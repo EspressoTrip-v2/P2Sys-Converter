@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'" />
+    <link rel="stylesheet" href="main.css" />
+    <title>P2Sys_()</title>
+  </head>
+  <body>
+    <div id="container">
+      <img id="logo" src="../icons/whitcher-logo.png" />
+      <div id="round">
+        <a class="btn btn-full" id="new-cus" title="Create new customer pricelist" href="#"
+          >START</a
+        >
+        <!-- <a
+          class="btn btn-full"
+          id="update-cus"
+          title="Edit existing customer pricelist"
+          href="#"
+          >UPDATE CUSTOMER</a
+        > -->
+        <a class="btn btn-exit" id="exit-btn" href="#">EXIT</a>
+        <a id="about-btn" title="About Price>>Sys() software" href="#"
+          ><img src="../icons/ps_logo.png" /><span>ABOUT</span></a
+        >
+      </div>
+    </div>
+    <div style="display: none;" class="about-screen">
+      <div class="paragraph">
+        <h2><img src="../icons/p2syslogo.png" alt="" /></h2>
+
+        <p>
+          P2Sys is software developed to help asist companies steamline there pricelist
+          generation and order template distribution. It utilizes a user friendly GUI to aid in
+          the creation of custom pricelists. Effortlessly generating ordersheets for
+          distribution as well as matching system templates for the companies implemented ERP
+          system.
+        </p>
+      </div>
+      <br />
+      <div class="paragraph">
+        For any inquiries or bug reporting:. <br /><br />
+        <a class="mail" id="mail-btn" href="#">CONTACT DEVELOPER</a>
+        <a class="btn-back" id="back-btn" href="#">BACK</a>
+      </div>
+      <footer>P2Sys_() &trade; &nbsp; 2020</footer>
+    </div>
+
+    <script>
+      require('./mainapp.js');
+    </script>
+  </body>
+</html>
