@@ -63,12 +63,10 @@ body {
   justify-content: center;
   justify-items: center;
   text-align: center;
-  padding-left: 10px;
-  padding-right: 10px;
-  font-size: 18px;
+  font-size: 16px;
   margin-top: 3px;
-  padding-top: 3px;
-  padding-bottom: 3px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   background-color: #fff;
   border: 3px solid #fff;
   border-bottom: 3px solid #e9ebeeb0;
@@ -131,11 +129,23 @@ body {
 
 /* loader icon */
 #loader {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  background-color: #fff;
+  width: 270px;
+  height: 563px;
+  top: 21px;
   margin: 5rem auto;
-  text-align: center;
+  align-self: center;
+  border: 4px solid var(--main-blue);
+  border-radius: 8px;
 }
 #loader img {
-  height: 3rem;
+  height: 60px;
   width: auto;
   transform-origin: 44% 50%;
   animation: rotate 2s infinite linear;

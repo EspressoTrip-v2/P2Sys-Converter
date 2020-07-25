@@ -39,25 +39,16 @@ let customerListContainer = document.getElementById('customer-list-container');
 ///////////////////////////////
 
 // Insert spinning logo
-addLoader(customerListContainer);
+// addLoader(customerListContainer);
 
-let customers = Object.keys(customerNameNumber),
-  loaderDiv = document.getElementById('loader');
+let customers = Object.keys(customerNameNumber);
 
-let counter = 0;
-for (let i = 0; i < customers.length; i++) {
-  if (customerNameListHTML) {
-    customerNameListHTML += `<div class="customer-name">${customers[i].toUpperCase()}</div>`;
-    counter++;
-  } else {
-    customerNameListHTML = `<div class="customer-name">${customers[i].toUpperCase()}</div>`;
-    counter++;
-  }
-}
-if (counter === customers.length) {
-  removeLoader(loaderDiv);
-  customerListContainer.insertAdjacentHTML('beforeend', customerNameListHTML);
-}
+(async () => {
+  customers.forEach((el) => {
+    let html = `<div class="customer-name">${el.toUpperCase()}</div>`;
+    customerListContainer.insertAdjacentHTML('beforeend', html);
+  });
+})();
 
 ////////////////////////////////////////
 /* DOM ELEMENTS AFTER GENERATED HTML */
@@ -71,9 +62,7 @@ let customerNameLists = Array.from(document.getElementsByClassName('customer-nam
 ////////////////////
 
 customerNameLists.forEach((el) => {
-  el.addEventListener('click', (e) => {
-    console.log(e.target);
-  });
+  el.addEventListener('click', (e) => {});
 });
 
 //////////////////
