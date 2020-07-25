@@ -51,7 +51,7 @@ let closebtn = document.getElementById('close-btn'),
   /////////////////////////
   checkCustomer = document.getElementById('check-customer'),
   customerSearch = document.getElementById('customer-search'),
-  customerNumberList = document.getElementById('customer-list'),
+  customerNumberList = document.getElementById('customer-list'), //TODO: finish update code
   checkHiddenSubmit = document.getElementById('hidden-submit'),
   checkUpdateBtn = document.getElementById('check-update-btn'),
   checkCancelbtn = document.getElementById('check-cancel-btn'),
@@ -126,14 +126,17 @@ idx.forEach((el) => {
 });
 table.innerHTML = htmlInner;
 
-//////////////////////
-/* EVENT LISTENERS */
-////////////////////
+////////////////////////////////////////
+/* DOM ELEMENTS AFTER GENERATED HTML */
+//////////////////////////////////////
 
-// DOM elements from populated data
 let numbers = Array.from(document.getElementsByClassName('cusnum')),
   tableEntryClass = Array.from(document.getElementsByClassName('table-entries')),
   priceEntryClass = Array.from(document.getElementsByClassName('price-entries'));
+
+//////////////////////
+/* EVENT LISTENERS */
+////////////////////
 
 ////////////////////////////////
 /* CUSTOMER NUMBER SELECTION */
@@ -186,8 +189,9 @@ checkCancelbtn.addEventListener('click', () => {
   secWindow = null;
 });
 
-/* Customer search code */
-/////////////////////////
+//////////////////
+/* SEARCH CODE */
+////////////////
 customerSearch.addEventListener('keyup', (e) => {
   // Code to set update btn
   if (target && customerSearch.value.length < 6) {

@@ -11,9 +11,6 @@
     <div id="check-customer">
       <div id="p2s-logo"><img src="../icons/p2syslogo.png" alt="" /></div>
 
-      <div class="max">
-        <a href="#"><img src="../icons/maximise.png" /></a>
-      </div>
       <div class="grab">
         <a href="#"><img src="../icons/grab.png" /></a>
       </div>
@@ -21,19 +18,22 @@
         <div id="customer-number-list">
           <span id="customer-list"></span>
         </div>
-        <form action="javascript:null;">
-          <input
-            type="text"
-            id="customer-search"
-            placeholder="Enter a new customer #..."
-            minlength="6"
-            maxlength="6"
-            size="25"
-            title="Customer number needs to be 6 digits long"
-            autofocus
-          />
-          <input style="display: none;" id="hidden-submit" type="submit" />
-        </form>
+        <div id="customer-search-container">
+          <form action="javascript:null;">
+            <img src="../icons/search.png" />
+            <input
+              type="text"
+              id="customer-search"
+              placeholder="Enter a new customer #..."
+              minlength="6"
+              maxlength="6"
+              size="25"
+              title="Customer number needs to be 6 digits long"
+              autofocus
+            />
+            <input style="display: none;" id="hidden-submit" type="submit" />
+          </form>
+        </div>
 
         <div>
           <a class="btn" id="check-cancel-btn" href="#">CANCEL</a>
