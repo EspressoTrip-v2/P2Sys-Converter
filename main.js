@@ -1,5 +1,5 @@
 // Module Imports
-const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, screen } = require('electron');
 const dotenv = require('dotenv');
 
 // Config file
@@ -7,6 +7,20 @@ dotenv.config({ path: './config.env' });
 
 // Create Window instance
 let homeWindow, secWindow, tray, childWindow;
+
+// Messenger service for windows
+const messengerService = (message, window) => {
+  if (window === 'sec') {
+    secWindow.webContents.send('sec-main', message);
+  } else {
+    childWindow.webContents.send('child-main', message);
+  }
+};
+
+// Message listener
+ipcMain.on('window-message', (event, message) => {
+  messengerService(message.message, message.source);
+});
 
 // Tray menu
 let trayMenu = Menu.buildFromTemplate([
@@ -30,6 +44,10 @@ ipcMain.on('new-customer', (e, message) => {
 // Listen for dimemsions of secWindow
 ipcMain.on('position', (e, message) => {
   createChildWindow(message);
+});
+
+ipcMain.on('get-child', (e, message) => {
+  homeWindow.getChildWindows()[1].close();
 });
 
 // Create MainWindow function
@@ -65,6 +83,7 @@ function createWindow() {
 function createSecWindow(message) {
   // Window State windowStateKeeper
   secWindow = new BrowserWindow({
+    // parent: homeWindow,
     height: 800,
     width: 1000,
     minHeight: 800,

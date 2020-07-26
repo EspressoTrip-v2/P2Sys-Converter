@@ -3,7 +3,8 @@ const { remote, ipcRenderer } = require('electron');
 const { dataObjects, customerDatabase, customerNameNumber } = require('../../data/objects.js');
 
 // Get The current window
-let secWindow = remote.getCurrentWindow();
+let secWindow = remote.getCurrentWindow(),
+  screenSize = remote.screen.getPrimaryDisplay().size;
 
 // Global variables for usage on necessary code
 let searchValue, target;
@@ -51,7 +52,7 @@ let closebtn = document.getElementById('close-btn'),
   /////////////////////////
   checkCustomer = document.getElementById('check-customer'),
   customerSearch = document.getElementById('customer-search'),
-  customerNumberList = document.getElementById('customer-list'), //TODO: finish update code
+  customerNumberList = document.getElementById('customer-list'),
   checkHiddenSubmit = document.getElementById('hidden-submit'),
   checkUpdateBtn = document.getElementById('check-update-btn'),
   checkCancelbtn = document.getElementById('check-cancel-btn'),
@@ -162,6 +163,7 @@ numbers.forEach((el) => {
 
     // Set/Activate updare button and remove disabled btn
     checkUpdateBtn.style.display = 'flex';
+    checkContinueBtn.style.display = 'none';
     disabledBtn.style.display = 'none';
     searchValue = customerSearch.value.toUpperCase(); //TODO: Eventlistener for update btn
   });
@@ -174,10 +176,7 @@ checkContinueBtn.addEventListener('click', (e) => {
   checkCustomer.style.opacity = '0';
   customerNumberValue.value = searchValue;
 
-  setTimeout(() => {
-    secWindow.maximize();
-    secWindow.getChildWindows()[0].close();
-  }, 200);
+  // setTimeout(() => {}, 200); //TODO: fix this maximise window
 });
 
 closebtn.addEventListener('click', () => {
@@ -286,11 +285,13 @@ customerFindBtn.addEventListener('click', (e) => {
       dimensions,
       type: 'toolbar',
     };
+
   if (secWindow.getChildWindows().length > 0) {
     if (process.platform === 'win32') {
       fadeInOut(secWindow.getChildWindows()[0]);
     } else {
       secWindow.getChildWindows()[0].close();
+      customerSearch.focus();
     }
   } else {
     if (process.platform === 'win32') {
@@ -298,6 +299,9 @@ customerFindBtn.addEventListener('click', (e) => {
       fadeInOut(secWindow.getChildWindows()[0]);
     } else {
       ipcRenderer.send('position', message);
+      setTimeout(() => {
+        ipcRenderer.send('set', 'set');
+      });
     }
   }
 });
@@ -305,16 +309,22 @@ customerFindBtn.addEventListener('click', (e) => {
 /* WINDOW CONTROL ELEMENTS */
 // Maximise window controls
 maxWindow[0].addEventListener('click', (e) => {
+  console.log(secWindow.getParentWindow());
   if (secWindow.isMaximized()) {
     secWindow.unmaximize();
   } else {
     secWindow.maximize();
   }
 });
-maxWindow[1].addEventListener('click', (e) => {
-  if (secWindow.isMaximized()) {
-    secWindow.unmaximize();
-  } else {
-    secWindow.maximize();
-  }
+
+//////////////////
+/*IPC LISTENERS*/
+////////////////
+ipcRenderer.on('sec-main', (event, message) => {
+  let child = secWindow.getChildWindows()[0];
+  child.blur();
+  secWindow.focus();
+  customerSearch.focus();
+  customerSearch.value = message;
+  customerSearch.dispatchEvent(new Event('keyup'));
 });

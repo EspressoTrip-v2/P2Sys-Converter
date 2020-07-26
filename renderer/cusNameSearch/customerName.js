@@ -1,9 +1,18 @@
 // Import modules
-const { remote } = require('electron');
+const { remote, ipcRenderer } = require('electron');
 const { customerNameNumber } = require('../../data/objects.js');
 
 // Get window
+// let childWindow = remote.getChildWindows();
 let childWindow = remote.getCurrentWindow();
+
+////////////////////////
+/* MESSAGE LISTENERS */
+//////////////////////
+
+ipcRenderer.on('child-main', (event, message) => {
+  console.log(message);
+});
 
 ////////////////
 /* FUNCTIONS */
@@ -62,7 +71,15 @@ let customerNameLists = Array.from(document.getElementsByClassName('customer-nam
 ////////////////////
 
 customerNameLists.forEach((el) => {
-  el.addEventListener('click', (e) => {});
+  el.addEventListener('click', (e) => {
+    let number = customerNameNumber[e.target.innerText],
+      messageObject = {
+        message: number,
+        source: 'sec',
+      };
+
+    ipcRenderer.send('window-message', messageObject);
+  });
 });
 
 //////////////////
