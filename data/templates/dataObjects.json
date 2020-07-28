@@ -31,7 +31,8 @@
     "28": ["32 PIECES", "76 x 228", "3.0-4.8"],
     "29": ["32 PIECES", "76 x 228", "5.1-6.6"],
     "columns": ["BUNDLE SIZE", "DIMENSIONS", "LENGTH", "PRICE UNTREATED", "PRICE TREATED"],
-    "ID": ""
+    "ID": "",
+    "CCA": ""
   },
   "regex-patterns": {
     "sequence": {

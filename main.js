@@ -46,10 +46,6 @@ ipcMain.on('position', (e, message) => {
   createChildWindow(message);
 });
 
-ipcMain.on('get-child', (e, message) => {
-  homeWindow.getChildWindows()[1].close();
-});
-
 // Create MainWindow function
 function createWindow() {
   createTray();
@@ -83,11 +79,8 @@ function createWindow() {
 function createSecWindow(message) {
   // Window State windowStateKeeper
   secWindow = new BrowserWindow({
-    // parent: homeWindow,
     height: 800,
-    width: 1000,
-    minHeight: 800,
-    minWidth: 1000,
+    width: 400,
     autoHideMenuBar: true,
     center: true,
     show: false,

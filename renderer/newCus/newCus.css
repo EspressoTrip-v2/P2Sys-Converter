@@ -23,6 +23,17 @@ html {
 }
 input[type='text'][disabled] {
   background-color: #fff;
+  color: #000;
+}
+input[type='number'][disabled] {
+  background-color: #fff;
+  color: #000;
+}
+
+#hider {
+  display: none;
+  flex-direction: column;
+  width: 100%;
 }
 
 /* Main section */
@@ -68,8 +79,8 @@ tbody {
   width: auto;
   height: 100%;
 }
-tr:nth-child(3n) {
-  padding-bottom: 20px;
+tr:nth-child(3n + 1) {
+  /* padding-bottom: 20px; */
   border-bottom: 4px solid #ccdaec73;
 }
 
@@ -114,7 +125,6 @@ header {
   margin-right: 2vh;
 }
 #pricelist,
-#customer-name,
 #customer-number,
 #cca-price {
   font-size: 15px;
@@ -123,6 +133,24 @@ header {
   padding-top: 4px;
   padding-bottom: 4px;
   text-align: center;
+  text-transform: uppercase;
+}
+#customer-name {
+  display: block;
+  background-color: #fff;
+  font-size: 15px;
+  border: 3px solid var(--main-blue);
+  border-radius: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  text-align: center;
+  width: 30vh;
+  height: auto;
+  min-height: 15px;
+  text-transform: uppercase;
+  overflow: hidden;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 /* Main body container */
@@ -266,6 +294,8 @@ footer {
 /* CHECK CUSTOMER BOX*/
 #check-customer {
   position: absolute;
+  top: 0;
+  left: 0;
   visibility: visible;
   opacity: 1;
   display: flex;
@@ -274,10 +304,15 @@ footer {
   top: 0;
   right: 0;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  height: 792px;
+  border: 4px solid var(--main-blue);
+  background-color: #fff;
+  background-image: url('../icons/whitcher-logo-small-opacity.png');
+  background-repeat: repeat-y;
+  background-position: center top;
+  /* background-color: var(--sec-blue);
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px); */
   z-index: 3;
   transition: visibility 0.3s, opacity 0.3s linear;
 }
@@ -513,13 +548,14 @@ footer {
   }
 
   #pricelist,
-  #customer-name,
-  #customer-number,
   #customer-number,
   #cca-price {
     font-size: 80%;
     padding-top: 10px;
     padding-bottom: 10px;
+  }
+  #customer-name {
+    font-size: 80%;
   }
 
   #close-btn,

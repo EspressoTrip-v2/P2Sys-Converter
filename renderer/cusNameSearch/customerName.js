@@ -1,6 +1,12 @@
 // Import modules
 const { remote, ipcRenderer } = require('electron');
-const { customerNameNumber } = require('../../data/objects.js');
+const { customerNumberName } = require('../../data/objects.js');
+
+// Change sequence of customerNameNumber to use in selection
+let customerNameNumber = {};
+Object.entries(customerNumberName).forEach((el) => {
+  customerNameNumber[el[1]] = el[0];
+});
 
 // Get window
 // let childWindow = remote.getChildWindows();
@@ -77,8 +83,22 @@ customerNameLists.forEach((el) => {
         message: number,
         source: 'sec',
       };
-
+    // send ipc
     ipcRenderer.send('window-message', messageObject);
+
+    // Clear any existing highlighted number in case of reclick
+    customerNameLists.forEach((el) => {
+      el.style.backgroundColor = '#fff';
+      el.style.color = 'black';
+      el.style.border = '3px solid #fff ';
+    });
+
+    // set the highlight on current clicked item
+    el.style.backgroundColor = '#8eafdafb';
+    el.style.color = 'white';
+    el.style.border = '3px solid #3e6ba6ff ';
+    customerSearch.value = el.textContent;
+    customerSearch.dispatchEvent(new Event('keyup'));
   });
 });
 

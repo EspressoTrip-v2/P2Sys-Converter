@@ -7,6 +7,7 @@
     <title>New Customer</title>
     <link rel="stylesheet" href="./newCus.css" />
   </head>
+
   <body>
     <div id="check-customer">
       <div id="p2s-logo"><img src="../icons/p2syslogo.png" alt="" /></div>
@@ -28,7 +29,6 @@
               spellcheck="false"
               minlength="6"
               maxlength="6"
-              size="25"
               title="Customer number needs to be 6 digits long"
               autofocus
             />
@@ -47,58 +47,64 @@
         <a class="btn" id="assist-btn" href="#">CUSTOMER FIND</a>
       </div>
     </div>
-    <div id="border">
-      <header>
-        <div class="max">
-          <a href="#"><img src="../icons/maximise.png" /></a>
-        </div>
-        <div class="grab">
-          <a href="#"><img src="../icons/grab.png" /></a>
-        </div>
-        <div class="customer-region-item-a">
-          <input
-            type="text"
-            id="customer-name"
-            placeholder="CUSTOMER NAME"
-            class="header-entry"
-          />
-        </div>
-        <div class="customer-region-item-b">
-          <input
-            type="text"
-            id="customer-number"
-            placeholder="CUSTOMER #"
-            class="header-entry"
-            disabled
-          />
-        </div>
-
-        <div class="price-list-item-a">
-          <input type="text" class="header-entry" placeholder="PRICELIST #" id="pricelist" />
-        </div>
-
-        <div class="cca-box-item-a">
-          <a href="#" class="btn" id="cca-auto">CCA AUTO</a>
-          <input type="number" placeholder="CCA PRICE" id="cca-price" class="header-entry" />
-        </div>
-      </header>
-
-      <main>
-        <div class="table-container">
-          <div id="container">
-            <table id="table">
-              <!-- <div id="background-image"></div> -->
-              <tr id="columns"></tr>
-
-              <tbody id="inner-table"></tbody>
-            </table>
+    <div id="hider">
+      <div id="border">
+        <header>
+          <div class="max">
+            <a href="#"><img src="../icons/maximise.png" /></a>
           </div>
-        </div>
-      </main>
-      <footer>
-        <a href="#" id="close-btn" class="btn">BACK TO MAIN</a>
-        <a href="#" id="save-btn" class="btn">SAVE</a>
-      </footer>
+          <div class="grab">
+            <a href="#"><img src="../icons/grab.png" /></a>
+          </div>
+          <div class="customer-region-item-a">
+            <span
+              role="textbox"
+              id="customer-name"
+              placeholder="CUSTOMER NAME"
+              class="header-entry"
+              spellcheck="false"
+              contenteditable
+            ></span>
+          </div>
+          <div class="customer-region-item-b">
+            <input
+              type="text"
+              id="customer-number"
+              placeholder="CUSTOMER #"
+              class="header-entry"
+              disabled
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="price-list-item-a">
+            <input
+              type="text"
+              class="header-entry"
+              spellcheck="false"
+              placeholder="PRICELIST #"
+              id="pricelist"
+            />
+          </div>
+
+          <div class="cca-box-item-a">
+            <a href="#" class="btn" id="cca-auto">CCA AUTO</a>
+            <input type="number" placeholder="CCA PRICE" id="cca-price" class="header-entry" />
+          </div>
+        </header>
+
+        <main>
+          <div class="table-container">
+            <div id="container">
+              <table id="table"></table>
+            </div>
+          </div>
+        </main>
+        <footer>
+          <a href="#" id="close-btn" class="btn">BACK TO MAIN</a>
+          <a href="#" id="save-btn" class="btn">SAVE</a>
+        </footer>
+      </div>
     </div>
 
     <script>
