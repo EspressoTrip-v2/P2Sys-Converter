@@ -13,7 +13,7 @@ exports.customerDatabase = JSON.parse(
 /* CUSTOMER NUMBER NAME IS CUSTOMER NUMBER - CUSTOMER NAME */
 
 //TODO: NEED TO UPDATE ON SAVE
-exports.customerNumberName = JSON.parse(
+let = customerNumberName = JSON.parse(
   fs.readFileSync(`${__dirname}/templates/customerNameNumber.json`)
 );
 
@@ -23,3 +23,13 @@ exports.customerNumberName = JSON.parse(
 exports.customerPrices = JSON.parse(
   fs.readFileSync(`${__dirname}/templates/customerPrices.json`)
 );
+
+/* FUNCTIONS FOR EXPORT */
+
+let customerNameNumber = {};
+Object.entries(customerNumberName).forEach((el) => {
+  customerNameNumber[el[1]] = el[0];
+});
+
+exports.customerNumberName = customerNumberName;
+exports.customerNameNumber = customerNameNumber;

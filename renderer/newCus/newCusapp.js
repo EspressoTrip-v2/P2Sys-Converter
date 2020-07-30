@@ -1,5 +1,6 @@
 // Import Modules and Objects
 const { remote, ipcRenderer } = require('electron');
+const { PythonShell } = require('python-shell');
 const {
   dataObjects,
   customerPrices,
@@ -41,7 +42,8 @@ let checkCustomer = document.getElementById('check-customer'),
   checkContinueBtn = document.getElementById('check-continue-btn'),
   customerNumberValue = document.getElementById('customer-number'),
   customerFindBtn = document.getElementById('assist-box'),
-  hider = document.getElementById('hider');
+  hider = document.getElementById('hider'),
+  pageBody = document.getElementById('page-body');
 
 //////////////
 /*FUNCTIONS*/
@@ -127,10 +129,11 @@ customerNumber.forEach((el) => {
 //////////////////////
 
 closeBtn.addEventListener('click', () => {
-  secWindow.setMinimumSize(400, 800);
+  pageBody.style.display = 'none';
   secWindow.unmaximize();
-  secWindow.reload();
+  secWindow.setMinimumSize(400, 800);
   secWindow.setSize(400, 800);
+  secWindow.reload();
 });
 
 ////////////////////////////////////
@@ -139,7 +142,7 @@ closeBtn.addEventListener('click', () => {
 
 // Selection click event on customer list
 let numbers = Array.from(document.getElementsByClassName('cusnum'));
-
+// click event on list
 numbers.forEach((el) => {
   el.addEventListener('click', (e) => {
     // reset all buttons to default
@@ -152,14 +155,10 @@ numbers.forEach((el) => {
     target = e.target;
     // Clear any existing highlighted number in case of reclick
     numbers.forEach((el) => {
-      el.style.backgroundColor = '#fff';
-      el.style.color = 'black';
-      el.style.border = '3px solid #fff ';
+      el.setAttribute('class', 'cusnum');
     });
-    // set the highlight on current clicked item
-    el.style.backgroundColor = '#8eafdafb';
-    el.style.color = 'white';
-    el.style.border = '3px solid #3e6ba6ff ';
+    // set clicked
+    el.setAttribute('class', 'cusnum-clicked');
     customerSearch.value = el.textContent;
     customerSearch.dispatchEvent(new Event('keyup'));
 
@@ -171,119 +170,20 @@ numbers.forEach((el) => {
     searchValue = customerSearch.value.toUpperCase();
   });
 });
-
-/* Search box button events */
-/////////////////////////////
-checkContinueBtn.addEventListener('click', (e) => {
-  // populate html table
-  htmlContent = tablePopulate(jsonFile);
-  htmlInnerFill(htmlContent);
-
-  // hide search box
-  checkCustomer.style.visibility = 'hidden';
-  checkCustomer.style.opacity = '0';
-  customerNumberValue.value = searchValue;
-  customerPriceList.value = searchValue;
-  customerPriceList.disabled = true;
-
-  if (customerNumberName[searchValue]) {
-    customerName.innerText = customerNumberName[searchValue];
-    customerName.contentEditable = true;
-  }
-
-  if (secWindow.getChildWindows().length > 0) {
-    secWindow.getChildWindows()[0].close();
-    setTimeout(() => {
-      hider.style.display = 'flex';
-      secWindow.maximize();
-      secWindow.setMinimumSize(1000, 800);
-    }, 200);
-  }
-  setTimeout(() => {
-    hider.style.display = 'flex';
-    secWindow.maximize();
-    secWindow.setMinimumSize(1000, 800);
-  }, 200);
-});
-
-checkUpdateBtn.addEventListener('click', (e) => {
-  // populate html table
-  htmlContent = tablePopulate(jsonFile);
-  htmlInnerFill(htmlContent);
-  // hide search box
-  checkCustomer.style.visibility = 'hidden';
-  checkCustomer.style.opacity = '0';
-  // Fill table info
-  customerNumberValue.value = searchValue;
-  customerName.innerText = customerNumberName[searchValue];
-  customerName.contentEditable = false;
-  ccaPrice.value = customerPrices[searchValue]['CCA'];
-  ccaPrice.disabled = true;
-
-  if (customerDatabase[searchValue]) {
-    customerPriceList.value = customerDatabase[searchValue];
-    customerPriceList.disabled = true;
-  } else {
-    customerPriceList.value = searchValue;
-    customerPriceList.disabled = true;
-  }
-
-  if (customerDatabase[searchValue]) {
-    customerPriceList.value = customerDatabase[searchValue];
-    customerPriceList.disabled = true;
-  }
-
-  if (secWindow.getChildWindows().length > 0) {
-    secWindow.getChildWindows()[0].close();
-    setTimeout(() => {
-      hider.style.display = 'flex';
-      secWindow.maximize();
-      secWindow.setMinimumSize(1000, 800);
-    }, 200);
-  }
-  setTimeout(() => {
-    hider.style.display = 'flex';
-    secWindow.maximize();
-    secWindow.setMinimumSize(1000, 800);
-  }, 200);
-});
-
-/* Global Enter keypress for search box */
-window.addEventListener('keydown', (event) => {
-  if (
-    customerSearch.value.length === 6 &&
-    event.keyCode === 13 &&
-    checkContinueBtn.style.display === 'flex'
-  ) {
-    checkContinueBtn.click();
-  } else if (
-    customerSearch.value.length === 6 &&
-    event.keyCode === 13 &&
-    checkUpdateBtn.style.display === 'flex'
-  ) {
-    checkUpdateBtn.click();
-  }
-});
-
-checkCancelbtn.addEventListener('click', () => {
-  secWindow.close();
-  secWindow = null;
-});
-
 /* SEARCH ELIMINATION CODE */
 customerSearch.addEventListener('keyup', (e) => {
   // Clean out any unwanted values
   let pattern = /\w+|\s+/g;
-  let match = customerSearch.value.match(pattern).join('');
-  customerSearch.value = match;
+  if (customerSearch.value) {
+    let match = customerSearch.value.match(pattern).join('');
+    customerSearch.value = match;
+  }
 
   // Code to set update btn
   if (target && customerSearch.value.length < 6) {
     // remove mouse click highlights
     numbers.forEach((el) => {
-      el.style.backgroundColor = '#fff';
-      el.style.color = 'black';
-      el.style.border = '3px solid #fff ';
+      el.setAttribute('class', 'cusnum');
     });
     // set update button disabled
     checkUpdateBtn.style.display = 'none';
@@ -335,7 +235,107 @@ customerSearch.addEventListener('keyup', (e) => {
       }
     });
   });
-}); //TODO: DOUBLE CHECK UNUSED CODE ///////////////////////
+});
+
+/* Search box button events */
+/////////////////////////////
+checkContinueBtn.addEventListener('click', (e) => {
+  // populate html table
+  htmlContent = tablePopulate(jsonFile);
+  htmlInnerFill(htmlContent);
+
+  // hide search box
+  checkCustomer.style.visibility = 'hidden';
+  checkCustomer.style.opacity = '0';
+  customerNumberValue.value = searchValue;
+  customerPriceList.value = searchValue;
+  customerPriceList.disabled = true;
+
+  if (customerNumberName[searchValue]) {
+    customerName.innerText = customerNumberName[searchValue];
+    customerName.contentEditable = false;
+  }
+
+  if (secWindow.getChildWindows().length > 0) {
+    secWindow.getChildWindows()[0].close();
+    setTimeout(() => {
+      hider.style.display = 'flex';
+      secWindow.maximize();
+      secWindow.setMinimumSize(1280, 900);
+    }, 200);
+  }
+  setTimeout(() => {
+    hider.style.display = 'flex';
+    secWindow.maximize();
+    secWindow.setMinimumSize(1280, 900);
+  }, 200);
+});
+
+checkUpdateBtn.addEventListener('click', (e) => {
+  // populate html table
+  htmlContent = tablePopulate(jsonFile);
+  htmlInnerFill(htmlContent);
+  // hide search box
+  checkCustomer.style.visibility = 'hidden';
+  checkCustomer.style.opacity = '0';
+  // Fill table info
+  customerNumberValue.value = searchValue;
+  customerName.innerText = customerNumberName[searchValue];
+  customerName.contentEditable = false;
+  ccaPrice.value = customerPrices[searchValue]['CCA'];
+  ccaPrice.disabled = true;
+
+  if (customerDatabase[searchValue]) {
+    customerPriceList.value = customerDatabase[searchValue];
+    customerPriceList.disabled = true;
+  } else {
+    customerPriceList.value = searchValue;
+    customerPriceList.disabled = true;
+  }
+
+  if (customerDatabase[searchValue]) {
+    customerPriceList.value = customerDatabase[searchValue];
+    customerPriceList.disabled = true;
+  }
+
+  if (secWindow.getChildWindows().length > 0) {
+    secWindow.getChildWindows()[0].close();
+    setTimeout(() => {
+      hider.style.display = 'flex';
+      secWindow.maximize();
+      secWindow.setMinimumSize(1280, 900);
+    }, 200);
+  }
+  setTimeout(() => {
+    hider.style.display = 'flex';
+    secWindow.maximize();
+    secWindow.setMinimumSize(1280, 900);
+  }, 200);
+});
+
+/* Global Enter keypress for search box */
+window.addEventListener('keydown', (event) => {
+  if (
+    customerSearch.value.length === 6 &&
+    event.keyCode === 13 &&
+    checkContinueBtn.style.display === 'flex'
+  ) {
+    checkContinueBtn.click();
+  } else if (
+    customerSearch.value.length === 6 &&
+    event.keyCode === 13 &&
+    checkUpdateBtn.style.display === 'flex'
+  ) {
+    checkUpdateBtn.click();
+  }
+});
+
+checkCancelbtn.addEventListener('click', () => {
+  secWindow.close();
+  secWindow = null;
+});
+
+//TODO: DOUBLE CHECK UNUSED CODE ///////////////////////
 
 /////////////////////////
 /* CUSTOMER FIND DOCK */ customerFindBtn.addEventListener('click', (e) => {
@@ -362,11 +362,6 @@ customerSearch.addEventListener('keyup', (e) => {
     } else {
       ipcRenderer.send('position', message);
     }
-  }
-});
-window.addEventListener('keydown', (e) => {
-  if (e.keyCode === 37) {
-    customerFindBtn.click();
   }
 });
 

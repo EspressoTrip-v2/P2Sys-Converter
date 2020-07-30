@@ -17,7 +17,17 @@ const messengerService = (message, window) => {
   }
 };
 
-// Message listener
+// IPC message listeners
+// Listen for new customer button
+ipcMain.on('new-customer', (e, message) => {
+  createSecWindow(message);
+});
+
+// Listen for dimemsions of secWindow
+ipcMain.on('position', (e, message) => {
+  createChildWindow(message);
+});
+
 ipcMain.on('window-message', (event, message) => {
   messengerService(message.message, message.source);
 });
@@ -34,17 +44,6 @@ function createTray() {
   tray = new Tray('./renderer/icons/trayTemplate.png');
   tray.setContextMenu(trayMenu);
 }
-
-// IPC message listeners
-// Listen for new customer button
-ipcMain.on('new-customer', (e, message) => {
-  createSecWindow(message);
-});
-
-// Listen for dimemsions of secWindow
-ipcMain.on('position', (e, message) => {
-  createChildWindow(message);
-});
 
 // Create MainWindow function
 function createWindow() {

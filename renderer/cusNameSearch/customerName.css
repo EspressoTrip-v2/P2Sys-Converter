@@ -72,6 +72,22 @@ body {
   border-bottom: 3px solid #e9ebeeb0;
   border-radius: 10px;
 }
+.customer-name-clicked {
+  display: flex;
+  color: #fff;
+  flex-direction: column;
+  justify-content: center;
+  justify-items: center;
+  text-align: center;
+  font-size: 16px;
+  margin-top: 3px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  background-color: #8eafdafb;
+  border: 3px solid var(--main-blue);
+  border-radius: 10px;
+}
+
 #container-background {
   display: flex;
   flex-direction: column;

@@ -3,7 +3,7 @@ const { dataObjects, customerDatabase, customerPrices } = require('../../data/ob
 exports.tablePopulate = (jsonfile) => {
   console.log(jsonfile);
   // let idx = Object.keys(dataObjects['template-pricelist']).slice(0, -2);
-  let idx = Object.keys(jsonfile).slice(0, -3);
+  let idx = Object.keys(jsonfile).slice(0, -5);
 
   let htmlColumns = '';
   jsonfile['columns'].forEach((el) => {

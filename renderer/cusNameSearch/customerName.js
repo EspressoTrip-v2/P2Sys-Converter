@@ -1,12 +1,6 @@
 // Import modules
 const { remote, ipcRenderer } = require('electron');
-const { customerNumberName } = require('../../data/objects.js');
-
-// Change sequence of customerNameNumber to use in selection
-let customerNameNumber = {};
-Object.entries(customerNumberName).forEach((el) => {
-  customerNameNumber[el[1]] = el[0];
-});
+const { customerNameNumber } = require('../../data/objects.js');
 
 // Get window
 // let childWindow = remote.getChildWindows();
@@ -60,7 +54,9 @@ let customers = Object.keys(customerNameNumber);
 
 (async () => {
   customers.forEach((el) => {
-    let html = `<div class="customer-name">${el.toUpperCase()}</div>`;
+    let html = `<div title="${
+      customerNameNumber[el.toLocaleUpperCase()]
+    }" class="customer-name">${el.toUpperCase()}</div>`;
     customerListContainer.insertAdjacentHTML('beforeend', html);
   });
 })();
@@ -88,15 +84,18 @@ customerNameLists.forEach((el) => {
 
     // Clear any existing highlighted number in case of reclick
     customerNameLists.forEach((el) => {
-      el.style.backgroundColor = '#fff';
-      el.style.color = 'black';
-      el.style.border = '3px solid #fff ';
+      el.setAttribute('class', 'customer-name');
+      // el.style.backgroundColor = '#fff';
+      // el.style.color = 'black';
+      // el.style.border = '3px solid #fff ';
     });
 
     // set the highlight on current clicked item
-    el.style.backgroundColor = '#8eafdafb';
-    el.style.color = 'white';
-    el.style.border = '3px solid #3e6ba6ff ';
+    el.setAttribute('class', 'customer-name-clicked');
+
+    // el.style.backgroundColor = '#8eafdafb';
+    // el.style.color = 'white';
+    // el.style.border = '3px solid #3e6ba6ff ';
     customerSearch.value = el.textContent;
     customerSearch.dispatchEvent(new Event('keyup'));
   });

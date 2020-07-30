@@ -8,12 +8,12 @@
     <link rel="stylesheet" href="./newCus.css" />
   </head>
 
-  <body>
+  <body id="page-body">
     <div id="check-customer">
       <div id="p2s-logo"><img src="../icons/p2syslogo.png" alt="" /></div>
 
-      <div class="grab">
-        <a href="#"><img src="../icons/grab.png" /></a>
+      <div class="grab-search">
+        <img src="../icons/grab.png" />
       </div>
       <div id="check-background">
         <div id="customer-number-list">
@@ -37,61 +37,68 @@
         </div>
 
         <div>
-          <a class="btn" id="check-cancel-btn" href="#">CANCEL</a>
-          <a class="btn" id="check-continue-btn" href="#">CONTINUE</a>
+          <button class="btn" id="check-cancel-btn" href="#">CANCEL</button>
+          <button class="btn" id="check-continue-btn" href="#">CONTINUE</button>
           <span id="disabled" href="#">DISABLED</span>
-          <a class="btn" id="check-update-btn" href="#">UPDATE</a>
+          <button class="btn" id="check-update-btn" href="#">UPDATE</button>
         </div>
       </div>
       <div id="assist-box">
-        <a class="btn" id="assist-btn" href="#">CUSTOMER FIND</a>
+        <button class="btn" id="assist-btn" href="#">CUSTOMER FIND</button>
       </div>
     </div>
     <div id="hider">
       <div id="border">
-        <header>
+        <div id="header">
           <div class="max">
             <a href="#"><img src="../icons/maximise.png" /></a>
           </div>
           <div class="grab">
-            <a href="#"><img src="../icons/grab.png" /></a>
+            <img src="../icons/grab.png" />
           </div>
           <div class="customer-region-item-a">
+            <button id="info-btn" class="info-btn" href="#">INFO</button>
             <span
               role="textbox"
               id="customer-name"
               placeholder="CUSTOMER NAME"
-              class="header-entry"
               spellcheck="false"
               contenteditable
             ></span>
+            <button id="email-now" class="email-now" href="mailto:"></button>
+            <button id="reminder" class="reminder" href="#">REMIND</button>
           </div>
           <div class="customer-region-item-b">
+            <span id="label-customer-number">
+              <span>CUSTOMER<br />NUMBER</span>
+            </span>
             <input
               type="text"
               id="customer-number"
               placeholder="CUSTOMER #"
-              class="header-entry"
               disabled
               spellcheck="false"
             />
           </div>
 
           <div class="price-list-item-a">
-            <input
-              type="text"
-              class="header-entry"
-              spellcheck="false"
-              placeholder="PRICELIST #"
-              id="pricelist"
-            />
+            <span id="label-pricelist">
+              <span>PRICELIST<br />NUMBER</span>
+            </span>
+
+            <input type="text" spellcheck="false" placeholder="PRICELIST #" id="pricelist" />
           </div>
 
           <div class="cca-box-item-a">
-            <a href="#" class="btn" id="cca-auto">CCA AUTO</a>
-            <input type="number" placeholder="CCA PRICE" id="cca-price" class="header-entry" />
+            <span id="label-cca">
+              <span>CCA<br />PRICE</span>
+            </span>
+
+            <input type="number" placeholder="CCA PRICE" id="cca-price" />
+            <button href="#" class="cca-auto-out" id="cca-auto">AUTO</button>
+            <button href="#" class="cca-man-in" id="cca-man" disabled>MAN</button>
           </div>
-        </header>
+        </div>
 
         <main>
           <div class="table-container">
@@ -100,10 +107,21 @@
             </div>
           </div>
         </main>
-        <footer>
-          <a href="#" id="close-btn" class="btn">BACK TO MAIN</a>
-          <a href="#" id="save-btn" class="btn">SAVE</a>
-        </footer>
+        <div id="footer">
+          <button href="#" id="close-btn" class="btn close-btn">BACK TO MAIN</button>
+          <button href="#" id="save-btn" class="btn save-btn">SAVE</button>
+        </div>
+        <div id="customer-contact-container">
+          <div id="email">
+            <div>EMAIL</div>
+            <input type="email" placeholder="ENTER EMAIL" />
+          </div>
+
+          <div id="phone">
+            <div>TEL</div>
+            <input type="phone" placeholder="ENTER TEL" />
+          </div>
+        </div>
       </div>
     </div>
 
