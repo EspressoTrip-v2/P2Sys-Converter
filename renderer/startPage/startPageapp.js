@@ -1,6 +1,6 @@
-// Import Modules and Objects
+/* MODULES */
+////////////
 const { remote, ipcRenderer } = require('electron');
-const { PythonShell } = require('python-shell');
 const {
   dataObjects,
   customerPrices,
@@ -9,11 +9,12 @@ const {
 } = require('../../data/objects');
 const { tablePopulate } = require('./tablePopulate');
 
-// Get The current window
+/* REMOTE WINDOWS */
+///////////////////
 let secWindow = remote.getCurrentWindow();
-
+window.secWindow = secWindow;
 // Global variables for usage on necessary code
-let searchValue, target, jsonFile, tableEntryClass, priceEntryClass, htmlContent;
+let searchValue, target, jsonFile, tableEntryClass, priceEntryClass, htmlContent, remoteWindow;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -26,15 +27,26 @@ let closeBtn = document.getElementById('close-btn'),
   table = document.getElementById('table'),
   customerName = document.getElementById('customer-name'),
   customerPriceList = document.getElementById('pricelist'),
-  ccaPrice = document.getElementById('cca-price');
+  ccaPrice = document.getElementById('cca-price'),
+  infobtn = document.getElementById('info-btn'),
+  customerContactMenu = document.getElementById('customer-contact-container'),
+  sendEmailbtn = document.getElementById('email-now'),
+  clientEmail = document.getElementById('client-email'),
+  manCaaBtn = document.getElementById('cca-man'),
+  autoCaaBtn = document.getElementById('cca-auto'),
+  /* TABLE COLUMNS DOM*/
+  /////////////////////
+  treatedColumns = document.getElementById('treated'),
+  /* PROGRESS FADE DOM */
+  //////////////////////
+  progressFade = document.getElementById('progress-fade');
 
 /* CUSTOMER SEARCH DOM */
 /////////////////////////
 let checkCustomer = document.getElementById('check-customer'),
   customerSearch = document.getElementById('customer-search'),
   customerNumberList = document.getElementById('customer-list'),
-  customerNameEntry = document.getElementById('customer-name'),
-  // checkHiddenSubmit = document.getElementById('hidden-submit'),
+  // customerNameEntry = document.getElementById('customer-name'),
   checkUpdateBtn = document.getElementById('check-update-btn'),
   checkCancelbtn = document.getElementById('check-cancel-btn'),
   disabledBtn = document.getElementById('disabled'),
@@ -49,7 +61,7 @@ let checkCustomer = document.getElementById('check-customer'),
 /*FUNCTIONS*/
 ////////////
 
-/* Fade In/Out dock windows for win32 platfoms only */
+/* FADE CUSTOMER DOCK ON WINDOWS */
 const fadeInOut = (childWindow) => {
   let count = childWindow.getOpacity(),
     timer;
@@ -107,11 +119,12 @@ const htmlInnerFill = (html) => {
   });
 };
 
-//////////////////////
-/* CUSTOMER NUMBER */
-////////////////////
+/////////////////////////////////
+/* CUSTOMER NUMBER SEARCH BOX */
+///////////////////////////////
 
-//* POPULATE CUSTOMER NUMBER LIST IN SEARCH */
+/* POPULATE CUSTOMER NUMBER LIST IN SEARCH */
+////////////////////////////////////////////
 let customerNumber = Object.keys(customerPrices);
 customerNumber.forEach((el) => {
   let html = `
@@ -124,23 +137,130 @@ customerNumber.forEach((el) => {
 /* EVENT LISTENERS */
 ////////////////////
 
-////////////////////////
 /* HTML TABLE EVENTS */
 //////////////////////
 
+/* BACK TO MAIN BUTTON */
 closeBtn.addEventListener('click', () => {
   pageBody.style.display = 'none';
   secWindow.unmaximize();
+  secWindow.reload();
   secWindow.setMinimumSize(400, 800);
   secWindow.setSize(400, 800);
-  secWindow.reload();
+  secWindow.center();
 });
 
-////////////////////////////////////
-/* CUSTOMER NUMBER SEARCH EVENTS */
-//////////////////////////////////
+/* TODO: CHECK ENTRIES BEFORE SAVING */
+/* SAVE BUTTON */
 
-// Selection click event on customer list
+savebtn.addEventListener('click', (e) => {
+  let treatedMissingBool = [],
+    untreatedMissingBool = [],
+    untreatedColumnClass = Array.from(
+      document.getElementsByClassName('price-entries-untreated')
+    ),
+    treatedColumnClass = Array.from(document.getElementsByClassName('price-entries-treated'));
+
+  treatedColumnClass.forEach((el) => {
+    if (!el.value) {
+      treatedMissingBool.push(el);
+    }
+  });
+  untreatedColumnClass.forEach((el) => {
+    if (!el.value) {
+      untreatedMissingBool.push(el);
+    }
+  });
+
+  if (treatedMissingBool.length > 0 || untreatedMissingBool.length > 0) {
+    treatedMissingBool.forEach((el) => {
+      el.style.backgroundColor = 'red';
+      el.style.color = '#fff';
+      el.placeholder = '';
+    });
+    untreatedMissingBool.forEach((el) => {
+      el.style.backgroundColor = 'red';
+      el.style.color = '#fff';
+      el.placeholder = '';
+    });
+    remote.dialog.showErrorBox(
+      'MISSING VALUES',
+      'Please enter values in the highlighted fields'
+    );
+  } else {
+    let message = {
+      emit: 'progress',
+      html: './renderer/progress/progress.html',
+    };
+    progressFade.style.visibility = 'visible';
+    progressFade.style.backdropFilter = 'blur(1px) grayscale(1)';
+    ipcRenderer.send('progress', message);
+  }
+});
+
+/* SEND EMAIL BUTTON */
+sendEmailbtn.addEventListener('click', (e) => {
+  if (clientEmail.value) {
+    window.location = `mailto:${clientEmail.value}`;
+  } else {
+    let message =
+      'There is no client email to use.\nPlease enter one by clicking on the INFO button';
+    remote.dialog.showMessageBox(secWindow, {
+      title: 'EMAIL ERROR',
+      type: 'warning',
+      buttons: ['OK'],
+      message: message,
+    });
+  }
+});
+/* INFO BUTTON */
+infobtn.addEventListener('click', (e) => {
+  if (window.getComputedStyle(customerContactMenu).visibility === 'hidden') {
+    customerContactMenu.style.visibility = 'visible';
+    customerContactMenu.style.transform = 'scaleY(1)';
+  } else {
+    customerContactMenu.style.transform = 'scaleY(0)';
+    setTimeout(() => {
+      customerContactMenu.style.visibility = 'hidden';
+    }, 250);
+  }
+});
+/* MANUAL CCA BUTTON */
+manCaaBtn.addEventListener('click', (e) => {
+  if (manCaaBtn.classList.value === 'cca-man-out') {
+    manCaaBtn.setAttribute('class', 'cca-man-in');
+    manCaaBtn.disabled = true;
+    treatedColumns.style.backgroundColor = '#487613cc';
+
+    for (let i = 0; i < 30; i++) {
+      document.getElementById(`TSER${i}`).disabled = false;
+    }
+
+    autoCaaBtn.setAttribute('class', 'cca-auto-out');
+    autoCaaBtn.disabled = false;
+  }
+});
+/* AUTO CCA BUTTON */
+autoCaaBtn.addEventListener('click', (e) => {
+  if (autoCaaBtn.classList.value === 'cca-auto-out') {
+    autoCaaBtn.setAttribute('class', 'cca-auto-in');
+    autoCaaBtn.disabled = true;
+    treatedColumns.style.backgroundColor = '#d97a3acc';
+
+    for (let i = 0; i < 30; i++) {
+      document.getElementById(`TSER${i}`).disabled = true;
+    }
+
+    manCaaBtn.setAttribute('class', 'cca-man-out');
+    manCaaBtn.disabled = false;
+  }
+});
+
+////////////////////////////////////////
+/* CUSTOMER NUMBER SEARCH BOX EVENTS */
+//////////////////////////////////////
+
+/* CLICK EVENTS ON CUSTOMER NUMBER SEARCH BOX */
 let numbers = Array.from(document.getElementsByClassName('cusnum'));
 // click event on list
 numbers.forEach((el) => {
@@ -170,7 +290,8 @@ numbers.forEach((el) => {
     searchValue = customerSearch.value.toUpperCase();
   });
 });
-/* SEARCH ELIMINATION CODE */
+
+/* REMOVE ITEMS IN THE LIST THAT DOES NOT MATCH SEARCH */
 customerSearch.addEventListener('keyup', (e) => {
   // Clean out any unwanted values
   let pattern = /\w+|\s+/g;
@@ -179,7 +300,7 @@ customerSearch.addEventListener('keyup', (e) => {
     customerSearch.value = match;
   }
 
-  // Code to set update btn
+  // Code to unhide/hide update btn
   if (target && customerSearch.value.length < 6) {
     // remove mouse click highlights
     numbers.forEach((el) => {
@@ -190,7 +311,7 @@ customerSearch.addEventListener('keyup', (e) => {
     disabledBtn.style.display = 'flex';
     target = null;
   }
-
+  // sort code
   numbers.forEach((el) => {
     // Check to see if element contains search item
     let hasMatch = el.innerText.includes(customerSearch.value.toUpperCase());
@@ -237,8 +358,10 @@ customerSearch.addEventListener('keyup', (e) => {
   });
 });
 
-/* Search box button events */
+/* SEARCH BOX BUTTON EVENTS */
 /////////////////////////////
+
+/* CONTINUE BUTTON */
 checkContinueBtn.addEventListener('click', (e) => {
   // populate html table
   htmlContent = tablePopulate(jsonFile);
@@ -261,16 +384,17 @@ checkContinueBtn.addEventListener('click', (e) => {
     setTimeout(() => {
       hider.style.display = 'flex';
       secWindow.maximize();
-      secWindow.setMinimumSize(1280, 900);
+      secWindow.setMinimumSize(1280, 600);
     }, 200);
   }
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
-    secWindow.setMinimumSize(1280, 900);
+    secWindow.setMinimumSize(1280, 600);
   }, 200);
 });
 
+/* UPDATE BUTTON */
 checkUpdateBtn.addEventListener('click', (e) => {
   // populate html table
   htmlContent = tablePopulate(jsonFile);
@@ -303,17 +427,24 @@ checkUpdateBtn.addEventListener('click', (e) => {
     setTimeout(() => {
       hider.style.display = 'flex';
       secWindow.maximize();
-      secWindow.setMinimumSize(1280, 900);
+      secWindow.setMinimumSize(1280, 600);
     }, 200);
   }
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
-    secWindow.setMinimumSize(1280, 900);
+    secWindow.setMinimumSize(1280, 600);
   }, 200);
 });
 
-/* Global Enter keypress for search box */
+/* CANCEL BUTTON */
+checkCancelbtn.addEventListener('click', () => {
+  secWindow.close();
+  secWindow = null;
+});
+
+/* GLOBAL KEY REGISTRATION */
+////////////////////////////
 window.addEventListener('keydown', (event) => {
   if (
     customerSearch.value.length === 6 &&
@@ -330,19 +461,13 @@ window.addEventListener('keydown', (event) => {
   }
 });
 
-checkCancelbtn.addEventListener('click', () => {
-  secWindow.close();
-  secWindow = null;
-});
+/* CUSTOMER FIND DOCK BUTTON */
 
-//TODO: DOUBLE CHECK UNUSED CODE ///////////////////////
-
-/////////////////////////
-/* CUSTOMER FIND DOCK */ customerFindBtn.addEventListener('click', (e) => {
+customerFindBtn.addEventListener('click', (e) => {
   // Get window posiiton to send to main process
   let dimensions = secWindow.getPosition(),
     message = {
-      emit: 'newCus',
+      emit: 'startPage',
       dimensions,
       type: 'toolbar',
     };
@@ -371,6 +496,9 @@ checkCancelbtn.addEventListener('click', () => {
 maxWindow[0].addEventListener('click', (e) => {
   if (secWindow.isMaximized()) {
     secWindow.unmaximize();
+    setTimeout(() => {
+      secWindow.center();
+    }, 50);
   } else {
     secWindow.maximize();
   }
@@ -379,7 +507,9 @@ maxWindow[0].addEventListener('click', (e) => {
 //////////////////
 /*IPC LISTENERS*/
 ////////////////
-ipcRenderer.on('sec-main', (event, message) => {
+
+/* COMMUNICATION FOR CUSTOMER DOCK */
+ipcRenderer.on('dock-sec', (event, message) => {
   let child = secWindow.getChildWindows()[0];
   child.blur();
   secWindow.focus();
@@ -390,4 +520,13 @@ ipcRenderer.on('sec-main', (event, message) => {
   if (document.getElementById(message)) {
     document.getElementById(message).click();
   }
-});
+}); /* TODO: COMPLETE BACK SEQUENCE AFTER PYTHON PROCESSED */
+
+/* COMMUNICATION FOR PROGRESS WINDOW END */ ipcRenderer.on(
+  'progress-end',
+  (event, message) => {
+    progressFade.style.visibility = 'hidden';
+    progressFade.style.backdropFilter = 'none';
+    closeBtn.click();
+  }
+);

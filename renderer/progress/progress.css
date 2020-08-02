@@ -1,0 +1,92 @@
+:root {
+  --psys-blue: #09e1ff;
+  --psys-red: #fe1604;
+  --psys-green: #04fe30;
+  --main-blue: #3e6ba6ff;
+  --sec-blue: #8eafdafb;
+  --button-red: #cf2115;
+  --button-green: #80c432;
+  --button-gold: #d9793b;
+  --man: #497813;
+  --opaque-man: #487613cc;
+  --auto: #d9793b;
+  --opaque-auto: #d97a3acc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: sans-serif;
+}
+.spinner {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+}
+
+.spinner-inside {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  width: 150%;
+  height: 45%;
+  font-size: 30px;
+  font-weight: bolder;
+  border-radius: 50%;
+  background-color: #fff;
+  z-index: 1;
+  box-shadow: 2px 0px 20px -6px rgba(50, 50, 50, 0.75);
+}
+
+.logo {
+  width: 60%;
+  height: auto;
+}
+#progress {
+  width: 70%;
+}
+
+.spinner-sector {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 30px solid transparent;
+  mix-blend-mode: overlay;
+}
+
+.spinner-color-a {
+  border-top: 30px solid var(--psys-blue);
+  animation: rotate 2s linear infinite;
+}
+
+.spinner-color-b {
+  border-left: 30px solid var(--psys-red);
+  animation: rotate 2.5s linear infinite;
+}
+.spinner-color-c {
+  border-right: 30px solid var(--psys-green);
+  animation: rotate 1.5s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

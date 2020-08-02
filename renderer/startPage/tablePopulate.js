@@ -1,13 +1,12 @@
 const { dataObjects, customerDatabase, customerPrices } = require('../../data/objects');
 
 exports.tablePopulate = (jsonfile) => {
-  console.log(jsonfile);
   // let idx = Object.keys(dataObjects['template-pricelist']).slice(0, -2);
   let idx = Object.keys(jsonfile).slice(0, -5);
 
   let htmlColumns = '';
   jsonfile['columns'].forEach((el) => {
-    htmlColumns += `<th id="${el}">${el}</th>`;
+    htmlColumns += `<th id="${el.toLowerCase().replace(' ', '-')}">${el}</th>`;
   });
   // tableColumns.innerHTML = htmlColumns;
 
@@ -43,10 +42,10 @@ exports.tablePopulate = (jsonfile) => {
       </td>
       
       
-      <td><input id="USER${el}" class="price-entries" type="number" value="${
+      <td><input id="USER${el}" class="price-entries-untreated" type="number" value="${
       row[3] ? row[3] : ''
     }" placeholder="- - - - - - - - -"/></td>
-      <td><input id="TSER${el}" class="price-entries" type="number" value="${
+      <td><input id="TSER${el}" class="price-entries-treated" type="number" value="${
       row[4] ? row[4] : ''
     }" placeholder="- - - - - - - - -"/></td>
     

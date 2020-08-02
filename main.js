@@ -1,38 +1,63 @@
-// Module Imports
+/* MODULE IMPORTS */
 const { app, BrowserWindow, ipcMain, Tray, Menu, screen } = require('electron');
 const dotenv = require('dotenv');
 
-// Config file
+/* CONFIG FILE FOR ENV PROCESSES */
 dotenv.config({ path: './config.env' });
 
-// Create Window instance
+/* WINDOW VARIABLES */
 let homeWindow, secWindow, tray, childWindow;
 
-// Messenger service for windows
-const messengerService = (message, window) => {
-  if (window === 'sec') {
-    secWindow.webContents.send('sec-main', message);
-  } else {
-    childWindow.webContents.send('child-main', message);
+////////////////
+/* FUNCTIONS */
+////////////////
+
+/* WINDOW MESSENGER FUNCTION */
+const messengerService = (channel, message, destination) => {
+  if (destination === 'sec') {
+    secWindow.webContents.send(channel, message);
+  } else if (destination === 'child') {
+    childWindow.webContents.send(channel, message);
   }
 };
 
-// IPC message listeners
-// Listen for new customer button
-ipcMain.on('new-customer', (e, message) => {
+/* FUNCTION TO CREATE TRAY MENU */
+function createTray() {
+  tray = new Tray('./renderer/icons/trayTemplate.png');
+  tray.setContextMenu(trayMenu);
+}
+
+////////////////////
+/* IPC LISTENERS */
+//////////////////
+
+/* MESSENGER SERVIVE BETWEEN RENDERERS */
+ipcMain.on('window-message', (event, message) => {
+  messengerService(message.channel, message.message, message.destination);
+});
+
+/* MESSAGE FROM START BUTTON */
+/* Create new customer number search window */
+ipcMain.on('start', (e, message) => {
   createSecWindow(message);
 });
 
-// Listen for dimemsions of secWindow
+/* POSITION OF SECWINDOW TO GENERATE DOCK NEXT TO IT */
 ipcMain.on('position', (e, message) => {
   createChildWindow(message);
 });
 
-ipcMain.on('window-message', (event, message) => {
-  messengerService(message.message, message.source);
+/* MESSAGE FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
+ipcMain.on('progress', (e, message) => {
+  createChildWindow(message);
 });
 
-// Tray menu
+/* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
+ipcMain.on('progress-end', (event, message) => {
+  messengerService(message.channel, message.message, message.destination);
+});
+
+/* TRAY MENU LAYOUT TEMPLATE */
 let trayMenu = Menu.buildFromTemplate([
   { label: 'P2Sys()' },
   { role: 'minimize' },
@@ -40,12 +65,7 @@ let trayMenu = Menu.buildFromTemplate([
   { role: 'toggleDevTools' },
 ]);
 
-function createTray() {
-  tray = new Tray('./renderer/icons/trayTemplate.png');
-  tray.setContextMenu(trayMenu);
-}
-
-// Create MainWindow function
+/* MAIN WINDOW CREATION */
 function createWindow() {
   createTray();
   homeWindow = new BrowserWindow({
@@ -74,9 +94,8 @@ function createWindow() {
   });
 }
 
-// Create secWindow function
+/* SECWINDOW CREATION */
 function createSecWindow(message) {
-  // Window State windowStateKeeper
   secWindow = new BrowserWindow({
     height: 800,
     width: 400,
@@ -90,7 +109,7 @@ function createSecWindow(message) {
   });
 
   //   Load html page
-  secWindow.loadFile('./renderer/newCus/newCus.html');
+  secWindow.loadFile('./renderer/startPage/startPage.html');
 
   // Only show on load completion
   secWindow.on('ready-to-show', () => {
@@ -108,10 +127,10 @@ function createSecWindow(message) {
   });
 }
 
-// Create childWindow function
+/* CHILD WINDOW CREATION */
 function createChildWindow(message) {
   // Window State windowStateKeeper
-  if (message.emit === 'newCus') {
+  if (message.emit === 'startPage') {
     childWindow = new BrowserWindow({
       parent: secWindow,
       height: 800,
@@ -133,24 +152,22 @@ function createChildWindow(message) {
   } else {
     childWindow = new BrowserWindow({
       parent: secWindow,
-      height: 800,
-      width: 300,
-      minHeight: 800,
-      minWidth: 300,
+      height: 450,
+      width: 500,
+
       spellCheck: false,
       resizable: false,
       autoHideMenuBar: true,
-      opacity: 0,
       center: true,
-      // frame: false,
-      // transparent: true,
+      frame: false,
+      transparent: true,
       webPreferences: { nodeIntegration: true, enableRemoteModule: true },
       icon: './renderer/icons/trayTemplate.png',
     });
   }
 
   //   Load html page
-  message.emit === 'newCus'
+  message.emit === 'startPage'
     ? childWindow.loadFile('./renderer/cusNameSearch/customerName.html')
     : childWindow.loadFile(message.html);
 
@@ -163,14 +180,14 @@ function createChildWindow(message) {
   });
 }
 
-// App ready initiator
+/* APP READY --> CREATE MAIN WINDOW */
 app.on('ready', () => {
   setTimeout(() => {
     createWindow();
   }, 300);
 });
 
-// Quit when all windows are closed - (Not macOS - Darwin)
+/* QUIT APP WHEN ALL WINDOWS ARE CLOSED */
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });

@@ -5,10 +5,12 @@
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'" />
     <title>New Customer</title>
-    <link rel="stylesheet" href="./newCus.css" />
+    <link rel="stylesheet" href="./startPage.css" />
   </head>
 
   <body id="page-body">
+    <!-- Customer Search Box -->
+    <!-- /////////////////// -->
     <div id="check-customer">
       <div id="p2s-logo"><img src="../icons/p2syslogo.png" alt="" /></div>
 
@@ -47,6 +49,9 @@
         <button class="btn" id="assist-btn" href="#">CUSTOMER FIND</button>
       </div>
     </div>
+
+    <!-- Main Table Form HTML -->
+    <!-- //////////////////// -->
     <div id="hider">
       <div id="border">
         <div id="header">
@@ -58,15 +63,33 @@
           </div>
           <div class="customer-region-item-a">
             <button id="info-btn" class="info-btn" href="#">INFO</button>
-            <span
-              role="textbox"
-              id="customer-name"
-              placeholder="CUSTOMER NAME"
-              spellcheck="false"
-              contenteditable
-            ></span>
-            <button id="email-now" class="email-now" href="mailto:"></button>
+            <div id="overflow">
+              <span
+                role="textbox"
+                id="customer-name"
+                placeholder="CUSTOMER NAME"
+                spellcheck="false"
+                contenteditable
+              ></span>
+            </div>
+            <button id="email-now" class="email-now" href="#"></button>
             <button id="reminder" class="reminder" href="#">REMIND</button>
+
+            <!-- Customer Info Dock -->
+            <!-- ////////////////// -->
+            <div id="customer-contact-container">
+              <span>
+                <div id="email">
+                  <span>EMAIL ADDRESS</span>
+                  <input id="client-email" type="email" placeholder="ENTER EMAIL" />
+                </div>
+
+                <div id="phone">
+                  <span>TELEPHONE NUMBER</span>
+                  <input id="client-phone" type="text"phone" placeholder="ENTER TEL" />
+                </div>
+              </span>
+            </div>
           </div>
           <div class="customer-region-item-b">
             <span id="label-customer-number">
@@ -96,14 +119,24 @@
 
             <input type="number" placeholder="CCA PRICE" id="cca-price" />
             <button href="#" class="cca-auto-out" id="cca-auto">AUTO</button>
-            <button href="#" class="cca-man-in" id="cca-man" disabled>MAN</button>
+            <button href="#" class="cca-man-in" id="cca-man">MAN</button>
           </div>
         </div>
 
+        <!-- Table -->
+        <!-- ///// -->
         <main>
           <div class="table-container">
             <div id="container">
-              <table id="table"></table>
+              <table id="table">
+                <colgroup>
+                  <col id="bundle" />
+                  <col id="dim" />
+                  <col id="len" />
+                  <col id="untreated" />
+                  <col id="treated" />
+                </colgroup>
+              </table>
             </div>
           </div>
         </main>
@@ -111,22 +144,14 @@
           <button href="#" id="close-btn" class="btn close-btn">BACK TO MAIN</button>
           <button href="#" id="save-btn" class="btn save-btn">SAVE</button>
         </div>
-        <div id="customer-contact-container">
-          <div id="email">
-            <div>EMAIL</div>
-            <input type="email" placeholder="ENTER EMAIL" />
-          </div>
-
-          <div id="phone">
-            <div>TEL</div>
-            <input type="phone" placeholder="ENTER TEL" />
-          </div>
-        </div>
       </div>
     </div>
 
+    <!-- FADE FOR PROGRESS DOCK -->
+    <div id="progress-fade"></div>
+
     <script>
-      require('./newCusapp.js');
+      require('./startPageapp.js');
     </script>
   </body>
 </html>

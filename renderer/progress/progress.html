@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'" />
+    <link rel="stylesheet" href="progress.css" />
+
+    <title>PROCESSING</title>
+  </head>
+  <body>
+    <div class="spinner">
+      <div class="spinner-inside">
+        <img class="logo" src="../icons/p2syslogo-large.png" />
+        <progress id="progress" value="" max="100"></progress>
+      </div>
+      <div class="spinner-sector spinner-color-a"></div>
+      <div class="spinner-sector spinner-color-b"></div>
+      <div class="spinner-sector spinner-color-c"></div>
+    </div>
+    <!-- <div>
+      <button id="close-btn">CLICK TO CLOSE</button>
+    </div> -->
+    <script>
+      require('./progress.js');
+    </script>
+  </body>
+</html>

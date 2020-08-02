@@ -2,10 +2,6 @@
 const { remote, ipcRenderer } = require('electron');
 const { customerNameNumber } = require('../../data/objects.js');
 
-// Get window
-// let childWindow = remote.getChildWindows();
-let childWindow = remote.getCurrentWindow();
-
 ////////////////////////
 /* MESSAGE LISTENERS */
 //////////////////////
@@ -71,31 +67,26 @@ let customerNameLists = Array.from(document.getElementsByClassName('customer-nam
 //////////////////////
 /* EVENT LISTENERS */
 ////////////////////
-
+/* SEND CUSTOMER NUMBER TO SECWINDOW */
 customerNameLists.forEach((el) => {
   el.addEventListener('click', (e) => {
     let number = customerNameNumber[e.target.innerText],
-      messageObject = {
+      message = {
+        channel: 'dock-sec',
         message: number,
-        source: 'sec',
+        destination: 'sec',
       };
     // send ipc
-    ipcRenderer.send('window-message', messageObject);
+    ipcRenderer.send('window-message', message);
 
     // Clear any existing highlighted number in case of reclick
     customerNameLists.forEach((el) => {
       el.setAttribute('class', 'customer-name');
-      // el.style.backgroundColor = '#fff';
-      // el.style.color = 'black';
-      // el.style.border = '3px solid #fff ';
     });
 
     // set the highlight on current clicked item
     el.setAttribute('class', 'customer-name-clicked');
 
-    // el.style.backgroundColor = '#8eafdafb';
-    // el.style.color = 'white';
-    // el.style.border = '3px solid #3e6ba6ff ';
     customerSearch.value = el.textContent;
     customerSearch.dispatchEvent(new Event('keyup'));
   });
