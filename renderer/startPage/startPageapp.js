@@ -269,6 +269,17 @@ autoCaaBtn.addEventListener('click', (e) => {
     untreatedColumnClass.forEach((el) => {
       el.addEventListener('keyup', ccaAutoMan);
     });
+  } else {
+    ccaPrice.type = 'text';
+    ccaPrice.style.fontWeight = 'bolder';
+    ccaPrice.value = 'ENTER PRICE';
+    ccaPrice.style.animation = 'cca-flash .5s linear 4';
+    setTimeout(() => {
+      ccaPrice.style.fontWeight = 'normal';
+      ccaPrice.value = 'none';
+      ccaPrice.type = 'number';
+      ccaPrice.style.animation = 'none';
+    }, 2050);
   }
 });
 

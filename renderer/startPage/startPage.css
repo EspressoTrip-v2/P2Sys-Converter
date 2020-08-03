@@ -189,8 +189,7 @@ tr:nth-child(3n + 1) {
 }
 
 #pricelist,
-#customer-number,
-#cca-price {
+#customer-number {
   font-size: 15px;
   border: 2px solid #fff;
   border-radius: 10px;
@@ -198,6 +197,30 @@ tr:nth-child(3n + 1) {
   text-transform: uppercase;
   height: 30px;
 }
+
+#cca-price {
+  font-size: 15px;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  text-align: center;
+  text-transform: uppercase;
+  height: 30px;
+  animation: none;
+}
+
+@keyframes cca-flash {
+  from {
+    border-color: orange;
+    color: #000;
+    background-color: #fff;
+  }
+  to {
+    border-color: orange;
+    color: #fff;
+    background-color: orange;
+  }
+}
+
 #overflow {
   display: flex;
   align-items: center;
