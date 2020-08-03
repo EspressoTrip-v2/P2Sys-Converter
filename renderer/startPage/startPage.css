@@ -20,6 +20,9 @@ form {
 button:focus {
   outline: none;
 }
+* {
+  box-sizing: border-box;
+}
 
 /* MAIN TAG SECTION WITH CHILDREN*/
 html {
@@ -36,6 +39,14 @@ input[type='text'][disabled] {
 input[type='number'][disabled] {
   background-color: #fff;
   color: #000;
+}
+
+input {
+  outline: none;
+}
+
+span[role='textbox'] {
+  outline: none;
 }
 
 #hider {
@@ -119,35 +130,41 @@ tr:nth-child(3n + 1) {
 /* INPUT BOXES */
 .customer-region-item-a {
   position: relative;
-  padding: 1.5px 10px;
+  padding: 5.5px 10px;
   display: flex;
   flex-direction: row;
+  height: 7vh;
+
   justify-content: center;
   justify-items: center;
   align-items: center;
-  border-radius: 20px;
+  border-radius: 15px;
   background-color: var(--sec-blue);
   border: 3px solid #fff;
+  margin-left: 1vh;
 }
 .customer-region-item-b,
 .price-list-item-a {
-  width: 35vh;
+  width: 45vh;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
   justify-items: center;
   align-items: center;
-  border-radius: 20px;
-  padding: 3px 23px;
+  border-radius: 15px;
+  height: 7vh;
+
+  padding: 3px 15px;
   background-color: var(--sec-blue);
   border: 3px solid #fff;
+  margin-left: 1vh;
 }
 
 #label-customer-number,
 #label-pricelist,
 #label-cca {
   background-color: var(--sec-blue);
-  border-radius: 5px;
+  border-radius: 10px;
   color: #fff;
   font-size: 15px;
   padding: 5px;
@@ -156,16 +173,19 @@ tr:nth-child(3n + 1) {
 }
 
 .cca-box-item-a {
-  padding: 3px 23px;
-  width: 40vh;
+  padding: 3px 0px;
+  width: 54vh;
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
   justify-items: center;
   align-items: center;
-  border-radius: 20px;
+  border-radius: 15px;
   background-color: var(--sec-blue);
   border: 3px solid #fff;
+  height: 7vh;
+  margin-left: 1vh;
+  margin-right: 1vh;
 }
 
 #pricelist,
@@ -188,7 +208,7 @@ tr:nth-child(3n + 1) {
   height: 35px;
   border: 2px solid var(--sec-blue);
   border-radius: 12px;
-  padding: 1px 0px;
+  padding: 0px 0px;
   margin: 3px 0px;
 }
 
@@ -201,20 +221,25 @@ tr:nth-child(3n + 1) {
   background-color: var(--sec-blue);
 }
 #customer-name {
+  display: flex;
+  flex-direction: row;
   position: relative;
+  justify-content: center;
+  align-items: center;
   background-color: #fff;
   font-size: 15px;
   text-align: center;
   width: 30vh;
-  height: auto;
+  height: 100%;
   text-transform: uppercase;
 }
 
 /* Main body container */
 #border {
+  position: relative;
   display: flex;
   flex-direction: column;
-  height: 95vh;
+  height: 96vh;
   width: auto;
   margin-left: 3vh;
   margin-right: 3vh;
@@ -232,14 +257,15 @@ tr:nth-child(3n + 1) {
   border: 4px solid var(--main-blue);
   border-radius: 10px;
   width: auto;
-  height: 76vh;
+  height: 79vh;
+  overflow: hidden;
 }
 /* Inner container to seperate border and scrollbar */
 #container {
   display: flex;
   flex-direction: column;
   overflow: auto;
-  max-height: 76vh;
+  max-height: 79vh;
 }
 
 /* Scrollbar Customization for Table */
@@ -285,7 +311,7 @@ tr:nth-child(3n + 1) {
 
 #footer {
   position: relative;
-  top: 1.2vh;
+  top: 0.8vh;
   background-color: var(--sec-blue);
   display: flex;
   align-self: center;
@@ -294,9 +320,9 @@ tr:nth-child(3n + 1) {
   padding: 0 2vh;
   padding-top: 2.2vh;
   border: 3px solid #fff;
-  border-radius: 200px;
-  height: 5vh;
-  width: 33%;
+  border-radius: 20px;
+  height: 7vh;
+  width: 40%;
 }
 
 /* /////////////////// */
@@ -306,6 +332,7 @@ tr:nth-child(3n + 1) {
   position: relative;
   display: flex;
   justify-content: center;
+  align-items: center;
   font-weight: bolder;
   border-radius: 200px;
 
@@ -444,7 +471,7 @@ tr:nth-child(3n + 1) {
   width: 1vh;
 
   padding: 5px 25px;
-  margin-right: 2px;
+  margin-right: 4px;
   text-align: center;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
@@ -556,10 +583,12 @@ tr:nth-child(3n + 1) {
   top: 0;
   right: 0;
   align-items: center;
-  height: 792px;
+  height: 100%;
   border: 4px solid var(--main-blue);
+  border-radius: 20px;
   background-color: #fff;
   background-image: url('../icons/whitcher-logo-small-opacity.png');
+  background-size: contain;
   background-repeat: repeat-y;
   background-position: center top;
   z-index: 3;
@@ -571,31 +600,32 @@ tr:nth-child(3n + 1) {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-top: 10vh;
   padding: 2vh;
-  width: 250px;
+  width: 46vh;
   background-color: var(--sec-blue);
   border: 4px solid var(--main-blue);
-  border-radius: 1vh;
+  border-radius: 20px;
   box-shadow: 2px 2px 20px 0px rgba(50, 50, 50, 0.75);
 }
 #customer-search-container {
   padding: 5px 6px;
+  height: 7vh;
   border: 2px solid #fff;
   border-radius: 50px;
 }
 #customer-search-container img {
   width: auto;
-  height: 26px;
-  margin-right: 12px;
-  margin-left: 12px;
+  height: 34px;
+  margin-right: 10px;
+  margin-left: 10px;
 }
 
 #customer-search {
   text-transform: uppercase;
-  padding: 2px;
+  padding: 4px;
   margin-right: 15px;
-  width: 75%;
-  height: auto;
+  width: 100%;
   text-align: center;
   font-weight: bolder;
   border-radius: 50px;
@@ -617,9 +647,9 @@ tr:nth-child(3n + 1) {
 #customer-number-list {
   background-color: #fff;
   border: 4px solid var(--main-blue);
-  border-radius: 2vh;
+  border-radius: 20px;
   height: 20vh;
-  padding: 3px;
+  padding: 5px;
 }
 #customer-list {
   width: 100%;
@@ -750,13 +780,13 @@ tr:nth-child(3n + 1) {
   font-weight: bolder;
   border-radius: 200px;
   height: auto;
-  width: 25%;
+  width: 45%;
   color: #8f9691c0;
   border: 2px solid #8f9691c0;
 }
 
 #assist-box {
-  bottom: 11vh;
+  bottom: 7vh;
   position: absolute;
   display: flex;
   flex-direction: column;
@@ -827,7 +857,7 @@ tr:nth-child(3n + 1) {
   justify-content: center;
   justify-items: center;
   align-items: center;
-  top: 50px;
+  top: 67px;
   right: 127px;
   background-color: var(--sec-blue);
   border-top: 3px solid #fff;
@@ -882,13 +912,13 @@ tr:nth-child(3n + 1) {
 /* //////// */
 @media screen and (max-width: 1560px) {
   .table-container {
-    max-height: 75vh;
+    max-height: 78vh;
   }
   html {
     font-size: 15px;
   }
   #container {
-    max-height: 75vh;
+    max-height: 78vh;
     font-size: 15px;
   }
   th,
@@ -911,22 +941,25 @@ tr:nth-child(3n + 1) {
   }
   .customer-region-item-a {
     padding: 0px 5px;
-    height: 5vh;
+    height: 7vh;
     width: auto;
+    border-radius: 15px;
   }
 
   .price-list-item-a,
   .customer-region-item-b {
     justify-content: space-evenly;
     padding: 0px 0px;
-    height: 5vh;
-    width: 30vh;
+    height: 7vh;
+    width: 32vh;
+    border-radius: 15px;
   }
   .cca-box-item-a {
     justify-content: space-evenly;
     padding: 0px 8px;
-    height: 5vh;
-    width: 34vh;
+    height: 7vh;
+    width: 40vh;
+    border-radius: 15px;
   }
   #customer-name {
     font-size: 14px;
@@ -950,8 +983,8 @@ tr:nth-child(3n + 1) {
   }
 
   #footer {
-    width: 62vh;
-    height: 6vh;
+    top: 1vh;
+    height: 7.5vh;
   }
 
   .cca-auto-out,
@@ -971,11 +1004,11 @@ tr:nth-child(3n + 1) {
     font-size: 15px;
     top: -10px;
     width: 30%;
-    padding: 9px 0px;
+    height: 4vh;
   }
 
   #customer-contact-container {
-    top: 40px;
+    top: 50px;
     right: 125px;
     width: 24.5vh;
     height: 20vh;

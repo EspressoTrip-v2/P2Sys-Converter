@@ -97,13 +97,14 @@ function createWindow() {
 /* SECWINDOW CREATION */
 function createSecWindow(message) {
   secWindow = new BrowserWindow({
-    height: 800,
+    height: 650,
     width: 400,
     autoHideMenuBar: true,
     center: true,
     show: false,
     frame: false,
     spellCheck: false,
+    transparent: true,
     webPreferences: { nodeIntegration: true, enableRemoteModule: true },
     icon: './renderer/icons/trayTemplate.png',
   });
@@ -133,10 +134,8 @@ function createChildWindow(message) {
   if (message.emit === 'startPage') {
     childWindow = new BrowserWindow({
       parent: secWindow,
-      height: 800,
+      height: 655,
       width: 300,
-      minHeight: 800,
-      minWidth: 300,
       resizable: false,
       x: message.dimensions[0] - 300,
       y: message.dimensions[1],

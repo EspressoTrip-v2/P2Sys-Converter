@@ -24,7 +24,6 @@ let searchValue, target, jsonFile, tableEntryClass, priceEntryClass, htmlContent
 //////////////////
 let closeBtn = document.getElementById('close-btn'),
   savebtn = document.getElementById('save-btn'),
-  table = document.getElementById('table'),
   customerName = document.getElementById('customer-name'),
   customerPriceList = document.getElementById('pricelist'),
   ccaPrice = document.getElementById('cca-price'),
@@ -34,6 +33,12 @@ let closeBtn = document.getElementById('close-btn'),
   clientEmail = document.getElementById('client-email'),
   manCaaBtn = document.getElementById('cca-man'),
   autoCaaBtn = document.getElementById('cca-auto'),
+  /* TABLE COMPONENT DOMS */
+  /////////////////////////
+  table = document.getElementById('table'),
+  /* MAIN PAGE ELEMENTS */
+  ///////////////////////
+  html = document.getElementsByTagName('html')[0],
   /* TABLE COLUMNS DOM*/
   /////////////////////
   treatedColumns = document.getElementById('treated'),
@@ -87,10 +92,20 @@ const fadeInOut = (childWindow) => {
   }
 };
 
+/* CCA AUTO/MAN FUNCTION CONTROL FOR KEYUP IN CELLS */
+// This function is created so that the event can be removed on manula mode
+function ccaAutoMan() {
+  let value = parseInt(this.value) + parseInt(ccaPrice.value),
+    /* create adjacent treated ID from untreated position */
+    treatedId = 'T' + this.id.slice(1);
+  document.getElementById(treatedId).value = value;
+}
+
 ////////////////////////////////////
 /* HTML TABLE FORM PAGE FUNCTION */
 //////////////////////////////////
 
+/* INNER TABLE HTM FUNCTION */
 const htmlInnerFill = (html) => {
   let innerTableColumns = html.htmlColumns,
     innerTable = html.htmlInner;
@@ -98,15 +113,6 @@ const htmlInnerFill = (html) => {
   table.insertAdjacentHTML('beforeend', innerTableColumns + innerTable);
 
   tableEntryClass = Array.from(document.getElementsByClassName('table-entries'));
-  priceEntryClass = Array.from(document.getElementsByClassName('price-entries'));
-  // Set a hidden submit for non entry prices in treated untreated columns
-  priceEntryClass.forEach((el) => {
-    el.addEventListener('focusout', () => {
-      if (el.value === '') {
-        el.value = 0;
-      }
-    });
-  });
 
   tableEntryClass.forEach((el) => {
     el.addEventListener('focusout', () => {
@@ -145,8 +151,8 @@ closeBtn.addEventListener('click', () => {
   pageBody.style.display = 'none';
   secWindow.unmaximize();
   secWindow.reload();
-  secWindow.setMinimumSize(400, 800);
-  secWindow.setSize(400, 800);
+  secWindow.setMinimumSize(400, 650);
+  secWindow.setSize(400, 650);
   secWindow.center();
 });
 
@@ -174,19 +180,24 @@ savebtn.addEventListener('click', (e) => {
 
   if (treatedMissingBool.length > 0 || untreatedMissingBool.length > 0) {
     treatedMissingBool.forEach((el) => {
-      el.style.backgroundColor = 'red';
-      el.style.color = '#fff';
+      el.style.backgroundColor = '#ffe558';
+      el.style.border = '1px solid #ffe558';
+      el.style.color = 'black';
       el.placeholder = '';
     });
     untreatedMissingBool.forEach((el) => {
-      el.style.backgroundColor = 'red';
-      el.style.color = '#fff';
+      el.style.backgroundColor = '#ffe558';
+      el.style.border = '1px solid #ffe558';
+      el.style.color = 'black';
       el.placeholder = '';
     });
-    remote.dialog.showErrorBox(
-      'MISSING VALUES',
-      'Please enter values in the highlighted fields'
-    );
+    remote.dialog.showMessageBox(secWindow, {
+      type: 'warning',
+      icon: './renderer/icons/trayTemplate.png',
+      buttons: ['OK'],
+      message: 'MISSING VALUES:',
+      detail: 'Please complete the highlighted areas.',
+    });
   } else {
     let message = {
       emit: 'progress',
@@ -203,14 +214,17 @@ sendEmailbtn.addEventListener('click', (e) => {
   if (clientEmail.value) {
     window.location = `mailto:${clientEmail.value}`;
   } else {
-    let message =
-      'There is no client email to use.\nPlease enter one by clicking on the INFO button';
-    remote.dialog.showMessageBox(secWindow, {
-      title: 'EMAIL ERROR',
-      type: 'warning',
-      buttons: ['OK'],
-      message: message,
-    });
+    remote.dialog
+      .showMessageBox(secWindow, {
+        type: 'warning',
+        icon: './renderer/icons/trayTemplate.png',
+        buttons: ['OK'],
+        message: 'NO EMAIL ADDRESS ON FILE:',
+        detail: 'Please enter an email address.',
+      })
+      .then((response) => {
+        infobtn.click();
+      });
   }
 });
 /* INFO BUTTON */
@@ -225,34 +239,62 @@ infobtn.addEventListener('click', (e) => {
     }, 250);
   }
 });
-/* MANUAL CCA BUTTON */
-manCaaBtn.addEventListener('click', (e) => {
-  if (manCaaBtn.classList.value === 'cca-man-out') {
-    manCaaBtn.setAttribute('class', 'cca-man-in');
-    manCaaBtn.disabled = true;
-    treatedColumns.style.backgroundColor = '#487613cc';
 
-    for (let i = 0; i < 30; i++) {
-      document.getElementById(`TSER${i}`).disabled = false;
-    }
-
-    autoCaaBtn.setAttribute('class', 'cca-auto-out');
-    autoCaaBtn.disabled = false;
-  }
-});
 /* AUTO CCA BUTTON */
 autoCaaBtn.addEventListener('click', (e) => {
-  if (autoCaaBtn.classList.value === 'cca-auto-out') {
+  // Check to see if there is an entry in the cca price and the button is out
+  if (autoCaaBtn.classList.value === 'cca-auto-out' && ccaPrice.value) {
     autoCaaBtn.setAttribute('class', 'cca-auto-in');
     autoCaaBtn.disabled = true;
     treatedColumns.style.backgroundColor = '#d97a3acc';
 
+    // Disable all treated cells
     for (let i = 0; i < 30; i++) {
       document.getElementById(`TSER${i}`).disabled = true;
     }
 
+    // Run through all cells once and calculate existing values
+    for (let i = 0; i < 30; i++) {
+      document.getElementById(`TSER${i}`).value =
+        parseInt(document.getElementById(`USER${i}`).value) + parseInt(ccaPrice.value);
+    }
+
     manCaaBtn.setAttribute('class', 'cca-man-out');
     manCaaBtn.disabled = false;
+
+    // Add event listeners for keyup on untreated entries to fill treated entries
+    let = untreatedColumnClass = Array.from(
+      document.getElementsByClassName('price-entries-untreated')
+    );
+    untreatedColumnClass.forEach((el) => {
+      el.addEventListener('keyup', ccaAutoMan);
+    });
+  }
+});
+
+/* MANUAL CCA BUTTON */
+manCaaBtn.addEventListener('click', (e) => {
+  if (manCaaBtn.classList.value === 'cca-man-out') {
+    // Set man button in
+    manCaaBtn.setAttribute('class', 'cca-man-in');
+    manCaaBtn.disabled = true;
+    treatedColumns.style.backgroundColor = '#487613cc';
+
+    // Make treated cell active
+    for (let i = 0; i < 30; i++) {
+      document.getElementById(`TSER${i}`).disabled = false;
+    }
+    // Set auto button to be out
+    autoCaaBtn.setAttribute('class', 'cca-auto-out');
+    autoCaaBtn.disabled = false;
+
+    // remove event listeners for keyup on untreated entries to fill treated entries
+    let = untreatedColumnClass = Array.from(
+      document.getElementsByClassName('price-entries-untreated')
+    );
+    untreatedColumnClass.forEach((el) => {
+      el.removeEventListener('keyup', ccaAutoMan);
+    });
   }
 });
 
@@ -374,6 +416,11 @@ checkContinueBtn.addEventListener('click', (e) => {
   customerPriceList.value = searchValue;
   customerPriceList.disabled = true;
 
+  // add background to html element
+  setTimeout(() => {
+    html.style.backgroundColor = '#fff';
+  }, 200);
+
   if (customerNumberName[searchValue]) {
     customerName.innerText = customerNumberName[searchValue];
     customerName.contentEditable = false;
@@ -384,13 +431,13 @@ checkContinueBtn.addEventListener('click', (e) => {
     setTimeout(() => {
       hider.style.display = 'flex';
       secWindow.maximize();
-      secWindow.setMinimumSize(1280, 600);
+      secWindow.setMinimumSize(1280, 700);
     }, 200);
   }
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
-    secWindow.setMinimumSize(1280, 600);
+    secWindow.setMinimumSize(1280, 700);
   }, 200);
 });
 
@@ -407,8 +454,10 @@ checkUpdateBtn.addEventListener('click', (e) => {
   customerName.innerText = customerNumberName[searchValue];
   customerName.contentEditable = false;
   ccaPrice.value = customerPrices[searchValue]['CCA'];
-  ccaPrice.disabled = true;
-
+  // add background to html element
+  setTimeout(() => {
+    html.style.backgroundColor = '#fff';
+  }, 200);
   if (customerDatabase[searchValue]) {
     customerPriceList.value = customerDatabase[searchValue];
     customerPriceList.disabled = true;
@@ -427,13 +476,13 @@ checkUpdateBtn.addEventListener('click', (e) => {
     setTimeout(() => {
       hider.style.display = 'flex';
       secWindow.maximize();
-      secWindow.setMinimumSize(1280, 600);
+      secWindow.setMinimumSize(1280, 700);
     }, 200);
   }
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
-    secWindow.setMinimumSize(1280, 600);
+    secWindow.setMinimumSize(1280, 700);
   }, 200);
 });
 

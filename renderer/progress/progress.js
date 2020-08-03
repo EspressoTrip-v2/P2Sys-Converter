@@ -16,7 +16,7 @@ let progressBar = document.getElementById('progress');
 let count = 0,
   timer = setInterval(() => {
     count++;
-    progressBar.value = count;
+    progressBar.style.setProperty('--width', count);
     if (count === 100) {
       clearInterval(timer);
       let message = {
