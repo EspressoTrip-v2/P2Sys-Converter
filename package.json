@@ -4,7 +4,7 @@
   "description": "Pricing program for Accpac",
   "main": "main.js",
   "scripts": {
-    "watch": "nodemon --exec electron ."
+    "watch": "nodemon --ignore '*.json' --exec electron ."
   },
   "author": "Juan Botha",
   "license": "ISC",
@@ -13,7 +13,12 @@
     "nodemon": "^2.0.4"
   },
   "dependencies": {
-    "dotenv": "^8.2.0",
+    "mongoose": "^5.9.27",
     "python-shell": "^2.0.1"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "./data/remplates/*.json"
+    ]
   }
 }

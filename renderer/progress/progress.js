@@ -1,24 +1,53 @@
 const { remote, ipcRenderer } = require('electron');
 const { PythonShell } = require('python-shell');
+const {
+  customerPrices,
+  customerDatabase,
+  customerNumberName,
+  writePricelistFile,
+} = require('../../data/objects');
 
 /* REMOTE WINDOWS */
 ///////////////////
-let progressWindow = remote.getCurrentWindow(),
-  secWindow = progressWindow.getParentWindow();
+let progressWindow = remote.getCurrentWindow();
 
 /* DOM ELEMENTS */
 /////////////////
 let progressBar = document.getElementById('progress');
 
-/* PYTHON PROCESSING FUNCTION */
-///////////////////////////////
+/* VARIABLES */
+//////////////
 
-let count = 0,
-  timer = setInterval(() => {
-    count++;
-    progressBar.style.setProperty('--width', count);
-    if (count === 100) {
-      clearInterval(timer);
+//TODO: FINNISH PROCESS AFTER CONVERSION
+
+ipcRenderer.on('convert-python', (event, message) => {
+  let file = message;
+  let data = JSON.stringify(file);
+
+  /* PYTHON PROCESSING FUNCTION */
+  ///////////////////////////////
+
+  /* CREATE OPTIONS OBJECT FOR PYSHELL */
+  let options = {
+    mode: 'text',
+    pythonOptions: ['-u'],
+    scriptPath: './python/',
+    args: [data],
+  };
+
+  /* CREATE PYSHELL  */
+  let pyshell = new PythonShell('conversion.py', options);
+
+  pyshell.on('message', (message) => {
+    let value = parseInt(message);
+    if (value < 100) {
+      // Push progrogress value to custom var in progress bar
+      progressBar.style.setProperty('--width', value);
+    } else if (value === 100) {
+      /* UPDATEWITH NEW ITEM */
+      customerPrices[customerNumberValue.value] = customerData[customerNumberValue.value];
+      writePricelistFile(customerNumberValue.value, customerPrices);
+      // Sent message to close bar and reset
       let message = {
         channel: 'progress-end',
         message: 'close',
@@ -27,4 +56,5 @@ let count = 0,
       ipcRenderer.send('progress-end', message);
       progressWindow.close();
     }
-  }, 100);
+  });
+});

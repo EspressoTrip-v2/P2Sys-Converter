@@ -86,9 +86,6 @@ customerNameLists.forEach((el) => {
 
     // set the highlight on current clicked item
     el.setAttribute('class', 'customer-name-clicked');
-
-    customerSearch.value = el.textContent;
-    customerSearch.dispatchEvent(new Event('keyup'));
   });
 });
 

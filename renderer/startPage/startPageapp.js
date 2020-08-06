@@ -14,7 +14,7 @@ const { tablePopulate } = require('./tablePopulate');
 let secWindow = remote.getCurrentWindow();
 window.secWindow = secWindow;
 // Global variables for usage on necessary code
-let searchValue, target, jsonFile, tableEntryClass, priceEntryClass, htmlContent, remoteWindow;
+let searchValue, target, jsonFile, tableEntryClass, htmlContent;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -26,6 +26,7 @@ let closeBtn = document.getElementById('close-btn'),
   savebtn = document.getElementById('save-btn'),
   customerName = document.getElementById('customer-name'),
   customerPriceList = document.getElementById('pricelist'),
+  customerNumberValue = document.getElementById('customer-number'),
   ccaPrice = document.getElementById('cca-price'),
   infobtn = document.getElementById('info-btn'),
   customerContactMenu = document.getElementById('customer-contact-container'),
@@ -51,16 +52,15 @@ let closeBtn = document.getElementById('close-btn'),
 let checkCustomer = document.getElementById('check-customer'),
   customerSearch = document.getElementById('customer-search'),
   customerNumberList = document.getElementById('customer-list'),
-  // customerNameEntry = document.getElementById('customer-name'),
   checkUpdateBtn = document.getElementById('check-update-btn'),
   checkCancelbtn = document.getElementById('check-cancel-btn'),
   disabledBtn = document.getElementById('disabled'),
   maxWindow = document.getElementsByClassName('max'),
   checkContinueBtn = document.getElementById('check-continue-btn'),
-  customerNumberValue = document.getElementById('customer-number'),
   customerFindBtn = document.getElementById('assist-box'),
   hider = document.getElementById('hider'),
-  pageBody = document.getElementById('page-body');
+  pageBody = document.getElementById('page-body'),
+  dbLight = document.getElementsByClassName('db-light');
 
 //////////////
 /*FUNCTIONS*/
@@ -98,8 +98,43 @@ function ccaAutoMan() {
   let value = parseInt(this.value) + parseInt(ccaPrice.value),
     /* create adjacent treated ID from untreated position */
     treatedId = 'T' + this.id.slice(1);
-  document.getElementById(treatedId).value = value;
+  if (value) {
+    document.getElementById(treatedId).value = value;
+  }
 }
+
+/* CREATE THE JSON OBJECT FROM HTML TABLE DATA */
+const createObjectFromHtml = () => {
+  /* SET VARIABLES */
+  let tableRows, message, columns, tableData, jsonObject;
+
+  /* RETRIEVE ALL INFO AND CREATE JSON OBJECT FROM TABLE */
+  jsonObject = {};
+  jsonObjectData = {};
+  tableRows = Array.from(document.getElementsByTagName('tr'));
+  tableData = tableRows.slice(1);
+
+  /* COLUMNS & INDEX */
+  columns = Array.from(document.getElementsByTagName('th'));
+
+  /* POPULATE THE JSON OBJECT WITH DATA */
+  /* TABLE ROW INNER ID FOR BUNDLE SIZE: BR, DIMENSIONS: DR, LENGTH: ER, UNTREATED: USER, TREATED: TSER */
+  for (var i = 0; i < tableData.length; i++) {
+    jsonObjectData[i] = [
+      document.getElementById(`BR${i}`).innerText,
+      document.getElementById(`DR${i}`).innerText,
+      document.getElementById(`ER${i}`).value,
+      document.getElementById(`USER${i}`).value,
+      document.getElementById(`TSER${i}`).value,
+    ];
+  }
+
+  jsonObject[customerNumberValue.value] = jsonObjectData;
+  jsonObject[customerNumberValue.value]['pricelist'] = customerPriceList.value;
+  jsonObject[customerNumberValue.value]['columns'] = columns.map((el) => el.innerText);
+
+  return jsonObject;
+};
 
 ////////////////////////////////////
 /* HTML TABLE FORM PAGE FUNCTION */
@@ -160,6 +195,7 @@ closeBtn.addEventListener('click', () => {
 /* SAVE BUTTON */
 
 savebtn.addEventListener('click', (e) => {
+  /* CHECK ALL VALUE ENTRIES AND WARN IF MISSING */
   let treatedMissingBool = [],
     untreatedMissingBool = [],
     untreatedColumnClass = Array.from(
@@ -167,6 +203,7 @@ savebtn.addEventListener('click', (e) => {
     ),
     treatedColumnClass = Array.from(document.getElementsByClassName('price-entries-treated'));
 
+  /* SEND HTML ELEMENTS WITH NO VALUES TO ARRAY */
   treatedColumnClass.forEach((el) => {
     if (!el.value) {
       treatedMissingBool.push(el);
@@ -178,6 +215,7 @@ savebtn.addEventListener('click', (e) => {
     }
   });
 
+  /* CHECK THE LENGHTS OF THOSE ARRAY AND HIGHLIGHT THE MISSING INPUTS */
   if (treatedMissingBool.length > 0 || untreatedMissingBool.length > 0) {
     treatedMissingBool.forEach((el) => {
       el.style.backgroundColor = '#ffe558';
@@ -191,6 +229,7 @@ savebtn.addEventListener('click', (e) => {
       el.style.color = 'black';
       el.placeholder = '';
     });
+    /* CREATE MESSAGE POPUP */
     remote.dialog.showMessageBox(secWindow, {
       type: 'warning',
       icon: './renderer/icons/trayTemplate.png',
@@ -199,10 +238,19 @@ savebtn.addEventListener('click', (e) => {
       detail: 'Please complete the highlighted areas.',
     });
   } else {
-    let message = {
+    /* CREATE THE CUSTOMER PRICELIST OBJECT */
+    let customerData = createObjectFromHtml();
+
+    /* CREATE MESSAGE TO SEND TO IPC LISTENER */
+    message = {
       emit: 'progress',
       html: './renderer/progress/progress.html',
+      jsonObject: customerData,
+      destination: 'child',
+      relayChannel: 'convert-python',
     };
+
+    /* FADE THE BACKGROUND AND MESSAGE FOR PROGRESS BAR */
     progressFade.style.visibility = 'visible';
     progressFade.style.backdropFilter = 'blur(1px) grayscale(1)';
     ipcRenderer.send('progress', message);
@@ -255,8 +303,10 @@ autoCaaBtn.addEventListener('click', (e) => {
 
     // Run through all cells once and calculate existing values
     for (let i = 0; i < 30; i++) {
-      document.getElementById(`TSER${i}`).value =
-        parseInt(document.getElementById(`USER${i}`).value) + parseInt(ccaPrice.value);
+      if (document.getElementById(`USER${i}`).value) {
+        document.getElementById(`TSER${i}`).value =
+          parseInt(document.getElementById(`USER${i}`).value) + parseInt(ccaPrice.value);
+      }
     }
 
     manCaaBtn.setAttribute('class', 'cca-man-out');
@@ -590,3 +640,28 @@ ipcRenderer.on('dock-sec', (event, message) => {
     closeBtn.click();
   }
 );
+
+ipcRenderer.on('db-status', (e, message) => {
+  if (message === 1) {
+    /* CUSTOMER SEARCH DB STATUS */
+    dbLight[0].classList[1]
+      ? dbLight[0].classList.replace('db-fail', 'db-connected')
+      : dbLight[0].classList.add('db-connected');
+
+    /* TABLE DB STATUS */
+    dbLight[1].classList[1]
+      ? dbLight[1].classList.replace('db-fail', 'db-connected')
+      : dbLight[1].classList.add('db-connected');
+  } else if (message === 0) {
+    /* CUSTOMER SEARCH DB STATUS */
+
+    dbLight[0].classList[1]
+      ? dbLight[0].classList.replace('db-connected', 'db-fail')
+      : dbLight[0].classList.add('db-fail');
+
+    /* TABLE DB STATUS */
+    dbLight[1].classList[1]
+      ? dbLight[1].classList.replace('db-connected', 'db-fail')
+      : dbLight[1].classList.add('db-fail');
+  }
+});

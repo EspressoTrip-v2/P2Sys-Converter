@@ -1,23 +1,107 @@
 /* MODULE IMPORTS */
-const { app, BrowserWindow, ipcMain, Tray, Menu, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, Notification } = require('electron');
 const dotenv = require('dotenv');
-
-/* CONFIG FILE FOR ENV PROCESSES */
-dotenv.config({ path: './config.env' });
+const mongoose = require('mongoose');
+const fs = require('fs');
 
 /* WINDOW VARIABLES */
-let homeWindow, secWindow, tray, childWindow;
+let homeWindow,
+  secWindow,
+  tray,
+  childWindow,
+  dbConnectionState = false;
+
+//////////////////////////
+/* DATABASE CONNECTION */
+////////////////////////
+function mongooseConnect() {
+  mongoose
+    .connect(
+      'mongodb+srv://pricetosys:Juan@198103@cluster0.61lij.mongodb.net/acwhitcher?retryWrites=true&w=majority',
+      {
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useFindAndModify: false,
+        useUnifiedTopology: true,
+      }
+    )
+    .catch((err) => {
+      fs.existsSync('connection-logfile.txt')
+        ? fs.appendFile(
+            'connection-logfile.txt',
+            `${new Date()} -> Connection failure: ${err}\n`,
+            'utf8',
+            () => console.log('Logfile write error')
+          )
+        : fs.writeFile(
+            'connection-logfile.txt',
+            `${new Date()} -> Connection failure: ${err}\n`,
+            'utf8',
+            () => console.log('Logfile write error')
+          );
+    });
+}
+
+mongooseConnect();
+////////////////////
+/* DB  LISTENERS */
+//////////////////
+const db = mongoose.connection;
+
+/* DB CHECK INTERVAL */
+setInterval(() => {
+  let state = db.readyState;
+
+  if (homeWindow) {
+    state === 1
+      ? homeWindow.webContents.send('db-status', state)
+      : homeWindow.webContents.send('db-status', state);
+  }
+
+  if (secWindow) {
+    state === 1
+      ? secWindow.webContents.send('db-status', state)
+      : secWindow.webContents.send('db-status', state);
+  }
+}, 5000);
+
+/* CONNECTION SUCCESS */
+db.on('open', () => {
+  let notification = new Notification({
+    title: 'AC WHITCHER DB ALERT',
+    body: 'CONNECTION SUCCESS',
+  });
+  notification.show();
+});
+
+/* CONNECTION ERROE */
+db.on('error', () => {
+  let notification = new Notification({
+    title: 'AC WHITCHER DB ALERT',
+    body: 'CONNECTION ERROR',
+  });
+  notification.show();
+  /* RESTART DB ON INITIAL START CONNECTION */
+  setTimeout(() => {
+    mongooseConnect();
+  }, 300000);
+});
 
 ////////////////
 /* FUNCTIONS */
 ////////////////
 
 /* WINDOW MESSENGER FUNCTION */
-const messengerService = (channel, message, destination) => {
+const messengerService = (channel, message, destination, jsonObject = null) => {
+  if (!message) {
+    message = jsonObject;
+  }
   if (destination === 'sec') {
     secWindow.webContents.send(channel, message);
   } else if (destination === 'child') {
-    childWindow.webContents.send(channel, message);
+    childWindow.webContents.on('did-finish-load', (e) => {
+      childWindow.webContents.send(channel, message);
+    });
   }
 };
 
@@ -30,6 +114,15 @@ function createTray() {
 ////////////////////
 /* IPC LISTENERS */
 //////////////////
+
+/* ##### MESSAGE CONSTRUCTOR LEGEND ################ */
+/*       emit: message originate                     */
+/*       channel: channel of message                 */
+/*       message: actual message content             */
+/*       destination: window message is intended for */
+/*       jsonObject: json object file attached       */
+/*       relayChannel: channel to relay message on   */
+/* ################################################# */
 
 /* MESSENGER SERVIVE BETWEEN RENDERERS */
 ipcMain.on('window-message', (event, message) => {
@@ -50,12 +143,17 @@ ipcMain.on('position', (e, message) => {
 /* MESSAGE FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
 ipcMain.on('progress', (e, message) => {
   createChildWindow(message);
+  messengerService(message.relayChannel, null, message.destination, message.jsonObject);
 });
 
 /* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
 ipcMain.on('progress-end', (event, message) => {
   messengerService(message.channel, message.message, message.destination);
 });
+
+////////////////////////////////
+/* WINDOW CREATION FUNCTIONS */
+//////////////////////////////
 
 /* TRAY MENU LAYOUT TEMPLATE */
 let trayMenu = Menu.buildFromTemplate([
@@ -70,7 +168,7 @@ function createWindow() {
   createTray();
   homeWindow = new BrowserWindow({
     width: 400,
-    height: 460,
+    height: 480,
     resizable: false,
     spellCheck: false,
     center: true,
@@ -189,4 +287,5 @@ app.on('ready', () => {
 /* QUIT APP WHEN ALL WINDOWS ARE CLOSED */
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+  db.close();
 });

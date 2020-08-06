@@ -594,6 +594,53 @@ tr:nth-child(3n + 1) {
 /* /////////////////////// */
 /* CHECK CUSTOMER BOX CSS */
 /* //////////////////// /*/
+#db-customer-search {
+  position: absolute;
+  bottom: 2vh;
+}
+#db-table {
+  position: relative;
+  bottom: 1vh;
+  font-size: 15px;
+  height: 4vh;
+  width: 4vh;
+}
+
+.db-light {
+  color: #fff;
+  border-radius: 50%;
+  background-color: lightgrey;
+  width: 5vh;
+  height: 5vh;
+  padding: 0.5vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bolder;
+}
+
+.db-connected {
+  animation: db-success 1.5s ease-in-out infinite alternate;
+}
+.db-fail {
+  background-color: var(--button-red);
+}
+
+@keyframes db-success {
+  from {
+    opacity: 0.5;
+    background-color: lightgrey;
+  }
+  to {
+    opacity: 1;
+    background-color: greenyellow;
+  }
+}
+
 #check-customer {
   position: absolute;
   top: 0;
@@ -623,7 +670,7 @@ tr:nth-child(3n + 1) {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 10vh;
+  margin-top: 7vh;
   padding: 2vh;
   width: 46vh;
   background-color: var(--sec-blue);
@@ -809,7 +856,7 @@ tr:nth-child(3n + 1) {
 }
 
 #assist-box {
-  bottom: 7vh;
+  bottom: 9.5vh;
   position: absolute;
   display: flex;
   flex-direction: column;

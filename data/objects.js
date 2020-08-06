@@ -1,5 +1,57 @@
 const fs = require('fs');
 
+exports.writePricelistFile = (newNumber, jsonObj) => {
+  let prices = JSON.parse(fs.readFileSync(`${__dirname}/templates/customerPrices.json`)),
+    objString = JSON.stringify(jsonObj);
+  /* CHECK TO SEE IT A LOG FILE HAS ALREADY BEEN CREATED AND APPEND OR WRITE NEW ONE */
+  fs.writeFile(`${__dirname}/templates/customerPrices.json`, objString, 'utf8', (err) => {
+    console.log(err);
+  });
+
+  /* LOGFILE UPDATING */
+  if (fs.existsSync('logfile.txt')) {
+    if (prices[newNumber]) {
+      fs.appendFile(
+        'logfile.txt',
+        `${new Date()}: Updated customer->  ${newNumber}\n`,
+        'utf8',
+        (err) => {
+          console.log(err);
+        }
+      );
+    } else {
+      fs.appendFile(
+        'logfile.txt',
+        `${new Date()}: New customer->  ${newNumber}\n`,
+        'utf8',
+        (err) => {
+          console.log(err);
+        }
+      );
+    }
+  } else {
+    if (prices[newNumber]) {
+      fs.writeFile(
+        'logfile.txt',
+        `${new Date()}: Updated customer->  ${newNumber}\n`,
+        'utf8',
+        (err) => {
+          console.log(err);
+        }
+      );
+    } else {
+      fs.writeFile(
+        'logfile.txt',
+        `${new Date()}: New customer->  ${newNumber}\n`,
+        'utf8',
+        (err) => {
+          if (err) throw err;
+        }
+      );
+    }
+  }
+};
+
 /* TEMPLATES FOR NEW CUSTOMER CREATION */
 exports.dataObjects = JSON.parse(fs.readFileSync(`${__dirname}/templates/dataObjects.json`));
 

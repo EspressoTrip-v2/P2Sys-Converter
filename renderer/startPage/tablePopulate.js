@@ -34,8 +34,8 @@ exports.tablePopulate = (jsonfile) => {
     htmlInner += `
     
     <tr id="R${el}" ">
-      <td>${row[0]}</td>
-      <td>${row[1]}</td>
+      <td id="BR${el}">${row[0]}</td>
+      <td id="DR${el}">${row[1]}</td>
       
       <td>
       <form action="javascript:null;"><input pattern=${pattern} id="ER${el}"  title="${title}" class="table-entries" type="text" value="${
