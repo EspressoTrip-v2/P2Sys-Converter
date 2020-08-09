@@ -14,7 +14,8 @@ let startBtn = document.getElementById('start'),
   aboutbtn = document.getElementById('about-btn'),
   backbtn = document.getElementById('back-btn'),
   mailbtn = document.getElementById('mail-btn'),
-  dbLight = document.getElementsByClassName('db-light')[0];
+  dbLight = document.getElementsByClassName('db-light')[0],
+  databaseText = document.getElementsByClassName('text')[0];
 
 /* REMOTE WINDOWS */
 ///////////////////
@@ -31,14 +32,12 @@ let homeWindow = remote.getCurrentWindow(),
 /* START BUTTON */
 startBtn.addEventListener('click', (e) => {
   ipcRenderer.send('start', 'startPage');
-  homeWindow.hide();
 });
 
 /* EXIT BUTTON */
 exitbtn.addEventListener('click', (e) => {
   clearInterval(dbStateTimer);
   homeWindow.close();
-  // console.log(message);
   homeWindow = null;
 });
 
@@ -56,15 +55,17 @@ backbtn.addEventListener('click', (e) => {
   document.querySelector('.about-screen').style.opacity = 0;
 });
 mailbtn.addEventListener('click', (e) => {
-  shell.openExternal('mailto:projects.juan@gmail.com?subject=P2Sys() Inquiry/ Bug report');
+  shell.openExternal('mailto:price.to.sys@gmail.com?subject=P2Sys() Inquiry/ Bug report');
 });
 
 ////////////////////
 /* IPC LISTENERS */
 //////////////////
+ipcRenderer.once('sync-database', (e, message) => {
+  databaseText.setAttribute('data-label', 'UPDATING');
+});
 
 ipcRenderer.on('db-status', (e, message) => {
-  console.log(dbLight.classList);
   if (message === 1) {
     dbLight.classList[1]
       ? dbLight.classList.replace('db-fail', 'db-connected')

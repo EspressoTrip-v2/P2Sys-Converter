@@ -5,11 +5,11 @@ const { dataObjects } = require('../../data/objects');
 /* FUNCTION TO POPULATE THE TABLE ROWS */
 exports.tablePopulate = (jsonfile) => {
   // get indexes of the json file
-  let idx = Object.keys(jsonfile).slice(0, -5);
+  let idx = Object.keys(jsonfile).slice(0, -4);
 
   // table column names
   let htmlColumns = '';
-  jsonfile['columns'].forEach((el) => {
+  jsonfile['COLUMNS'].forEach((el) => {
     htmlColumns += `<th id="${el.toLowerCase().replace(' ', '-')}">${el}</th>`;
   });
 
@@ -56,5 +56,6 @@ exports.tablePopulate = (jsonfile) => {
     </tr>  
     `;
   });
+
   return { htmlColumns, htmlInner };
 };

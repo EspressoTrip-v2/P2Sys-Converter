@@ -1,15 +1,10 @@
 /* MODULE IMPORTS */
 const { app, BrowserWindow, ipcMain, Tray, Menu, Notification } = require('electron');
-const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const fs = require('fs');
 
 /* WINDOW VARIABLES */
-let homeWindow,
-  secWindow,
-  tray,
-  childWindow,
-  dbConnectionState = false;
+let homeWindow, secWindow, tray, childWindow, loadingWindow;
 
 //////////////////////////
 /* DATABASE CONNECTION */
@@ -63,18 +58,13 @@ setInterval(() => {
       ? secWindow.webContents.send('db-status', state)
       : secWindow.webContents.send('db-status', state);
   }
-}, 5000);
+}, 1000);
 
-/* CONNECTION SUCCESS */
-db.on('open', () => {
-  let notification = new Notification({
-    title: 'AC WHITCHER DB ALERT',
-    body: 'CONNECTION SUCCESS',
-  });
-  notification.show();
+db.once('connected', () => {
+  if (homeWindow) homeWindow.webContents.send('sync-database', 1);
 });
 
-/* CONNECTION ERROE */
+/* CONNECTION ERROR */
 db.on('error', () => {
   let notification = new Notification({
     title: 'AC WHITCHER DB ALERT',
@@ -132,6 +122,8 @@ ipcMain.on('window-message', (event, message) => {
 /* MESSAGE FROM START BUTTON */
 /* Create new customer number search window */
 ipcMain.on('start', (e, message) => {
+  homeWindow.hide();
+  createLoadingWindow();
   createSecWindow(message);
 });
 
@@ -167,8 +159,8 @@ let trayMenu = Menu.buildFromTemplate([
 function createWindow() {
   createTray();
   homeWindow = new BrowserWindow({
-    width: 400,
-    height: 480,
+    width: 410,
+    height: 490,
     resizable: false,
     spellCheck: false,
     center: true,
@@ -212,6 +204,8 @@ function createSecWindow(message) {
 
   // Only show on load completion
   secWindow.on('ready-to-show', () => {
+    loadingWindow.close();
+    loadingWindow = null;
     secWindow.show();
   });
 
@@ -274,6 +268,32 @@ function createChildWindow(message) {
   //   Event listener for closing
   childWindow.on('closed', () => {
     childWindow = null;
+  });
+}
+
+/* LOADING WINDOW */
+function createLoadingWindow() {
+  loadingWindow = new BrowserWindow({
+    height: 500,
+    width: 500,
+    autoHideMenuBar: true,
+    center: true,
+    frame: false,
+    spellCheck: false,
+    transparent: true,
+    webPreferences: { nodeIntegration: true, enableRemoteModule: true },
+    icon: './renderer/icons/trayTemplate.png',
+  });
+
+  //   Load html page
+  loadingWindow.loadFile('./renderer/loader/loader.html');
+
+  //   Load dev tools
+  // loadingWindow.webContents.openDevTools();
+
+  //   Event listener for closing
+  loadingWindow.on('closed', () => {
+    loadingWindow = null;
   });
 }
 

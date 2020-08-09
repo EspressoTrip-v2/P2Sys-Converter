@@ -3,31 +3,37 @@ import pandas as pd
 import numpy as np
 import json
 import sys
+import os
+import platform
 import time
 
 # IMPORT CUSTOM MODEULES #
 # ////////////////////// #
 import reform
+import s5_ordersheet
 
 # READ IN JSON FILE FROM ARGV #
 # /////////////////////////// #
 json_pricelist = dict(json.loads(sys.argv[1:][0]))
+
 # GET CUSTOMER NUMBER FROM FILE
-name = list(json_pricelist.keys())[0]
+customer_number = list(json_pricelist.keys())[0]
+# GET PRICELIST NUMBER
+pricelist_number = json_pricelist[customer_number]['PRICELIST']
 
 # EXTRACT INDEX NUMBERS REMOVE LAST THREE ENTRIES
-idx = list(json_pricelist[name].keys())[:-2]
-# print({'index': idx})
+idx = list(json_pricelist[customer_number].keys())[:-5]
+
 # EXTRACT COLUMNS
-columns = json_pricelist[name]['columns']
+columns = json_pricelist[customer_number]['COLUMNS']
+
 running_cols = ['UNT_RUNNING', 'TR_RUNNING']
 
 # EXTRACT VALUES
-values = list(json_pricelist[name].values())[:-2]
-# print({'values': values})
+values = list(json_pricelist[customer_number].values())[:-5]
 
 # PERCENTAGE STDOUT
-# print(10)
+print(10)
 
 # BUID THE DATAFRAME #
 # ////////////////// #
@@ -68,7 +74,7 @@ df['DIMENSIONS'] = df['DIMENSIONS'].str.join(' x ')
 # /////////////////////////////////// #
 
 # PERCENTAGE STDOUT
-# print(20)
+print(20)
 
 
 def factor(col):
@@ -90,7 +96,7 @@ df['R_FACTOR'] = df['R_FACTOR'].apply(factor)
 df['ODD_EVEN'] = ''
 
 # PERCENTAGE STDOUT
-# print(30)
+print(30)
 
 
 # ODD EVEN TAG FUNCTION TO #
@@ -118,7 +124,7 @@ def length(col):
 
 
 # PERCENTAGE STDOUT
-# print(40)
+print(40)
 
 # CLEAN THE LENGTH COLUMN OF ALL LETTERS AND DASHES
 df['LENGTH'] = df['LENGTH'].str.replace('[a-zA-Z\(\)\-]', ' ').str.split()
@@ -142,7 +148,7 @@ def remove_dup():
 remove_dup()
 
 # PERCENTAGE STDOUT
-# print(50)
+print(50)
 
 
 # CREATE THE RANGE OF SIZES IN LENGTH COLUMN
@@ -175,7 +181,7 @@ def odd_even(col):
 df = df.apply(odd_even, axis=1)
 
 # PERCENTAGE STDOUT
-# print(60)
+print(60)
 
 
 # REMOVE THE EXCLUDED AND ADD INCLUDED LENGTHS #
@@ -193,7 +199,8 @@ def excl_incl():
 
 excl_incl()
 
-# print(70)
+# PERCENTAGE STDOUT
+print(70)
 
 
 # FUNCTION TO MATCH SYSTEM CODES TO THE DESCRIPTIONS IN DATAFRAME #
@@ -273,18 +280,41 @@ def s5_product(col):
     return col
 
 
-# print(80)
+# PERCENTAGE STDOUT
+print(80)
 
 # CREATE ITEM CODES COLUMNS
 df['IC_UNTREATED'] = ''
 df['IC_TREATED'] = ''
 
-# PERCENTAGE STDOUT
-# print(90)
 df = df.apply(s5_product, axis=1)
 df.reset_index(inplace=True, drop=True)
 
-# PASS TO REFORM FUNCTION
-pricelist = json_pricelist[name]['pricelist']
+# CREATE THE FOLDER TO STORE ITEMS INSERT #
+###########################################
 
-# reform.reformat_fn(pricelist, name, df)
+# GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
+system_os = platform.platform(terse=True).split('-')[0]
+if system_os == 'Windows':
+    mydocuments_folder = f'{os.environ["HOME"]}\Documents\{customer_number}'
+    os.makedirs(mydocuments_folder, exist_ok=True)
+elif system_os == 'Linux':
+    mydocuments_folder = f'{os.environ["HOME"]}/Documents/{customer_number}'
+    os.makedirs(mydocuments_folder, exist_ok=True)
+
+# PASS TO SHEET CREATOR CODE #
+##############################
+
+# SEND FOR REFORM
+reform_file = reform.reformat_layman(pricelist_number, customer_number, df)
+
+# PERCENTAGE STDOUT
+print(90)
+
+# SEND TO S5
+s5_ordersheet.create_s5_ordersheet(mydocuments_folder,
+                                   reform_file['customer_number'],
+                                   reform_file['customer_pricelist'])
+
+# PERCENTAGE STDOUT
+print(100)

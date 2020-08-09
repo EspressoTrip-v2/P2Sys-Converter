@@ -39,22 +39,28 @@ ipcRenderer.on('convert-python', (event, message) => {
   let pyshell = new PythonShell('conversion.py', options);
 
   pyshell.on('message', (message) => {
+    // console.log(message);
     let value = parseInt(message);
     if (value < 100) {
       // Push progrogress value to custom var in progress bar
       progressBar.style.setProperty('--width', value);
     } else if (value === 100) {
+      progressBar.style.setProperty('--width', value);
+
       /* UPDATEWITH NEW ITEM */
-      customerPrices[customerNumberValue.value] = customerData[customerNumberValue.value];
-      writePricelistFile(customerNumberValue.value, customerPrices);
+      // customerPrices[customerNumber.value] = customerData[customerNumber.value]; // TODO: START HERE CUSTOMERNAMENUMBER VALUE NOT DEFINED
+      // writePricelistFile(customerNumber.value, customerPrices);
       // Sent message to close bar and reset
-      let message = {
-        channel: 'progress-end',
-        message: 'close',
-        destination: 'sec',
-      };
-      ipcRenderer.send('progress-end', message);
-      progressWindow.close();
+
+      setTimeout(() => {
+        let message = {
+          channel: 'progress-end',
+          message: 'close',
+          destination: 'sec',
+        };
+        ipcRenderer.send('progress-end', message);
+        progressWindow.close();
+      }, 500);
     }
   });
 });

@@ -5,6 +5,13 @@
   --button-green: #80c432;
   --button-gold: #d9793b;
   --man: #497813;
+
+  /* --data-label: 'DATABASE'; */
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 /* Fonts */
@@ -67,22 +74,28 @@ button {
   font-style: italic;
   padding-top: 20px;
 }
+.text {
+  font-size: 11px;
+  font-weight: bolder;
+  text-align: center;
+  padding: 1vh 3vw;
+}
+.text::after {
+  content: attr(data-label);
+}
 
 .db-light {
+  position: relative;
   color: #fff;
   border-radius: 50%;
   background-color: lightgrey;
-  width: 5vh;
-  height: 5vh;
-  padding: 0.5vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   align-content: center;
   text-align: center;
-  font-size: 15px;
-  font-weight: bolder;
+  box-shadow: inset 1px 1px 1px 0px rgba(50, 50, 50, 0.25);
 }
 
 .db-connected {
@@ -112,7 +125,8 @@ button {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 460px;
+  height: 97vh;
+  width: 82vh;
   background-color: #3e6ba6f5;
   color: #fff;
   border: 2px solid #fff;

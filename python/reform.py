@@ -2,6 +2,10 @@
 import pandas as pd
 import numpy as np
 import json
+import warnings
+warnings.filterwarnings("ignore", 'This pattern has match groups')
+
+import s5_ordersheet
 
 #  IMPORT MASTER JSON AND CHANGE TO DF #
 with open('./data/templates/masterPricelistTemplate.json', 'r') as jsonfile:
@@ -17,7 +21,7 @@ master_price = pd.DataFrame(data, columns=columns, index=index)
 
 # REFORMAT THE LAYMAN PRICELIST FUNCTION #
 ##########################################
-def reformat_fn(pricelist, name, df):
+def reformat_layman(pricelist_number, customer_number, df):
     # DICTIONARY TO SEPERATE PRODUCT NUMBERS
     D = {}
     for i, d in df.iterrows():
@@ -26,34 +30,43 @@ def reformat_fn(pricelist, name, df):
         D[str(i) + 'T'] = (d['IC_TREATED'], d['PRICE TREATED'], d['R_FACTOR'],
                            d['BUNDLE SIZE'])
 
-    customer_master = master_price.copy()
-    customer_master['PRICE R/METER UNTREATED'] = 0
-    customer_master['PRICE R/METER UNTREATED'] = 0
-    customer_master['BUNDLE SIZE'] = 'NA'
-    customer_master['PRICE TREATED'] = 0
-    customer_master['PRICE UNTREATED'] = 0
-    customer_master['CURRENCY'] = 'ZAR'
-    customer_master['PRICELIST'] = pricelist
+    customer_pricelist = master_price.copy()
+    customer_pricelist['R/METER UNTREATED'] = 0
+    customer_pricelist['R/METER TREATED'] = 0
+    customer_pricelist['BUNDLE SIZE'] = 'NA'
+    customer_pricelist['M3 TREATED'] = 0
+    customer_pricelist['M3 UNTREATED'] = 0
+    customer_pricelist['CURRENCY'] = 'ZAR'
+    customer_pricelist['PRICELIST'] = pricelist_number
 
-    for k, v in D.items():  #TODO: Start here
-        print(v)
+    # LOOP THOUGHT THE SEPERATED TREATED/UNTREATED PRODUCTS AN DALOWCATE PRICES ON THE MASTERPRICELIST FILE
+    for k, v in D.items():
+
+        # ADD THE PRICES TO THE CORRECT ITEMNO UNTREATED
         if k.endswith('U'):
 
-            # untreated items
-            customer_master.loc[v[0], ['unitprice']] = v[1]
-            customer_master.loc[v[0], ['price r/meter untreated']] = round(
-                v[1] * v[2], 2)
-            customer_master.loc[v[0], ['price m3 untreated']] = v[1]
-            customer_master.loc[v[0], ['bundle size']] = v[3]
+            customer_pricelist.loc[v[0], ['UNITPRICE']] = v[1]
+            customer_pricelist.loc[v[0], ['R/METER UNTREATED']] = round(
+                int(v[1]) * v[2], 2)
+            customer_pricelist.loc[v[0], ['M3 UNTREATED']] = v[1]
+            customer_pricelist.loc[v[0], ['BUNDLE SIZE']] = v[3]
 
+        # ADD THE PRICES TO THE CORRECT ITEMNO TREATED
         elif k.endswith('T'):
 
-            # Treated items
-            customer_master.loc[v[0], ['unitprice']] = v[1]
-            customer_master.loc[v[0], ['price r/meter treated']] = round(
-                v[1] * v[2], 2)
-            customer_master.loc[v[0], ['price m3 treated']] = v[1]
-            customer_master.loc[v[0], ['bundle size']] = v[3]
+            customer_pricelist.loc[v[0], ['UNITPRICE']] = v[1]
+            customer_pricelist.loc[v[0], ['R/METER TREATED']] = round(
+                int(v[1]) * v[2], 2)
+            customer_pricelist.loc[v[0], ['M3 TREATED']] = v[1]
+            customer_pricelist.loc[v[0], ['BUNDLE SIZE']] = v[3]
 
-    customer_master['unitprice'].replace(1, 0, inplace=True)
-    return customer_master
+    # REPLACE ALL THE ZERO WITH NAN VALUES AND SORT THE DF UNITPRICE WITH VALUES
+    customer_pricelist.replace(0, np.nan, inplace=True)
+    customer_pricelist = customer_pricelist.dropna(axis=0,
+                                                   subset=['UNITPRICE'])
+
+    # RETURN ITEMS TO PROCESS S5 AND SYSTEM TEMPLATE
+    return {
+        'customer_number': customer_number,
+        'customer_pricelist': customer_pricelist
+    }
