@@ -231,38 +231,48 @@ tr:nth-child(3n + 1) {
 
 #overflow {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  align-content: center;
   position: relative;
-  text-align: center;
-  overflow: auto;
   background-color: #fff;
   height: 35px;
+  max-width: 17vw;
+  width: 17vw;
   border: 2px solid var(--sec-blue);
   border-radius: 12px;
-  padding: 0px 0px;
-  margin: 3px 0px;
+  padding: 0px 1vw;
 }
 
-#overflow::-webkit-scrollbar {
-  width: 4px;
-  background-color: var(--main-blue);
-}
-#overflow::-webkit-scrollbar-thumb {
-  height: 3px;
-  background-color: var(--sec-blue);
-}
 #customer-name {
-  display: flex;
-  flex-direction: row;
-  position: relative;
-  justify-content: center;
-  align-items: center;
+  display: block;
+  position: absolute;
+  top: 0.7vh;
   background-color: #fff;
   font-size: 15px;
   text-align: center;
-  width: 18vw;
-  height: 100%;
+  line-height: 20px;
+  padding: 0 1vw;
+  width: 16vw;
+  max-height: 2vh;
+  max-width: 17vw;
+  overflow-y: auto;
   text-transform: uppercase;
+}
+
+#customer-name[contenteditable]:empty::before {
+  content: 'Placeholder still possible';
+  color: gray;
+}
+
+#customer-name::-webkit-scrollbar {
+  width: 4px;
+  background-color: var(--main-blue);
+}
+#customer-name::-webkit-scrollbar-thumb {
+  height: 3px;
+  background-color: var(--sec-blue);
 }
 
 /* Main body container */
@@ -604,54 +614,89 @@ tr:nth-child(3n + 1) {
 /* /////////////////////// */
 /* CHECK CUSTOMER BOX CSS */
 /* //////////////////// /*/
+
 #db-customer-search {
   position: absolute;
-  bottom: 2vh;
-  border: 2px solid #e7e4e4;
+  bottom: 3vh;
 }
 #db-table {
-  position: relative;
-  bottom: 1vh;
-  font-size: 18px;
+  position: absolute;
+  left: -14vw;
+  bottom: 1.5vh;
+  width: 8vw;
   height: 3vh;
-  width: 2.5vw;
-  border: 2px solid #fff;
+}
+#db-table .text {
+  font-size: 14px;
+  font-weight: bolder;
+  text-align: center;
+}
+
+.text {
+  position: relative;
+  font-size: 11px;
+  font-weight: bolder;
+  text-align: center;
+  padding: 1vh 3vw;
+}
+.text::after {
+  content: attr(data-label);
 }
 
 .db-light {
+  position: relative;
   color: #fff;
   border-radius: 50%;
   background-color: lightgrey;
-  width: 11vw;
-  height: 5vh;
-  padding: 0.2vh;
-  padding-top: 3px;
   display: flex;
+  width: 22vw;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   align-content: center;
   text-align: center;
-  font-size: 18px;
-  font-weight: bolder;
+  box-shadow: inset 1px 1px 1px 0px rgba(50, 50, 50, 0.25);
+}
+
+.db-fail {
+  position: relative;
+  color: #fff;
+  border-radius: 50%;
+  background-color: var(--button-red);
+  display: flex;
+  width: 22vw;
+
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  text-align: center;
   box-shadow: inset 1px 1px 1px 0px rgba(50, 50, 50, 0.25);
 }
 
 .db-connected {
+  position: relative;
+  color: #fff;
+  border-radius: 50%;
+  background-color: lightgrey;
+  display: flex;
+  flex-direction: column;
+  width: 22vw;
+
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  box-shadow: inset 1px 1px 1px 0px rgba(50, 50, 50, 0.25);
   animation: db-success 1.5s ease-in-out infinite alternate;
-}
-.db-fail {
-  background-color: var(--button-red);
 }
 
 @keyframes db-success {
   from {
-    opacity: 0.5;
-    background-color: lightgrey;
+    background-color: var(--main-blue);
   }
   to {
-    opacity: 1;
-    background-color: greenyellow;
+    background-color: var(--button-green);
   }
 }
 
@@ -1122,5 +1167,8 @@ tr:nth-child(3n + 1) {
     font-size: 12px;
     padding: 1vh 0;
     width: 12vw;
+  }
+  #db-table .text {
+    font-size: 11px;
   }
 }

@@ -2,6 +2,192 @@
 ////////////
 
 const { remote, ipcRenderer, shell } = require('electron');
+const mongoose = require('mongoose');
+const fs = require('fs');
+const {
+  customerPricesModel,
+  customerPricelistNumberModel,
+  customerNameNumberModel,
+  customerBackUpModel,
+} = require('../../database/mongoDbConnect.js');
+const {
+  customerBackUp,
+  customerNumberName,
+  customerPricelistNumber,
+  customerPrices,
+} = require('../../data/objects.js');
+
+/* GLOBAL VARIABLES */
+/////////////////////
+let homeWindow = remote.getCurrentWindow(),
+  dbStateTimer,
+  state = null;
+
+////////////////
+/* FUNCTIONS */
+//////////////
+
+const messageAlert = (type, title, detail, buttons) => {
+  let selection = remote.dialog.showMessageBoxSync(homeWindow, {
+    type,
+    buttons,
+    title,
+    message: 'There was an database error:',
+    detail,
+  });
+  if (selection === 1) {
+    let issue = detail.match(/([A-Z]+)/g).map((el) => {
+      if (el.length > 3) return el;
+    });
+    shell.openExternal(
+      `mailto:price.to.sys@gmail.com?subject=DATABASE ERROR: ${issue.join(' ')}`
+    );
+  }
+};
+
+const updateDatabase = async () => {
+  let mes = 'There are inconsistencies in:\n\n# {DATA} #\n\nPlease contact the developer.',
+    title = 'DATABASE ERROR',
+    type = 'error',
+    but = ['OK', 'EMAIL DEV'];
+
+  //TODO: FINISH
+
+  /* CUSTOMER PRICES DATABASE */
+  let customerPricesDB = await customerPricesModel.findById('customerPrices');
+  delete customerPricesDB._doc['_id'];
+  if (Object.keys(customerPrices).length >= Object.keys(customerPricesDB._doc).length) {
+    console.log('customerPrices');
+    // customerPricesDB.replaceOne({ _id: 'customerPrices' }, customerPrices); //TODO: ADD LOG CALLBACK
+  } else {
+    let alteredMes = mes.replace('{DATA}', 'CUSTOMER PRICELIST');
+    messageAlert(type, title, alteredMes, but);
+  }
+
+  /* CUSTOMER NUMBER: PRICELIST NUMBER DATABASE  */
+  let customerPricelistNumberDB = await customerPricelistNumberModel.findById(
+    'customerPricelistNumber'
+  );
+  delete customerPricelistNumberDB._doc['_id'];
+  if (
+    Object.keys(customerPricelistNumber).length >=
+    Object.keys(customerPricelistNumberDB._doc).length
+  ) {
+    console.log('customerPricelistNumber');
+    // customerPricelistNumberDB.replaceOne({ _id: 'customerPricelistNumber' }, customerPricelistNumber); //TODO: ADD LOG CALLBACK
+  } else {
+    let alteredMes = mes.replace('{DATA}', 'CUSTOMER NUMBER: PRICELIST NUMBER');
+    messageAlert(type, title, alteredMes, but);
+  }
+
+  /* CUSTOMER NAME: CUSTOMER NUMBER DATABASE */
+  let customerNameNumberDB = await customerNameNumberModel.findById('customerNameNumber');
+  delete customerNameNumberDB._doc['_id'];
+
+  if (
+    Object.keys(customerNumberName).length >= Object.keys(customerNameNumberDB._doc).length
+  ) {
+    console.log('customerNumberName');
+
+    // customerNameNumberDB.replaceOne({ _id: 'customerNameNumber' }, customerNumberName); //TODO: ADD LOG CALLBACK
+  } else {
+    let alteredMes = mes.replace('{DATA}', 'CUSTOMER NAME: CUSTOMER NUMBER');
+    messageAlert(type, title, alteredMes, but);
+  }
+
+  /* CUSTOMER BACKUP DATABASE */
+  let customerBackUpDB = await customerBackUpModel.findById('customerBackUp');
+  delete customerBackUpDB._doc['_id'];
+  if (Object.keys(customerBackUp).length >= Object.keys(customerBackUpDB._doc).length) {
+    console.log('customerBackUp');
+
+    // customerBackUpDB.replaceOne({ _id: 'customerBackUp' }, customerBackUp); //TODO: ADD LOG CALLBACK
+  } else {
+    let alteredMes = mes.replace('{DATA}', 'CUSTOMER BACKUP');
+    messageAlert(type, title, alteredMes, but);
+  }
+
+  return true;
+};
+
+const syncDb = async () => {
+  databaseText.setAttribute('data-label', 'UPDATING');
+  dbLight.setAttribute('class', 'db-update');
+  let updated = await updateDatabase();
+  if (updated) {
+    dbLight.setAttribute('class', 'db-connected');
+    state = db.readyState;
+  }
+};
+
+//////////////////////////
+/* DATABASE CONNECTION */
+////////////////////////
+function mongooseConnect() {
+  mongoose
+    .connect(
+      'mongodb+srv://pricetosys:Juan@198103@cluster0.61lij.mongodb.net/acwhitcher?retryWrites=true&w=majority',
+      {
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useFindAndModify: false,
+        useUnifiedTopology: true,
+      }
+    )
+    .catch((err) => {
+      fs.existsSync('connection-logfile.txt')
+        ? fs.appendFile(
+            'connection-logfile.txt',
+            `${new Date()} -> Connection failure: ${err}\n`,
+            'utf8',
+            () => console.log('Logfile write error')
+          )
+        : fs.writeFile(
+            'connection-logfile.txt',
+            `${new Date()} -> Connection failure: ${err}\n`,
+            'utf8',
+            () => console.log('Logfile write error')
+          );
+    });
+}
+
+/* CREATE CONNECTION */
+mongooseConnect();
+////////////////////
+/* DB  LISTENERS */
+//////////////////
+const db = mongoose.connection;
+
+/* DB CHECK INTERVAL */
+setInterval(() => {
+  if (state === 1) {
+    dbLight.setAttribute('class', 'db-connected');
+    databaseText.setAttribute('data-label', 'CONNECTED');
+    ipcRenderer.send('db-status', state);
+  } else if (state === 0) {
+    dbLight.setAttribute('class', 'db-fail');
+    databaseText.setAttribute('data-label', 'ERROR');
+    ipcRenderer.send('db-status', state);
+  }
+}, 1000);
+
+db.once('connected', () => {
+  state = null;
+  syncDb();
+});
+
+/* CONNECTION ERROR */
+db.on('error', () => {
+  let notification = new Notification({
+    title: 'AC WHITCHER DB ALERT',
+    body: 'CONNECTION ERROR',
+  });
+  notification.show();
+  /* RESTART DB ON INITIAL START CONNECTION */
+  setTimeout(() => {
+    mongooseConnect();
+  }, 300000);
+});
 
 //////////////////
 /* DOM ELEMENTS*/
@@ -14,13 +200,8 @@ let startBtn = document.getElementById('start'),
   aboutbtn = document.getElementById('about-btn'),
   backbtn = document.getElementById('back-btn'),
   mailbtn = document.getElementById('mail-btn'),
-  dbLight = document.getElementsByClassName('db-light')[0],
-  databaseText = document.getElementsByClassName('text')[0];
-
-/* REMOTE WINDOWS */
-///////////////////
-let homeWindow = remote.getCurrentWindow(),
-  dbStateTimer;
+  dbLight = document.getElementById('db'),
+  databaseText = document.getElementById('dbtext');
 
 //////////////////////
 /* EVENT LISTENERS */
@@ -58,21 +239,10 @@ mailbtn.addEventListener('click', (e) => {
   shell.openExternal('mailto:price.to.sys@gmail.com?subject=P2Sys() Inquiry/ Bug report');
 });
 
-////////////////////
 /* IPC LISTENERS */
 //////////////////
-ipcRenderer.once('sync-database', (e, message) => {
-  databaseText.setAttribute('data-label', 'UPDATING');
-});
 
-ipcRenderer.on('db-status', (e, message) => {
-  if (message === 1) {
-    dbLight.classList[1]
-      ? dbLight.classList.replace('db-fail', 'db-connected')
-      : dbLight.classList.add('db-connected');
-  } else if (message === 0) {
-    dbLight.classList[1]
-      ? dbLight.classList.replace('db-connected', 'db-fail')
-      : dbLight.classList.add('db-fail');
-  }
+/* SYNC DB*/
+ipcRenderer.on('sync-db', (e, message) => {
+  syncDb();
 });

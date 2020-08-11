@@ -90,6 +90,23 @@ button {
   border-radius: 50%;
   background-color: lightgrey;
   display: flex;
+  width: 22vw;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  box-shadow: inset 1px 1px 1px 0px rgba(50, 50, 50, 0.25);
+}
+
+.db-fail {
+  position: relative;
+  color: #fff;
+  border-radius: 50%;
+  background-color: var(--button-red);
+  display: flex;
+  width: 22vw;
+
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -99,20 +116,54 @@ button {
 }
 
 .db-connected {
+  position: relative;
+  color: #fff;
+  border-radius: 50%;
+  background-color: lightgrey;
+  display: flex;
+  flex-direction: column;
+  width: 22vw;
+
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  box-shadow: inset 1px 1px 1px 0px rgba(50, 50, 50, 0.25);
   animation: db-success 1.5s ease-in-out infinite alternate;
 }
-.db-fail {
-  background-color: var(--button-red);
+
+.db-update {
+  position: relative;
+  color: #fff;
+  border-radius: 50%;
+  background-color: lightgrey;
+  display: flex;
+  width: 22vw;
+
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  box-shadow: inset 1px 1px 1px 0px rgba(50, 50, 50, 0.25);
+  animation: db-flash 0.1s linear infinite alternate;
 }
 
 @keyframes db-success {
   from {
-    opacity: 0.5;
-    background-color: lightgrey;
+    background-color: var(--main-blue);
   }
   to {
-    opacity: 1;
-    background-color: greenyellow;
+    background-color: var(--button-green);
+  }
+}
+
+@keyframes db-flash {
+  from {
+    background-color: var(--button-gold);
+  }
+  to {
+    background-color: var(--man);
   }
 }
 
@@ -125,7 +176,7 @@ button {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 97vh;
+  height: 95vh;
   width: 82vh;
   background-color: #3e6ba6f5;
   color: #fff;

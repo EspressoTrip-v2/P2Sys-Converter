@@ -1,22 +1,41 @@
+/* MODULES */
 const mongoose = require('mongoose');
 
 /* CUSTOMER PRICELISTS ALREADY CREATED */
 /* SCHEMA */
-const customerPricesSchema = new mongoose.Schema({}, { strict: false, versionKey: false });
+const customerPricesSchema = new mongoose.Schema(
+  {},
+  { strict: false, _id: false, versionKey: false }
+);
 /* MODEL */
-const customerPrices = mongoose.model('Customer_Prices', customerPricesSchema);
+const customerPricesModel = mongoose.model('Customer_Prices', customerPricesSchema);
+exports.customerPricesModel = customerPricesModel;
 
-/* CUSTOMER PRICELISTS ALREADY CREATED */
+/* CUSTOMER NUMBER: PRICELIST NUMBER */
 /* SCHEMA */
-const customerDatabaseSchema = new mongoose.Schema({}, { strict: false, versionKey: false });
+const customerPricelistNumberSchema = new mongoose.Schema(
+  {},
+  { strict: false, _id: false, versionKey: false }
+);
 /* MODEL */
-const customerPricelistNumber = mongoose.model('Customer_Database', customerDatabaseSchema);
+const customerPricelistNumberModel = mongoose.model(
+  'Customer_Pricelist_Number',
+  customerPricelistNumberSchema
+);
+exports.customerPricelistNumberModel = customerPricelistNumberModel;
 
-/* CUSTOMER PRICELISTS ALREADY CREATED */
+/* CUSTOMER NAME: CUSTOMER NUMBER */
 /* SCHEMA */
-const customerNameNumberSchema = new mongoose.Schema({}, { strict: false, versionKey: false });
+const customerNameNumberSchema = new mongoose.Schema(
+  {},
+  { strict: false, _id: false, versionKey: false }
+);
 /* MODEL */
-const customerNameNumber = mongoose.model('Customer_Name_Number', customerNameNumberSchema);
+const customerNameNumberModel = mongoose.model(
+  'Customer_Name_Number',
+  customerNameNumberSchema
+);
+exports.customerNameNumberModel = customerNameNumberModel;
 
 /* CUSTOMER PRICELISTS BACKUPS */
 /* SCHEMA */
@@ -25,10 +44,5 @@ const customerBackUpSchema = new mongoose.Schema(
   { strict: false, _id: false, versionKey: false }
 );
 /* MODEL */
-const customerBackUp = mongoose.model('Customer_BackUp', customerBackUpSchema);
-
-/* EXPORTS */
-exports.customerPricesModel = customerPrices;
-exports.customerPricelistNumberModel = customerPricelistNumber;
-exports.customerNameNumberModel = customerNameNumber;
-exports.customerBackUpModel = customerBackUp;
+const customerBackUpModel = mongoose.model('Customer_BackUp', customerBackUpSchema);
+exports.customerBackUpModel = customerBackUpModel;

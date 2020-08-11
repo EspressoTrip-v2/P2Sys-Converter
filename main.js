@@ -1,88 +1,16 @@
 /* MODULE IMPORTS */
 const { app, BrowserWindow, ipcMain, Tray, Menu, Notification } = require('electron');
-const mongoose = require('mongoose');
 const fs = require('fs');
 
 /* WINDOW VARIABLES */
 let homeWindow, secWindow, tray, childWindow, loadingWindow;
-
-//////////////////////////
-/* DATABASE CONNECTION */
-////////////////////////
-function mongooseConnect() {
-  mongoose
-    .connect(
-      'mongodb+srv://pricetosys:Juan@198103@cluster0.61lij.mongodb.net/acwhitcher?retryWrites=true&w=majority',
-      {
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useFindAndModify: false,
-        useUnifiedTopology: true,
-      }
-    )
-    .catch((err) => {
-      fs.existsSync('connection-logfile.txt')
-        ? fs.appendFile(
-            'connection-logfile.txt',
-            `${new Date()} -> Connection failure: ${err}\n`,
-            'utf8',
-            () => console.log('Logfile write error')
-          )
-        : fs.writeFile(
-            'connection-logfile.txt',
-            `${new Date()} -> Connection failure: ${err}\n`,
-            'utf8',
-            () => console.log('Logfile write error')
-          );
-    });
-}
-
-mongooseConnect();
-////////////////////
-/* DB  LISTENERS */
-//////////////////
-const db = mongoose.connection;
-
-/* DB CHECK INTERVAL */
-setInterval(() => {
-  let state = db.readyState;
-
-  if (homeWindow) {
-    state === 1
-      ? homeWindow.webContents.send('db-status', state)
-      : homeWindow.webContents.send('db-status', state);
-  }
-
-  if (secWindow) {
-    state === 1
-      ? secWindow.webContents.send('db-status', state)
-      : secWindow.webContents.send('db-status', state);
-  }
-}, 1000);
-
-db.once('connected', () => {
-  if (homeWindow) homeWindow.webContents.send('sync-database', 1);
-});
-
-/* CONNECTION ERROR */
-db.on('error', () => {
-  let notification = new Notification({
-    title: 'AC WHITCHER DB ALERT',
-    body: 'CONNECTION ERROR',
-  });
-  notification.show();
-  /* RESTART DB ON INITIAL START CONNECTION */
-  setTimeout(() => {
-    mongooseConnect();
-  }, 300000);
-});
 
 ////////////////
 /* FUNCTIONS */
 ////////////////
 
 /* WINDOW MESSENGER FUNCTION */
-const messengerService = (channel, message, destination, jsonObject = null) => {
+function messengerService(channel, message, destination, jsonObject = null) {
   if (!message) {
     message = jsonObject;
   }
@@ -93,7 +21,7 @@ const messengerService = (channel, message, destination, jsonObject = null) => {
       childWindow.webContents.send(channel, message);
     });
   }
-};
+}
 
 /* FUNCTION TO CREATE TRAY MENU */
 function createTray() {
@@ -114,7 +42,7 @@ function createTray() {
 /*       relayChannel: channel to relay message on   */
 /* ################################################# */
 
-/* MESSENGER SERVIVE BETWEEN RENDERERS */
+/* MESSENGER SERVICE BETWEEN RENDERERS */
 ipcMain.on('window-message', (event, message) => {
   messengerService(message.channel, message.message, message.destination);
 });
@@ -141,6 +69,14 @@ ipcMain.on('progress', (e, message) => {
 /* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
 ipcMain.on('progress-end', (event, message) => {
   messengerService(message.channel, message.message, message.destination);
+});
+
+ipcMain.on('db-status', (event, message) => {
+  if (secWindow) {
+    message === 1
+      ? secWindow.webContents.send('db-status', message)
+      : secWindow.webContents.send('db-status', message);
+  }
 });
 
 ////////////////////////////////
@@ -216,7 +152,7 @@ function createSecWindow(message) {
   secWindow.on('closed', () => {
     secWindow = null;
     homeWindow.show();
-    homeWindow.reload();
+    homeWindow.webContents.send('sync-db', null);
   });
 }
 
