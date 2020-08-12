@@ -40,7 +40,7 @@ exports.tablePopulate = (jsonfile) => {
       <td>
       <form action="javascript:null;"><input pattern=${pattern} id="ER${el}"  title="${title}" class="table-entries" type="text" value="${
       row[2]
-    }"/>
+    }" disabled/>
       <input type="submit" id="SER${el}" style="display:none;" />
       </form>
       </td>

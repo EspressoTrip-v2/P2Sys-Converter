@@ -27,7 +27,7 @@ let homeWindow = remote.getCurrentWindow(),
 /* FUNCTIONS */
 //////////////
 
-const messageAlert = (type, title, detail, buttons) => {
+function messageAlert(type, title, detail, buttons) {
   let selection = remote.dialog.showMessageBoxSync(homeWindow, {
     type,
     buttons,
@@ -43,22 +43,41 @@ const messageAlert = (type, title, detail, buttons) => {
       `mailto:price.to.sys@gmail.com?subject=DATABASE ERROR: ${issue.join(' ')}`
     );
   }
-};
+}
 
-const updateDatabase = async () => {
+/* LOGFILE CREATION FUNCTION */
+//////////////////////////////
+function logfileFunc(message) {
+  if (fs.existsSync('./data/logfiles/online-db-logfile.txt')) {
+    fs.appendFile(
+      './data/logfiles/online-db-logfile.txt',
+      `${new Date()}: Database ${message}\n`,
+      (err) => console.log(err)
+    );
+  } else {
+    fs.writeFile(
+      './data/logfiles/online-db-logfile.txt',
+      `${new Date()}: Database ${message}\n`,
+      (err) => console.log(err)
+    );
+  }
+}
+
+/* UPDATE ONLINE DATABASES */
+////////////////////////////
+async function updateDatabase() {
   let mes = 'There are inconsistencies in:\n\n# {DATA} #\n\nPlease contact the developer.',
     title = 'DATABASE ERROR',
     type = 'error',
     but = ['OK', 'EMAIL DEV'];
 
-  //TODO: FINISH
-
   /* CUSTOMER PRICES DATABASE */
   let customerPricesDB = await customerPricesModel.findById('customerPrices');
   delete customerPricesDB._doc['_id'];
   if (Object.keys(customerPrices).length >= Object.keys(customerPricesDB._doc).length) {
-    console.log('customerPrices');
-    // customerPricesDB.replaceOne({ _id: 'customerPrices' }, customerPrices); //TODO: ADD LOG CALLBACK
+    customerPricesDB.replaceOne({ _id: 'customerPrices' }, customerPrices, (err, res) => {
+      if (err) logfileFunc(`customerPricesDB - ${err}`);
+    });
   } else {
     let alteredMes = mes.replace('{DATA}', 'CUSTOMER PRICELIST');
     messageAlert(type, title, alteredMes, but);
@@ -73,8 +92,13 @@ const updateDatabase = async () => {
     Object.keys(customerPricelistNumber).length >=
     Object.keys(customerPricelistNumberDB._doc).length
   ) {
-    console.log('customerPricelistNumber');
-    // customerPricelistNumberDB.replaceOne({ _id: 'customerPricelistNumber' }, customerPricelistNumber); //TODO: ADD LOG CALLBACK
+    customerPricelistNumberDB.replaceOne(
+      { _id: 'customerPricelistNumber' },
+      customerPricelistNumber,
+      (err, res) => {
+        if (err) logfileFunc(`customerPricelistNumberDB - ${err}`);
+      }
+    );
   } else {
     let alteredMes = mes.replace('{DATA}', 'CUSTOMER NUMBER: PRICELIST NUMBER');
     messageAlert(type, title, alteredMes, but);
@@ -87,9 +111,13 @@ const updateDatabase = async () => {
   if (
     Object.keys(customerNumberName).length >= Object.keys(customerNameNumberDB._doc).length
   ) {
-    console.log('customerNumberName');
-
-    // customerNameNumberDB.replaceOne({ _id: 'customerNameNumber' }, customerNumberName); //TODO: ADD LOG CALLBACK
+    customerNameNumberDB.replaceOne(
+      { _id: 'customerNameNumber' },
+      customerNumberName,
+      (err, res) => {
+        if (err) logfileFunc(`customerNameNumberDB - ${err}`);
+      }
+    );
   } else {
     let alteredMes = mes.replace('{DATA}', 'CUSTOMER NAME: CUSTOMER NUMBER');
     messageAlert(type, title, alteredMes, but);
@@ -99,17 +127,19 @@ const updateDatabase = async () => {
   let customerBackUpDB = await customerBackUpModel.findById('customerBackUp');
   delete customerBackUpDB._doc['_id'];
   if (Object.keys(customerBackUp).length >= Object.keys(customerBackUpDB._doc).length) {
-    console.log('customerBackUp');
-
-    // customerBackUpDB.replaceOne({ _id: 'customerBackUp' }, customerBackUp); //TODO: ADD LOG CALLBACK
+    customerBackUpDB.replaceOne({ _id: 'customerBackUp' }, customerBackUp, (err, res) => {
+      if (err) logfileFunc(`customerBackUpDB - ${err}`);
+    });
   } else {
     let alteredMes = mes.replace('{DATA}', 'CUSTOMER BACKUP');
     messageAlert(type, title, alteredMes, but);
   }
 
   return true;
-};
+}
 
+/* SYNC DATABASE FUNCTION */
+///////////////////////////
 const syncDb = async () => {
   databaseText.setAttribute('data-label', 'UPDATING');
   dbLight.setAttribute('class', 'db-update');
@@ -153,12 +183,14 @@ function mongooseConnect() {
 
 /* CREATE CONNECTION */
 mongooseConnect();
+
 ////////////////////
 /* DB  LISTENERS */
 //////////////////
 const db = mongoose.connection;
 
 /* DB CHECK INTERVAL */
+//////////////////////
 setInterval(() => {
   if (state === 1) {
     dbLight.setAttribute('class', 'db-connected');

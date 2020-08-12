@@ -41,17 +41,17 @@ delete customerBackUp['_id'];
 /* //////// */
 
 /* LOGFILE CREATION FUNCTION */
-const logfileFunc = (customerNumber) => {
-  if (fs.existsSync('./data/local-db-logfile.txt')) {
+function logfileFunc(customerNumber) {
+  if (fs.existsSync('./data/logfiles/local-db-logfile.txt')) {
     if (customerPrices[customerNumber]) {
       fs.appendFile(
-        './data/local-db-logfile.txt',
+        './data/logfiles/local-db-logfile.txt',
         `${new Date()}: Updated customer ->  ${customerNumber}\n`,
         (err) => console.log(err)
       );
     } else {
       fs.appendFile(
-        './data/local-db-logfile.txt',
+        './data/logfiles/local-db-logfile.txt',
         `${new Date()}: New customer ->  ${customerNumber}\n`,
         (err) => console.log(err)
       );
@@ -59,23 +59,22 @@ const logfileFunc = (customerNumber) => {
   } else {
     if (customerPrices[customerNumber]) {
       fs.writeFile(
-        './data/local-db-logfile.txt',
+        './data/logfiles/local-db-logfile.txt',
         `${new Date()}: Updated customer ->  ${customerNumber}\n`,
         (err) => console.log(err)
       );
     } else {
       fs.writeFile(
-        './data/local-db-logfile.txt',
+        './data/logfiles/local-db-logfile.txt',
         `${new Date()}: New customer ->  ${customerNumber}\n`,
         (err) => console.log(err)
       );
     }
   }
-};
+}
 
 exports.writeLocalDatabase = (object) => {
   //TODO: FINISH
-  console.log(customerNameNumber);
 };
 
 let customerNameNumber = {};

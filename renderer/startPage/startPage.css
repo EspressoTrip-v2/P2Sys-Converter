@@ -5,10 +5,9 @@
   --button-red: #cf2115;
   --button-green: #80c432;
   --button-gold: #d9793b;
-  --man: #497813;
-  --opaque-man: #487613cc;
+  --opaque-man: rgba(128, 196, 50, 0.4);
   --auto: #d9793b;
-  --opaque-auto: #d97a3acc;
+  --opaque-auto: rgba(217, 122, 58, 0.3);
 }
 form {
   display: flex;
@@ -171,7 +170,6 @@ tr:nth-child(3n + 1) {
   border-radius: 10px;
   color: #fff;
   font-size: 15px;
-  padding: 5px;
   text-align: center;
   font-weight: bolder;
   width: 5vw;
@@ -366,6 +364,9 @@ tr:nth-child(3n + 1) {
   height: 7vh;
   width: 50vw;
 }
+#len {
+  background-color: var(--opaque-auto);
+}
 
 /* /////////////////// */
 /* TABLE FORM BUTTONS */
@@ -447,8 +448,8 @@ tr:nth-child(3n + 1) {
   font-weight: bolder;
   border-radius: 200px;
 
-  background-color: var(--auto);
-  color: #fff;
+  background-color: #fff;
+  color: var(--auto);
   border: 2px solid var(--auto);
   font-size: 12px;
   width: 3vw;
@@ -485,9 +486,9 @@ tr:nth-child(3n + 1) {
   font-weight: bolder;
   border-radius: 200px;
 
-  background-color: var(--man);
+  background-color: var(--button-green);
   color: #fff;
-  border: 2px solid var(--man);
+  border: 2px solid var(--button-green);
   font-size: 12px;
   width: 3vw;
 
@@ -506,16 +507,15 @@ tr:nth-child(3n + 1) {
   font-weight: bolder;
   border-radius: 200px;
 
-  background-color: var(--man);
-  color: #fff;
-  border: 2px solid var(--man);
+  background-color: #fff;
+  color: var(--button-green);
+  border: 2px solid var(--button-green);
   font-size: 12px;
   width: 3vw;
 
   padding: 5px 20px;
   margin-left: 0.5vw;
   text-align: center;
-  box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
@@ -600,15 +600,100 @@ tr:nth-child(3n + 1) {
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
-.cca-auto-out:hover {
-  background-color: #fff;
-  text-align: center;
-  color: var(--auto);
+.lock-in {
+  position: absolute;
+  left: 30.5vw;
+  z-index: 3;
+  background-color: var(--button-gold);
+  color: #fff;
+  border: 2px solid var(--button-gold);
+  width: 2.5vw;
+  height: 2.5vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bolder;
+  box-shadow: inset 1px 1px 3px 0px rgba(50, 50, 50, 0.75);
+  transition: background-color 0.5s, border 0.5s, box-shadow 0.5s;
 }
-.cca-man-out:hover {
+
+.lock-out {
+  left: 30.5vw;
+  z-index: 3;
   background-color: #fff;
-  text-align: center;
-  color: var(--man);
+  color: var(--button-gold);
+  border: 2px solid var(--button-gold);
+  position: absolute;
+  width: 2.5vw;
+  height: 2.5vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bolder;
+  box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+  transition: background-color 0.5s, border 0.5s, box-shadow 0.5s;
+}
+
+.unlock-out {
+  left: 43vw;
+  z-index: 3;
+  background-color: #fff;
+  border: 2px solid var(--button-green);
+  color: var(--button-green);
+  position: absolute;
+  width: 2.5vw;
+  height: 2.5vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bolder;
+  box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+  transition: background-color 0.5s, border 0.5s, box-shadow 0.5s;
+}
+
+.unlock-in {
+  left: 43vw;
+  z-index: 3;
+  background-color: var(--button-green);
+  border: 2px solid var(--button-green);
+  color: #fff;
+  position: absolute;
+  width: 2.5vw;
+  height: 2.5vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bolder;
+  box-shadow: inset 1px 1px 3px 0px rgba(50, 50, 50, 0.75);
+  transition: background-color 0.5s, border 0.5s, box-shadow 0.5s;
+}
+
+#unlock-svg {
+  fill: var(--button-green);
+  width: 18px;
+  height: 18px;
+}
+
+#lock-svg {
+  fill: #fff;
+  width: 18px;
+  height: 18px;
 }
 
 /* /////////////////////// */
@@ -809,12 +894,13 @@ tr:nth-child(3n + 1) {
   border-radius: 10px;
   margin: 0;
   padding: 2px;
-  border-bottom: 3px solid #e9ebeeb0;
+  border-bottom: 3px solid #e8eaed80;
 }
 .cusnum-clicked {
-  background-color: #8eafdafb;
+  position: relative;
+  background-color: var(--sec-blue);
   color: #fff;
-  border: 3px solid #3e6ba6ff;
+  border: 3px solid var(--main-blue);
   text-align: center;
   font-size: 18px;
   border-radius: 10px;
@@ -822,6 +908,26 @@ tr:nth-child(3n + 1) {
   padding: 2px;
 }
 
+.cusnum-resume {
+  position: relative;
+  background-color: #fff;
+  color: #d9793b;
+  border: 3px solid #fff;
+  text-align: center;
+  font-size: 18px;
+  border-radius: 10px;
+  margin: 0;
+  padding: 2px;
+  border-bottom: 3px solid #e8eaed80;
+}
+
+.cusnum-resume::after {
+  position: absolute;
+  font-weight: bolder;
+  right: 3vw;
+  content: '✔';
+  color: #d9793b;
+}
 #p2s-logo {
   position: absolute;
   top: 6vh;
@@ -1056,7 +1162,7 @@ tr:nth-child(3n + 1) {
 /* ////////// */
 /* MEDIA CSS */
 /* //////// */
-@media screen and (max-width: 1200px) {
+@media screen and (max-width: 1280px) {
   .table-container {
     max-height: 78vh;
   }
@@ -1106,6 +1212,7 @@ tr:nth-child(3n + 1) {
   }
   #customer-name {
     font-size: 14px;
+    max-height: 3vh;
   }
   #customer-number,
   #pricelist,
@@ -1170,5 +1277,11 @@ tr:nth-child(3n + 1) {
   }
   #db-table .text {
     font-size: 11px;
+  }
+  #unlock {
+    left: 41vw;
+  }
+  #lock {
+    left: 24vw;
   }
 }

@@ -100,6 +100,7 @@ function createWindow() {
     resizable: false,
     spellCheck: false,
     center: true,
+    show: false,
     alwaysOnTop: true,
     webPreferences: { nodeIntegration: true, enableRemoteModule: true },
     autoHideMenuBar: true,
@@ -113,6 +114,11 @@ function createWindow() {
 
   //   Load dev tools
   // homeWindow.webContents.openDevTools();
+
+  // Only show on load completion
+  homeWindow.on('ready-to-show', () => {
+    homeWindow.show();
+  });
 
   //   Event listener for closing
   homeWindow.on('closed', () => {

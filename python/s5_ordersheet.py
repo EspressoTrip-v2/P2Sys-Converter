@@ -291,22 +291,22 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
                             engine='xlsxwriter')
 
     # CONVERT THE DATAFRAME TO EXCEL
-    _038T.to_excel(writer, sheet_name='Treated 38mm', startrow=2, index=False)
+    _038T.to_excel(writer, sheet_name='Treated 38mm', startrow=3, index=False)
     _038U.to_excel(writer,
                    sheet_name='Untreated 38mm',
-                   startrow=2,
+                   startrow=3,
                    index=False)
 
-    _050T.to_excel(writer, sheet_name='Treated 50mm', startrow=2, index=False)
+    _050T.to_excel(writer, sheet_name='Treated 50mm', startrow=3, index=False)
     _050U.to_excel(writer,
                    sheet_name='Untreated 50mm',
-                   startrow=2,
+                   startrow=3,
                    index=False)
 
-    _076T.to_excel(writer, sheet_name='Treated 76mm', startrow=2, index=False)
+    _076T.to_excel(writer, sheet_name='Treated 76mm', startrow=3, index=False)
     _076U.to_excel(writer,
                    sheet_name='Untreated 76mm',
-                   startrow=2,
+                   startrow=3,
                    index=False)
 
     # GET THE WRITER WORKBOOK
@@ -319,14 +319,6 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet4 = writer.sheets['Untreated 50mm']
     worksheet5 = writer.sheets['Treated 76mm']
     worksheet6 = writer.sheets['Untreated 76mm']
-
-    # SET TAB COLOR FOR EACH SHEET
-    worksheet1.set_tab_color('red')
-    worksheet2.set_tab_color('red')
-    worksheet3.set_tab_color('blue')
-    worksheet4.set_tab_color('blue')
-    worksheet5.set_tab_color('green')
-    worksheet6.set_tab_color('green')
 
     # COLUMN ATTRIBUTES AND FORMATTING
     column_format1 = workbook.add_format({
@@ -347,7 +339,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet1.set_column(3, 7, 20, column_format2)
 
     # ADD FORMULA TO ROWS
-    r = np.arange(4, _038T_rownum + 4)
+    r = np.arange(5, _038T_rownum + 5)
     for i in r:
         formula = f'=SUM(E{i}:E{i}*G{i}:G{i})'
         worksheet1.write_formula(f'H{i}:H{i}', formula)
@@ -357,7 +349,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet2.set_column(3, 7, 20, column_format2)
 
     # ADD FORMULA TO ROWS
-    r = np.arange(4, _038U_rownum + 4)
+    r = np.arange(5, _038U_rownum + 5)
     for i in r:
         formula = f'=SUM(E{i}:E{i}*G{i}:G{i})'
         worksheet2.write_formula(f'H{i}:H{i}', formula)
@@ -367,7 +359,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet3.set_column(3, 7, 20, column_format2)
 
     # ADD FORMULA TO ROWS
-    r = np.arange(4, _050T_rownum + 4)
+    r = np.arange(5, _050T_rownum + 5)
     for i in r:
         formula = f'=SUM(E{i}:E{i}*G{i}:G{i})'
         worksheet3.write_formula(f'H{i}:H{i}', formula)
@@ -377,7 +369,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet4.set_column(3, 7, 20, column_format2)
 
     # ADD FORMULA TO ROWS
-    r = np.arange(4, _050U_rownum + 4)
+    r = np.arange(5, _050U_rownum + 5)
     for i in r:
         formula = f'=SUM(E{i}:E{i}*G{i}:G{i})'
         worksheet4.write_formula(f'H{i}:H{i}', formula)
@@ -387,7 +379,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet5.set_column(3, 7, 20, column_format2)
 
     # ADD FORMULA TO ROWS
-    r = np.arange(4, _076T_rownum + 4)
+    r = np.arange(5, _076T_rownum + 5)
     for i in r:
         formula = f'=SUM(E{i}:E{i}*G{i}:G{i})'
         worksheet5.write_formula(f'H{i}:H{i}', formula)
@@ -397,7 +389,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet6.set_column(3, 7, 20, column_format2)
 
     # ADD FORMULA TO ROWS
-    r = np.arange(4, _076U_rownum + 4)
+    r = np.arange(5, _076U_rownum + 5)
     for i in r:
         formula = f'=SUM(E{i}:E{i}*G{i}:G{i})'
         worksheet6.write_formula(f'H{i}:H{i}', formula)
@@ -448,6 +440,27 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet5.merge_range('A1:H1', 'A.C. Whitcher (PTY) Ltd', merge_formatA)
     worksheet6.merge_range('A1:H1', 'A.C. Whitcher (PTY) Ltd', merge_formatA)
 
+    worksheet1.merge_range('C3:H3', '', merge_formatA)
+    worksheet2.merge_range('C3:H3', '', merge_formatA)
+    worksheet3.merge_range('C3:H3', '', merge_formatA)
+    worksheet4.merge_range('C3:H3', '', merge_formatA)
+    worksheet5.merge_range('C3:H3', '', merge_formatA)
+    worksheet6.merge_range('C3:H3', '', merge_formatA)
+
+    worksheet1.write_string(2, 0, 'CUSTOMER:')
+    worksheet2.write_string(2, 0, 'CUSTOMER:')
+    worksheet3.write_string(2, 0, 'CUSTOMER:')
+    worksheet4.write_string(2, 0, 'CUSTOMER:')
+    worksheet5.write_string(2, 0, 'CUSTOMER:')
+    worksheet6.write_string(2, 0, 'CUSTOMER:')
+
+    worksheet1.write_string(2, 1, customer_number)
+    worksheet2.write_string(2, 1, customer_number)
+    worksheet3.write_string(2, 1, customer_number)
+    worksheet4.write_string(2, 1, customer_number)
+    worksheet5.write_string(2, 1, customer_number)
+    worksheet6.write_string(2, 1, customer_number)
+
     worksheet1.merge_range('A2:H2', 'ESTABLISHED 1902', merge_formatB)
     worksheet2.merge_range('A2:H2', 'ESTABLISHED 1902', merge_formatB)
     worksheet3.merge_range('A2:H2', 'ESTABLISHED 1902', merge_formatB)
@@ -482,5 +495,77 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet6.merge_range(f'A{u76_row}:H{u76_row}',
                            '''S7 AVAILABLE AT AN ADDITIONAL 11%''',
                            merge_formatC)
+
+    # COLUMN WIDTH ALL
+    worksheet1.set_column('A:H', 22)
+    worksheet2.set_column('A:H', 22)
+    worksheet3.set_column('A:H', 22)
+    worksheet4.set_column('A:H', 22)
+    worksheet5.set_column('A:H', 22)
+    worksheet6.set_column('A:H', 22)
+
+    # DEFAULT ROW
+    worksheet1.set_default_row(16)
+    worksheet2.set_default_row(16)
+    worksheet3.set_default_row(16)
+    worksheet4.set_default_row(16)
+    worksheet5.set_default_row(16)
+    worksheet6.set_default_row(16)
+
+    # HEADING ROWS
+    worksheet1.set_row(3, 30)
+    worksheet2.set_row(3, 30)
+    worksheet3.set_row(3, 30)
+    worksheet4.set_row(3, 30)
+    worksheet5.set_row(3, 30)
+    worksheet6.set_row(3, 30)
+    # AC WHITCHER ROW
+    worksheet1.set_row(0, 30)
+    worksheet2.set_row(0, 30)
+    worksheet3.set_row(0, 30)
+    worksheet4.set_row(0, 30)
+    worksheet5.set_row(0, 30)
+    worksheet6.set_row(0, 30)
+
+    # WORKSHEET PROTECTION
+    worksheet1.protect('acwhitcher1234')
+    worksheet2.protect('acwhitcher1234')
+    worksheet3.protect('acwhitcher1234')
+    worksheet4.protect('acwhitcher1234')
+    worksheet5.protect('acwhitcher1234')
+    worksheet6.protect('acwhitcher1234')
+
+    # unlocked = workbook.add_format({'locked': False})
+
+    unlocked = workbook.add_format({
+        'font_name': 'Calibri',
+        'align': 'center',
+        'valign': 'vcenter',
+        'locked': False
+    })
+
+    len_38T = np.arange(5, _038T_rownum + 5)
+    for i in len_38T:
+        worksheet1.write(f'G{i}', ' ', unlocked)
+
+    len_38U = np.arange(5, _038U_rownum + 5)
+    for i in len_38U:
+        worksheet2.write(f'G{i}', ' ', unlocked)
+
+    len_50T = np.arange(5, _050T_rownum + 5)
+    for i in len_50T:
+        worksheet3.write(f'G{i}', ' ', unlocked)
+
+    len_50U = np.arange(5, _050U_rownum + 5)
+    for i in len_50U:
+        worksheet4.write(f'G{i}', ' ', unlocked)
+
+    len_76T = np.arange(5, _076T_rownum + 5)
+    for i in len_76T:
+        worksheet5.write(f'G{i}', ' ', unlocked)
+
+    len_76U = np.arange(5, _076U_rownum + 5)
+    for i in len_76U:
+        worksheet6.write(f'G{i}', '0', unlocked)
 
     writer.save()
