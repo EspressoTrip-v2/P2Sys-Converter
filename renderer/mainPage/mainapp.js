@@ -4,18 +4,23 @@
 const { remote, ipcRenderer, shell } = require('electron');
 const mongoose = require('mongoose');
 const fs = require('fs');
+
+/* GET WORKING DIRECTORY */
+const dir = process.cwd();
+
+/* LOCAL MODULES */
 const {
   customerPricesModel,
   customerPricelistNumberModel,
   customerNumberNameModel,
   customerBackUpModel,
-} = require('../../database/mongoDbConnect.js');
+} = require(`${dir}/database/mongoDbConnect.js`);
 const {
   customerBackUp,
   customerNumberName,
   customerPricelistNumber,
   customerPrices,
-} = require('../../data/objects.js');
+} = require(`${dir}/data/objects.js`);
 
 /* GLOBAL VARIABLES */
 /////////////////////
@@ -62,18 +67,12 @@ function messageAlert(type, title, detail, buttons) {
 /* LOGFILE CREATION FUNCTION */
 //////////////////////////////
 function logfileFunc(message) {
-  if (fs.existsSync('./data/logfiles/online-db-logfile.txt')) {
-    fs.appendFile(
-      './data/logfiles/online-db-logfile.txt',
-      `${new Date()}: Database ${message}\n`,
-      (err) => console.log(err)
-    );
+  let fileDir = `${dir}/data/logfiles/online-db-logfile.txt`;
+  /* CHECK IF EXISTS */
+  if (fs.existsSync(fileDir)) {
+    fs.appendFile(fileDir, `${new Date()}: Database ${message}\n`, (err) => console.log(err));
   } else {
-    fs.writeFile(
-      './data/logfiles/online-db-logfile.txt',
-      `${new Date()}: Database ${message}\n`,
-      (err) => console.log(err)
-    );
+    fs.writeFile(fileDir, `${new Date()}: Database ${message}\n`, (err) => console.log(err));
   }
 }
 
@@ -210,18 +209,14 @@ function mongooseConnect() {
       }
     )
     .catch((err) => {
-      fs.existsSync('connection-logfile.txt')
-        ? fs.appendFile(
-            'connection-logfile.txt',
-            `${new Date()} -> Connection failure: ${err}\n`,
-            'utf8',
-            () => console.log('Logfile write error')
+      let fileDir = `${dir}/data/logfiles/connection-logfile.txt`;
+      /* CHECK IF IT EXISTS */
+      fs.existsSync(fileDir)
+        ? fs.appendFile(fileDir, `${new Date()} -> Connection failure: ${err}\n`, 'utf8', () =>
+            console.log('Logfile write error')
           )
-        : fs.writeFile(
-            'connection-logfile.txt',
-            `${new Date()} -> Connection failure: ${err}\n`,
-            'utf8',
-            () => console.log('Logfile write error')
+        : fs.writeFile(fileDir, `${new Date()} -> Connection failure: ${err}\n`, 'utf8', () =>
+            console.log('Logfile write error')
           );
     });
 }

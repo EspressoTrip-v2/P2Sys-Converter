@@ -2,14 +2,19 @@
 const fs = require('fs');
 const { ipcRenderer } = require('electron');
 
+/* GET WORKING DIRECTORY */
+const dir = process.cwd();
+/* GET CURRENT DIRECTORY */
+const curDir = __dirname;
+
 /* TEMPLATES FOR NEW CUSTOMER CREATION */
-exports.dataObjects = JSON.parse(fs.readFileSync(`${__dirname}/templates/dataObjects.json`));
+exports.dataObjects = JSON.parse(fs.readFileSync(`${curDir}/templates/dataObjects.json`));
 
 /* CUSTOMER DATABASE IS CUSTOMER NUMBER - PRICELIST NUMBER */
 
 //TODO: NEED TO UPDATE ON SAVE
 let customerPricelistNumber = JSON.parse(
-  fs.readFileSync(`${__dirname}/templates/customerPricelistNumber.json`)
+  fs.readFileSync(`${curDir}/templates/customerPricelistNumber.json`)
 );
 delete customerPricelistNumber['_id'];
 
@@ -17,14 +22,14 @@ delete customerPricelistNumber['_id'];
 
 //TODO: NEED TO UPDATE ON SAVE
 let = customerNumberName = JSON.parse(
-  fs.readFileSync(`${__dirname}/templates/customerNumberName.json`)
+  fs.readFileSync(`${curDir}/templates/customerNumberName.json`)
 );
 delete customerNumberName['_id'];
 
 /* ALL ON FILE LAYMAN PRICELISTS */
 
 //TODO: NEED TO UPDATE ON SAVE
-let customerPrices = JSON.parse(fs.readFileSync(`${__dirname}/templates/customerPrices.json`));
+let customerPrices = JSON.parse(fs.readFileSync(`${curDir}/templates/customerPrices.json`));
 delete customerPrices['_id'];
 
 delete customerPricelistNumber['_id'];
@@ -32,9 +37,7 @@ delete customerPricelistNumber['_id'];
 /* CUSTOMER PRICELIST BACKUP */
 
 //TODO: NEED TO UPDATE ON SAVE
-let = customerBackUp = JSON.parse(
-  fs.readFileSync(`${__dirname}/templates/customerBackUp.json`)
-);
+let = customerBackUp = JSON.parse(fs.readFileSync(`${curDir}/templates/customerBackUp.json`));
 delete customerBackUp['_id'];
 
 /* ////////// */
@@ -43,25 +46,27 @@ delete customerBackUp['_id'];
 
 /* LOGFILE CREATION FUNCTION */
 function logfileFunc(database) {
-  if (fs.existsSync('./data/logfiles/local-db-logfile.txt')) {
+  const fileDir = `${dir}/data/logfiles/local-db-logfile.txt'`;
+  /* CHECK IF IT EXISTS */
+  if (fs.existsSync(fileDir)) {
     fs.appendFile(
-      './data/logfiles/local-db-logfile.txt',
+      fileDir,
       `${new Date()}: Writefile Error ->  In local Database ${database}\n`,
       (err) => console.log(err)
     );
   } else {
-    fs.writeFile(
-      './data/logfiles/local-db-logfile.txt',
-      `${new Date()}: Updated customer ->  ${database}\n`,
-      (err) => console.log(err)
+    fs.writeFile(fileDir, `${new Date()}: Updated customer ->  ${database}\n`, (err) =>
+      console.log(err)
     );
   }
 }
 
 /* FUNCTION OVERWRITE THE LOCAL DATABASES WITH UPDATED INFOMATION */
 exports.writeLocalDatabase = (writeFileObject) => {
+  const fileDir = `${curDir}/templates`;
+
   fs.writeFileSync(
-    `${__dirname}/templates/customerPrices.json`,
+    `${fileDir}/customerPrices.json`,
     JSON.stringify(writeFileObject.customerPrices),
     'utf-8',
     (err) => {
@@ -69,7 +74,7 @@ exports.writeLocalDatabase = (writeFileObject) => {
     }
   );
   fs.writeFileSync(
-    `${__dirname}/templates/customerPricelistNumber.json`,
+    `${fileDir}/customerPricelistNumber.json`,
     JSON.stringify(writeFileObject.customerPricelistNumber),
     'utf-8',
     (err) => {
@@ -77,7 +82,7 @@ exports.writeLocalDatabase = (writeFileObject) => {
     }
   );
   fs.writeFileSync(
-    `${__dirname}/templates/customerBackUp.json`,
+    `${fileDir}/customerBackUp.json`,
     JSON.stringify(writeFileObject.customerBackUp),
     'utf-8',
     (err) => {
@@ -85,7 +90,7 @@ exports.writeLocalDatabase = (writeFileObject) => {
     }
   );
   fs.writeFileSync(
-    `${__dirname}/templates/customerNumberName.json`,
+    `${fileDir}/customerNumberName.json`,
     JSON.stringify(writeFileObject.customerNumberName),
     'utf-8',
     (err) => {

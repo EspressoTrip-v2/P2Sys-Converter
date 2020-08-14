@@ -296,10 +296,10 @@ df.reset_index(inplace=True, drop=True)
 # GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
 system_os = platform.platform(terse=True).split('-')[0]
 if system_os == 'Windows':
-    mydocuments_folder = f'{os.environ["HOME"]}\Documents\{customer_number}'
+    mydocuments_folder = f'{os.environ["HOME"]}\Documents\p2sys\{customer_number}'
     os.makedirs(mydocuments_folder, exist_ok=True)
 elif system_os == 'Linux':
-    mydocuments_folder = f'{os.environ["HOME"]}/Documents/{customer_number}'
+    mydocuments_folder = f'{os.environ["HOME"]}/Documents/p2sys/{customer_number}'
     os.makedirs(mydocuments_folder, exist_ok=True)
 
 # PASS TO SHEET CREATOR CODE #

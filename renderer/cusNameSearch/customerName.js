@@ -1,6 +1,11 @@
 // Import modules
 const { remote, ipcRenderer } = require('electron');
-const { customerNameNumber } = require('../../data/objects.js');
+
+/* GET WORKING DIRECTORY */
+const dir = process.cwd();
+
+/* LOCAL MODULES */
+const { customerNameNumber } = require(`${dir}/data/objects.js`);
 
 ////////////////////////
 /* MESSAGE LISTENERS */
@@ -17,7 +22,7 @@ ipcRenderer.on('child-main', (event, message) => {
 function addLoader(parent) {
   let html = `
     <div id="loader">
-    <img  src="../icons/loader.png"/>
+    <img  src="${dir}/renderer/icons/loader.png"/>
     </div>
     `;
   parent.insertAdjacentHTML('beforeend', html);

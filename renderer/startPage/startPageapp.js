@@ -1,6 +1,13 @@
 /* MODULES */
 ////////////
 const { remote, ipcRenderer } = require('electron');
+
+/* GET WORKING DIRECTORY */
+const dir = process.cwd();
+/* CURRENT DIRECTORY */
+const curDir = __dirname;
+
+/* LOCAL MODULES */
 const {
   dataObjects,
   customerPrices,
@@ -8,8 +15,8 @@ const {
   customerNumberName,
   customerBackUp,
   writeLocalDatabase,
-} = require('../../data/objects');
-const { tablePopulate } = require('./tablePopulate');
+} = require(`${dir}/data/objects`);
+const { tablePopulate } = require(`${curDir}/tablePopulate`);
 
 /* CREATE DATE INSTANCE */
 let mainDate = new Date();
@@ -312,7 +319,7 @@ createBtn.addEventListener('click', (e) => {
     /* CREATE MESSAGE POPUP */
     remote.dialog.showMessageBox(secWindow, {
       type: 'error',
-      icon: './renderer/icons/trayTemplate.png',
+      icon: `${dir}/renderer/icons/trayTemplate.png`,
       buttons: ['OK'],
       message: 'MISSING VALUES:',
       detail: 'Please complete the highlighted areas.',
@@ -320,7 +327,7 @@ createBtn.addEventListener('click', (e) => {
   } else if (!customerName.innerText) {
     remote.dialog.showMessageBox(secWindow, {
       type: 'error',
-      icon: './renderer/icons/trayTemplate.png',
+      icon: `${dir}/renderer/icons/trayTemplate.png`,
       buttons: ['OK'],
       message: 'CUSTOMER NAME REQUIRED:',
       detail: 'The customer name is a required field.',
@@ -332,7 +339,7 @@ createBtn.addEventListener('click', (e) => {
     /* CREATE MESSAGE TO SEND TO IPC LISTENER */
     message = {
       emit: 'progress',
-      html: './renderer/progress/progress.html',
+      html: `${dir}/renderer/progress/progress.html`,
       jsonObject: customerData,
       destination: 'child',
       relayChannel: 'convert-python',
@@ -365,7 +372,7 @@ sendEmailbtn.addEventListener('click', (e) => {
     remote.dialog
       .showMessageBox(secWindow, {
         type: 'warning',
-        icon: './renderer/icons/trayTemplate.png',
+        icon: `${dir}/renderer/icons/trayTemplate.png`,
         buttons: ['OK'],
         message: 'NO EMAIL ADDRESS ON FILE:',
         detail: 'Please enter an email address.',

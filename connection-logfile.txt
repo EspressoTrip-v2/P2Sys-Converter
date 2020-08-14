@@ -1,2 +1,0 @@
-Thu Aug 13 2020 18:31:30 GMT+0200 (South Africa Standard Time) -> Connection failure: Error: querySrv ETIMEOUT _mongodb._tcp.cluster0.61lij.mongodb.net
-Thu Aug 13 2020 18:47:41 GMT+0200 (South Africa Standard Time) -> Connection failure: Error: querySrv ETIMEOUT _mongodb._tcp.cluster0.61lij.mongodb.net

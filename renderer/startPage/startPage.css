@@ -94,7 +94,7 @@ th {
   z-index: 2;
   color: #fff;
   font-size: 18px;
-  padding: 12px 0;
+  padding: 9px 0;
   background-color: var(--main-blue);
 }
 #row-columns {
@@ -128,7 +128,7 @@ tr:nth-child(3n + 1) {
   justify-content: space-evenly;
   justify-items: center;
   align-items: center;
-  height: 8vh;
+  height: 7vh;
 }
 
 /* INPUT BOXES */
@@ -137,7 +137,7 @@ tr:nth-child(3n + 1) {
   padding: 5.5px 10px;
   display: flex;
   flex-direction: row;
-  height: 7vh;
+  height: 6vh;
   width: 30vw;
   justify-content: center;
   justify-items: center;
@@ -155,7 +155,7 @@ tr:nth-child(3n + 1) {
   justify-items: center;
   align-items: center;
   border-radius: 15px;
-  height: 7vh;
+  height: 6vh;
   width: 25vw;
   padding: 3px 15px;
   background-color: var(--sec-blue);
@@ -192,7 +192,7 @@ tr:nth-child(3n + 1) {
   border-radius: 15px;
   background-color: var(--sec-blue);
   border: 3px solid #fff;
-  height: 7vh;
+  height: 6vh;
   margin-left: 0.5vw;
   margin-right: 0.5vw;
 }
@@ -204,8 +204,8 @@ tr:nth-child(3n + 1) {
   border-radius: 10px;
   text-align: center;
   text-transform: uppercase;
-  height: 30px;
-  width: 12vw;
+  height: 3vh;
+  width: 9vw;
 }
 
 #cca-price {
@@ -214,8 +214,8 @@ tr:nth-child(3n + 1) {
   border-radius: 10px;
   text-align: center;
   text-transform: uppercase;
-  height: 30px;
-  width: 12vw;
+  height: 3vh;
+  width: 9vw;
   animation: none;
 }
 
@@ -240,7 +240,7 @@ tr:nth-child(3n + 1) {
   align-content: center;
   position: relative;
   background-color: #fff;
-  height: 35px;
+  height: 3.5vh;
   max-width: 17vw;
   width: 17vw;
   border: 2px solid var(--sec-blue);
@@ -249,23 +249,26 @@ tr:nth-child(3n + 1) {
 }
 
 #customer-name {
-  display: block;
+  display: flex;
+  flex-direction: column;
   position: absolute;
-  top: 0.7vh;
+  justify-content: center;
+  align-content: center;
   background-color: #fff;
   font-size: 15px;
   text-align: center;
-  line-height: 20px;
+  line-height: 1em;
   padding: 0 1vw;
-  width: 16vw;
-  max-height: 2vh;
+  width: 15vw;
+  height: 3vh;
+  max-height: 3.5vh;
   max-width: 17vw;
   overflow-y: auto;
   text-transform: uppercase;
 }
 
 #customer-name[contenteditable]:empty::before {
-  content: 'Placeholder still possible';
+  content: 'CUSTOMER NAME';
   color: gray;
 }
 
@@ -301,14 +304,14 @@ tr:nth-child(3n + 1) {
   border: 4px solid var(--main-blue);
   border-radius: 10px;
   width: auto;
-  height: 79vh;
+  height: 81vh;
   overflow: hidden;
 }
 /* Inner container to seperate border and scrollbar */
 #container {
   position: relative;
   overflow: auto;
-  max-height: 78.5vh;
+  max-height: 80.5vh;
 }
 
 /* Scrollbar Customization for Table */
@@ -355,15 +358,15 @@ tr:nth-child(3n + 1) {
 
 #footer {
   position: relative;
-  top: 0.8vh;
+  top: 0.5vh;
   background-color: var(--sec-blue);
   display: flex;
   align-self: center;
   align-items: center;
   align-content: center;
   justify-content: space-evenly;
-  padding: 0 2vw;
   padding-top: 2.2vh;
+  margin-bottom: 1vh;
   border: 3px solid #fff;
   border-radius: 20px;
   height: 7vh;
@@ -399,7 +402,6 @@ tr:nth-child(3n + 1) {
   color: #fff;
   border: 2px solid var(--button-red);
   width: 11vw;
-  height: 4vh;
   padding: 1vh 0px;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
 }
@@ -425,7 +427,6 @@ tr:nth-child(3n + 1) {
   color: #fff;
   border: 2px solid var(--button-green);
   width: 11vw;
-  height: 4vh;
   padding: 1vh 0px;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
@@ -446,7 +447,6 @@ tr:nth-child(3n + 1) {
   color: #fff;
   border: 2px solid grey;
   width: 11vw;
-  height: 4vh;
   padding: 1vh 0px;
   transition: background-color 0.5s, border 0.5s, color 0.5s;
 }
@@ -464,7 +464,6 @@ tr:nth-child(3n + 1) {
   color: #fff;
   border: 2px solid var(--button-gold);
   width: 11vw;
-  height: 4vh;
   padding: 1vh 0px;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
 }
@@ -639,7 +638,7 @@ tr:nth-child(3n + 1) {
   position: absolute;
   left: 29.5vw;
   z-index: 3;
-  top: 0.5vh;
+  top: 0.3vh;
   background-color: var(--button-gold);
   color: #fff;
   border: 2px solid var(--button-gold);
@@ -660,7 +659,7 @@ tr:nth-child(3n + 1) {
 .lock-out {
   left: 29.5vw;
   z-index: 3;
-  top: 0.5vh;
+  top: 0.3vh;
   background-color: #fff;
   color: var(--button-gold);
   border: 2px solid var(--button-gold);
@@ -681,7 +680,7 @@ tr:nth-child(3n + 1) {
 
 .unlock-out {
   left: 42vw;
-  top: 0.5vh;
+  top: 0.3vh;
   z-index: 3;
   background-color: #fff;
   border: 2px solid var(--button-green);
@@ -703,7 +702,7 @@ tr:nth-child(3n + 1) {
 
 .unlock-in {
   left: 42vw;
-  top: 0.5vh;
+  top: 0.3vh;
   z-index: 3;
   background-color: var(--button-green);
   border: 2px solid var(--button-green);
@@ -748,7 +747,6 @@ tr:nth-child(3n + 1) {
   left: -14vw;
   bottom: 1.5vh;
   width: 8vw;
-  height: 3vh;
 }
 #db-table .text {
   font-size: 14px;
@@ -956,8 +954,9 @@ tr:nth-child(3n + 1) {
   font-size: 18px;
   background-color: #fff;
   border: 3px solid #fff;
-  border-radius: 10px;
   margin: 0;
+  border-radius: 10px;
+
   padding: 2px;
   border-bottom: 3px solid #e8eaed80;
 }
@@ -983,9 +982,8 @@ tr:nth-child(3n + 1) {
   border-radius: 10px;
   margin: 0;
   padding: 2px;
-  border-bottom: 3px solid #e8eaed80;
+  border: 2px solid #d9793b;
 }
-
 .cusnum-resume::after {
   position: absolute;
   font-weight: bolder;
@@ -1229,13 +1227,13 @@ tr:nth-child(3n + 1) {
 /* //////// */
 @media screen and (max-width: 1280px) {
   .table-container {
-    max-height: 78vh;
+    max-height: 79.5vh;
   }
   html {
     font-size: 15px;
   }
   #container {
-    max-height: 77vh;
+    max-height: 78.5vh;
     font-size: 15px;
   }
   th,
@@ -1250,11 +1248,9 @@ tr:nth-child(3n + 1) {
   #label-customer-number,
   #label-pricelist {
     font-size: 12px;
-    margin: 1px;
   }
   #label-cca {
     font-size: 12px;
-    margin: 1px;
   }
   .customer-region-item-a {
     padding: 0px 1vh;
@@ -1264,28 +1260,23 @@ tr:nth-child(3n + 1) {
   .customer-region-item-b {
     justify-content: space-evenly;
     padding: 0px 0px;
-    height: 7vh;
     width: 32vh;
     border-radius: 15px;
   }
   .cca-box-item-a {
     justify-content: space-evenly;
     padding: 0px 8px;
-    height: 7vh;
     width: 40vh;
     border-radius: 15px;
   }
   #customer-name {
     font-size: 14px;
-    max-height: 3vh;
+    justify-content: flex-start;
   }
   #customer-number,
   #pricelist,
   #cca-price {
-    font-size: 15px;
-    height: 30px;
-    width: 119px;
-    padding: 0px 0px;
+    font-size: 14px;
   }
   #border {
     width: 94%;
@@ -1296,7 +1287,6 @@ tr:nth-child(3n + 1) {
 
   #footer {
     top: 1vh;
-    height: 7.5vh;
   }
 
   .cca-auto-out,
@@ -1309,11 +1299,10 @@ tr:nth-child(3n + 1) {
   }
 
   #back-to-main-btn,
-  #create-btn {
+  #create-btn,
+  #pause-btn {
     font-size: 15px;
-    top: -10px;
-    width: 30%;
-    height: 4vh;
+    height: 4.5vh;
   }
 
   #customer-contact-container {
@@ -1346,11 +1335,11 @@ tr:nth-child(3n + 1) {
   #unlock {
     left: 40vw;
     width: 45px;
-    height: 28px;
+    height: 26px;
   }
   #lock {
     left: 22vw;
     width: 45px;
-    height: 28px;
+    height: 26px;
   }
 }

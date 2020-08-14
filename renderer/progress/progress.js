@@ -1,11 +1,8 @@
 const { remote, ipcRenderer } = require('electron');
 const { PythonShell } = require('python-shell');
-const {
-  customerPrices,
-  customerDatabase,
-  customerNumberName,
-  writePricelistFile,
-} = require('../../data/objects');
+
+/* GET WORKING DIRECTORY */
+const dir = process.cwd();
 
 /* REMOTE WINDOWS */
 ///////////////////
@@ -31,7 +28,7 @@ ipcRenderer.on('convert-python', (event, message) => {
   let options = {
     mode: 'text',
     pythonOptions: ['-u'],
-    scriptPath: './python/',
+    scriptPath: `${dir}/python/`,
     args: [data],
   };
 

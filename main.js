@@ -1,6 +1,8 @@
 /* MODULE IMPORTS */
 const { app, BrowserWindow, ipcMain, Tray, Menu, Notification } = require('electron');
-const fs = require('fs');
+
+/* GET WORKING DIRECTORY */
+const dir = process.cwd();
 
 /* WINDOW VARIABLES */
 let homeWindow, secWindow, tray, childWindow, loadingWindow;
@@ -25,7 +27,7 @@ function messengerService(channel, message, destination, jsonObject = null) {
 
 /* FUNCTION TO CREATE TRAY MENU */
 function createTray() {
-  tray = new Tray('./renderer/icons/trayTemplate.png');
+  tray = new Tray(`${dir}/renderer/icons/trayTemplate.png`);
   tray.setContextMenu(trayMenu);
 }
 
@@ -76,11 +78,11 @@ ipcMain.on('progress-end', (e, message) => {
 
 /* MESSAGE TO SYNC DB AFTER FILES HAVE BEEN WRITTEN TO LOCAL DB */
 ipcMain.on('db-sync', (e, message) => {
-  console.log(message);
   /* SEND MESSAGE TO UPDATE THE DB */
   homeWindow.webContents.send('sync-db', null);
 });
 
+/* SEND DB STATUS TO UPDATE OTHER DATABASE INDICATORS */
 ipcMain.on('db-status', (event, message) => {
   if (secWindow) {
     secWindow.webContents.send('db-status', message);
@@ -113,11 +115,11 @@ function createWindow() {
     autoHideMenuBar: true,
     frame: false,
     transparent: true,
-    icon: './renderer/icons/trayTemplate.png',
+    icon: `${dir}/renderer/icons/trayTemplate.png`,
   });
 
   //   Load html page
-  homeWindow.loadFile('./renderer/mainPage/main.html');
+  homeWindow.loadFile(`${dir}/renderer/mainPage/main.html`);
 
   //   Load dev tools
   // homeWindow.webContents.openDevTools();
@@ -145,11 +147,11 @@ function createSecWindow(message) {
     spellCheck: false,
     transparent: true,
     webPreferences: { nodeIntegration: true, enableRemoteModule: true },
-    icon: './renderer/icons/trayTemplate.png',
+    icon: `${dir}/renderer/icons/trayTemplate.png`,
   });
 
   //   Load html page
-  secWindow.loadFile('./renderer/startPage/startPage.html');
+  secWindow.loadFile(`${dir}/renderer/startPage/startPage.html`);
 
   // Only show on load completion
   secWindow.once('ready-to-show', () => {
@@ -186,7 +188,7 @@ function createChildWindow(message) {
       spellCheck: false,
       transparent: true,
       webPreferences: { nodeIntegration: true, enableRemoteModule: true },
-      icon: './renderer/icons/trayTemplate.png',
+      icon: `${dir}/renderer/icons/trayTemplate.png`,
     });
   } else {
     childWindow = new BrowserWindow({
@@ -201,13 +203,13 @@ function createChildWindow(message) {
       frame: false,
       transparent: true,
       webPreferences: { nodeIntegration: true, enableRemoteModule: true },
-      icon: './renderer/icons/trayTemplate.png',
+      icon: `${dir}/renderer/icons/trayTemplate.png`,
     });
   }
 
   //   Load html page
   message.emit === 'startPage'
-    ? childWindow.loadFile('./renderer/cusNameSearch/customerName.html')
+    ? childWindow.loadFile(`${dir}/renderer/cusNameSearch/customerName.html`)
     : childWindow.loadFile(message.html);
 
   //   Load dev tools
@@ -230,11 +232,11 @@ function createLoadingWindow() {
     spellCheck: false,
     transparent: true,
     webPreferences: { nodeIntegration: true, enableRemoteModule: true },
-    icon: './renderer/icons/trayTemplate.png',
+    icon: `${dir}/renderer/icons/trayTemplate.png`,
   });
 
   //   Load html page
-  loadingWindow.loadFile('./renderer/loader/loader.html');
+  loadingWindow.loadFile(`${dir}/renderer/loader/loader.html`);
 
   //   Load dev tools
   // loadingWindow.webContents.openDevTools();

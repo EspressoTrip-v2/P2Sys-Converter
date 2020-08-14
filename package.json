@@ -4,7 +4,8 @@
   "description": "Pricing program for Accpac",
   "main": "main.js",
   "scripts": {
-    "watch": "nodemon --ignore '*.json' --exec electron ."
+    "watch": "nodemon --ignore '*.json' --exec electron .",
+    "start": " electron ."
   },
   "author": "Juan Botha",
   "license": "ISC",
