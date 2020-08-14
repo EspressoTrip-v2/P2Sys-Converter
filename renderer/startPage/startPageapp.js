@@ -6,16 +6,30 @@ const {
   customerPrices,
   customerPricelistNumber,
   customerNumberName,
+  customerBackUp,
   writeLocalDatabase,
 } = require('../../data/objects');
 const { tablePopulate } = require('./tablePopulate');
+
+/* CREATE DATE INSTANCE */
+let mainDate = new Date();
+let dateString = `${mainDate.getMonth() + 1}/${mainDate.getFullYear()}`;
 
 /* REMOTE WINDOWS */
 ///////////////////
 let secWindow = remote.getCurrentWindow();
 window.secWindow = secWindow;
+
+/* ///////////////////////////////// VARIABLE LEGEND ////////////////////////////// */
+/* searchValue: Value entered into the search box (customer number)                 */
+/* target: clicked object in the customer list in search box                        */
+/* jsonFile: Locally stored layman pricelist                                        */
+/* htmlContent: Html that gets generated in the table form from the jsonFile        */
+/* 
+/* //////////////////////////////////////////////////////////////////////////////// */
+
 // GLOBAL VARIABLES FOR USAGE ON NECESSARY CODE
-let searchValue, target, jsonFile, tableEntryClass, htmlContent;
+let searchValue, target, jsonFile, htmlContent, customerNumber, customerData;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -137,21 +151,20 @@ const createObjectFromHtml = () => {
       document.getElementById(`BR${i}`).innerText,
       document.getElementById(`DR${i}`).innerText,
       document.getElementById(`ER${i}`).value,
-      document.getElementById(`USER${i}`).value,
-      document.getElementById(`TSER${i}`).value,
+      parseInt(document.getElementById(`USER${i}`).value),
+      parseInt(document.getElementById(`TSER${i}`).value),
     ];
   }
 
   jsonObject[customerNumberValue.value] = jsonObjectData;
-  jsonObject[customerNumberValue.value]['PRICELIST'] = customerPriceList.value;
   jsonObject[customerNumberValue.value]['COLUMNS'] = columns.map((el) => el.innerText);
-  jsonObject[customerNumberValue.value]['CCA'] = ccaPrice.value;
+  jsonObject[customerNumberValue.value]['CCA'] = parseInt(ccaPrice.value);
   jsonObject[customerNumberValue.value]['EMAIL'] = clientEmail.value;
   jsonObject[customerNumberValue.value]['TEL'] = clientPhone.value;
+  jsonObject['PRICELIST'] = customerPriceList.value;
   jsonObject['HEADER'] = {
     customerName: customerName.innerText,
   };
-  console.log(jsonObject);
 
   return jsonObject;
 };
@@ -180,7 +193,7 @@ const resetForm = () => {
   tableBody.parentNode.removeChild(tableBody);
 
   /* RESET THE CCA BUTTONS BACK TO STANDARD */
-  ccaBtnReset();
+  btnReset();
 
   /* SHOW THE SEARCH BOX AGAIN */
   checkCustomer.style.visibility = 'visible';
@@ -211,10 +224,10 @@ const htmlInnerFill = (html) => {
 
   table.insertAdjacentHTML(
     'beforeend',
-    `<tbody id="table-body" >${innerTableColumns}${innerTable}</tbody>`
+    `<tbody id="table-body" ><tr id="row-columns">${innerTableColumns}</tr>${innerTable}</tbody>`
   );
 
-  tableEntryClass = Array.from(document.getElementsByClassName('table-entries'));
+  let tableEntryClass = Array.from(document.getElementsByClassName('table-entries'));
 
   tableEntryClass.forEach((el) => {
     el.addEventListener('focusout', () => {
@@ -227,15 +240,23 @@ const htmlInnerFill = (html) => {
   });
 };
 
-/////////////////////////////////////////////////////
-/* CCA BUTTON RESET ON BACK BUTTON PRESS FUNCTION */
-///////////////////////////////////////////////////
-const ccaBtnReset = () => {
+///////////////////////////////////
+/* HEADER BUTTON RESET FUNCTION */
+/////////////////////////////////
+const btnReset = () => {
   if (autoCaaBtn.classList.value === 'cca-auto-in') {
     autoCaaBtn.setAttribute('class', 'cca-auto-out');
     manCaaBtn.setAttribute('class', 'cca-man-in');
     autoCaaBtn.disabled = false;
     treatedColumns.style.backgroundColor = 'var(--opaque-man)';
+  }
+  if (lengthLockBtn.classList.value === 'lock-out') {
+    lengthLockBtn.setAttribute('class', 'lock-in');
+    lockSvg.style.fill = '#fff';
+    lengthColumn.style.backgroundColor = 'var(--opaque-auto)';
+
+    lengthUnlockBtn.setAttribute('class', 'unlock-out');
+    unlockSvg.style.fill = 'var(--button-green)';
   }
 };
 
@@ -250,10 +271,9 @@ const ccaBtnReset = () => {
 backBtn.addEventListener('click', () => {
   /* RESET THE TABLE FORM TO ZERO DATA */
   resetForm();
-}); //TODO: FINISH CREATE SEQUENCE
+});
 
 /* CREATE BUTTON */
-
 createBtn.addEventListener('click', (e) => {
   /* CHECK ALL VALUE ENTRIES AND WARN IF MISSING */
   let treatedMissingBool = [],
@@ -307,7 +327,8 @@ createBtn.addEventListener('click', (e) => {
     });
   } else {
     /* CREATE THE CUSTOMER PRICELIST OBJECT TO SEND TO PYTHON */
-    let customerData = createObjectFromHtml();
+    customerData = createObjectFromHtml();
+
     /* CREATE MESSAGE TO SEND TO IPC LISTENER */
     message = {
       emit: 'progress',
@@ -321,16 +342,6 @@ createBtn.addEventListener('click', (e) => {
     progressFade.style.visibility = 'visible';
     progressFade.style.backdropFilter = 'blur(1px) grayscale(1)';
     ipcRenderer.send('progress', message);
-
-    /* SEND DATA FOR UPDATING LOCAL */
-    delete customerData[searchValue]['PRICELIST'];
-    let objectJson = {
-      name: customerName.innerText,
-      number: searchValue,
-      customerData,
-      pricelist: customerPriceList.value,
-    };
-    writeLocalDatabase(objectJson);
   }
 });
 
@@ -338,8 +349,7 @@ createBtn.addEventListener('click', (e) => {
 pauseBtn.addEventListener('click', () => {
   /* CREATE THE STORAGE OBJECT */
   let localStorageJson = createObjectFromHtml();
-  /* REMOVER THE PRICELIST ENTRY FOR LOCAL USAGE (ONLY USED IN PYTHON CONVERSION)*/
-  delete localStorageJson[searchValue]['PRICELIST'];
+
   /* STRINGIFY FOR LOCALSTORAGE */
   localStorageJson = JSON.stringify(localStorageJson);
   /* SET ITEM */
@@ -552,7 +562,8 @@ function addListListeners() {
 /* POPLATE THE CUSTOMERLIST AND ADD CORRECT CLASSES */
 
 function populateList() {
-  let customerNumber = Object.keys(customerPrices);
+  customerNumberList.innerHTML = '';
+  customerNumber = Object.keys(customerPrices);
   customerNumber.forEach((el) => {
     if (localStorage[el]) {
       let html = `
@@ -588,6 +599,13 @@ customerSearch.addEventListener('keyup', (e) => {
     checkResumeEditingBtn.style.display = 'none';
     disabledBtn.style.display = 'flex';
     target = null;
+  } else if (
+    customerSearch.value.length < 6 &&
+    !Object.keys(localStorage).includes(customerSearch.value)
+  ) {
+    checkUpdateBtn.style.display = 'none';
+    checkResumeEditingBtn.style.display = 'none';
+    disabledBtn.style.display = 'flex';
   }
   // SORTING CODE
   numbers.forEach((el) => {
@@ -607,7 +625,8 @@ customerSearch.addEventListener('keyup', (e) => {
           // AND THE SEARCH VALUE ISNT IN THE CURRENT CUSTOMER PRICELISTS
           window.getComputedStyle(checkContinueBtn).display === 'none' &&
           customerSearch.value.length === 6 &&
-          !customerNumber.includes(customerSearch.value)
+          !customerNumber.includes(customerSearch.value) &&
+          !Object.keys(localStorage).includes(customerSearch.value)
         ) {
           // DISPLAY CONTINUE BUTTON
           jsonFile = dataObjects['template-pricelist'];
@@ -625,6 +644,15 @@ customerSearch.addEventListener('keyup', (e) => {
           disabledBtn.style.display = 'flex';
           checkUpdateBtn.style.display = 'none';
           checkResumeEditingBtn.style.display = 'none';
+        } else if (
+          customerSearch.value.length === 6 &&
+          Object.keys(localStorage).includes(customerSearch.value)
+        ) {
+          // SHOW RESUME BUTTON
+          checkContinueBtn.style.display = 'none';
+          disabledBtn.style.display = 'none';
+          checkUpdateBtn.style.display = 'none';
+          checkResumeEditingBtn.style.display = 'flex';
         }
 
         // DISPLAY TICK IF THE SEARCH  VALUE IS CORRECT PATTERN AND LENGTH 6
@@ -646,7 +674,6 @@ checkContinueBtn.addEventListener('click', (e) => {
   // POPULATE HTML TABLE
   htmlContent = tablePopulate(jsonFile);
   htmlInnerFill(htmlContent);
-
   // HIDE SEARCH BOX
   checkCustomer.style.visibility = 'hidden';
   checkCustomer.style.opacity = '0';
@@ -742,6 +769,7 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
     ? customerNumberName[searchValue]
     : localStorageObject['HEADER']['customerName'];
   customerName.contentEditable = false;
+  /* LOOK TO SEE IF PRICELIST ONFILE */
   customerPriceList.value = customerPricelistNumber[searchValue]
     ? customerPricelistNumber[searchValue]
     : searchValue;
@@ -839,9 +867,44 @@ ipcRenderer.on('dock-sec', (event, message) => {
   }
 });
 
-/* COMMUNICATION FOR PROGRESS WINDOW END */
+/* //// LOCAL oBJECTS //// */
+/* customerPrices:         */
+/* customerPricelistNumber */
+/* customerNumberName      */
+/* customerBackUp          */
+/* /////////////////////// */
 
+/* COMMUNICATION FOR PROGRESS WINDOW END */
 ipcRenderer.on('progress-end', (event, message) => {
+  /* CREATE THE DATE OBJECT TO INSERT IN CUSTOMER BACKUPS */
+  let dateJsonFile = {};
+  dateJsonFile[dateString] =
+    jsonFile[0].length > 3 ? jsonFile : customerData[customerNumberValue.value];
+
+  /* UPDATE ALL THE DATA OBJECTS AND SEND TO GET WRITTEN LOCALLY  */
+  customerBackUp[customerNumberValue.value] = dateJsonFile;
+  customerPricelistNumber[customerNumberValue.value] = customerPriceList.value;
+  customerNumberName[customerNumberValue.value] = customerName.innerText;
+  customerPrices[customerNumberValue.value] = customerData[customerNumberValue.value];
+
+  /* ADD BACK THE _id FOR ONLINE UPDATE */
+  customerBackUp['_id'] = 'customerBackUp';
+  customerPricelistNumber['_id'] = 'customerPricelistNumber';
+  customerNumberName['_id'] = 'customerNumberName';
+  customerPrices['_id'] = 'customerPrices';
+
+  /* CREATE THE WRITE FILE OBJECT */
+  let writeFileObject = {
+    customerBackUp,
+    customerPrices,
+    customerNumberName,
+    customerPricelistNumber,
+  };
+
+  /* SEND TO THE WRITE OBJECT FUNCTION */
+  writeLocalDatabase(writeFileObject);
+  /* REPOPULATE CUSTOMER LIST */
+  populateList();
   // HIDE THE PROGRESS BAR
   progressFade.style.visibility = 'hidden';
   progressFade.style.backdropFilter = 'none';
@@ -852,6 +915,16 @@ ipcRenderer.on('progress-end', (event, message) => {
 });
 
 ipcRenderer.on('db-status', (e, message) => {
+  /* DISABLE THE CREATE BUTTON */
+  if (message === 4) {
+    createBtn.disabled = true;
+    createBtn.setAttribute('class', 'create-btn-disabled');
+  } else {
+    createBtn.disabled = false;
+    createBtn.setAttribute('class', 'create-btn');
+  }
+
+  /* CONTROL DB STATUS LIGHT */
   if (message === 1) {
     /* CUSTOMER SEARCH DB STATUS */
     customerSearchDb.setAttribute('class', 'db-connected');
@@ -868,5 +941,13 @@ ipcRenderer.on('db-status', (e, message) => {
     /* TABLE DB STATUS */
     tableDb.setAttribute('class', 'db-fail');
     tableDbText.setAttribute('data-label', 'ERROR');
+  } else if (message === 4) {
+    /* CUSTOMER SEARCH DB STATUS */
+    customerSearchDb.setAttribute('class', 'db-update');
+    customerSearchDbText.setAttribute('data-label', 'UPDATING');
+
+    /* TABLE DB STATUS */
+    tableDb.setAttribute('class', 'db-update');
+    tableDbText.setAttribute('data-label', 'UPDATING');
   }
 });

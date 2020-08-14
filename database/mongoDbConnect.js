@@ -26,16 +26,16 @@ exports.customerPricelistNumberModel = customerPricelistNumberModel;
 
 /* CUSTOMER NAME: CUSTOMER NUMBER */
 /* SCHEMA */
-const customerNameNumberSchema = new mongoose.Schema(
+const customerNumberNameSchema = new mongoose.Schema(
   {},
   { strict: false, _id: false, versionKey: false }
 );
 /* MODEL */
-const customerNameNumberModel = mongoose.model(
-  'Customer_Name_Number',
-  customerNameNumberSchema
+const customerNumberNameModel = mongoose.model(
+  'Customer_Number_Name',
+  customerNumberNameSchema
 );
-exports.customerNameNumberModel = customerNameNumberModel;
+exports.customerNumberNameModel = customerNumberNameModel;
 
 /* CUSTOMER PRICELISTS BACKUPS */
 /* SCHEMA */

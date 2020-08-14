@@ -89,18 +89,23 @@ span[role='textbox'] {
 }
 
 th {
-  left: 0;
   position: sticky;
   top: 0;
   z-index: 2;
   color: #fff;
   font-size: 18px;
-  padding: 5px;
+  padding: 12px 0;
   background-color: var(--main-blue);
+}
+#row-columns {
+  position: sticky;
+  margin: 0;
+  padding: 0;
 }
 
 tbody {
-  padding: 0;
+  position: relative;
+  padding: 0px;
   margin: 0;
   width: auto;
   height: 100%;
@@ -301,10 +306,9 @@ tr:nth-child(3n + 1) {
 }
 /* Inner container to seperate border and scrollbar */
 #container {
-  display: flex;
-  flex-direction: column;
+  position: relative;
   overflow: auto;
-  max-height: 79vh;
+  max-height: 78.5vh;
 }
 
 /* Scrollbar Customization for Table */
@@ -330,6 +334,7 @@ tr:nth-child(3n + 1) {
 
 /* Container for js html population */
 #table {
+  position: relative;
   border-collapse: collapse;
   width: 100%;
   font-size: 18px;
@@ -406,6 +411,15 @@ tr:nth-child(3n + 1) {
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
 .create-btn {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bolder;
+  border-radius: 200px;
+  font-size: 15px;
+  text-align: center;
+  font-weight: bolder;
   top: -1.2vh;
   background-color: var(--button-green);
   color: #fff;
@@ -414,6 +428,27 @@ tr:nth-child(3n + 1) {
   height: 4vh;
   padding: 1vh 0px;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
+  transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
+}
+
+.create-btn-disabled {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bolder;
+  border-radius: 200px;
+  font-size: 15px;
+  text-align: center;
+  font-weight: bolder;
+  top: -1.2vh;
+  background-color: grey;
+  color: #fff;
+  border: 2px solid grey;
+  width: 11vw;
+  height: 4vh;
+  padding: 1vh 0px;
+  transition: background-color 0.5s, border 0.5s, color 0.5s;
 }
 
 .create-btn:hover {
@@ -602,13 +637,14 @@ tr:nth-child(3n + 1) {
 
 .lock-in {
   position: absolute;
-  left: 30.5vw;
+  left: 29.5vw;
   z-index: 3;
+  top: 0.5vh;
   background-color: var(--button-gold);
   color: #fff;
   border: 2px solid var(--button-gold);
-  width: 2.5vw;
-  height: 2.5vh;
+  width: 45px;
+  height: 30px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -622,14 +658,15 @@ tr:nth-child(3n + 1) {
 }
 
 .lock-out {
-  left: 30.5vw;
+  left: 29.5vw;
   z-index: 3;
+  top: 0.5vh;
   background-color: #fff;
   color: var(--button-gold);
   border: 2px solid var(--button-gold);
   position: absolute;
-  width: 2.5vw;
-  height: 2.5vh;
+  width: 45px;
+  height: 30px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -643,14 +680,15 @@ tr:nth-child(3n + 1) {
 }
 
 .unlock-out {
-  left: 43vw;
+  left: 42vw;
+  top: 0.5vh;
   z-index: 3;
   background-color: #fff;
   border: 2px solid var(--button-green);
   color: var(--button-green);
   position: absolute;
-  width: 2.5vw;
-  height: 2.5vh;
+  width: 45px;
+  height: 30px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -664,14 +702,15 @@ tr:nth-child(3n + 1) {
 }
 
 .unlock-in {
-  left: 43vw;
+  left: 42vw;
+  top: 0.5vh;
   z-index: 3;
   background-color: var(--button-green);
   border: 2px solid var(--button-green);
   color: #fff;
   position: absolute;
-  width: 2.5vw;
-  height: 2.5vh;
+  width: 45px;
+  height: 30px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -773,15 +812,41 @@ tr:nth-child(3n + 1) {
   align-content: center;
   text-align: center;
   box-shadow: inset 1px 1px 1px 0px rgba(50, 50, 50, 0.25);
-  animation: db-success 1.5s ease-in-out infinite alternate;
+  animation: db-success 1.5s linear infinite alternate;
 }
 
 @keyframes db-success {
   from {
-    background-color: var(--main-blue);
+    background-color: #e1e1e1;
   }
   to {
     background-color: var(--button-green);
+  }
+}
+
+.db-update {
+  position: relative;
+  color: #fff;
+  border-radius: 50%;
+  background-color: lightgrey;
+  display: flex;
+  width: 22vw;
+
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  box-shadow: inset 1px 1px 1px 0px rgba(50, 50, 50, 0.25);
+  animation: db-flash 0.1s linear infinite alternate;
+}
+
+@keyframes db-flash {
+  from {
+    background-color: var(--button-gold);
+  }
+  to {
+    background-color: var(--man);
   }
 }
 
@@ -1170,7 +1235,7 @@ tr:nth-child(3n + 1) {
     font-size: 15px;
   }
   #container {
-    max-height: 78vh;
+    max-height: 77vh;
     font-size: 15px;
   }
   th,
@@ -1279,9 +1344,13 @@ tr:nth-child(3n + 1) {
     font-size: 11px;
   }
   #unlock {
-    left: 41vw;
+    left: 40vw;
+    width: 45px;
+    height: 28px;
   }
   #lock {
-    left: 24vw;
+    left: 22vw;
+    width: 45px;
+    height: 28px;
   }
 }

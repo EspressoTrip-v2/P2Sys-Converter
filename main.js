@@ -62,20 +62,28 @@ ipcMain.on('position', (e, message) => {
 
 /* MESSAGE FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
 ipcMain.on('progress', (e, message) => {
+  /* CREATE THE PROGRESS WINDOW */
   createChildWindow(message);
+  /* SEND THE FILE TO PYTHON SHELL TO GET CONVERTED */
   messengerService(message.relayChannel, null, message.destination, message.jsonObject);
 });
 
 /* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
-ipcMain.on('progress-end', (event, message) => {
+ipcMain.on('progress-end', (e, message) => {
+  /* SEND MESSAGE TO CLOSE THE PROGRES BAR */
   messengerService(message.channel, message.message, message.destination);
+});
+
+/* MESSAGE TO SYNC DB AFTER FILES HAVE BEEN WRITTEN TO LOCAL DB */
+ipcMain.on('db-sync', (e, message) => {
+  console.log(message);
+  /* SEND MESSAGE TO UPDATE THE DB */
+  homeWindow.webContents.send('sync-db', null);
 });
 
 ipcMain.on('db-status', (event, message) => {
   if (secWindow) {
-    message === 1
-      ? secWindow.webContents.send('db-status', message)
-      : secWindow.webContents.send('db-status', message);
+    secWindow.webContents.send('db-status', message);
   }
 });
 
@@ -101,7 +109,6 @@ function createWindow() {
     spellCheck: false,
     center: true,
     show: false,
-    alwaysOnTop: true,
     webPreferences: { nodeIntegration: true, enableRemoteModule: true },
     autoHideMenuBar: true,
     frame: false,
@@ -116,7 +123,7 @@ function createWindow() {
   // homeWindow.webContents.openDevTools();
 
   // Only show on load completion
-  homeWindow.on('ready-to-show', () => {
+  homeWindow.once('ready-to-show', () => {
     homeWindow.show();
   });
 
@@ -145,7 +152,7 @@ function createSecWindow(message) {
   secWindow.loadFile('./renderer/startPage/startPage.html');
 
   // Only show on load completion
-  secWindow.on('ready-to-show', () => {
+  secWindow.once('ready-to-show', () => {
     loadingWindow.close();
     loadingWindow = null;
     secWindow.show();
@@ -158,7 +165,6 @@ function createSecWindow(message) {
   secWindow.on('closed', () => {
     secWindow = null;
     homeWindow.show();
-    homeWindow.webContents.send('sync-db', null);
   });
 }
 

@@ -39,18 +39,12 @@ ipcRenderer.on('convert-python', (event, message) => {
   let pyshell = new PythonShell('conversion.py', options);
 
   pyshell.on('message', (message) => {
-    // console.log(message);
     let value = parseInt(message);
     if (value < 100) {
-      // Push progrogress value to custom var in progress bar
+      /* PUSH THE STDIN VALUE FROM PYTHON TO THE PERCENTAGE OF THE PROGRESS BAR */
       progressBar.style.setProperty('--width', value);
     } else if (value === 100) {
       progressBar.style.setProperty('--width', value);
-
-      /* UPDATEWITH NEW ITEM */
-      // customerPrices[customerNumber.value] = customerData[customerNumber.value]; // TODO: START HERE CUSTOMERNAMENUMBER VALUE NOT DEFINED
-      // writePricelistFile(customerNumber.value, customerPrices);
-      // Sent message to close bar and reset
 
       setTimeout(() => {
         let message = {

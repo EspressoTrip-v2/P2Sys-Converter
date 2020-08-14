@@ -1,5 +1,6 @@
 /* MODULES */
 const fs = require('fs');
+const { ipcRenderer } = require('electron');
 
 /* TEMPLATES FOR NEW CUSTOMER CREATION */
 exports.dataObjects = JSON.parse(fs.readFileSync(`${__dirname}/templates/dataObjects.json`));
@@ -16,7 +17,7 @@ delete customerPricelistNumber['_id'];
 
 //TODO: NEED TO UPDATE ON SAVE
 let = customerNumberName = JSON.parse(
-  fs.readFileSync(`${__dirname}/templates/customerNameNumber.json`)
+  fs.readFileSync(`${__dirname}/templates/customerNumberName.json`)
 );
 delete customerNumberName['_id'];
 
@@ -41,40 +42,57 @@ delete customerBackUp['_id'];
 /* //////// */
 
 /* LOGFILE CREATION FUNCTION */
-function logfileFunc(customerNumber) {
+function logfileFunc(database) {
   if (fs.existsSync('./data/logfiles/local-db-logfile.txt')) {
-    if (customerPrices[customerNumber]) {
-      fs.appendFile(
-        './data/logfiles/local-db-logfile.txt',
-        `${new Date()}: Updated customer ->  ${customerNumber}\n`,
-        (err) => console.log(err)
-      );
-    } else {
-      fs.appendFile(
-        './data/logfiles/local-db-logfile.txt',
-        `${new Date()}: New customer ->  ${customerNumber}\n`,
-        (err) => console.log(err)
-      );
-    }
+    fs.appendFile(
+      './data/logfiles/local-db-logfile.txt',
+      `${new Date()}: Writefile Error ->  In local Database ${database}\n`,
+      (err) => console.log(err)
+    );
   } else {
-    if (customerPrices[customerNumber]) {
-      fs.writeFile(
-        './data/logfiles/local-db-logfile.txt',
-        `${new Date()}: Updated customer ->  ${customerNumber}\n`,
-        (err) => console.log(err)
-      );
-    } else {
-      fs.writeFile(
-        './data/logfiles/local-db-logfile.txt',
-        `${new Date()}: New customer ->  ${customerNumber}\n`,
-        (err) => console.log(err)
-      );
-    }
+    fs.writeFile(
+      './data/logfiles/local-db-logfile.txt',
+      `${new Date()}: Updated customer ->  ${database}\n`,
+      (err) => console.log(err)
+    );
   }
 }
 
-exports.writeLocalDatabase = (object) => {
-  //TODO: FINISH
+/* FUNCTION OVERWRITE THE LOCAL DATABASES WITH UPDATED INFOMATION */
+exports.writeLocalDatabase = (writeFileObject) => {
+  fs.writeFileSync(
+    `${__dirname}/templates/customerPrices.json`,
+    JSON.stringify(writeFileObject.customerPrices),
+    'utf-8',
+    (err) => {
+      console.log(err);
+    }
+  );
+  fs.writeFileSync(
+    `${__dirname}/templates/customerPricelistNumber.json`,
+    JSON.stringify(writeFileObject.customerPricelistNumber),
+    'utf-8',
+    (err) => {
+      console.log(err);
+    }
+  );
+  fs.writeFileSync(
+    `${__dirname}/templates/customerBackUp.json`,
+    JSON.stringify(writeFileObject.customerBackUp),
+    'utf-8',
+    (err) => {
+      console.log(err);
+    }
+  );
+  fs.writeFileSync(
+    `${__dirname}/templates/customerNumberName.json`,
+    JSON.stringify(writeFileObject.customerNumberName),
+    'utf-8',
+    (err) => {
+      console.log(err);
+    }
+  );
+  ipcRenderer.send('db-sync', 'sent message');
 };
 
 let customerNameNumber = {};

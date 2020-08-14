@@ -7,7 +7,7 @@ const fs = require('fs');
 const {
   customerPricesModel,
   customerPricelistNumberModel,
-  customerNameNumberModel,
+  customerNumberNameModel,
   customerBackUpModel,
 } = require('../../database/mongoDbConnect.js');
 const {
@@ -22,6 +22,20 @@ const {
 let homeWindow = remote.getCurrentWindow(),
   dbStateTimer,
   state = null;
+
+//////////////////
+/* DOM ELEMENTS*/
+////////////////
+
+/* MAIN WINDOW */
+////////////////
+let startBtn = document.getElementById('start'),
+  exitbtn = document.getElementById('exit-btn'),
+  aboutbtn = document.getElementById('about-btn'),
+  backbtn = document.getElementById('back-btn'),
+  mailbtn = document.getElementById('mail-btn'),
+  dbLight = document.getElementById('db'),
+  databaseText = document.getElementById('dbtext');
 
 ////////////////
 /* FUNCTIONS */
@@ -66,73 +80,99 @@ function logfileFunc(message) {
 /* UPDATE ONLINE DATABASES */
 ////////////////////////////
 async function updateDatabase() {
+  /* ADD THE _id BACK INTO THE DATABASES */
+  customerBackUp['_id'] = 'customerBackUp';
+  customerNumberName['_id'] = 'customerNumberName';
+  customerPricelistNumber['_id'] = 'customerPricelistNumber';
+  customerPrices['_id'] = 'customerPrices';
+
   let mes = 'There are inconsistencies in:\n\n# {DATA} #\n\nPlease contact the developer.',
     title = 'DATABASE ERROR',
     type = 'error',
     but = ['OK', 'EMAIL DEV'];
 
-  /* CUSTOMER PRICES DATABASE */
-  let customerPricesDB = await customerPricesModel.findById('customerPrices');
-  delete customerPricesDB._doc['_id'];
-  if (Object.keys(customerPrices).length >= Object.keys(customerPricesDB._doc).length) {
-    customerPricesDB.replaceOne({ _id: 'customerPrices' }, customerPrices, (err, res) => {
-      if (err) logfileFunc(`customerPricesDB - ${err}`);
-    });
-  } else {
-    let alteredMes = mes.replace('{DATA}', 'CUSTOMER PRICELIST');
-    messageAlert(type, title, alteredMes, but);
+  try {
+    /* CUSTOMER PRICES DATABASE */
+    let customerPricesDB = await customerPricesModel.findById('customerPrices');
+
+    if (Object.keys(customerPrices).length >= Object.keys(customerPricesDB._doc).length) {
+      await customerPricesModel.replaceOne(customerPrices, (err, res) => {
+        console.log(res);
+        if (err) logfileFunc(`customerPricesDB - ${err}`);
+      });
+    } else {
+      /* CREATE ALERT IF DATABASES ARE NOT CONSISTENT */
+      let alteredMes = mes.replace('{DATA}', 'CUSTOMER PRICELIST');
+      messageAlert(type, title, alteredMes, but);
+    }
+  } catch (err) {
+    /* CREATE ALERT IF CONNECTION ERROR */
+    logfileFunc(`customerPricesDB - ${err}`);
+    messageAlert(type, 'DB UNREACHABLE', 'CUSTOMERPRICES DATABASE', but);
   }
 
-  /* CUSTOMER NUMBER: PRICELIST NUMBER DATABASE  */
-  let customerPricelistNumberDB = await customerPricelistNumberModel.findById(
-    'customerPricelistNumber'
-  );
-  delete customerPricelistNumberDB._doc['_id'];
-  if (
-    Object.keys(customerPricelistNumber).length >=
-    Object.keys(customerPricelistNumberDB._doc).length
-  ) {
-    customerPricelistNumberDB.replaceOne(
-      { _id: 'customerPricelistNumber' },
-      customerPricelistNumber,
-      (err, res) => {
+  try {
+    /* CUSTOMER NUMBER: PRICELIST NUMBER DATABASE  */
+    let customerPricelistNumberDB = await customerPricelistNumberModel.findById(
+      'customerPricelistNumber'
+    );
+
+    if (
+      Object.keys(customerPricelistNumber).length >=
+      Object.keys(customerPricelistNumberDB._doc).length
+    ) {
+      await customerPricelistNumberModel.replaceOne(customerPricelistNumber, (err, res) => {
         if (err) logfileFunc(`customerPricelistNumberDB - ${err}`);
-      }
-    );
-  } else {
-    let alteredMes = mes.replace('{DATA}', 'CUSTOMER NUMBER: PRICELIST NUMBER');
-    messageAlert(type, title, alteredMes, but);
+      });
+    } else {
+      /* CREATE ALERT IF DATABASES ARE NOT CONSISTENT */
+      let alteredMes = mes.replace('{DATA}', 'CUSTOMER NUMBER: PRICELIST NUMBER');
+      messageAlert(type, title, alteredMes, but);
+    }
+  } catch (err) {
+    /* CREATE ALERT IF CONNECTION ERROR */
+    logfileFunc(`customerPricelistNumberDB - ${err}`);
+    messageAlert(type, 'DB UNREACHABLE', 'CUSTOMERPRICELISTNUMBER DATABASE', but);
   }
 
-  /* CUSTOMER NAME: CUSTOMER NUMBER DATABASE */
-  let customerNameNumberDB = await customerNameNumberModel.findById('customerNameNumber');
-  delete customerNameNumberDB._doc['_id'];
+  try {
+    /* CUSTOMER NUMBER: CUSTOMER NAME DATABASE */
+    let customerNumberNameDB = await customerNumberNameModel.findById('customerNumberName');
 
-  if (
-    Object.keys(customerNumberName).length >= Object.keys(customerNameNumberDB._doc).length
-  ) {
-    customerNameNumberDB.replaceOne(
-      { _id: 'customerNameNumber' },
-      customerNumberName,
-      (err, res) => {
-        if (err) logfileFunc(`customerNameNumberDB - ${err}`);
-      }
-    );
-  } else {
-    let alteredMes = mes.replace('{DATA}', 'CUSTOMER NAME: CUSTOMER NUMBER');
-    messageAlert(type, title, alteredMes, but);
+    if (
+      Object.keys(customerNumberName).length >= Object.keys(customerNumberNameDB._doc).length
+    ) {
+      await customerNumberNameModel.replaceOne(customerNumberName, (err, res) => {
+        if (err) logfileFunc(`customerNumberNameDB - ${err}`);
+      });
+    } else {
+      /* CREATE ALERT IF DATABASES ARE NOT CONSISTENT */
+      let alteredMes = mes.replace('{DATA}', 'CUSTOMER NAME: CUSTOMER NUMBER');
+      messageAlert(type, title, alteredMes, but);
+    }
+  } catch (err) {
+    /* CREATE ALERT IF CONNECTION ERROR */
+    logfileFunc(`customerNumberNameDB - ${err}`);
+    messageAlert(type, 'DB UNREACHABLE', 'CUSTOMERNUMBERNAME DATABASE', but);
   }
 
-  /* CUSTOMER BACKUP DATABASE */
-  let customerBackUpDB = await customerBackUpModel.findById('customerBackUp');
-  delete customerBackUpDB._doc['_id'];
-  if (Object.keys(customerBackUp).length >= Object.keys(customerBackUpDB._doc).length) {
-    customerBackUpDB.replaceOne({ _id: 'customerBackUp' }, customerBackUp, (err, res) => {
-      if (err) logfileFunc(`customerBackUpDB - ${err}`);
-    });
-  } else {
-    let alteredMes = mes.replace('{DATA}', 'CUSTOMER BACKUP');
-    messageAlert(type, title, alteredMes, but);
+  try {
+    /* CUSTOMER BACKUP DATABASE */
+    let customerBackUpDB = await customerBackUpModel.findById('customerBackUp');
+
+    if (Object.keys(customerBackUp).length >= Object.keys(customerBackUpDB._doc).length) {
+      await customerBackUpModel.replaceOne(customerBackUp, (err, res) => {
+        if (err) logfileFunc(`customerBackUpDB - ${err}`);
+      });
+    } else {
+      /* CREATE ALERT IF DATABASES ARE NOT CONSISTENT */
+      let alteredMes = mes.replace('{DATA}', 'CUSTOMER BACKUP');
+      messageAlert(type, title, alteredMes, but);
+    }
+  } catch (err) {
+    /* CREATE ALERT IF CONNECTION ERROR */
+    logfileFunc(`customerBackUpDB - ${err}`);
+    messageAlert(type, 'DB UNREACHABLE', 'CUSTOMERBACKUP DATABASE', but);
   }
 
   return true;
@@ -140,15 +180,20 @@ async function updateDatabase() {
 
 /* SYNC DATABASE FUNCTION */
 ///////////////////////////
-const syncDb = async () => {
+async function syncDb() {
+  exitbtn.disabled = true;
+  exitbtn.setAttribute('class', 'btn-disabled');
+  state = 4;
   databaseText.setAttribute('data-label', 'UPDATING');
   dbLight.setAttribute('class', 'db-update');
   let updated = await updateDatabase();
   if (updated) {
     dbLight.setAttribute('class', 'db-connected');
     state = db.readyState;
+    exitbtn.disabled = false;
+    exitbtn.setAttribute('class', 'btn-exit');
   }
-};
+}
 
 //////////////////////////
 /* DATABASE CONNECTION */
@@ -200,6 +245,8 @@ setInterval(() => {
     dbLight.setAttribute('class', 'db-fail');
     databaseText.setAttribute('data-label', 'ERROR');
     ipcRenderer.send('db-status', state);
+  } else if (state === 4) {
+    ipcRenderer.send('db-status', state);
   }
 }, 1000);
 
@@ -220,20 +267,6 @@ db.on('error', () => {
     mongooseConnect();
   }, 300000);
 });
-
-//////////////////
-/* DOM ELEMENTS*/
-////////////////
-
-/* MAIN WINDOW */
-////////////////
-let startBtn = document.getElementById('start'),
-  exitbtn = document.getElementById('exit-btn'),
-  aboutbtn = document.getElementById('about-btn'),
-  backbtn = document.getElementById('back-btn'),
-  mailbtn = document.getElementById('mail-btn'),
-  dbLight = document.getElementById('db'),
-  databaseText = document.getElementById('dbtext');
 
 //////////////////////
 /* EVENT LISTENERS */

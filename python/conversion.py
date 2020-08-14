@@ -19,7 +19,7 @@ json_pricelist = dict(json.loads(sys.argv[1:][0]))
 # GET CUSTOMER NUMBER FROM FILE
 customer_number = list(json_pricelist.keys())[0]
 # GET PRICELIST NUMBER
-pricelist_number = json_pricelist[customer_number]['PRICELIST']
+pricelist_number = json_pricelist['PRICELIST']
 
 # EXTRACT INDEX NUMBERS REMOVE LAST THREE ENTRIES
 idx = list(json_pricelist[customer_number].keys())[:-5]
