@@ -1,4 +1,4 @@
-![Screenshot](p2syslogo-large.png)
+![Screenshot](readme_data/p2syslogo-large.png)
 
 A crossplatform pricelist convertor for Sage 300/ACC-PAC
 
