@@ -1,5 +1,4 @@
 ![Screenshot](p2syslogo-large.png)
-# P2Sys-Electron
 
 A crossplatform pricelist convertor for Sage 300/ACC-PAC
 
