@@ -199,6 +199,10 @@ const resetForm = () => {
   html.style.backgroundColor = 'transparent';
   tableBody.parentNode.removeChild(tableBody);
 
+  // HIDE THE PROGRESS BAR
+  progressFade.style.visibility = 'hidden';
+  progressFade.style.backdropFilter = 'none';
+
   /* RESET THE CCA BUTTONS BACK TO STANDARD */
   btnReset();
 
@@ -338,16 +342,13 @@ createBtn.addEventListener('click', (e) => {
 
     /* CREATE MESSAGE TO SEND TO IPC LISTENER */
     message = {
-      emit: 'progress',
       html: `${dir}/renderer/progress/progress.html`,
       jsonObject: customerData,
-      destination: 'child',
-      relayChannel: 'convert-python',
     };
 
     /* FADE THE BACKGROUND AND MESSAGE FOR PROGRESS BAR */
     progressFade.style.visibility = 'visible';
-    progressFade.style.backdropFilter = 'blur(1px) grayscale(1)';
+    progressFade.style.backdropFilter = 'blur(4px) grayscale(1)';
     ipcRenderer.send('progress', message);
   }
 });
@@ -910,15 +911,26 @@ ipcRenderer.on('progress-end', (event, message) => {
 
   /* SEND TO THE WRITE OBJECT FUNCTION */
   writeLocalDatabase(writeFileObject);
+
   /* REPOPULATE CUSTOMER LIST */
   populateList();
-  // HIDE THE PROGRESS BAR
-  progressFade.style.visibility = 'hidden';
-  progressFade.style.backdropFilter = 'none';
+
+  /* SEND MESSAGE WITH FILE PATHS TO MAIN TO OPEN EMAIL CHILDWINDOW */
+  /* ADD CUSTOMER NUMBER FOE EASIER FILENAME DISCRIPTION */
+  let newMessage = {
+    number: customerNumberValue.value,
+    filePaths: message,
+  };
+  ipcRenderer.send('email-popup', newMessage);
+
   // REMOVE ITEM FROM LOCAL STORAGE
   localStorage.removeItem(searchValue);
-  // CLICK BACK BUTTON
-  backBtn.click();
+
+  /* WAIT FOR MESSAGE SENT TO CLOSE EMAIL POPUP AND RESET */
+  ipcRenderer.once('email-close', (e, message) => {
+    // CLICK BACK BUTTON
+    backBtn.click();
+  });
 });
 
 ipcRenderer.on('db-status', (e, message) => {

@@ -75,14 +75,9 @@ let customerNameLists = Array.from(document.getElementsByClassName('customer-nam
 /* SEND CUSTOMER NUMBER TO SECWINDOW */
 customerNameLists.forEach((el) => {
   el.addEventListener('click', (e) => {
-    let number = customerNameNumber[e.target.innerText],
-      message = {
-        channel: 'dock-sec',
-        message: number,
-        destination: 'sec',
-      };
+    let number = customerNameNumber[e.target.innerText];
     // send ipc
-    ipcRenderer.send('window-message', message);
+    ipcRenderer.send('dock-sec', number);
 
     // Clear any existing highlighted number in case of reclick
     customerNameLists.forEach((el) => {

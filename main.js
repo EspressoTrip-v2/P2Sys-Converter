@@ -5,25 +5,11 @@ const { app, BrowserWindow, ipcMain, Tray, Menu, Notification } = require('elect
 const dir = process.cwd();
 
 /* WINDOW VARIABLES */
-let homeWindow, secWindow, tray, childWindow, loadingWindow;
+let homeWindow, secWindow, tray, childWindow, loadingWindow, emailWindow;
 
 ////////////////
 /* FUNCTIONS */
 ////////////////
-
-/* WINDOW MESSENGER FUNCTION */
-function messengerService(channel, message, destination, jsonObject = null) {
-  if (!message) {
-    message = jsonObject;
-  }
-  if (destination === 'sec') {
-    secWindow.webContents.send(channel, message);
-  } else if (destination === 'child') {
-    childWindow.webContents.on('did-finish-load', (e) => {
-      childWindow.webContents.send(channel, message);
-    });
-  }
-}
 
 /* FUNCTION TO CREATE TRAY MENU */
 function createTray() {
@@ -35,18 +21,9 @@ function createTray() {
 /* IPC LISTENERS */
 //////////////////
 
-/* ##### MESSAGE CONSTRUCTOR LEGEND ################ */
-/*       emit: message originate                     */
-/*       channel: channel of message                 */
-/*       message: actual message content             */
-/*       destination: window message is intended for */
-/*       jsonObject: json object file attached       */
-/*       relayChannel: channel to relay message on   */
-/* ################################################# */
-
 /* MESSENGER SERVICE BETWEEN RENDERERS */
-ipcMain.on('window-message', (event, message) => {
-  messengerService(message.channel, message.message, message.destination);
+ipcMain.on('dock-sec', (event, message) => {
+  secWindow.webContents.send('dock-sec', message);
 });
 
 /* MESSAGE FROM START BUTTON */
@@ -67,13 +44,15 @@ ipcMain.on('progress', (e, message) => {
   /* CREATE THE PROGRESS WINDOW */
   createChildWindow(message);
   /* SEND THE FILE TO PYTHON SHELL TO GET CONVERTED */
-  messengerService(message.relayChannel, null, message.destination, message.jsonObject);
+  childWindow.webContents.on('did-finish-load', (e) => {
+    childWindow.webContents.send('convert-python', message.jsonObject);
+  });
 });
 
 /* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
 ipcMain.on('progress-end', (e, message) => {
   /* SEND MESSAGE TO CLOSE THE PROGRES BAR */
-  messengerService(message.channel, message.message, message.destination);
+  secWindow.webContents.send('progress-end', message.filePaths);
 });
 
 /* MESSAGE TO SYNC DB AFTER FILES HAVE BEEN WRITTEN TO LOCAL DB */
@@ -89,6 +68,15 @@ ipcMain.on('db-status', (event, message) => {
   }
 });
 
+/* MESSAGE TO CREATE EMAIL POPUP CHILD WINDOW */
+ipcMain.on('email-popup', (e, message) => {
+  createEmailWindow(message);
+});
+
+/* SEND MESSAGE SEND AND FORM CAN BE RESET MESSAGE FROM EMAIL POPUP */
+ipcMain.on('email-close', (e, message) => {
+  secWindow.webContents.send('email-close', null);
+});
 ////////////////////////////////
 /* WINDOW CREATION FUNCTIONS */
 //////////////////////////////
@@ -244,6 +232,38 @@ function createLoadingWindow() {
   //   Event listener for closing
   loadingWindow.on('closed', () => {
     loadingWindow = null;
+  });
+}
+
+/* EMAIL POPUP WINDOW */
+function createEmailWindow(message) {
+  emailWindow = new BrowserWindow({
+    parent: secWindow,
+    height: 750,
+    width: 550,
+    autoHideMenuBar: true,
+    center: true,
+    frame: false,
+    spellCheck: false,
+    transparent: true,
+    webPreferences: { nodeIntegration: true, enableRemoteModule: true },
+    icon: `${dir}/renderer/icons/trayTemplate.png`,
+  });
+
+  //   Load html page
+  emailWindow.loadFile(`${dir}/renderer/email/email.html`);
+
+  emailWindow.webContents.once('did-finish-load', (e) => {
+    // console.log(message);
+    emailWindow.webContents.send('email-popup', message);
+  });
+
+  //   Load dev tools
+  // emailWindow.webContents.openDevTools();
+
+  //   Event listener for closing
+  emailWindow.on('closed', () => {
+    emailWindow = null;
   });
 }
 

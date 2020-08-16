@@ -10,33 +10,28 @@ const curDir = __dirname;
 /* TEMPLATES FOR NEW CUSTOMER CREATION */
 exports.dataObjects = JSON.parse(fs.readFileSync(`${curDir}/templates/dataObjects.json`));
 
-/* CUSTOMER DATABASE IS CUSTOMER NUMBER - PRICELIST NUMBER */
+/* EMAIL CONTACTS JSON */
+exports.emailContacts = JSON.parse(fs.readFileSync(`${curDir}/appdata/email.json`));
 
-//TODO: NEED TO UPDATE ON SAVE
+/* CUSTOMER DATABASE IS CUSTOMER NUMBER - PRICELIST NUMBER */
 let customerPricelistNumber = JSON.parse(
   fs.readFileSync(`${curDir}/templates/customerPricelistNumber.json`)
 );
 delete customerPricelistNumber['_id'];
 
 /* CUSTOMER NUMBER NAME IS CUSTOMER NUMBER - CUSTOMER NAME */
-
-//TODO: NEED TO UPDATE ON SAVE
 let = customerNumberName = JSON.parse(
   fs.readFileSync(`${curDir}/templates/customerNumberName.json`)
 );
 delete customerNumberName['_id'];
 
 /* ALL ON FILE LAYMAN PRICELISTS */
-
-//TODO: NEED TO UPDATE ON SAVE
 let customerPrices = JSON.parse(fs.readFileSync(`${curDir}/templates/customerPrices.json`));
 delete customerPrices['_id'];
 
 delete customerPricelistNumber['_id'];
 
 /* CUSTOMER PRICELIST BACKUP */
-
-//TODO: NEED TO UPDATE ON SAVE
 let = customerBackUp = JSON.parse(fs.readFileSync(`${curDir}/templates/customerBackUp.json`));
 delete customerBackUp['_id'];
 

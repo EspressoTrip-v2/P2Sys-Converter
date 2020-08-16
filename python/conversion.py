@@ -5,7 +5,8 @@ import json
 import sys
 import os
 import platform
-import time
+from datetime import datetime
+time = str(datetime.now())[:10]
 
 # IMPORT CUSTOM MODEULES #
 # ////////////////////// #
@@ -292,15 +293,15 @@ df.reset_index(inplace=True, drop=True)
 
 # CREATE THE FOLDER TO STORE ITEMS INSERT #
 ###########################################
-
 # GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
+mydocuments_folder = f'{os.environ["HOME"]}/Documents/p2sys/{customer_number}/{time}/'
+os.makedirs(mydocuments_folder, exist_ok=True)
+
+# REPLACE THE SLASHES FOR CORRECT FORMAT
 system_os = platform.platform(terse=True).split('-')[0]
 if system_os == 'Windows':
-    mydocuments_folder = f'{os.environ["HOME"]}\Documents\p2sys\{customer_number}'
-    os.makedirs(mydocuments_folder, exist_ok=True)
-elif system_os == 'Linux':
-    mydocuments_folder = f'{os.environ["HOME"]}/Documents/p2sys/{customer_number}'
-    os.makedirs(mydocuments_folder, exist_ok=True)
+    s = '\\'
+    mydocuments_folder = mydocuments_folder.replace('/', s[0])
 
 # PASS TO SHEET CREATOR CODE #
 ##############################
@@ -315,6 +316,16 @@ print(90)
 s5_ordersheet.create_s5_ordersheet(mydocuments_folder,
                                    reform_file['customer_number'],
                                    reform_file['customer_pricelist'])
+
+# PASS FILE PATHS FOR EMAIL
+path_arr = list(os.listdir(mydocuments_folder))
+str_file = ''
+for i in path_arr:
+    if len(str_file) > 1:
+        str_file += f',{mydocuments_folder}{i}'
+    else:
+        str_file = f'{mydocuments_folder}{i}'
+print(str_file)
 
 # PERCENTAGE STDOUT
 print(100)

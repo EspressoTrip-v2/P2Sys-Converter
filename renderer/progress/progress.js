@@ -35,8 +35,16 @@ ipcRenderer.on('convert-python', (event, message) => {
   /* CREATE PYSHELL  */
   let pyshell = new PythonShell('conversion.py', options);
 
+  /* CREATE THE PATHS VARIABLE */
+  let filePaths;
+
   pyshell.on('message', (message) => {
     let value = parseInt(message);
+
+    /* SEPARATE THE PATHS INTO USABLE ARRAY */
+    if (isNaN(value)) {
+      filePaths = message.split(',');
+    }
     if (value < 100) {
       /* PUSH THE STDIN VALUE FROM PYTHON TO THE PERCENTAGE OF THE PROGRESS BAR */
       progressBar.style.setProperty('--width', value);
@@ -46,7 +54,7 @@ ipcRenderer.on('convert-python', (event, message) => {
       setTimeout(() => {
         let message = {
           channel: 'progress-end',
-          message: 'close',
+          filePaths,
           destination: 'sec',
         };
         ipcRenderer.send('progress-end', message);

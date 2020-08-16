@@ -15,11 +15,7 @@
   },
   "dependencies": {
     "mongoose": "^5.9.27",
+    "nodemailer": "^6.4.11",
     "python-shell": "^2.0.1"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "./data/remplates/*.json"
-    ]
   }
 }

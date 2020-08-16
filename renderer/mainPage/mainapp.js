@@ -96,7 +96,6 @@ async function updateDatabase() {
 
     if (Object.keys(customerPrices).length >= Object.keys(customerPricesDB._doc).length) {
       await customerPricesModel.replaceOne(customerPrices, (err, res) => {
-        console.log(res);
         if (err) logfileFunc(`customerPricesDB - ${err}`);
       });
     } else {
@@ -252,12 +251,7 @@ db.once('connected', () => {
 
 /* CONNECTION ERROR */
 db.on('error', () => {
-  let notification = new Notification({
-    title: 'AC WHITCHER DB ALERT',
-    body: 'CONNECTION ERROR',
-  });
-  notification.show();
-  /* RESTART DB ON INITIAL START CONNECTION */
+  state = 0;
   setTimeout(() => {
     mongooseConnect();
   }, 300000);
