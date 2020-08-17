@@ -36,7 +36,7 @@ window.secWindow = secWindow;
 /* //////////////////////////////////////////////////////////////////////////////// */
 
 // GLOBAL VARIABLES FOR USAGE ON NECESSARY CODE
-let searchValue, target, jsonFile, htmlContent, customerNumber, customerData;
+let searchValue, target, jsonFile, htmlContent, customerNumber, customerData, pricelistNumber;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -356,7 +356,8 @@ createBtn.addEventListener('click', (e) => {
 /* PAUSE BUTTON TO SAVE TO LOCAL STORAGE */
 pauseBtn.addEventListener('click', () => {
   /* CREATE THE STORAGE OBJECT */
-  let localStorageJson = createObjectFromHtml();
+  let localStorageJson = createObjectFromHtml(),
+    searchValue = customerSearch.value.toUpperCase();
 
   /* STRINGIFY FOR LOCALSTORAGE */
   localStorageJson = JSON.stringify(localStorageJson);
@@ -593,9 +594,15 @@ populateList();
 customerSearch.addEventListener('keyup', (e) => {
   // USE REGEX TO REMOVE ANY UNWANTED CHAR
   let pattern = /\w+|\s+/g;
+
   if (customerSearch.value) {
     let match = customerSearch.value.match(pattern).join('');
-    customerSearch.value = match;
+    pricelistNumber = match.toUpperCase().replace(' ', '');
+    if (pricelistNumber.length < 6) {
+      pricelistNumber = pricelistNumber.padEnd(6, ' ');
+    } else if (pricelistNumber.length === 7) {
+      pricelistNumber = pricelistNumber.slice(0, 6);
+    }
   }
 
   // REHIDE THE UPDATE BUTTON AND RESUME IF SEARCH CHANGES
@@ -611,6 +618,7 @@ customerSearch.addEventListener('keyup', (e) => {
     customerSearch.value.length < 6 &&
     !Object.keys(localStorage).includes(customerSearch.value)
   ) {
+    checkContinueBtn.style.display = 'none';
     checkUpdateBtn.style.display = 'none';
     checkResumeEditingBtn.style.display = 'none';
     disabledBtn.style.display = 'flex';
@@ -632,16 +640,24 @@ customerSearch.addEventListener('keyup', (e) => {
           // MAKE SURE CONTINUE BUTT0N IS INACTIVE / SEARCH VALUE LENGTH IS 6
           // AND THE SEARCH VALUE ISNT IN THE CURRENT CUSTOMER PRICELISTS
           window.getComputedStyle(checkContinueBtn).display === 'none' &&
-          customerSearch.value.length === 6 &&
-          !customerNumber.includes(customerSearch.value) &&
-          !Object.keys(localStorage).includes(customerSearch.value)
+          customerSearch.value.length >= 6 &&
+          !customerNumber.includes(customerSearch.value)
         ) {
-          // DISPLAY CONTINUE BUTTON
-          jsonFile = dataObjects['template-pricelist'];
-          checkContinueBtn.style.display = 'flex';
-          disabledBtn.style.display = 'none';
-          checkUpdateBtn.style.display = 'none';
-          checkResumeEditingBtn.style.display = 'none';
+          if (localStorage[customerSearch.value.toUpperCase()]) {
+            // DISPLAY CONTINUE BUTTON
+            checkContinueBtn.style.display = 'none';
+            disabledBtn.style.display = 'none';
+            checkUpdateBtn.style.display = 'none';
+            checkResumeEditingBtn.style.display = 'flex';
+            customerNumberList.style.backgroundImage = `url('${dir}/renderer/icons/inprogress.png')`;
+          } else {
+            // DISPLAY CONTINUE BUTTON
+            jsonFile = dataObjects['template-pricelist'];
+            checkContinueBtn.style.display = 'flex';
+            disabledBtn.style.display = 'none';
+            checkUpdateBtn.style.display = 'none';
+            checkResumeEditingBtn.style.display = 'none';
+          }
         } else if (
           // DISABLE THE CONTINUE BUTTON IF THE SEARCH VALUE IS LESS 6
           window.getComputedStyle(checkContinueBtn).display === 'flex' &&
@@ -652,20 +668,11 @@ customerSearch.addEventListener('keyup', (e) => {
           disabledBtn.style.display = 'flex';
           checkUpdateBtn.style.display = 'none';
           checkResumeEditingBtn.style.display = 'none';
-        } else if (
-          customerSearch.value.length === 6 &&
-          Object.keys(localStorage).includes(customerSearch.value)
-        ) {
-          // SHOW RESUME BUTTON
-          checkContinueBtn.style.display = 'none';
-          disabledBtn.style.display = 'none';
-          checkUpdateBtn.style.display = 'none';
-          checkResumeEditingBtn.style.display = 'flex';
+        } else if (!localStorage[customerSearch.value.toUpperCase()]) {
+          // DISPLAY TICK IF THE SEARCH  VALUE IS CORRECT PATTERN AND LENGTH 6
+          customerNumberList.style.backgroundImage = `url('${dir}/renderer/icons/tick.png')`;
+          searchValue = customerSearch.value.toUpperCase();
         }
-
-        // DISPLAY TICK IF THE SEARCH  VALUE IS CORRECT PATTERN AND LENGTH 6
-        customerNumberList.style.backgroundImage = "url('../icons/tick.png')";
-        searchValue = customerSearch.value.toUpperCase();
       } else {
         // REMOVE IMAGE IF UNACCEPTABLE
         customerNumberList.style.backgroundImage = 'none';
@@ -679,6 +686,9 @@ customerSearch.addEventListener('keyup', (e) => {
 
 /* CONTINUE BUTTON */
 checkContinueBtn.addEventListener('click', (e) => {
+  /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
+  searchValue = customerSearch.value.toUpperCase();
+
   // POPULATE HTML TABLE
   htmlContent = tablePopulate(jsonFile);
   htmlInnerFill(htmlContent);
@@ -686,7 +696,7 @@ checkContinueBtn.addEventListener('click', (e) => {
   checkCustomer.style.visibility = 'hidden';
   checkCustomer.style.opacity = '0';
   customerNumberValue.value = searchValue;
-  customerPriceList.value = searchValue;
+  customerPriceList.value = pricelistNumber;
   customerPriceList.disabled = true;
 
   if (customerNumberName[searchValue]) {
@@ -707,6 +717,7 @@ checkContinueBtn.addEventListener('click', (e) => {
       secWindow.maximize();
       secWindow.setMinimumSize(1200, 700);
     }, 200);
+    searchValue;
   }
   setTimeout(() => {
     hider.style.display = 'flex';
@@ -717,6 +728,9 @@ checkContinueBtn.addEventListener('click', (e) => {
 
 /* UPDATE BUTTON */
 checkUpdateBtn.addEventListener('click', (e) => {
+  /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
+  searchValue = customerSearch.value.toUpperCase();
+
   // POPULATE HTML TABLE
   htmlContent = tablePopulate(jsonFile);
   htmlInnerFill(htmlContent);
@@ -737,7 +751,7 @@ checkUpdateBtn.addEventListener('click', (e) => {
     customerPriceList.value = customerPricelistNumber[searchValue];
     customerPriceList.disabled = true;
   } else {
-    customerPriceList.value = searchValue;
+    customerPriceList.value = pricelistNumber;
     customerPriceList.disabled = true;
   }
   // ADD BACKGROUND TO HTML ELEMENT
@@ -762,8 +776,12 @@ checkUpdateBtn.addEventListener('click', (e) => {
 
 /* RESUME BUTTON */
 checkResumeEditingBtn.addEventListener('click', (e) => {
-  let localPricelist = JSON.parse(localStorage[searchValue]),
-    localStorageObject = JSON.parse(localStorage[searchValue]);
+  /* SET THE SEARCH VALUE TO CUSTOMER SEARCH VALUE UPPERCASE*/
+  searchValue = customerSearch.value.toUpperCase();
+
+  let localPricelist = JSON.parse(localStorage[searchValue]);
+
+  let localStorageObject = JSON.parse(localStorage[searchValue]);
   // POPULATE HTML TABLE
   htmlContent = tablePopulate(localPricelist[searchValue]);
   htmlInnerFill(htmlContent);
@@ -866,9 +884,10 @@ ipcRenderer.on('dock-sec', (event, message) => {
   secWindow.focus();
   customerSearch.focus();
   customerSearch.value = message;
+  customerSearch.dispatchEvent(new Event('keyup'));
   setTimeout(() => {
     customerSearch.dispatchEvent(new Event('keyup'));
-  }, 200);
+  }, 100);
 
   if (document.getElementById(message)) {
     document.getElementById(message).click();
@@ -884,11 +903,18 @@ ipcRenderer.on('dock-sec', (event, message) => {
 
 /* COMMUNICATION FOR PROGRESS WINDOW END */
 ipcRenderer.on('progress-end', (event, message) => {
+  /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
+  searchValue = customerSearch.value.toUpperCase();
+
   /* CREATE THE DATE OBJECT TO INSERT IN CUSTOMER BACKUPS */
   let dateJsonFile = {};
-  dateJsonFile[dateString] =
-    jsonFile[0].length > 3 ? jsonFile : customerData[customerNumberValue.value];
-
+  if (jsonFile) {
+    if (jsonFile[0].length > 3) {
+      dateJsonFile[dateString] = jsonFile;
+    }
+  } else {
+    dateJsonFile[dateString] = customerData[customerNumberValue.value];
+  }
   /* UPDATE ALL THE DATA OBJECTS AND SEND TO GET WRITTEN LOCALLY  */
   customerBackUp[customerNumberValue.value] = dateJsonFile;
   customerPricelistNumber[customerNumberValue.value] = customerPriceList.value;
@@ -912,6 +938,9 @@ ipcRenderer.on('progress-end', (event, message) => {
   /* SEND TO THE WRITE OBJECT FUNCTION */
   writeLocalDatabase(writeFileObject);
 
+  // REMOVE ITEM FROM LOCAL STORAGE
+  localStorage.removeItem(searchValue);
+
   /* REPOPULATE CUSTOMER LIST */
   populateList();
 
@@ -919,13 +948,10 @@ ipcRenderer.on('progress-end', (event, message) => {
   /* ADD CUSTOMER NUMBER FOE EASIER FILENAME DISCRIPTION */
   let newMessage = {
     name: customerName.innerText,
-    number: customerNumberValue.value,
+    number: pricelistNumber,
     filePaths: message,
   };
   ipcRenderer.send('email-popup', newMessage);
-
-  // REMOVE ITEM FROM LOCAL STORAGE
-  localStorage.removeItem(searchValue);
 
   /* WAIT FOR MESSAGE SENT TO CLOSE EMAIL POPUP AND RESET */
   ipcRenderer.once('email-close', (e, message) => {

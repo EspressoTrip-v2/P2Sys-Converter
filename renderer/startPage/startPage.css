@@ -377,9 +377,9 @@ tr:nth-child(3n + 1) {
 }
 
 #p2sys-logo {
-  position: relative;
-  bottom: 1.1vh;
-  left: 16vw;
+  position: absolute;
+  bottom: 0.2vh;
+  left: 58.5vw;
   width: 8vh;
 }
 
@@ -751,7 +751,7 @@ tr:nth-child(3n + 1) {
 }
 #db-table {
   position: absolute;
-  left: -14vw;
+  right: 57vw;
   bottom: 1.5vh;
   width: 8vw;
 }

@@ -33,14 +33,30 @@ let emailRecipients = document.getElementById('email-entry'),
   sendBtn = document.getElementById('send'),
   borderBox = document.getElementById('border'),
   letterContainer = document.getElementById('sent-letter-container'),
-  letterCheckbox = document.getElementById('check-container');
+  letterCheckbox = document.getElementById('check-container'),
+  sentNotification = document.getElementById('sent-audio');
 
 /* CREATE EMAIL TEXT FOR MESSAGE AND INITIAL ADDRESSES */
 emailRecipients.value = emailSetup['email']['to'];
 
+/* GLOBAL VARIABLES */
+let customerNumber, filePaths, fileNameB, fileNameA, html;
+
 ///////////////
 /* FUNCTIONS */
 ///////////////
+
+function getMessage(text) {
+  let transportMessage = {
+    to: emailRecipients.value,
+    subject: `Emailing ${customerNumber}`,
+    replyTo: emailSetup['email']['replyTo'],
+    text,
+    attachments: [{ path: filePaths[0] }, { path: filePaths[1] }],
+  };
+
+  return transportMessage;
+}
 
 /* LOGFILE CREATION FUNCTION */
 function logfileFunc(error) {
@@ -60,14 +76,11 @@ function logfileFunc(error) {
 /* EMAIL SENT FUNCTION */
 function sendEmail() {
   borderBox.style.transform = 'scale(0)';
-  letterContainer.style.cssText = 'visibility: visible;transform: scaleY(1);';
+  letterContainer.style.cssText = 'transform: scaleY(1);';
 }
 
 /* EXCEL BOX AND MAIL SEND FUNCTION */
 function populateExcelHtml(message) {
-  /* GLOBAL VARIABLES */
-  let customerNumber, transportMessage, filePaths, fileNameB, fileNameA, html;
-
   /* SPLIT MESSAGE INTO USABLE PARTS */
   customerName = message.name;
   customerNumber = message.number;
@@ -83,14 +96,6 @@ function populateExcelHtml(message) {
     text = textInitial.replace('{NUMBER}', customerNumber);
   /* INSERT THE MESSAGE IN THE TEXT AREA */
   emailMessageArea.value = text;
-
-  transportMessage = {
-    to: emailRecipients.value,
-    subject: `Emailing ${customerNumber}`,
-    replyTo: emailSetup['email']['replyTo'],
-    text,
-    attachments: [{ path: filePaths[0] }, { path: filePaths[1] }],
-  };
 
   html = `
 
@@ -144,9 +149,11 @@ function populateExcelHtml(message) {
 
   /* SEND BUTTON */
   sendBtn.addEventListener('click', (e) => {
+    let message = getMessage(text);
+
     /* HIDE EMAIL BOX SHOW LETTER */
     sendEmail();
-    mailTransport.sendMail(transportMessage, (err, info) => {
+    mailTransport.sendMail(message, (err, info) => {
       if (err) {
         new Notification('MAIL SEND ERROR', {
           body: 'There was a problem sending messages',
@@ -156,9 +163,10 @@ function populateExcelHtml(message) {
         letterCheckbox.style.cssText =
           'visibility: visible;transform: rotate(360deg) scale(1);';
         letterContainer.setAttribute('data-label', '');
+        sentNotification.play();
         setTimeout(() => {
-          letterContainer.style.transform = 'scaleY(0)';
-          letterCheckbox.style.transform = 'scaleY(0)';
+          letterContainer.style.cssText = 'transform:scaleY(0);opacity:0;';
+          letterCheckbox.style.cssText = 'transform:scaleY(0);opacity:0;';
           setTimeout(() => {
             ipcRenderer.send('email-close', null);
             emailWindow.close();
