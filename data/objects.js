@@ -10,8 +10,8 @@ const curDir = __dirname;
 /* TEMPLATES FOR NEW CUSTOMER CREATION */
 exports.dataObjects = JSON.parse(fs.readFileSync(`${curDir}/templates/dataObjects.json`));
 
-/* EMAIL CONTACTS JSON */
-exports.emailContacts = JSON.parse(fs.readFileSync(`${curDir}/appdata/email.json`));
+/* EMAIL SETUP JSON */
+exports.emailSetup = JSON.parse(fs.readFileSync(`${curDir}/appdata/email.json`));
 
 /* CUSTOMER DATABASE IS CUSTOMER NUMBER - PRICELIST NUMBER */
 let customerPricelistNumber = JSON.parse(

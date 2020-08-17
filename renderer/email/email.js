@@ -1,18 +1,27 @@
 /* MODULES */
 const nodemailer = require('nodemailer');
 const { shell, ipcRenderer, remote } = require('electron');
-
+const fs = require('fs');
 /* GET WORKING DIRECTORY */
 const dir = process.cwd();
 
 /* LOCAL MODULES */
-const { emailContacts } = require(`${dir}/data/objects.js`);
+const { emailSetup } = require(`${dir}/data/objects.js`);
 
 /* GET WINDOW */
 let emailWindow = remote.getCurrentWindow();
 
-/* GLOBAL VARIABLES */
-let customerNumber;
+/* CREATE NODEMAILER TRANSPORTER */
+let mailTransport = nodemailer.createTransport(emailSetup['smtp']);
+
+/* SHOW NOTIFICATION IF ERROR CONNECTING */
+mailTransport.verify((err, success) => {
+  if (err) {
+    new Notification('MAIL SERVER ERROR', {
+      body: 'There was a mail server error.\nPlease contact your administrator.',
+    });
+  }
+});
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -22,25 +31,66 @@ let emailRecipients = document.getElementById('email-entry'),
   emailMessageArea = document.getElementById('email-message'),
   excel = document.getElementsByClassName('excel')[0],
   sendBtn = document.getElementById('send'),
-  mainHtml = document.getElementsByTagName('html')[0];
+  borderBox = document.getElementById('border'),
+  letterContainer = document.getElementById('sent-letter-container'),
+  letterCheckbox = document.getElementById('check-container');
 
-emailRecipients.value = emailContacts['email-tests'];
-emailMessageArea.value =
-  'Please find the attached files for immediate update and distribution.\n\nRegards,\nManagement.';
+/* CREATE EMAIL TEXT FOR MESSAGE AND INITIAL ADDRESSES */
+emailRecipients.value = emailSetup['email']['to'];
 
+///////////////
+/* FUNCTIONS */
+///////////////
+
+/* LOGFILE CREATION FUNCTION */
+function logfileFunc(error) {
+  const fileDir = `${dir}/data/logfiles/mail-error-logfile.txt'`;
+  /* CHECK IF IT EXISTS */
+  if (fs.existsSync(fileDir)) {
+    fs.appendFile(fileDir, `${new Date()}: Email Error -> ${error}\n`, (err) =>
+      console.log(err)
+    );
+  } else {
+    fs.writeFile(fileDir, `${new Date()}: Email Error -> ${error}\n`, (err) =>
+      console.log(err)
+    );
+  }
+}
+
+/* EMAIL SENT FUNCTION */
+function sendEmail() {
+  borderBox.style.transform = 'scale(0)';
+  letterContainer.style.cssText = 'visibility: visible;transform: scaleY(1);';
+}
+
+/* EXCEL BOX AND MAIL SEND FUNCTION */
 function populateExcelHtml(message) {
-  /* SPLIT MESSAGE INTO USABLE PARTS */
-  let filePaths = message.filePaths,
-    fileNameB,
-    fileNameA,
-    html;
+  /* GLOBAL VARIABLES */
+  let customerNumber, transportMessage, filePaths, fileNameB, fileNameA, html;
 
-  /* SET GLOBAL CUSTOMER NUMBER */
+  /* SPLIT MESSAGE INTO USABLE PARTS */
+  customerName = message.name;
   customerNumber = message.number;
+  filePaths = message.filePaths;
 
   /* DISPLAY FILE NAMES */
   fileNameA = `S5_${customerNumber}.xlsx`;
   fileNameB = `${customerNumber}_system.xlsx`;
+
+  /* CREATE THE TRANSPORT MESSAGE */
+  /* TEXT OF MESSAGE */
+  let textInitial = emailSetup['email']['text'].replace('{NAME}', customerName),
+    text = textInitial.replace('{NUMBER}', customerNumber);
+  /* INSERT THE MESSAGE IN THE TEXT AREA */
+  emailMessageArea.value = text;
+
+  transportMessage = {
+    to: emailRecipients.value,
+    subject: `Emailing ${customerNumber}`,
+    replyTo: emailSetup['email']['replyTo'],
+    text,
+    attachments: [{ path: filePaths[0] }, { path: filePaths[1] }],
+  };
 
   html = `
 
@@ -94,14 +144,28 @@ function populateExcelHtml(message) {
 
   /* SEND BUTTON */
   sendBtn.addEventListener('click', (e) => {
-    console.log(mainHtml);
-    mainHtml.style.transform = 'scaleY(0)';
-    mainHtml.style.opacity = '0';
-    setTimeout(() => {
-      //TODO: FINISH EMAIL SECTION
-      ipcRenderer.send('email-close', null);
-      emailWindow.close();
-    }, 1000);
+    /* HIDE EMAIL BOX SHOW LETTER */
+    sendEmail();
+    mailTransport.sendMail(transportMessage, (err, info) => {
+      if (err) {
+        new Notification('MAIL SEND ERROR', {
+          body: 'There was a problem sending messages',
+        });
+        logfileFunc(err);
+      } else {
+        letterCheckbox.style.cssText =
+          'visibility: visible;transform: rotate(360deg) scale(1);';
+        letterContainer.setAttribute('data-label', '');
+        setTimeout(() => {
+          letterContainer.style.transform = 'scaleY(0)';
+          letterCheckbox.style.transform = 'scaleY(0)';
+          setTimeout(() => {
+            ipcRenderer.send('email-close', null);
+            emailWindow.close();
+          }, 1500);
+        }, 1000);
+      }
+    });
   });
 
   /* FILE LINKS */
@@ -113,6 +177,8 @@ function populateExcelHtml(message) {
   excelLinks[1].addEventListener('dblclick', (e) => {
     shell.openPath(filePaths[1]);
   });
+
+  borderBox.style.cssText = 'transform: scale(1);opacity:1;';
 }
 
 /* ///////////// */

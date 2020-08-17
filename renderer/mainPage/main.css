@@ -19,6 +19,17 @@
   font-family: Forelle;
   src: url('./fonts/Forelle.ttf');
 }
+
+html {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  width: 100%;
+  height: 100%;
+}
+
 /* Main Body */
 body {
   display: flex;
@@ -43,10 +54,10 @@ button {
 }
 
 #container {
+  position: relative;
   display: flex;
-  /* width: 300px; */
+  width: fit-content;
   flex-direction: column;
-  justify-content: space-evenly;
 }
 #round {
   position: relative;
@@ -55,12 +66,12 @@ button {
   align-items: center;
   justify-content: center;
   background-color: #fff;
-  border: 8px solid var(--sec-blue);
+  border: 6px solid var(--sec-blue);
   border-radius: 150px;
   padding-top: 80px;
   padding-bottom: 20px;
-  margin-left: 60px;
-  margin-right: 60px;
+  margin-left: 70px;
+  margin-right: 70px;
 }
 #logo {
   position: relative;
@@ -176,11 +187,10 @@ button {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 95vh;
-  width: 82vh;
-  background-color: #3e6ba6f5;
-  color: #fff;
-  border: 2px solid #fff;
+  height: 90vh;
+  width: 100vw;
+  background-color: #fff;
+  border: 4px solid #111;
   border-radius: 100px;
   transition: visibility 0.3s, opacity 0.3s linear;
 }
@@ -208,6 +218,7 @@ button {
 }
 
 #about-btn {
+  position: relative;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -220,18 +231,19 @@ button {
   font-weight: bolder;
   font-size: 15px;
   color: transparent;
-  border: 4px solid var(--main-blue);
-
+  border: 4px solid #09e1ff;
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
 }
 #about-btn img {
   position: absolute;
+  width: 80%;
   transition: visibility 0.5s, opacity 0.5s;
 }
 
 #about-btn:hover {
-  background-color: var(--main-blue);
-  color: #fff;
+  background-color: #fff;
+  color: #fe1604;
+  border: 4px solid #03fd2f;
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
@@ -308,11 +320,11 @@ button {
   padding: 10px 10px;
   font-weight: bolder;
   font-size: 15px;
+  background-color: #09e1ff;
   border-radius: 200px;
   margin-top: 20px;
-  background-color: var(--main-blue);
   color: #fff;
-  border: 2px solid #fff;
+  border: 2px solid #09e1ff;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
 
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
@@ -321,6 +333,6 @@ button {
 .mail:hover,
 .btn-back:hover {
   background-color: #fff;
-  color: rgba(0, 0, 0, 0.9);
+  color: #09e1ff;
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }

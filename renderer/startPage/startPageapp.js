@@ -918,6 +918,7 @@ ipcRenderer.on('progress-end', (event, message) => {
   /* SEND MESSAGE WITH FILE PATHS TO MAIN TO OPEN EMAIL CHILDWINDOW */
   /* ADD CUSTOMER NUMBER FOE EASIER FILENAME DISCRIPTION */
   let newMessage = {
+    name: customerName.innerText,
     number: customerNumberValue.value,
     filePaths: message,
   };

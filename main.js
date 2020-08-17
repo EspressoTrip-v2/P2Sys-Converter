@@ -93,8 +93,8 @@ let trayMenu = Menu.buildFromTemplate([
 function createWindow() {
   createTray();
   homeWindow = new BrowserWindow({
-    width: 410,
-    height: 490,
+    width: 450,
+    height: 550,
     resizable: false,
     spellCheck: false,
     center: true,

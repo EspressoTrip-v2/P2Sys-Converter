@@ -7,6 +7,7 @@
   --opaque-man: rgba(128, 196, 50, 0.4);
   --auto: #d9793b;
   --opaque-auto: rgba(217, 122, 58, 0.3);
+  --sent-color: #cbe558;
 }
 
 /* Fonts */
@@ -23,9 +24,6 @@ html {
   align-content: center;
   height: 100%;
   background-color: transparent;
-  transform: scaleY(1);
-  opacity: 1;
-  transition: transform 0.3s, opacity 0.3s;
 }
 
 * {
@@ -79,6 +77,9 @@ body {
   width: 500px;
   height: 700px;
   box-shadow: 1px 1px 19px 0px rgba(50, 50, 50, 1);
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.3s, opacity 0.3s;
 }
 
 .text-container {
@@ -121,6 +122,15 @@ body {
   resize: none;
   margin-bottom: 20px;
   font-size: 16px;
+}
+
+#email-message::-webkit-scrollbar {
+  width: 4px;
+  background-color: var(--main-blue);
+}
+#email-message::-webkit-scrollbar-thumb {
+  height: 3px;
+  background-color: var(--sec-blue);
 }
 
 .excel-image {
@@ -192,7 +202,6 @@ body {
   outline: none;
   overflow: hidden;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
-
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
 }
 #send:hover {
@@ -202,4 +211,52 @@ body {
 }
 #letter:hover {
   fill: var(--button-green);
+}
+#sent-letter-container {
+  visibility: visible;
+  position: absolute;
+  transform: scaleY(0);
+  height: 140px;
+  width: 200px;
+  border-radius: 24px;
+  background-color: #fff;
+  transition: transform 0.8s;
+  box-shadow: 1px 1px 30px 0px rgba(50, 50, 50, 1);
+}
+#sent-letter-container::before {
+  position: absolute;
+  font-size: 45px;
+  top: 160px;
+  font-weight: bolder;
+  content: attr(data-label);
+  animation: sending 0.3s linear infinite alternate;
+}
+
+@keyframes sending {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+#sent-letter {
+  position: relative;
+  bottom: 30px;
+  width: 200px;
+}
+
+#check-container {
+  visibility: visible;
+  transform: rotate(0deg) scale(0);
+  position: absolute;
+  width: fit-content;
+  transition: transform 0.8s;
+}
+
+#check {
+  position: relative;
+  width: 120px;
+  height: auto;
 }

@@ -376,6 +376,13 @@ tr:nth-child(3n + 1) {
   background-color: var(--opaque-auto);
 }
 
+#p2sys-logo {
+  position: relative;
+  bottom: 1.1vh;
+  left: 16vw;
+  width: 8vh;
+}
+
 /* /////////////////// */
 /* TABLE FORM BUTTONS */
 /* ///////////////// */
