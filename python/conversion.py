@@ -12,6 +12,7 @@ time = str(datetime.now())[:10]
 # ////////////////////// #
 import reform
 import s5_ordersheet
+import system_template
 
 # READ IN JSON FILE FROM ARGV #
 # /////////////////////////// #
@@ -314,6 +315,10 @@ print(90)
 
 # SEND TO S5
 s5_ordersheet.create_s5_ordersheet(mydocuments_folder,
+                                   reform_file['customer_number'],
+                                   reform_file['customer_pricelist'])
+
+system_template.system_template_fn(mydocuments_folder,
                                    reform_file['customer_number'],
                                    reform_file['customer_pricelist'])
 

@@ -30,6 +30,8 @@ html {
   font-family: sans-serif;
   margin: 0;
   padding: 1vh;
+  transform: none;
+  transition: transform 0.3s;
 }
 input[type='text'][disabled] {
   background-color: #fff;
@@ -354,6 +356,15 @@ tr:nth-child(3n + 1) {
 .price-entries-untreated {
   text-align: center;
   font-size: 15px;
+}
+
+/* UNTREATED COMPARISON TABLE */
+#untreated-comparison {
+  display: none;
+}
+/* TREATED COMPARISON TABLE */
+#treated-comparison {
+  display: none;
 }
 
 #footer {

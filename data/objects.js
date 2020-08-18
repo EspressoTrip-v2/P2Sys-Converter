@@ -7,11 +7,7 @@ const dir = process.cwd();
 /* GET CURRENT DIRECTORY */
 const curDir = __dirname;
 
-/* TEMPLATES FOR NEW CUSTOMER CREATION */
-exports.dataObjects = JSON.parse(fs.readFileSync(`${curDir}/templates/dataObjects.json`));
-
-/* EMAIL SETUP JSON */
-exports.emailSetup = JSON.parse(fs.readFileSync(`${curDir}/appdata/email.json`));
+/* DATABASE GLOBAL VARIABLES */
 
 /* CUSTOMER DATABASE IS CUSTOMER NUMBER - PRICELIST NUMBER */
 let customerPricelistNumber = JSON.parse(
@@ -20,7 +16,7 @@ let customerPricelistNumber = JSON.parse(
 delete customerPricelistNumber['_id'];
 
 /* CUSTOMER NUMBER NAME IS CUSTOMER NUMBER - CUSTOMER NAME */
-let = customerNumberName = JSON.parse(
+let customerNumberName = JSON.parse(
   fs.readFileSync(`${curDir}/templates/customerNumberName.json`)
 );
 delete customerNumberName['_id'];
@@ -32,8 +28,14 @@ delete customerPrices['_id'];
 delete customerPricelistNumber['_id'];
 
 /* CUSTOMER PRICELIST BACKUP */
-let = customerBackUp = JSON.parse(fs.readFileSync(`${curDir}/templates/customerBackUp.json`));
+let customerBackUp = JSON.parse(fs.readFileSync(`${curDir}/templates/customerBackUp.json`));
 delete customerBackUp['_id'];
+
+/* TEMPLATES FOR NEW CUSTOMER CREATION */
+exports.dataObjects = JSON.parse(fs.readFileSync(`${curDir}/templates/dataObjects.json`));
+
+/* EMAIL SETUP JSON */
+exports.emailSetup = JSON.parse(fs.readFileSync(`${curDir}/appdata/email.json`));
 
 /* ////////// */
 /* FUNCTIONS */

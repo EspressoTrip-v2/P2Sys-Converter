@@ -2,9 +2,11 @@
 
 <h2 align="center">A crossplatform pricelist convertor for Sage-300 / ACC-PAC</h2>
 
-## Getting Started
+<p align="center" ><h3>Getting Started</h3>
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+
+</p>
 
 ### Prerequisites
 
@@ -27,6 +29,7 @@ Give the example
 And repeat
 
 <<<<<<< HEAD
+
 ```Skip to content
 Search or jump to…
 
@@ -175,6 +178,7 @@ About
 until finished
 
 =======
+
 ```
 until finished
 >>>>>>> 1d88635b264d35cacf569b44c706228c2ecc72f8
@@ -220,9 +224,9 @@ Add additional notes about how to deploy this on a live system
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+- [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
+- [Maven](https://maven.apache.org/) - Dependency Management
+- [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
 
 ## Contributing
 
@@ -233,12 +237,13 @@ Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c6
 <<<<<<< HEAD
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
 =======
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
->>>>>>> 1d88635b264d35cacf569b44c706228c2ecc72f8
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
+
+> > > > > > > 1d88635b264d35cacf569b44c706228c2ecc72f8
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+- **Billie Thompson** - _Initial work_ - [PurpleBooth](https://github.com/PurpleBooth)
 
 See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
@@ -248,10 +253,12 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
-<<<<<<< HEAD
+- Hat tip to anyone whose code was used
+- Inspiration
+- etc
+  <<<<<<< HEAD
+
 ```
 =======
 >>>>>>> 1d88635b264d35cacf569b44c706228c2ecc72f8
+```

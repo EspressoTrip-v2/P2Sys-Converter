@@ -177,51 +177,16 @@ const createObjectFromHtml = () => {
 };
 
 const resetForm = () => {
-  /* GET THE TABLE BODY ELEMENT THAT WAS GENERATED WHEN FILLING HTML */
-  let tableBody = document.getElementById('table-body');
-  /* CHANGE WINDOW SIZE */
-  secWindow.unmaximize();
-  secWindow.setMinimumSize(400, 650);
-  secWindow.setSize(400, 650);
-  secWindow.center();
-
-  /* HIDE THE WINDOW AND RESET ALL VALUES TO NULL */
-  // BASICALLY REVERSE THE FILL HTML FUNCTION
-  hider.style.display = 'none';
-  customerNumberValue.value = null;
-  customerName.innerText = null;
-  customerName.contentEditable = true;
-  ccaPrice.value = null;
-  clientEmail.value = null;
-  clientPhone.value = null;
-  customerPriceList.value = null;
-  customerPriceList.disabled = false;
-  html.style.backgroundColor = 'transparent';
-  tableBody.parentNode.removeChild(tableBody);
-
-  // HIDE THE PROGRESS BAR
-  progressFade.style.visibility = 'hidden';
-  progressFade.style.backdropFilter = 'none';
-
-  /* RESET THE CCA BUTTONS BACK TO STANDARD */
-  btnReset();
-
-  /* SHOW THE SEARCH BOX AGAIN */
-  checkCustomer.style.visibility = 'visible';
-  checkCustomer.style.opacity = '1';
-  /* CLEAR INPUT */
-  customerSearch.value = null;
-
-  /* GIVE ENOUGH DELAY TO REFOCUS THE SEARCH BOX AND ADD KEY UP TO RESET SEARCH VALUE */
+  html.style.cssText = 'transform:scale(0)';
   setTimeout(() => {
-    customerSearch.focus();
-    customerSearch.dispatchEvent(new Event('keyup'));
-    checkUpdateBtn.style.display = 'none';
-    checkContinueBtn.style.display = 'none';
-    checkResumeEditingBtn.style.display = 'none';
+    /* CHANGE WINDOW SIZE */
+    secWindow.unmaximize();
+    secWindow.setMinimumSize(400, 650);
+    secWindow.setSize(400, 650);
+    secWindow.center();
 
-    disabled.style.display = 'flex';
-  }, 250);
+    secWindow.reload();
+  }, 300);
 };
 
 ////////////////////////////////////
@@ -570,7 +535,7 @@ function addListListeners() {
 
 /* POPLATE THE CUSTOMERLIST AND ADD CORRECT CLASSES */
 
-function populateList() {
+(function populateList() {
   customerNumberList.innerHTML = '';
   customerNumber = Object.keys(customerPrices);
   customerNumber.forEach((el) => {
@@ -587,8 +552,8 @@ function populateList() {
     }
   });
   addListListeners();
-}
-populateList();
+})();
+// populateList();
 
 /* REMOVE ITEMS IN THE LIST THAT DOES NOT MATCH SEARCH */
 customerSearch.addEventListener('keyup', (e) => {
@@ -908,15 +873,21 @@ ipcRenderer.on('progress-end', (event, message) => {
 
   /* CREATE THE DATE OBJECT TO INSERT IN CUSTOMER BACKUPS */
   let dateJsonFile = {};
-  if (jsonFile) {
-    if (jsonFile[0].length > 3) {
+  dateJsonFile = {};
+  if (jsonFile[0].length > 3) {
+    if (customerBackUp[customerNumberValue.value]) {
+      dateJsonFile = jsonFile;
+      customerBackUp[customerNumberValue.value][dateString] = dateJsonFile;
+    } else {
       dateJsonFile[dateString] = jsonFile;
+      customerBackUp[customerNumberValue.value] = dateJsonFile;
     }
   } else {
     dateJsonFile[dateString] = customerData[customerNumberValue.value];
+    customerBackUp[customerNumberValue.value] = dateJsonFile;
   }
+
   /* UPDATE ALL THE DATA OBJECTS AND SEND TO GET WRITTEN LOCALLY  */
-  customerBackUp[customerNumberValue.value] = dateJsonFile;
   customerPricelistNumber[customerNumberValue.value] = customerPriceList.value;
   customerNumberName[customerNumberValue.value] = customerName.innerText;
   customerPrices[customerNumberValue.value] = customerData[customerNumberValue.value];
@@ -941,8 +912,8 @@ ipcRenderer.on('progress-end', (event, message) => {
   // REMOVE ITEM FROM LOCAL STORAGE
   localStorage.removeItem(searchValue);
 
-  /* REPOPULATE CUSTOMER LIST */
-  populateList();
+  // /* REPOPULATE CUSTOMER LIST */
+  // populateList();
 
   /* SEND MESSAGE WITH FILE PATHS TO MAIN TO OPEN EMAIL CHILDWINDOW */
   /* ADD CUSTOMER NUMBER FOE EASIER FILENAME DISCRIPTION */
