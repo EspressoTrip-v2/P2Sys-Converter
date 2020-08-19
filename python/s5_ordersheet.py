@@ -469,29 +469,29 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet6.merge_range('A2:H2', 'ESTABLISHED 1902', merge_formatB)
 
     # USE ROW NUM TO ADD 7 11% TEXT
-    t38_row = _038T_rownum + 4
+    t38_row = _038T_rownum + 5
     worksheet1.merge_range(f'A{t38_row}:H{t38_row}',
                            '''S7 AVAILABLE AT AN ADDITIONAL 11%''',
                            merge_formatC)
-    u38_row = _038U_rownum + 4
+    u38_row = _038U_rownum + 5
     worksheet2.merge_range(f'A{u38_row}:H{u38_row}',
                            '''S7 AVAILABLE AT AN ADDITIONAL 11%''',
                            merge_formatC)
 
-    t50_row = _050T_rownum + 4
+    t50_row = _050T_rownum + 5
     worksheet3.merge_range(f'A{t50_row}:H{t50_row}',
                            '''S7 AVAILABLE AT AN ADDITIONAL 11%''',
                            merge_formatC)
-    u50_row = _050U_rownum + 4
+    u50_row = _050U_rownum + 5
     worksheet4.merge_range(f'A{u50_row}:H{u50_row}',
                            '''S7 AVAILABLE AT AN ADDITIONAL 11%''',
                            merge_formatC)
 
-    t76_row = _076T_rownum + 4
+    t76_row = _076T_rownum + 5
     worksheet5.merge_range(f'A{t76_row}:H{t76_row}',
                            '''S7 AVAILABLE AT AN ADDITIONAL 11%''',
                            merge_formatC)
-    u76_row = _076U_rownum + 4
+    u76_row = _076U_rownum + 5
     worksheet6.merge_range(f'A{u76_row}:H{u76_row}',
                            '''S7 AVAILABLE AT AN ADDITIONAL 11%''',
                            merge_formatC)

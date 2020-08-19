@@ -17,6 +17,7 @@ let mailTransport = nodemailer.createTransport(emailSetup['smtp']);
 /* SHOW NOTIFICATION IF ERROR CONNECTING */
 mailTransport.verify((err, success) => {
   if (err) {
+    console.log(err);
     new Notification('MAIL SERVER ERROR', {
       body: 'There was a mail server error.\nPlease contact your administrator.',
     });
@@ -155,10 +156,15 @@ function populateExcelHtml(message) {
     sendEmail();
     mailTransport.sendMail(message, (err, info) => {
       if (err) {
+        logfileFunc(err);
+
         new Notification('MAIL SEND ERROR', {
           body: 'There was a problem sending messages',
         });
-        logfileFunc(err);
+
+        letterContainer.style.cssText = 'transform:scaleY(0);opacity:0;';
+        ipcRenderer.send('email-close', null);
+        emailWindow.close();
       } else {
         letterCheckbox.style.cssText =
           'visibility: visible;transform: rotate(360deg) scale(1);';

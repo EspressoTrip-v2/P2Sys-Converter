@@ -179,17 +179,19 @@ async function updateDatabase() {
 /* SYNC DATABASE FUNCTION */
 ///////////////////////////
 async function syncDb() {
-  exitbtn.disabled = true;
-  exitbtn.setAttribute('class', 'btn-disabled');
-  state = 4;
-  databaseText.setAttribute('data-label', 'UPDATING');
-  dbLight.setAttribute('class', 'db-update');
-  let updated = await updateDatabase();
-  if (updated) {
-    dbLight.setAttribute('class', 'db-connected');
-    state = db.readyState;
-    exitbtn.disabled = false;
-    exitbtn.setAttribute('class', 'btn-exit');
+  if (db.readyState !== 0) {
+    exitbtn.disabled = true;
+    exitbtn.setAttribute('class', 'btn-disabled');
+    state = 4;
+    databaseText.setAttribute('data-label', 'UPDATING');
+    dbLight.setAttribute('class', 'db-update');
+    let updated = await updateDatabase();
+    if (updated) {
+      dbLight.setAttribute('class', 'db-connected');
+      state = db.readyState;
+      exitbtn.disabled = false;
+      exitbtn.setAttribute('class', 'btn-exit');
+    }
   }
 }
 
@@ -252,6 +254,9 @@ db.once('connected', () => {
 /* CONNECTION ERROR */
 db.on('error', () => {
   state = 0;
+  new Notification('DATABASE CONNECTION ERROR', {
+    body: 'Unable to connect to the database...',
+  });
   setTimeout(() => {
     mongooseConnect();
   }, 300000);

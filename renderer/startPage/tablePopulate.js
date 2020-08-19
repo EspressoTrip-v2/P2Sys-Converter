@@ -45,13 +45,15 @@ exports.tablePopulate = (jsonfile) => {
       </form>
       </td>
       
-      
-      <td><input id="USER${el}" class="price-entries-untreated" type="number" value="${
+          
+      <td><div id="CU${el}" class="CU" data-label=""><input id="USER${el}" class="price-entries-untreated" type="number" value="${
       row[3] ? row[3] : ''
-    }" placeholder="- - - - - - - - -"/></td>
-      <td><input id="TSER${el}" class="price-entries-treated" type="number" value="${
+    }" placeholder="- - - - - - - - -"/></div></td>
+    
+    
+      <td><div id="CT${el}" class="CT" data-label=""><input id="TSER${el}" class="price-entries-treated" type="number" value="${
       row[4] ? row[4] : ''
-    }" placeholder="- - - - - - - - -"/></td>
+    }" placeholder="- - - - - - - - -"/></div></td>
     
     </tr>  
     `;

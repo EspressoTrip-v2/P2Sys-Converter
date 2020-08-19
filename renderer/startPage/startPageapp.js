@@ -193,8 +193,43 @@ const resetForm = () => {
 /* HTML TABLE FORM PAGE FUNCTION */
 //////////////////////////////////
 
+/* CREATE THE POPUP DATA FOR PREVIOUS PRICELISTS */
+function getBackupDateStrings(customernumber, cumenu, ctmenu) {
+  if (customerBackUp[customernumber]) {
+    let priceListDates = Array.from(Object.keys(customerBackUp[customernumber])),
+      cudateList,
+      ctdatelist;
+    priceListDates.sort();
+    /* GET THE CURRENT DATE INDEX IF EXISTS */
+    let curDate = priceListDates.indexOf(dateString);
+    if (curDate !== -1) {
+      priceListDates.splice(curDate, 1);
+    }
+    /* UNTREATED COLUMNS POPUP */
+    for (i = 0; i < cumenu.length; i++) {
+      cudateList = '';
+      priceListDates.forEach((el) => {
+        let val = customerBackUp[customernumber][el][i][3];
+        // console.log(val);
+        cudateList += ` ${el}: ${val}`;
+      });
+      cumenu[i].setAttribute('data-label', cudateList);
+    }
+    /* TREATED COLUMNS POPUP */
+    for (i = 0; i < ctmenu.length; i++) {
+      ctdatelist = '';
+      priceListDates.forEach((el) => {
+        let val = customerBackUp[customernumber][el][i][4];
+        // console.log(val);
+        ctdatelist += ` ${el}: ${val}`;
+      });
+      ctmenu[i].setAttribute('data-label', ctdatelist);
+    }
+  }
+}
+
 /* INNER TABLE HTM FUNCTION */
-const htmlInnerFill = (html) => {
+const htmlInnerFill = (customernumber, html) => {
   let innerTableColumns = html.htmlColumns,
     innerTable = html.htmlInner;
 
@@ -203,7 +238,9 @@ const htmlInnerFill = (html) => {
     `<tbody id="table-body" ><tr id="row-columns">${innerTableColumns}</tr>${innerTable}</tbody>`
   );
 
-  let tableEntryClass = Array.from(document.getElementsByClassName('table-entries'));
+  let tableEntryClass = Array.from(document.getElementsByClassName('table-entries')),
+    cuMenu = Array.from(document.getElementsByClassName('CU')),
+    ctMenu = Array.from(document.getElementsByClassName('CT'));
 
   tableEntryClass.forEach((el) => {
     el.addEventListener('focusout', () => {
@@ -214,6 +251,9 @@ const htmlInnerFill = (html) => {
       el.value = el.value.toUpperCase();
     });
   });
+
+  //TODO: FINISH THE POPUP MENUS FOR THE BACKUP PRICES
+  getBackupDateStrings(customernumber, cuMenu, ctMenu);
 };
 
 ///////////////////////////////////
@@ -656,7 +696,7 @@ checkContinueBtn.addEventListener('click', (e) => {
 
   // POPULATE HTML TABLE
   htmlContent = tablePopulate(jsonFile);
-  htmlInnerFill(htmlContent);
+  htmlInnerFill(searchValue, htmlContent);
   // HIDE SEARCH BOX
   checkCustomer.style.visibility = 'hidden';
   checkCustomer.style.opacity = '0';
@@ -698,7 +738,7 @@ checkUpdateBtn.addEventListener('click', (e) => {
 
   // POPULATE HTML TABLE
   htmlContent = tablePopulate(jsonFile);
-  htmlInnerFill(htmlContent);
+  htmlInnerFill(searchValue, htmlContent);
 
   // HIDE SEARCH BOX
   checkCustomer.style.visibility = 'hidden';
@@ -749,7 +789,7 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
   let localStorageObject = JSON.parse(localStorage[searchValue]);
   // POPULATE HTML TABLE
   htmlContent = tablePopulate(localPricelist[searchValue]);
-  htmlInnerFill(htmlContent);
+  htmlInnerFill(searchValue, htmlContent);
 
   // HIDE SEARCH BOX
   checkCustomer.style.visibility = 'hidden';
