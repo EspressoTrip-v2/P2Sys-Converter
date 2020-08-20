@@ -1,5 +1,6 @@
 /* MODULE IMPORTS */
 const { app, BrowserWindow, ipcMain, Tray, Menu, Notification } = require('electron');
+const { set } = require('mongoose');
 
 /* GET WORKING DIRECTORY */
 const dir = process.cwd();
@@ -52,6 +53,7 @@ ipcMain.on('progress', (e, message) => {
 /* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
 ipcMain.on('progress-end', (e, message) => {
   /* SEND MESSAGE TO CLOSE THE PROGRES BAR */
+  createLoadingWindow();
   secWindow.webContents.send('progress-end', message.filePaths);
 });
 
@@ -77,6 +79,12 @@ ipcMain.on('email-popup', (e, message) => {
 ipcMain.on('email-close', (e, message) => {
   secWindow.webContents.send('email-close', null);
 });
+
+/* SEND MESSAGE TO CLOSE TABLE WINDOW ON ERROR */
+ipcMain.on('error', (e, message) => {
+  secWindow.webContents.send('error', null);
+});
+
 ////////////////////////////////
 /* WINDOW CREATION FUNCTIONS */
 //////////////////////////////
@@ -143,8 +151,9 @@ function createSecWindow(message) {
 
   // Only show on load completion
   secWindow.once('ready-to-show', () => {
-    loadingWindow.close();
-    loadingWindow = null;
+    if (loadingWindow) {
+      loadingWindow.close();
+    }
     secWindow.show();
   });
 
@@ -171,6 +180,7 @@ function createChildWindow(message) {
       y: message.dimensions[1],
       autoHideMenuBar: true,
       opacity: 0,
+      show: false,
       center: true,
       frame: false,
       spellCheck: false,
@@ -183,7 +193,7 @@ function createChildWindow(message) {
       parent: secWindow,
       height: 450,
       width: 500,
-
+      show: false,
       spellCheck: false,
       resizable: false,
       autoHideMenuBar: true,
@@ -203,6 +213,14 @@ function createChildWindow(message) {
   //   Load dev tools
   // childWindow.webContents.openDevTools();
 
+  // Only show on load completion
+  childWindow.once('ready-to-show', () => {
+    if (loadingWindow) {
+      loadingWindow.close();
+    }
+    childWindow.show();
+  });
+
   //   Event listener for closing
   childWindow.on('closed', () => {
     childWindow = null;
@@ -219,6 +237,7 @@ function createLoadingWindow() {
     frame: false,
     spellCheck: false,
     transparent: true,
+    alwaysOnTop: true,
     webPreferences: { nodeIntegration: true, enableRemoteModule: true },
     icon: `${dir}/renderer/icons/trayTemplate.png`,
   });
@@ -244,8 +263,10 @@ function createEmailWindow(message) {
     autoHideMenuBar: true,
     center: true,
     frame: false,
+    show: false,
     spellCheck: false,
     transparent: true,
+    alwaysOnTop: true,
     webPreferences: { nodeIntegration: true, enableRemoteModule: true },
     icon: `${dir}/renderer/icons/trayTemplate.png`,
   });
@@ -260,6 +281,16 @@ function createEmailWindow(message) {
 
   //   Load dev tools
   // emailWindow.webContents.openDevTools();
+
+  // Only show on load completion
+  emailWindow.once('ready-to-show', () => {
+    emailWindow.show();
+    setTimeout(() => {
+      if (loadingWindow) {
+        loadingWindow.close();
+      }
+    }, 3000);
+  });
 
   //   Event listener for closing
   emailWindow.on('closed', () => {

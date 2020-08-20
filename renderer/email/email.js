@@ -10,23 +10,11 @@ const { emailSetup } = require(`${dir}/data/objects.js`);
 
 /* GET WINDOW */
 let emailWindow = remote.getCurrentWindow();
+let secWindow = emailWindow.getParentWindow();
 
-/* CREATE NODEMAILER TRANSPORTER */
-let mailTransport = nodemailer.createTransport(emailSetup['smtp']);
-
-/* SHOW NOTIFICATION IF ERROR CONNECTING */
-mailTransport.verify((err, success) => {
-  if (err) {
-    console.log(err);
-    new Notification('MAIL SERVER ERROR', {
-      body: 'There was a mail server error.\nPlease contact your administrator.',
-    });
-  }
-});
-
-///////////////////
+//////////////////
 /* DOM ELEMENTS */
-/////////////////
+//////////////////
 
 let emailRecipients = document.getElementById('email-entry'),
   emailMessageArea = document.getElementById('email-message'),
@@ -35,53 +23,35 @@ let emailRecipients = document.getElementById('email-entry'),
   borderBox = document.getElementById('border'),
   letterContainer = document.getElementById('sent-letter-container'),
   letterCheckbox = document.getElementById('check-container'),
-  sentNotification = document.getElementById('sent-audio');
+  sentNotification = document.getElementById('sent-audio'),
+  sentLetter = document.getElementById('sent-letter');
 
 /* CREATE EMAIL TEXT FOR MESSAGE AND INITIAL ADDRESSES */
 emailRecipients.value = emailSetup['email']['to'];
 
 /* GLOBAL VARIABLES */
-let customerNumber, filePaths, fileNameB, fileNameA, html;
+let customerNumber, filePaths, fileNameB, fileNameA, html, dialogReply, failedMessageobj;
 
 ///////////////
 /* FUNCTIONS */
 ///////////////
 
-function getMessage(text) {
-  let transportMessage = {
-    to: emailRecipients.value,
-    subject: `Emailing ${customerNumber}`,
-    replyTo: emailSetup['email']['replyTo'],
-    text,
-    attachments: [{ path: filePaths[0] }, { path: filePaths[1] }],
-  };
-
-  return transportMessage;
-}
-
-/* LOGFILE CREATION FUNCTION */
-function logfileFunc(error) {
-  const fileDir = `${dir}/data/logfiles/mail-error-logfile.txt'`;
-  /* CHECK IF IT EXISTS */
-  if (fs.existsSync(fileDir)) {
-    fs.appendFile(fileDir, `${new Date()}: Email Error -> ${error}\n`, (err) =>
-      console.log(err)
-    );
+/* LOCAL STORAGE APPEND FUNCTION INCASE FAILED EMAIL ALREADY EXISTS */
+function localStorageAppend(obj) {
+  let localFile;
+  if (localStorage['failedEmail']) {
+    localFile = JSON.parse(localStorage['failedEmail']);
+    localFile.push(obj);
+    localStorage.setItem('failedEmail', JSON.stringify(localFile));
   } else {
-    fs.writeFile(fileDir, `${new Date()}: Email Error -> ${error}\n`, (err) =>
-      console.log(err)
-    );
+    localFile = [];
+    localFile.push(obj);
+    localStorage.setItem('failedEmail', JSON.stringify(localFile));
   }
 }
 
-/* EMAIL SENT FUNCTION */
-function sendEmail() {
-  borderBox.style.transform = 'scale(0)';
-  letterContainer.style.cssText = 'transform: scaleY(1);';
-}
-
-/* EXCEL BOX AND MAIL SEND FUNCTION */
-function populateExcelHtml(message) {
+/* FUNCTION TO GENERATE THE MESSAGE TEST FOR EMAIL MESSAGE*/
+function getText(message) {
   /* SPLIT MESSAGE INTO USABLE PARTS */
   customerName = message.name;
   customerNumber = message.number;
@@ -97,6 +67,90 @@ function populateExcelHtml(message) {
     text = textInitial.replace('{NUMBER}', customerNumber);
   /* INSERT THE MESSAGE IN THE TEXT AREA */
   emailMessageArea.value = text;
+
+  return text;
+}
+
+/* FUNCTION TO CREATE MESSAGE OBJECT TO SEND AS EMAIL */
+function getMessage(text) {
+  let transportMessage = {
+    to: emailRecipients.value,
+    subject: `Emailing ${customerNumber}`,
+    replyTo: emailSetup['email']['replyTo'],
+    text,
+    attachments: [{ path: filePaths[0] }, { path: filePaths[1] }],
+  };
+
+  return transportMessage;
+}
+
+//////////////////////////////
+/* EMAIL TRANSPORT FUNCTION */
+//////////////////////////////
+
+/* CREATE NODEMAILER TRANSPORTER */
+let mailTransport = nodemailer.createTransport(emailSetup['smtp']);
+
+function verifyConnect(message) {
+  console.log(message);
+  /* SHOW NOTIFICATION IF ERROR CONNECTING */
+  mailTransport.verify((err, success) => {
+    if (err) {
+      logfileFunc(err);
+      new Notification('MAIL SERVER ERROR', {
+        body: 'There was a mail server error.\nPlease contact your administrator.',
+      });
+      /* GET THE REPLY FOR DIALOG */
+      dialogReply = remote.dialog.showMessageBoxSync(emailWindow, {
+        type: 'error',
+        icon: `${dir}/renderer/icons/trayTemplate.png`,
+        title: 'EMAIL SERVER ERROR',
+        buttons: ['CONTINUE', 'CLOSE'],
+        message: 'THE EMAIL SERVER COULD NOT BE REACHED:',
+        detail:
+          'Choose CONTINUE to try send anyway.\nElse CLOSE to return to the customer search box.\n\nWe will resend the email on the next restart',
+      });
+      if (dialogReply === 0) {
+        /* get the message object to save for retrey on reload */
+        populateExcelHtml(message);
+      } else {
+        /* SEND FAILED OBJECT TO LOCALSTORAGE FUNCTION */
+        failedMessageobj = getMessage(getText(message));
+        localStorageAppend(failedMessageobj);
+        ipcRenderer.send('email-close', null);
+        emailWindow.close();
+      }
+    } else {
+      populateExcelHtml(message);
+    }
+  });
+}
+
+/* LOGFILE CREATION FUNCTION */
+function logfileFunc(error) {
+  const fileDir = `${dir}/data/logfiles/mail-error-logfile.txt'`;
+  /* CHECK IF IT EXISTS */
+  if (fs.existsSync(fileDir)) {
+    fs.appendFile(fileDir, `${new Date()}: Email Error -> ${error}\n`, (err) =>
+      console.log(err)
+    );
+  } else {
+    fs.writeFileSync(fileDir, `${new Date()}: Email Error -> ${error}\n`, (err) =>
+      console.log(err)
+    );
+  }
+}
+
+/* EMAIL SENT FUNCTION */
+function sendEmail() {
+  borderBox.style.transform = 'scale(0)';
+  letterContainer.style.cssText = 'transform: scaleY(1);';
+}
+
+/* EXCEL BOX AND MAIL SEND FUNCTION */
+function populateExcelHtml(message) {
+  /* GET THE MESSAGE TEXT */
+  let text = getText(message);
 
   html = `
 
@@ -146,6 +200,7 @@ function populateExcelHtml(message) {
   excel.insertAdjacentHTML('beforeend', html);
 
   /* EVENT LISTENERS */
+
   /////////////////////
 
   /* SEND BUTTON */
@@ -158,14 +213,24 @@ function populateExcelHtml(message) {
       if (err) {
         logfileFunc(err);
 
+        localStorageAppend(message);
+
+        /* CREATE NOTIFICATION */
         new Notification('MAIL SEND ERROR', {
-          body: 'There was a problem sending messages',
+          body: 'There was a problem sending the message',
         });
 
-        letterContainer.style.cssText = 'transform:scaleY(0);opacity:0;';
-        ipcRenderer.send('email-close', null);
-        emailWindow.close();
+        /* CHANGE THE LETTER TO RED AND CHANGE MESSAGE TO FAIL */
+        letterContainer.setAttribute('data-label', '');
+        letterContainer.setAttribute('data-fail', 'SENDING FAILED');
+        sentLetter.style.fill = '#cf2115';
+        setTimeout(() => {
+          letterContainer.style.cssText = 'transform:scaleY(0);opacity:0;';
+          ipcRenderer.send('email-close', null);
+          emailWindow.close();
+        }, 1800);
       } else {
+        /* IF SUCCESSFUL SHOW TICK AND TRANSITION  */
         letterCheckbox.style.cssText =
           'visibility: visible;transform: rotate(360deg) scale(1);';
         letterContainer.setAttribute('data-label', '');
@@ -176,7 +241,7 @@ function populateExcelHtml(message) {
           setTimeout(() => {
             ipcRenderer.send('email-close', null);
             emailWindow.close();
-          }, 1500);
+          }, 1800);
         }, 1000);
       }
     });
@@ -200,5 +265,5 @@ function populateExcelHtml(message) {
 /* ///////////// */
 
 ipcRenderer.on('email-popup', (e, message) => {
-  populateExcelHtml(message);
+  verifyConnect(message);
 });

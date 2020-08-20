@@ -16,19 +16,16 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
 
     # TREATED
     columnsT = [
-        '   ITEM NUMBER   \n   ', '   DESCRIPTION   \n   ',
-        '   BUNDLE   \n   SIZE   ', '   M3 TREATED   \n   PRICE   ',
-        '   TREATED BUNDLE   \n   PRICE   ',
-        '   R/METER TREATED   \n   PRICE   ',
-        '    (BUNDLE) ORDER\n   QUANTITY   ', '   TOTAL\n   AMOUNT   '
+        'ITEM NUMBER', 'DESCRIPTION', 'BUNDLE \n SIZE', 'M3 TREATED \n PRICE',
+        'TREATED BUNDLE \n PRICE', 'R/METER TREATED \n PRICE',
+        '(BUNDLE) ORDER \n QUANTITY', 'TOTAL \n AMOUNT'
     ]
     # UNTREATED
     columnsU = [
-        '   ITEM NUMBER   \n   ', '   DESCRIPTION   \n   ',
-        '   BUNDLE   \n   SIZE   ', '   M3 UNTREATED   \n   PRICE   ',
-        '   UNTREATED BUNDLE   \n   PRICE   ',
-        '   R/METER UNTREATED   \n   PRICE   ',
-        '    (BUNDLE) ORDER\n   QUANTITY   ', '   TOTAL\n   AMOUNT   '
+        'ITEM NUMBER', 'DESCRIPTION', 'BUNDLE \n SIZE',
+        'M3 UNTREATED \n PRICE', 'UNTREATED BUNDLE \n PRICE',
+        'R/METER UNTREATED \n PRICE', '(BUNDLE) ORDER \n QUANTITY',
+        'TOTAL \n AMOUNT'
     ]
 
     # LISTS TO BE ABLE TO INSERT BLANK LINES BETWEEN PRODUCT LINES #
@@ -76,8 +73,8 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
         'ITEMNO', 'DESC', 'BUNDLE SIZE', 'M3 TREATED', 'BUNDLE PRICE',
         'R/METER TREATED'
     ]]
-    _038T['ORDER QTY M3'] = pd.NA
-    _038T['AMOUNT R'] = pd.NA
+    _038T['ORDER QTY M3'] = np.nan
+    _038T['AMOUNT R'] = np.nan
     _038T = _038T[_038T['M3 TREATED'] > 0]
 
     _038T.sort_values(by=['DESC'], inplace=True, axis=0)
@@ -111,8 +108,8 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
         'ITEMNO', 'DESC', 'BUNDLE SIZE', 'M3 UNTREATED', 'BUNDLE PRICE',
         'R/METER UNTREATED'
     ]]
-    _038U['ORDER QTY M3'] = pd.NA
-    _038U['AMOUNT R'] = pd.NA
+    _038U['ORDER QTY M3'] = np.nan
+    _038U['AMOUNT R'] = np.nan
     _038U = _038U[_038U['M3 UNTREATED'] > 0]
     _038U.sort_values(by=['DESC'], inplace=True, axis=0)
 
@@ -134,6 +131,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
             _038U = pd.concat([df1, df2])
     # ADD UNTREATED COLUMN NAMES
     _038U.columns = columnsU
+
     # ROW LENGTH
     _038U_rownum = _038U.shape[0]
 
@@ -147,8 +145,8 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
         'ITEMNO', 'DESC', 'BUNDLE SIZE', 'M3 TREATED', 'BUNDLE PRICE',
         'R/METER TREATED'
     ]]
-    _050T['ORDER QTY M3'] = pd.NA
-    _050T['AMOUNT R'] = pd.NA
+    _050T['ORDER QTY M3'] = np.nan
+    _050T['AMOUNT R'] = np.nan
     _050T = _050T[_050T['M3 TREATED'] > 0]
     _050T.sort_values(by=['DESC'], inplace=True, axis=0)
 
@@ -183,8 +181,8 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
         'ITEMNO', 'DESC', 'BUNDLE SIZE', 'M3 UNTREATED', 'BUNDLE PRICE',
         'R/METER UNTREATED'
     ]]
-    _050U['ORDER QTY M3'] = pd.NA
-    _050U['AMOUNT R'] = pd.NA
+    _050U['ORDER QTY M3'] = np.nan
+    _050U['AMOUNT R'] = np.nan
     _050U = _050U[_050U['M3 UNTREATED'] > 0]
     _050U.sort_values(by=['DESC'], inplace=True, axis=0)
 
@@ -221,8 +219,8 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
         'ITEMNO', 'DESC', 'BUNDLE SIZE', 'M3 TREATED', 'BUNDLE PRICE',
         'R/METER TREATED'
     ]]
-    _076T['ORDER QTY M3'] = pd.NA
-    _076T['AMOUNT R'] = pd.NA
+    _076T['ORDER QTY M3'] = np.nan
+    _076T['AMOUNT R'] = np.nan
     _076T = _076T[_076T['M3 TREATED'] > 0]
     _076T.sort_values(by=['DESC'], inplace=True, axis=0)
 
@@ -253,12 +251,13 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     # UNTREATED
     _076U = _076[~_076['ITEMNO'].str.endswith('T')].copy()
     _076U = _076U[_076U['DESC'].str.contains('SABS S5')]
+
     _076U = _076U[[
         'ITEMNO', 'DESC', 'BUNDLE SIZE', 'M3 UNTREATED', 'BUNDLE PRICE',
         'R/METER UNTREATED'
     ]]
-    _076U['ORDER QTY M3'] = pd.NA
-    _076U['AMOUNT R'] = pd.NA
+    _076U['ORDER QTY M3'] = np.nan
+    _076U['AMOUNT R'] = np.nan
     _076U = _076U[_076U['M3 UNTREATED'] > 0]
     _076U.sort_values(by=['DESC'], inplace=True, axis=0)
 
@@ -321,22 +320,19 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet6 = writer.sheets['Untreated 76mm']
 
     # COLUMN ATTRIBUTES AND FORMATTING
-    column_format1 = workbook.add_format({
-        'align': 'center',
-        'valign': 'center'
-    })
-    column_format2 = workbook.add_format({
-        'align':
-        'center',
-        'valign':
-        'center',
-        'num_format':
-        '_(###0.00_);_(\(###0.00\);_(" "??_);_(@_)'
-    })
+    column_format1 = workbook.add_format()
+    column_format1.set_align('center')
+    column_format1.set_align('vcenter')
+    column_format2 = workbook.add_format()
+    column_format2.set_align('center')
+    column_format2.set_align('vcenter')
+    column_format2.set_text_wrap()
+    column_format2.set_num_format('_(###0.00_);_(\(###0.00\);_(" "??_);_(@_)')
 
     # WORKSHEET 1
     worksheet1.set_column(0, 2, 20, column_format1)
-    worksheet1.set_column(3, 7, 20, column_format2)
+    worksheet1.set_column(3, 7, 28, column_format2)
+    worksheet1.set_column(7, 8, 20, column_format2)
 
     # ADD FORMULA TO ROWS
     r = np.arange(5, _038T_rownum + 5)
@@ -346,7 +342,8 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
 
     # WORKSHEET 2
     worksheet2.set_column(0, 2, 20, column_format1)
-    worksheet2.set_column(3, 7, 20, column_format2)
+    worksheet2.set_column(3, 7, 28, column_format2)
+    worksheet2.set_column(7, 8, 20, column_format2)
 
     # ADD FORMULA TO ROWS
     r = np.arange(5, _038U_rownum + 5)
@@ -356,7 +353,8 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
 
     # WORKSHEET 3
     worksheet3.set_column(0, 2, 20, column_format1)
-    worksheet3.set_column(3, 7, 20, column_format2)
+    worksheet3.set_column(3, 7, 28, column_format2)
+    worksheet3.set_column(7, 8, 20, column_format2)
 
     # ADD FORMULA TO ROWS
     r = np.arange(5, _050T_rownum + 5)
@@ -366,7 +364,8 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
 
     # WORKSHEET 4
     worksheet4.set_column(0, 2, 20, column_format1)
-    worksheet4.set_column(3, 7, 20, column_format2)
+    worksheet4.set_column(3, 7, 28, column_format2)
+    worksheet4.set_column(7, 8, 20, column_format2)
 
     # ADD FORMULA TO ROWS
     r = np.arange(5, _050U_rownum + 5)
@@ -376,7 +375,8 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
 
     # WORKSHEET 5
     worksheet5.set_column(0, 2, 20, column_format1)
-    worksheet5.set_column(3, 7, 20, column_format2)
+    worksheet5.set_column(3, 7, 28, column_format2)
+    worksheet5.set_column(7, 8, 20, column_format2)
 
     # ADD FORMULA TO ROWS
     r = np.arange(5, _076T_rownum + 5)
@@ -386,7 +386,8 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
 
     # WORKSHEET 6
     worksheet6.set_column(0, 2, 20, column_format1)
-    worksheet6.set_column(3, 7, 20, column_format2)
+    worksheet6.set_column(3, 7, 28, column_format2)
+    worksheet6.set_column(7, 8, 20, column_format2)
 
     # ADD FORMULA TO ROWS
     r = np.arange(5, _076U_rownum + 5)
@@ -496,13 +497,13 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
                            '''S7 AVAILABLE AT AN ADDITIONAL 11%''',
                            merge_formatC)
 
-    # COLUMN WIDTH ALL
-    worksheet1.set_column('A:H', 22)
-    worksheet2.set_column('A:H', 22)
-    worksheet3.set_column('A:H', 22)
-    worksheet4.set_column('A:H', 22)
-    worksheet5.set_column('A:H', 22)
-    worksheet6.set_column('A:H', 22)
+    # # COLUMN WIDTH ALL
+    # worksheet1.set_column(0, 6, 20)
+    # worksheet2.set_column(0, 6, 20)
+    # worksheet3.set_column(0, 6, 20)
+    # worksheet4.set_column(0, 6, 20)
+    # worksheet5.set_column(0, 6, 20)
+    # worksheet6.set_column(0, 6, 20)
 
     # DEFAULT ROW
     worksheet1.set_default_row(16)
@@ -513,12 +514,12 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet6.set_default_row(16)
 
     # HEADING ROWS
-    worksheet1.set_row(3, 30)
-    worksheet2.set_row(3, 30)
-    worksheet3.set_row(3, 30)
-    worksheet4.set_row(3, 30)
-    worksheet5.set_row(3, 30)
-    worksheet6.set_row(3, 30)
+    worksheet1.set_row(3, 28, column_format2)
+    worksheet2.set_row(3, 28, column_format2)
+    worksheet3.set_row(3, 28, column_format2)
+    worksheet4.set_row(3, 28, column_format2)
+    worksheet5.set_row(3, 28, column_format2)
+    worksheet6.set_row(3, 28, column_format2)
     # AC WHITCHER ROW
     worksheet1.set_row(0, 30)
     worksheet2.set_row(0, 30)
@@ -535,10 +536,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     worksheet5.protect('acwhitcher1234')
     worksheet6.protect('acwhitcher1234')
 
-    # unlocked = workbook.add_format({'locked': False})
-
     unlocked = workbook.add_format({
-        'font_name': 'Calibri',
         'align': 'center',
         'valign': 'vcenter',
         'locked': False
@@ -546,26 +544,26 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
 
     len_38T = np.arange(5, _038T_rownum + 5)
     for i in len_38T:
-        worksheet1.write(f'G{i}', ' ', unlocked)
+        worksheet1.write(f'G{i}', '', unlocked)
 
     len_38U = np.arange(5, _038U_rownum + 5)
     for i in len_38U:
-        worksheet2.write(f'G{i}', ' ', unlocked)
+        worksheet2.write(f'G{i}', '', unlocked)
 
     len_50T = np.arange(5, _050T_rownum + 5)
     for i in len_50T:
-        worksheet3.write(f'G{i}', ' ', unlocked)
+        worksheet3.write(f'G{i}', '', unlocked)
 
     len_50U = np.arange(5, _050U_rownum + 5)
     for i in len_50U:
-        worksheet4.write(f'G{i}', ' ', unlocked)
+        worksheet4.write(f'G{i}', '', unlocked)
 
     len_76T = np.arange(5, _076T_rownum + 5)
     for i in len_76T:
-        worksheet5.write(f'G{i}', ' ', unlocked)
+        worksheet5.write(f'G{i}', '', unlocked)
 
     len_76U = np.arange(5, _076U_rownum + 5)
     for i in len_76U:
-        worksheet6.write(f'G{i}', '0', unlocked)
+        worksheet6.write(f'G{i}', '', unlocked)
 
     writer.save()

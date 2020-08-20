@@ -126,17 +126,43 @@ span[role='textbox'] {
   width: 100px;
   height: fit-content;
   background-color: #fff;
-
   font-size: 15px;
   font-weight: bolder;
-  right: 75%;
+  right: 80%;
   top: 0;
   padding: 0 2vh;
   border-radius: 5px;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  /* border: 1px solid #000; */
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
+  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  z-index: 2;
+}
+#CU0::after,
+#CU3::after,
+#CU6::after,
+#CU9::after,
+#CU12::after,
+#CU15::after,
+#CU18::after,
+#CU21::after,
+#CU24::after,
+#CU27::after {
+  visibility: var(--vis, hidden);
+  position: absolute;
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 35px solid #000;
+  right: 72%;
+  top: 6px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+  z-index: 1;
 }
 
 #CU0:hover::before,
@@ -149,6 +175,19 @@ span[role='textbox'] {
 #CU21:hover::before,
 #CU24:hover::before,
 #CU27:hover::before {
+  transform: scaleX(1);
+}
+
+#CU0:hover::after,
+#CU3:hover::after,
+#CU6:hover::after,
+#CU9:hover::after,
+#CU12:hover::after,
+#CU15:hover::after,
+#CU18:hover::after,
+#CU21:hover::after,
+#CU24:hover::after,
+#CU27:hover::after {
   transform: scaleX(1);
 }
 
@@ -186,17 +225,43 @@ span[role='textbox'] {
   width: 100px;
   height: fit-content;
   background-color: #fff;
-
   font-size: 15px;
   font-weight: bolder;
-  right: 75%;
+  right: 80%;
   top: 0;
   padding: 0 2vh;
   border-radius: 5px;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
+  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  z-index: 2;
+}
+
+#CU1::after,
+#CU4::after,
+#CU7::after,
+#CU10::after,
+#CU13::after,
+#CU16::after,
+#CU19::after,
+#CU22::after,
+#CU25::after,
+#CU28::after {
+  visibility: var(--vis, hidden);
+  position: absolute;
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 35px solid #000;
+  right: 72%;
+  top: 6px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+  z-index: 1;
 }
 
 #CU1:hover::before,
@@ -211,7 +276,20 @@ span[role='textbox'] {
 #CU28:hover::before {
   transform: scaleX(1);
 }
+#CU1:hover::after,
+#CU4:hover::after,
+#CU7:hover::after,
+#CU10:hover::after,
+#CU13:hover::after,
+#CU16:hover::after,
+#CU19:hover::after,
+#CU22:hover::after,
+#CU25:hover::after,
+#CU28:hover::after {
+  transform: scaleX(1);
+}
 
+/* BOTTOM */
 #CU2,
 #CU5,
 #CU8,
@@ -231,7 +309,6 @@ span[role='textbox'] {
   width: 100%;
 }
 
-/* BOTTOM */
 #CU2::before,
 #CU5::before,
 #CU8::before,
@@ -247,17 +324,43 @@ span[role='textbox'] {
   width: 100px;
   height: fit-content;
   background-color: #fff;
-
   font-size: 15px;
   font-weight: bolder;
+  right: 80%;
   top: 0;
-  right: 75%;
   padding: 0 2vh;
   border-radius: 5px;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
+  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  z-index: 2;
+}
+
+#CU2::after,
+#CU5::after,
+#CU8::after,
+#CU11::after,
+#CU14::after,
+#CU17::after,
+#CU20::after,
+#CU23::after,
+#CU26::after,
+#CU29::after {
+  visibility: var(--vis, hidden);
+  position: absolute;
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 35px solid #000;
+  right: 72%;
+  top: 6px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+  z-index: 1;
 }
 
 #CU2:hover::before,
@@ -273,8 +376,21 @@ span[role='textbox'] {
   transform: scaleX(1);
 }
 
-/* TREATED COLUMNS */
+#CU2:hover::after,
+#CU5:hover::after,
+#CU8:hover::after,
+#CU11:hover::after,
+#CU14:hover::after,
+#CU17:hover::after,
+#CU20:hover::after,
+#CU23:hover::after,
+#CU26:hover::after,
+#CU29:hover::after {
+  transform: scaleX(1);
+}
 
+/* TREATED COLUMNS */
+/* TOP */
 #CT0,
 #CT3,
 #CT6,
@@ -290,7 +406,7 @@ span[role='textbox'] {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  align-content: center;
+  align-content: center;hidden
   width: 100%;
 }
 
@@ -311,14 +427,41 @@ span[role='textbox'] {
   background-color: #fff;
   font-size: 15px;
   font-weight: bolder;
-  right: 75%;
+  right: 80%;
   top: 0;
   padding: 0 2vh;
   border-radius: 5px;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
+  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  z-index: 2;
+}
+
+#CT0::after,
+#CT3::after,
+#CT6::after,
+#CT9::after,
+#CT12::after,
+#CT15::after,
+#CT18::after,
+#CT21::after,
+#CT24::after,
+#CT27::after {
+  visibility: var(--vis, hidden);
+  position: absolute;
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 35px solid #000;
+  right: 72%;
+  top: 6px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+  z-index: 1;
 }
 
 #CT0:hover::before,
@@ -333,6 +476,21 @@ span[role='textbox'] {
 #CT27:hover::before {
   transform: scaleX(1);
 }
+
+#CT0:hover::after,
+#CT3:hover::after,
+#CT6:hover::after,
+#CT9:hover::after,
+#CT12:hover::after,
+#CT15:hover::after,
+#CT18:hover::after,
+#CT21:hover::after,
+#CT24:hover::after,
+#CT27:hover::after {
+  transform: scaleX(1);
+}
+
+/* MIDDLE */
 
 #CT1,
 #CT4,
@@ -368,17 +526,42 @@ span[role='textbox'] {
   width: 100px;
   height: fit-content;
   background-color: #fff;
-
   font-size: 15px;
   font-weight: bolder;
-  right: 75%;
+  right: 80%;
   top: 0;
   padding: 0 2vh;
   border-radius: 5px;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
+  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  z-index: 2;
+}
+#CT1::after,
+#CT4::after,
+#CT7::after,
+#CT10::after,
+#CT13::after,
+#CT16::after,
+#CT19::after,
+#CT22::after,
+#CT25::after,
+#CT28::after {
+  visibility: var(--vis, hidden);
+  position: absolute;
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 35px solid #000;
+  right: 72%;
+  top: 6px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+  z-index: 1;
 }
 
 #CT1:hover::before,
@@ -394,6 +577,20 @@ span[role='textbox'] {
   transform: scaleX(1);
 }
 
+#CT1:hover::after,
+#CT4:hover::after,
+#CT7:hover::after,
+#CT10:hover::after,
+#CT13:hover::after,
+#CT16:hover::after,
+#CT19:hover::after,
+#CT22:hover::after,
+#CT25:hover::after,
+#CT28:hover::after {
+  transform: scaleX(1);
+}
+
+/* BOTTOM */
 #CT2,
 #CT5,
 #CT8,
@@ -429,17 +626,43 @@ span[role='textbox'] {
   width: 100px;
   height: fit-content;
   background-color: #fff;
-
   font-size: 15px;
   font-weight: bolder;
+  right: 80%;
   top: 0;
-  right: 75%;
   padding: 0 2vh;
   border-radius: 5px;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
+  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  z-index: 2;
+}
+
+#CT2::after,
+#CT5::after,
+#CT8::after,
+#CT11::after,
+#CT14::after,
+#CT17::after,
+#CT20::after,
+#CT23::after,
+#CT26::after,
+#CT29::after {
+  visibility: var(--vis,hidden);
+  position: absolute;
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 35px solid #000;
+  right: 72%;
+  top: 6px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+  z-index: 1;
 }
 
 #CT2:hover::before,
@@ -452,6 +675,19 @@ span[role='textbox'] {
 #CT23:hover::before,
 #CT26:hover::before,
 #CT29:hover::before {
+  transform: scaleX(1);
+}
+
+#CT2:hover::after,
+#CT5:hover::after,
+#CT8:hover::after,
+#CT11:hover::after,
+#CT14:hover::after,
+#CT17:hover::after,
+#CT20:hover::after,
+#CT23:hover::after,
+#CT26:hover::after,
+#CT29:hover::after {
   transform: scaleX(1);
 }
 

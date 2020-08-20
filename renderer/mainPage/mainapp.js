@@ -72,7 +72,9 @@ function logfileFunc(message) {
   if (fs.existsSync(fileDir)) {
     fs.appendFile(fileDir, `${new Date()}: Database ${message}\n`, (err) => console.log(err));
   } else {
-    fs.writeFile(fileDir, `${new Date()}: Database ${message}\n`, (err) => console.log(err));
+    fs.writeFileSync(fileDir, `${new Date()}: Database ${message}\n`, (err) =>
+      console.log(err)
+    );
   }
 }
 

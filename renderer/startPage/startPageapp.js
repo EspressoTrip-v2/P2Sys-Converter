@@ -25,7 +25,6 @@ let dateString = `${mainDate.getMonth() + 1}/${mainDate.getFullYear()}`;
 /* REMOTE WINDOWS */
 ///////////////////
 let secWindow = remote.getCurrentWindow();
-window.secWindow = secWindow;
 
 /* ///////////////////////////////// VARIABLE LEGEND ////////////////////////////// */
 /* searchValue: Value entered into the search box (customer number)                 */
@@ -196,34 +195,39 @@ const resetForm = () => {
 /* CREATE THE POPUP DATA FOR PREVIOUS PRICELISTS */
 function getBackupDateStrings(customernumber, cumenu, ctmenu) {
   if (customerBackUp[customernumber]) {
+    /* GET THE PRICELIST DATES FROM DATAFRAME */
     let priceListDates = Array.from(Object.keys(customerBackUp[customernumber])),
       cudateList,
       ctdatelist;
     priceListDates.sort();
-    /* GET THE CURRENT DATE INDEX IF EXISTS */
+    /* GET THE CURRENT DATE INDEX IF EXISTS AND REMOVE */
     let curDate = priceListDates.indexOf(dateString);
     if (curDate !== -1) {
       priceListDates.splice(curDate, 1);
     }
-    /* UNTREATED COLUMNS POPUP */
-    for (i = 0; i < cumenu.length; i++) {
-      cudateList = '';
-      priceListDates.forEach((el) => {
-        let val = customerBackUp[customernumber][el][i][3];
-        // console.log(val);
-        cudateList += ` ${el}: ${val}`;
-      });
-      cumenu[i].setAttribute('data-label', cudateList);
-    }
-    /* TREATED COLUMNS POPUP */
-    for (i = 0; i < ctmenu.length; i++) {
-      ctdatelist = '';
-      priceListDates.forEach((el) => {
-        let val = customerBackUp[customernumber][el][i][4];
-        // console.log(val);
-        ctdatelist += ` ${el}: ${val}`;
-      });
-      ctmenu[i].setAttribute('data-label', ctdatelist);
+    if (priceListDates.length >= 1) {
+      /* UNTREATED COLUMNS POPUP */
+      for (i = 0; i < cumenu.length; i++) {
+        cudateList = '';
+        priceListDates.forEach((el) => {
+          let val = customerBackUp[customernumber][el][i][3];
+          // console.log(val);
+          cudateList += ` ${el}: ${val}`;
+        });
+        cumenu[i].setAttribute('data-label', cudateList);
+        cumenu[i].style.setProperty('--vis', 'visible');
+      }
+      /* TREATED COLUMNS POPUP */
+      for (i = 0; i < ctmenu.length; i++) {
+        ctdatelist = '';
+        priceListDates.forEach((el) => {
+          let val = customerBackUp[customernumber][el][i][4];
+          // console.log(val);
+          ctdatelist += ` ${el}: ${val}`;
+        });
+        ctmenu[i].setAttribute('data-label', ctdatelist);
+        ctmenu[i].style.setProperty('--vis', 'visible');
+      }
     }
   }
 }
@@ -952,9 +956,6 @@ ipcRenderer.on('progress-end', (event, message) => {
   // REMOVE ITEM FROM LOCAL STORAGE
   localStorage.removeItem(searchValue);
 
-  // /* REPOPULATE CUSTOMER LIST */
-  // populateList();
-
   /* SEND MESSAGE WITH FILE PATHS TO MAIN TO OPEN EMAIL CHILDWINDOW */
   /* ADD CUSTOMER NUMBER FOE EASIER FILENAME DISCRIPTION */
   let newMessage = {
@@ -962,6 +963,8 @@ ipcRenderer.on('progress-end', (event, message) => {
     number: pricelistNumber,
     filePaths: message,
   };
+
+  /* CALL EMAIL POPUP */
   ipcRenderer.send('email-popup', newMessage);
 
   /* WAIT FOR MESSAGE SENT TO CLOSE EMAIL POPUP AND RESET */
@@ -1007,4 +1010,9 @@ ipcRenderer.on('db-status', (e, message) => {
     tableDb.setAttribute('class', 'db-update');
     tableDbText.setAttribute('data-label', 'UPDATING');
   }
+});
+
+/* MESSAGE TO CLICK BACK BUTTON IF THERE IS AN ERROR IN PYTHON CONVERSION */
+ipcRenderer.on('error', (e, message) => {
+  backBtn.click();
 });

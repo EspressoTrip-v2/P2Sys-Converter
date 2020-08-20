@@ -1,5 +1,6 @@
 const { remote, ipcRenderer } = require('electron');
 const { PythonShell } = require('python-shell');
+const fs = require('fs');
 
 /* GET WORKING DIRECTORY */
 const dir = process.cwd();
@@ -7,15 +8,29 @@ const dir = process.cwd();
 /* REMOTE WINDOWS */
 ///////////////////
 let progressWindow = remote.getCurrentWindow();
+secWindow = progressWindow.getParentWindow();
 
 /* DOM ELEMENTS */
 /////////////////
 let progressBar = document.getElementById('progress');
 
-/* VARIABLES */
+/* FUNCTIONS */
 //////////////
 
-//TODO: FINNISH PROCESS AFTER CONVERSION
+/* LOGFILE CREATION FUNCTION */
+function logfileFunc(error) {
+  const fileDir = `${dir}/data/logfiles/conversion-logfile.txt'`;
+  /* CHECK IF IT EXISTS */
+  if (fs.existsSync(fileDir)) {
+    fs.appendFile(fileDir, `${new Date()}: Conversion Error -> [${error}]\n`, (err) =>
+      console.log(err)
+    );
+  } else {
+    fs.writeFileSync(fileDir, `${new Date()}: Conversion Error -> [${error}]\n`, (err) =>
+      console.log(err)
+    );
+  }
+}
 
 ipcRenderer.on('convert-python', (event, message) => {
   let file = message;
@@ -39,6 +54,7 @@ ipcRenderer.on('convert-python', (event, message) => {
   let filePaths;
 
   pyshell.on('message', (message) => {
+    // console.log(message);
     let value = parseInt(message);
 
     /* SEPARATE THE PATHS INTO USABLE ARRAY */
@@ -60,6 +76,23 @@ ipcRenderer.on('convert-python', (event, message) => {
         ipcRenderer.send('progress-end', message);
         progressWindow.close();
       }, 500);
+    }
+  });
+  pyshell.end(function (err, code, signal) {
+    if (err) {
+      console.log(err);
+      logfileFunc(err);
+      progressWindow.hide();
+      remote.dialog.showMessageBoxSync(secWindow, {
+        type: 'error',
+        icon: `${dir}/renderer/icons/trayTemplate.png`,
+        buttons: ['OK'],
+        message: 'PYTHON CONVERSION ERROR:',
+        detail:
+          'There was an problem during the file conversion.\nPlease contact your developer.',
+      });
+      ipcRenderer.send('error', null);
+      progressWindow.close();
     }
   });
 });

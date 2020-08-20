@@ -232,6 +232,16 @@ body {
   content: attr(data-label);
   animation: sending 0.3s linear infinite alternate;
 }
+#sent-letter-container::after {
+  position: absolute;
+  text-align: center;
+  color: #cf2115;
+  right: -6px;
+  font-size: 45px;
+  top: 160px;
+  font-weight: bolder;
+  content: attr(data-fail);
+}
 
 @keyframes sending {
   from {
