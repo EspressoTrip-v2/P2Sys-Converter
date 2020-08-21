@@ -192,14 +192,32 @@ const resetForm = () => {
 /* HTML TABLE FORM PAGE FUNCTION */
 //////////////////////////////////
 
+/* SORT DATES FUNCTION */
+function sortDate(datesArr) {
+  /* SET THE DATES */
+  let arr = datesArr.map((el) => {
+    return `1/${el}`;
+  });
+  arr.sort((dateA, dateB) => new Date(dateA) - new Date(dateB));
+  console.log(arr);
+  return arr.map((el) => {
+    return el.toString().slice(2);
+  });
+}
+
 /* CREATE THE POPUP DATA FOR PREVIOUS PRICELISTS */
 function getBackupDateStrings(customernumber, cumenu, ctmenu) {
   if (customerBackUp[customernumber]) {
     /* GET THE PRICELIST DATES FROM DATAFRAME */
-    let priceListDates = Array.from(Object.keys(customerBackUp[customernumber])),
+    let datesArray = Array.from(Object.keys(customerBackUp[customernumber])),
       cudateList,
+      priceListDates,
       ctdatelist;
-    priceListDates.sort();
+
+    /* SORT THE DATES FOR DISPLAY */
+    priceListDates = sortDate(datesArray);
+    console.log(priceListDates);
+
     /* GET THE CURRENT DATE INDEX IF EXISTS AND REMOVE */
     let curDate = priceListDates.indexOf(dateString);
     if (curDate !== -1) {
@@ -331,7 +349,7 @@ createBtn.addEventListener('click', (e) => {
     });
     /* CREATE MESSAGE POPUP */
     remote.dialog.showMessageBox(secWindow, {
-      type: 'error',
+      type: 'warning',
       icon: `${dir}/renderer/icons/trayTemplate.png`,
       buttons: ['OK'],
       message: 'MISSING VALUES:',
@@ -339,7 +357,7 @@ createBtn.addEventListener('click', (e) => {
     });
   } else if (!customerName.innerText) {
     remote.dialog.showMessageBox(secWindow, {
-      type: 'error',
+      type: 'warning',
       icon: `${dir}/renderer/icons/trayTemplate.png`,
       buttons: ['OK'],
       message: 'CUSTOMER NAME REQUIRED:',

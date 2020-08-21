@@ -85,6 +85,13 @@ ipcMain.on('error', (e, message) => {
   secWindow.webContents.send('error', null);
 });
 
+/* LOADER CLOSE MESSAGE */
+ipcMain.on('close-loader', (e, message) => {
+  if (loadingWindow) {
+    loadingWindow.close();
+  }
+});
+
 ////////////////////////////////
 /* WINDOW CREATION FUNCTIONS */
 //////////////////////////////

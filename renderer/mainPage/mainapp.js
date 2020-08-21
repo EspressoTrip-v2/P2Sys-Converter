@@ -21,6 +21,7 @@ const {
   customerPricelistNumber,
   customerPrices,
 } = require(`${dir}/data/objects.js`);
+const { sendFailedMail } = require(`${dir}/renderer/email/failedMail.js`);
 
 /* GLOBAL VARIABLES */
 /////////////////////
@@ -89,7 +90,7 @@ async function updateDatabase() {
 
   let mes = 'There are inconsistencies in:\n\n# {DATA} #\n\nPlease contact the developer.',
     title = 'DATABASE ERROR',
-    type = 'error',
+    type = 'warning',
     but = ['OK', 'EMAIL DEV'];
 
   try {
@@ -248,7 +249,13 @@ setInterval(() => {
   }
 }, 1000);
 
+/* ONCE DB CONNECTION IS UP SEND PREVIOUSLY FAILED EMAILS AND UPDATE DATABASE */
 db.once('connected', () => {
+  /* SEND PREVIOUSLY FAILED MAIL MESSAGES */
+  if (localStorage['failedEmail']) {
+    sendFailedMail().catch(console.error);
+  }
+  /* UPDATE DB */
   state = null;
   syncDb();
 });
@@ -257,6 +264,7 @@ db.once('connected', () => {
 db.on('error', () => {
   state = 0;
   new Notification('DATABASE CONNECTION ERROR', {
+    icon: `${dir}/renderer/icons/trayTemplate.png`,
     body: 'Unable to connect to the database...',
   });
   setTimeout(() => {

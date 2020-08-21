@@ -10,7 +10,6 @@ const { emailSetup } = require(`${dir}/data/objects.js`);
 
 /* GET WINDOW */
 let emailWindow = remote.getCurrentWindow();
-let secWindow = emailWindow.getParentWindow();
 
 //////////////////
 /* DOM ELEMENTS */
@@ -96,13 +95,19 @@ function verifyConnect(message) {
   /* SHOW NOTIFICATION IF ERROR CONNECTING */
   mailTransport.verify((err, success) => {
     if (err) {
+      /* LOG THE ERROR */
       logfileFunc(err);
       new Notification('MAIL SERVER ERROR', {
+        icon: `${dir}/renderer/icons/trayTemplate.png`,
         body: 'There was a mail server error.\nPlease contact your administrator.',
       });
+
+      /* SEND MESSAGE TO CLOSE THE ACTIVE LOADER */
+      ipcRenderer.send('close-loader', null);
+
       /* GET THE REPLY FOR DIALOG */
       dialogReply = remote.dialog.showMessageBoxSync(emailWindow, {
-        type: 'error',
+        type: 'warning',
         icon: `${dir}/renderer/icons/trayTemplate.png`,
         title: 'EMAIL SERVER ERROR',
         buttons: ['CONTINUE', 'CLOSE'],
@@ -111,7 +116,7 @@ function verifyConnect(message) {
           'Choose CONTINUE to try send anyway.\nElse CLOSE to return to the customer search box.\n\nWe will resend the email on the next restart',
       });
       if (dialogReply === 0) {
-        /* get the message object to save for retrey on reload */
+        /* GET THE MESSAGE OBJECT TO SAVE FOR RETRY ON RELOAD */
         populateExcelHtml(message);
       } else {
         /* SEND FAILED OBJECT TO LOCALSTORAGE FUNCTION */
@@ -217,6 +222,7 @@ function populateExcelHtml(message) {
 
         /* CREATE NOTIFICATION */
         new Notification('MAIL SEND ERROR', {
+          icon: `${dir}/renderer/icons/mailFailTemplate.png`,
           body: 'There was a problem sending the message',
         });
 

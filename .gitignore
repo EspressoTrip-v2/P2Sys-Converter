@@ -1,3 +1,4 @@
 node_modules/
 data/templates/
-python/__pycache__
+data/logfiles/
+python/__pycache__/

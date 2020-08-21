@@ -84,7 +84,7 @@ ipcRenderer.on('convert-python', (event, message) => {
       logfileFunc(err);
       progressWindow.hide();
       remote.dialog.showMessageBoxSync(secWindow, {
-        type: 'error',
+        type: 'warning',
         icon: `${dir}/renderer/icons/trayTemplate.png`,
         buttons: ['OK'],
         message: 'PYTHON CONVERSION ERROR:',
