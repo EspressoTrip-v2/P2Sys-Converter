@@ -1,7 +1,7 @@
 {
-  "name": "price2system",
+  "name": "P2Sys-App",
   "version": "1.0.0",
-  "description": "Pricing program for Accpac",
+  "description": "Price-List conversion program",
   "main": "main.js",
   "scripts": {
     "watch": "nodemon --ignore '*.json' --exec electron .",

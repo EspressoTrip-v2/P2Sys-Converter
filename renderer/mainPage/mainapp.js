@@ -30,7 +30,8 @@ const { sendFailedMail } = require(`${dir}/renderer/email/failedMail.js`);
 /////////////////////
 let homeWindow = remote.getCurrentWindow(),
   stateInterval,
-  restartInterval;
+  restartInterval,
+  sendStatus;
 
 //////////////////
 /* DOM ELEMENTS*/
@@ -105,6 +106,8 @@ db.on('error', (err) => {
   });
   logfileFunc(err);
   restartDB();
+  clearInterval(sendStatus);
+  sendDbStatus('getStatus');
 
   /* CLEAR THE STATE INTERVAL SET DB STATUS TO ERROR */
   clearInterval(stateInterval);
@@ -119,7 +122,7 @@ db.on('connected', (e) => {
 ////////////////
 /* FUNCTIONS */
 //////////////
-
+/* MESSAGE FUNCTION FOR DATABASE CONNECTION INCONSISTENCIES */
 function messageAlert(type, title, detail, buttons) {
   let selection = remote.dialog.showMessageBoxSync(homeWindow, {
     type,
@@ -259,13 +262,30 @@ function startInterval() {
     if (db.readyState === 1) {
       dbLight.setAttribute('class', 'db-connected');
       databaseText.setAttribute('data-label', 'CONNECTED');
-      ipcRenderer.send('db-status', db.readyState);
+      // ipcRenderer.send('db-status', db.readyState);
     } else if (db.readyState === 0) {
       dbLight.setAttribute('class', 'db-fail');
       databaseText.setAttribute('data-label', 'ERROR');
-      ipcRenderer.send('db-status', db.readyState);
+      // ipcRenderer.send('db-status', db.readyState);
     }
   }, 1000);
+}
+
+/* SEND STATUS TO SECWINDOW */
+function sendDbStatus(status) {
+  if (status === 'getStatus') {
+    sendStatus = setInterval(() => {
+      ipcRenderer.send('db-status', db.readyState);
+    }, 1000);
+  } else if (status === 4) {
+    sendStatus = setInterval(() => {
+      ipcRenderer.send('db-status', 4);
+    }, 1000);
+  } else {
+    sendStatus = setInterval(() => {
+      ipcRenderer.send('db-status', status);
+    }, 1000);
+  }
 }
 
 /* DB RESTART FUNCTION FOR FAILURE */
@@ -286,7 +306,8 @@ async function syncDb() {
     exitbtn.setAttribute('class', 'btn-disabled');
 
     /* SEND THE UPDATE CODE */
-    ipcRenderer.send('db-status', 4);
+    clearInterval(sendStatus);
+    sendDbStatus(4);
     /* CHANGE THE DB STATUS DOM */
     databaseText.setAttribute('data-label', 'UPDATING');
     dbLight.setAttribute('class', 'db-update');
@@ -300,6 +321,9 @@ async function syncDb() {
       exitbtn.setAttribute('class', 'btn-exit');
       /* RESTART THE STATUS INTERVAL TIMER */
       startInterval();
+      clearInterval(sendStatus);
+
+      sendDbStatus('getStatus');
     }
   } else if (state === 0) {
     /* SET EXIT BUTTON ENABLED IF NOT CONNECTION AVAILABLE */
@@ -329,7 +353,9 @@ window.addEventListener('offline', (e) => {
   dbLight.setAttribute('class', 'db-fail');
   databaseText.setAttribute('data-label', 'ERROR');
   /* SEND TO OTHER WINDOWS IF AVAILABLE */
-  ipcRenderer.send('db-status', 0);
+  clearInterval(sendStatus);
+
+  sendDbStatus('getStatus');
 });
 
 /* MAIN PAGE EVENTS */
