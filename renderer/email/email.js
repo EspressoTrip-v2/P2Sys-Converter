@@ -38,8 +38,8 @@ let customerNumber, filePaths, fileNameB, fileNameA, html, dialogReply, failedMe
 /* LOCAL STORAGE APPEND FUNCTION INCASE FAILED EMAIL ALREADY EXISTS */
 function localStorageAppend(obj) {
   let localFile;
-  if (localStorage['failedEmail']) {
-    localFile = JSON.parse(localStorage['failedEmail']);
+  if (localStorage.getItem('failedEmail')) {
+    localFile = JSON.parse(localStorage.getItem('failedEmail'));
     localFile.push(obj);
     localStorage.setItem('failedEmail', JSON.stringify(localFile));
   } else {
@@ -56,9 +56,14 @@ function getText(message) {
   customerNumber = message.number;
   filePaths = message.filePaths;
 
-  /* DISPLAY FILE NAMES */
-  fileNameA = `S5_${customerNumber}.xlsx`;
-  fileNameB = `${customerNumber}_system.xlsx`;
+  if (filePaths[0].includes('S5')) {
+    /* DISPLAY FILE NAMES */
+    fileNameA = `S5_${customerNumber}.xlsx`;
+    fileNameB = `${customerNumber}_system.xlsx`;
+  } else {
+    fileNameB = `S5_${customerNumber}.xlsx`;
+    fileNameA = `${customerNumber}_system.xlsx`;
+  }
 
   /* CREATE THE TRANSPORT MESSAGE */
   /* TEXT OF MESSAGE */

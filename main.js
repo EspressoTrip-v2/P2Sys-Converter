@@ -1,6 +1,5 @@
 /* MODULE IMPORTS */
 const { app, BrowserWindow, ipcMain, Tray, Menu, Notification } = require('electron');
-const { set } = require('mongoose');
 
 /* GET WORKING DIRECTORY */
 const dir = process.cwd();
@@ -273,7 +272,6 @@ function createEmailWindow(message) {
     show: false,
     spellCheck: false,
     transparent: true,
-    alwaysOnTop: true,
     webPreferences: { nodeIntegration: true, enableRemoteModule: true },
     icon: `${dir}/renderer/icons/trayTemplate.png`,
   });
@@ -315,5 +313,4 @@ app.on('ready', () => {
 /* QUIT APP WHEN ALL WINDOWS ARE CLOSED */
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
-  db.close();
 });

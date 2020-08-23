@@ -542,7 +542,7 @@ manCaaBtn.addEventListener('click', (e) => {
 /* CLEAR CURRENT LIST OF CLICKS FUNCTION */
 function clearList() {
   numbers.forEach((el) => {
-    if (localStorage[el.innerText]) {
+    if (localStorage.getItem(el.innerText)) {
       el.setAttribute('class', 'cusnum-resume');
     } else {
       el.setAttribute('class', 'cusnum');
@@ -577,7 +577,7 @@ function addListListeners() {
 
       // FIRST CHECK TO SEE IF THERE IS A LOCALLY STORED VERSION
       // PRICELIST OF THE SELECTED CUSTOMER AND SHOW THE RESUME BUTTON
-      if (localStorage[searchValue]) {
+      if (localStorage.getItem(searchValue)) {
         jsonFile = customerPrices[customerSearch.value];
         checkUpdateBtn.style.display = 'none';
         checkContinueBtn.style.display = 'none';
@@ -601,7 +601,7 @@ function addListListeners() {
   customerNumberList.innerHTML = '';
   customerNumber = Object.keys(customerPrices);
   customerNumber.forEach((el) => {
-    if (localStorage[el]) {
+    if (localStorage.getItem(el)) {
       let html = `
       <dl class="cusnum-resume" id="${el}">${el}</dl>
       `;
@@ -670,7 +670,7 @@ customerSearch.addEventListener('keyup', (e) => {
           customerSearch.value.length >= 6 &&
           !customerNumber.includes(customerSearch.value)
         ) {
-          if (localStorage[customerSearch.value.toUpperCase()]) {
+          if (localStorage.getItem(customerSearch.value.toUpperCase())) {
             // DISPLAY CONTINUE BUTTON
             checkContinueBtn.style.display = 'none';
             disabledBtn.style.display = 'none';
@@ -695,7 +695,7 @@ customerSearch.addEventListener('keyup', (e) => {
           disabledBtn.style.display = 'flex';
           checkUpdateBtn.style.display = 'none';
           checkResumeEditingBtn.style.display = 'none';
-        } else if (!localStorage[customerSearch.value.toUpperCase()]) {
+        } else if (!localStorage.getItem(customerSearch.value.toUpperCase())) {
           // DISPLAY TICK IF THE SEARCH  VALUE IS CORRECT PATTERN AND LENGTH 6
           customerNumberList.style.backgroundImage = `url('${dir}/renderer/icons/tick.png')`;
           searchValue = customerSearch.value.toUpperCase();
@@ -806,9 +806,9 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
   /* SET THE SEARCH VALUE TO CUSTOMER SEARCH VALUE UPPERCASE*/
   searchValue = customerSearch.value.toUpperCase();
 
-  let localPricelist = JSON.parse(localStorage[searchValue]);
+  let localPricelist = JSON.parse(localStorage.getItem(searchValue));
 
-  let localStorageObject = JSON.parse(localStorage[searchValue]);
+  let localStorageObject = JSON.parse(localStorage.getItem(searchValue));
   // POPULATE HTML TABLE
   htmlContent = tablePopulate(localPricelist[searchValue]);
   htmlInnerFill(searchValue, htmlContent);

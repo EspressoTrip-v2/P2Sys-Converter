@@ -37,6 +37,9 @@ exports.dataObjects = JSON.parse(fs.readFileSync(`${curDir}/templates/dataObject
 /* EMAIL SETUP JSON */
 exports.emailSetup = JSON.parse(fs.readFileSync(`${curDir}/appdata/email.json`));
 
+/* DATABASE SETUP FILE */
+exports.databaseSetup = JSON.parse(fs.readFileSync(`${dir}/data/appdata/database.json`));
+
 /* ////////// */
 /* FUNCTIONS */
 /* //////// */
