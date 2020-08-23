@@ -1,5 +1,5 @@
 /* MODULE IMPORTS */
-const { app, BrowserWindow, ipcMain, Tray, Menu, Notification } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
 
 /* GET WORKING DIRECTORY */
 const dir = process.cwd();
