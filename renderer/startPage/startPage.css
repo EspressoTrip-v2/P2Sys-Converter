@@ -143,8 +143,6 @@ span[role='textbox'] {
   z-index: 2;
 }
 
-
-
 #CU0::after,
 #CU3::after,
 #CU6::after,
@@ -416,7 +414,7 @@ span[role='textbox'] {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  align-content: center;hidden
+  align-content: center;
   width: 100%;
 }
 
@@ -665,7 +663,7 @@ span[role='textbox'] {
 #CT23::after,
 #CT26::after,
 #CT29::after {
-  visibility: var(--vis,hidden);
+  visibility: var(--vis, hidden);
   position: absolute;
   content: '';
   width: 0;
@@ -1045,6 +1043,10 @@ tr:nth-child(3n + 1) {
   color: var(--button-red);
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
+.back-to-main-btn:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
 .create-btn {
   position: relative;
   display: flex;
@@ -1091,6 +1093,11 @@ tr:nth-child(3n + 1) {
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
+.create-btn:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
 .pause-btn {
   top: -1.2vh;
   background-color: var(--button-gold);
@@ -1106,6 +1113,11 @@ tr:nth-child(3n + 1) {
   text-align: center;
   color: var(--button-gold);
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
+.pause-btn:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
 .cca-auto-out {
@@ -1265,6 +1277,12 @@ tr:nth-child(3n + 1) {
   text-align: center;
   color: var(--button-gold);
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
+.info-btn:active,
+.email-now:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
 .lock-in {
@@ -1649,6 +1667,11 @@ tr:nth-child(3n + 1) {
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
 }
 
+#check-cancel-btn:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
 #check-cancel-btn:hover {
   background-color: #fff;
   color: var(--button-red);
@@ -1673,6 +1696,11 @@ tr:nth-child(3n + 1) {
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
+#check-continue-btn:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
 #check-update-btn {
   position: relative;
   display: none;
@@ -1691,6 +1719,12 @@ tr:nth-child(3n + 1) {
   color: var(--main-blue);
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
+
+#check-update-btn:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
 #resume-editing-btn {
   position: relative;
   display: none;
@@ -1706,6 +1740,11 @@ tr:nth-child(3n + 1) {
   background-color: #fff;
   color: var(--button-gold);
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
+#resume-editing-btn:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
 #check-background div {
@@ -1760,6 +1799,10 @@ tr:nth-child(3n + 1) {
   background-color: #fff;
   border: 2px solid black;
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+}
+#assist-btn:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
 /* //////////////////// */

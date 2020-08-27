@@ -6,9 +6,12 @@
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'" />
     <title>New Customer</title>
     <link rel="stylesheet" href="./startPage.css" />
+    <script defer src="./startPageapp.js"></script>
   </head>
 
   <body id="page-body">
+    <audio src="../sounds/click.wav" id="click" style="display: none"></audio>
+
     <!-- Customer Search Box -->
     <!-- /////////////////// -->
     <div id="check-customer">
@@ -34,7 +37,7 @@
               title="Customer number needs to be 6 digits long"
               autofocus
             />
-            <input style="display: none;" id="hidden-submit" type="submit" />
+            <input style="display: none" id="hidden-submit" type="submit" />
           </form>
         </div>
 
@@ -56,7 +59,7 @@
 
     <!-- Main Table Form HTML -->
     <!-- //////////////////// -->
-    <div id="hider" style="display: hidden;">
+    <div id="hider" style="display: hidden">
       <div id="border">
         <div id="header">
           <div class="max">
@@ -72,7 +75,6 @@
               </span>
             </div>
             <button id="email-now" class="email-now" href="#"></button>
-            <!-- <button id="reminder" class="reminder" href="#">REMIND</button> -->
 
             <!-- Customer Info Dock -->
             <!-- ////////////////// -->
@@ -167,9 +169,5 @@
 
     <!-- FADE FOR PROGRESS DOCK -->
     <div id="progress-fade"></div>
-
-    <script>
-      require('./startPageapp.js');
-    </script>
   </body>
 </html>

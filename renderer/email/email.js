@@ -23,7 +23,8 @@ let emailRecipients = document.getElementById('email-entry'),
   letterContainer = document.getElementById('sent-letter-container'),
   letterCheckbox = document.getElementById('check-container'),
   sentNotification = document.getElementById('sent-audio'),
-  sentLetter = document.getElementById('sent-letter');
+  sentLetter = document.getElementById('sent-letter'),
+  soundClick = document.getElementById('click');
 
 /* CREATE EMAIL TEXT FOR MESSAGE AND INITIAL ADDRESSES */
 emailRecipients.value = emailSetup['email']['to'];
@@ -215,47 +216,49 @@ function populateExcelHtml(message) {
 
   /* SEND BUTTON */
   sendBtn.addEventListener('click', (e) => {
+    soundClick.play();
     let message = getMessage(text);
+    setTimeout(() => {
+      /* HIDE EMAIL BOX SHOW LETTER */
+      sendEmail();
+      mailTransport.sendMail(message, (err, info) => {
+        if (err) {
+          logfileFunc(err);
 
-    /* HIDE EMAIL BOX SHOW LETTER */
-    sendEmail();
-    mailTransport.sendMail(message, (err, info) => {
-      if (err) {
-        logfileFunc(err);
+          localStorageAppend(message);
 
-        localStorageAppend(message);
+          /* CREATE NOTIFICATION */
+          new Notification('MAIL SEND ERROR', {
+            icon: `${dir}/renderer/icons/mailFailTemplate.png`,
+            body: 'There was a problem sending the message',
+          });
 
-        /* CREATE NOTIFICATION */
-        new Notification('MAIL SEND ERROR', {
-          icon: `${dir}/renderer/icons/mailFailTemplate.png`,
-          body: 'There was a problem sending the message',
-        });
-
-        /* CHANGE THE LETTER TO RED AND CHANGE MESSAGE TO FAIL */
-        letterContainer.setAttribute('data-label', '');
-        letterContainer.setAttribute('data-fail', 'SENDING FAILED');
-        sentLetter.style.fill = '#cf2115';
-        setTimeout(() => {
-          letterContainer.style.cssText = 'transform:scaleY(0);opacity:0;';
-          ipcRenderer.send('email-close', null);
-          emailWindow.close();
-        }, 1800);
-      } else {
-        /* IF SUCCESSFUL SHOW TICK AND TRANSITION  */
-        letterCheckbox.style.cssText =
-          'visibility: visible;transform: rotate(360deg) scale(1);';
-        letterContainer.setAttribute('data-label', '');
-        sentNotification.play();
-        setTimeout(() => {
-          letterContainer.style.cssText = 'transform:scaleY(0);opacity:0;';
-          letterCheckbox.style.cssText = 'transform:scaleY(0);opacity:0;';
+          /* CHANGE THE LETTER TO RED AND CHANGE MESSAGE TO FAIL */
+          letterContainer.setAttribute('data-label', '');
+          letterContainer.setAttribute('data-fail', 'SENDING FAILED');
+          sentLetter.style.fill = '#cf2115';
           setTimeout(() => {
+            letterContainer.style.cssText = 'transform:scaleY(0);opacity:0;';
             ipcRenderer.send('email-close', null);
             emailWindow.close();
           }, 1800);
-        }, 1000);
-      }
-    });
+        } else {
+          /* IF SUCCESSFUL SHOW TICK AND TRANSITION  */
+          letterCheckbox.style.cssText =
+            'visibility: visible;transform: rotate(360deg) scale(1);';
+          letterContainer.setAttribute('data-label', '');
+          sentNotification.play();
+          setTimeout(() => {
+            letterContainer.style.cssText = 'transform:scaleY(0);opacity:0;';
+            letterCheckbox.style.cssText = 'transform:scaleY(0);opacity:0;';
+            setTimeout(() => {
+              ipcRenderer.send('email-close', null);
+              emailWindow.close();
+            }, 1800);
+          }, 1000);
+        }
+      });
+    }, 200);
   });
 
   /* FILE LINKS */

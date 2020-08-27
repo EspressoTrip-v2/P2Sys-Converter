@@ -210,6 +210,12 @@ body {
   border: 3px solid var(--button-green);
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
+
+#send:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
 #letter:hover {
   fill: var(--button-green);
 }

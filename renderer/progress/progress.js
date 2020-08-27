@@ -80,7 +80,6 @@ ipcRenderer.on('convert-python', (event, message) => {
   });
   pyshell.end(function (err, code, signal) {
     if (err) {
-      console.log(err);
       logfileFunc(err);
       progressWindow.hide();
       remote.dialog.showMessageBoxSync(secWindow, {

@@ -60,8 +60,8 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     customer_pricelist['BUNDLE PRICE'] = (customer_pricelist['UNITPRICE'].values\
                                             *  (1/customer_pricelist['CONVERSION'].values)).round(2)
 
-    customer_pricelist = customer_pricelist[~customer_pricelist['DESC'].str.
-                                            contains('XXX')]
+    # customer_pricelist = customer_pricelist[~customer_pricelist['DESC'].str.
+    #                                         contains('XXX')]
 
     # 038 PRODUCT LINE
     _038 = customer_pricelist[customer_pricelist['DESC'].str.contains(

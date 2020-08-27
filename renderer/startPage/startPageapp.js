@@ -62,6 +62,7 @@ let backBtn = document.getElementById('back-to-main-btn'),
   lockSvg = document.getElementById('lock-svg'),
   unlockSvg = document.getElementById('unlock-svg'),
   lengthColumn = document.getElementById('len'),
+  soundClick = document.getElementById('click'),
   /* TABLE COMPONENT DOMS */
   /////////////////////////
   table = document.getElementById('table'),
@@ -98,32 +99,6 @@ let checkCustomer = document.getElementById('check-customer'),
 //////////////
 /*FUNCTIONS*/
 ////////////
-
-/* FADE CUSTOMER DOCK ON WINDOWS */
-const fadeInOut = (childWindow) => {
-  let count = childWindow.getOpacity(),
-    timer;
-  if (childWindow.getOpacity() === 0) {
-    if (count < 1) {
-      timer = setInterval(() => {
-        count += 0.1;
-        childWindow.setOpacity(count);
-        if (count >= 1) clearInterval(timer);
-      }, 80);
-    }
-  } else if (childWindow.getOpacity() === 1) {
-    if (count >= 1) {
-      timer = setInterval(() => {
-        count -= 0.1;
-        childWindow.setOpacity(count);
-        if (count <= 0) {
-          clearInterval(timer);
-          childWindow.close();
-        }
-      }, 50);
-    }
-  }
-};
 
 /* CCA AUTO/MAN FUNCTION CONTROL FOR KEYUP IN CELLS */
 // THIS FUNCTION IS CREATED SO THAT THE EVENT CAN BE REMOVED ON MANUAL MODE
@@ -199,7 +174,6 @@ function sortDate(datesArr) {
     return `1/${el}`;
   });
   arr.sort((dateA, dateB) => new Date(dateA) - new Date(dateB));
-  console.log(arr);
   return arr.map((el) => {
     return el.toString().slice(2);
   });
@@ -216,7 +190,6 @@ function getBackupDateStrings(customernumber, cumenu, ctmenu) {
 
     /* SORT THE DATES FOR DISPLAY */
     priceListDates = sortDate(datesArray);
-    console.log(priceListDates);
 
     /* GET THE CURRENT DATE INDEX IF EXISTS AND REMOVE */
     let curDate = priceListDates.indexOf(dateString);
@@ -307,12 +280,16 @@ const btnReset = () => {
 
 /* TO MAIN BUTTON */
 backBtn.addEventListener('click', () => {
+  soundClick.play();
   /* RESET THE TABLE FORM TO ZERO DATA */
-  resetForm();
+  setTimeout(() => {
+    resetForm();
+  }, 200);
 });
 
 /* CREATE BUTTON */
 createBtn.addEventListener('click', (e) => {
+  soundClick.play();
   /* CHECK ALL VALUE ENTRIES AND WARN IF MISSING */
   let treatedMissingBool = [],
     untreatedMissingBool = [],
@@ -382,6 +359,8 @@ createBtn.addEventListener('click', (e) => {
 
 /* PAUSE BUTTON TO SAVE TO LOCAL STORAGE */
 pauseBtn.addEventListener('click', () => {
+  soundClick.play();
+
   /* CREATE THE STORAGE OBJECT */
   let localStorageJson = createObjectFromHtml(),
     searchValue = customerSearch.value.toUpperCase();
@@ -390,11 +369,15 @@ pauseBtn.addEventListener('click', () => {
   localStorageJson = JSON.stringify(localStorageJson);
   /* SET ITEM */
   localStorage.setItem(searchValue, localStorageJson);
-  backBtn.click();
+  setTimeout(() => {
+    resetForm();
+  }, 200);
 });
 
 /* SEND EMAIL BUTTON */
 sendEmailbtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   if (clientEmail.value) {
     window.location = `mailto:${clientEmail.value}`;
   } else {
@@ -413,6 +396,8 @@ sendEmailbtn.addEventListener('click', (e) => {
 });
 /* INFO BUTTON */
 infobtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   if (window.getComputedStyle(customerContactMenu).visibility === 'hidden') {
     customerContactMenu.style.visibility = 'visible';
     customerContactMenu.style.transform = 'scaleY(1)';
@@ -426,6 +411,8 @@ infobtn.addEventListener('click', (e) => {
 
 /* LENGTH LOCK BUTTON */
 lengthLockBtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   if (lengthLockBtn.classList.value === 'lock-out') {
     lengthLockBtn.setAttribute('class', 'lock-in');
     lockSvg.style.fill = '#fff';
@@ -443,6 +430,7 @@ lengthLockBtn.addEventListener('click', (e) => {
 
 /* LENGTH UNLOCK BUTTON */
 lengthUnlockBtn.addEventListener('click', (e) => {
+  soundClick.play();
   if (lengthUnlockBtn.classList.value === 'unlock-out') {
     lengthUnlockBtn.setAttribute('class', 'unlock-in');
     unlockSvg.style.fill = '#fff';
@@ -460,6 +448,8 @@ lengthUnlockBtn.addEventListener('click', (e) => {
 
 /* AUTO CCA BUTTON */
 autoCaaBtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   // Check to see if there is an entry in the cca price and the button is out
   if (autoCaaBtn.classList.value === 'cca-auto-out' && ccaPrice.value) {
     autoCaaBtn.setAttribute('class', 'cca-auto-in');
@@ -505,6 +495,8 @@ autoCaaBtn.addEventListener('click', (e) => {
 
 /* MANUAL CCA BUTTON */
 manCaaBtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   if (manCaaBtn.classList.value === 'cca-man-out') {
     // Set man button in
     manCaaBtn.setAttribute('class', 'cca-man-in');
@@ -559,6 +551,8 @@ function addListListeners() {
   // CLICK EVENT ON CUSTOMER LIST ITEM
   numbers.forEach((el) => {
     el.addEventListener('click', (e) => {
+      soundClick.play();
+
       // RESET ALL THE BUTTONS TO DEFAULT
       checkUpdateBtn.style.display = 'none';
       checkContinueBtn.style.display = 'none';
@@ -615,7 +609,6 @@ function addListListeners() {
   });
   addListListeners();
 })();
-// populateList();
 
 /* REMOVE ITEMS IN THE LIST THAT DOES NOT MATCH SEARCH */
 customerSearch.addEventListener('keyup', (e) => {
@@ -713,6 +706,8 @@ customerSearch.addEventListener('keyup', (e) => {
 
 /* CONTINUE BUTTON */
 checkContinueBtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
   searchValue = customerSearch.value.toUpperCase();
 
@@ -735,7 +730,7 @@ checkContinueBtn.addEventListener('click', (e) => {
   // ADD BACKGROUND TO HTML ELEMENT
   setTimeout(() => {
     html.style.backgroundColor = '#fff';
-  }, 200);
+  }, 300);
 
   if (secWindow.getChildWindows().length > 0) {
     secWindow.getChildWindows()[0].close();
@@ -743,18 +738,20 @@ checkContinueBtn.addEventListener('click', (e) => {
       hider.style.display = 'flex';
       secWindow.maximize();
       secWindow.setMinimumSize(1200, 700);
-    }, 200);
+    }, 300);
     searchValue;
   }
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
     secWindow.setMinimumSize(1200, 700);
-  }, 200);
+  }, 300);
 });
 
 /* UPDATE BUTTON */
 checkUpdateBtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
   searchValue = customerSearch.value.toUpperCase();
 
@@ -784,7 +781,7 @@ checkUpdateBtn.addEventListener('click', (e) => {
   // ADD BACKGROUND TO HTML ELEMENT
   setTimeout(() => {
     html.style.backgroundColor = '#fff';
-  }, 200);
+  }, 300);
 
   if (secWindow.getChildWindows().length > 0) {
     secWindow.getChildWindows()[0].close();
@@ -792,17 +789,19 @@ checkUpdateBtn.addEventListener('click', (e) => {
       hider.style.display = 'flex';
       secWindow.maximize();
       secWindow.setMinimumSize(1200, 700);
-    }, 200);
+    }, 300);
   }
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
     secWindow.setMinimumSize(1200, 700);
-  }, 200);
+  }, 300);
 });
 
 /* RESUME BUTTON */
 checkResumeEditingBtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   /* SET THE SEARCH VALUE TO CUSTOMER SEARCH VALUE UPPERCASE*/
   searchValue = customerSearch.value.toUpperCase();
 
@@ -834,7 +833,7 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
   // ADD BACKGROUND TO HTML ELEMENT
   setTimeout(() => {
     html.style.backgroundColor = '#fff';
-  }, 200);
+  }, 300);
 
   if (secWindow.getChildWindows().length > 0) {
     secWindow.getChildWindows()[0].close();
@@ -842,24 +841,29 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
       hider.style.display = 'flex';
       secWindow.maximize();
       secWindow.setMinimumSize(1200, 700);
-    }, 200);
+    }, 300);
   }
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
     secWindow.setMinimumSize(1200, 700);
-  }, 200);
+  }, 300);
 });
 
 /* CANCEL BUTTON */
 checkCancelbtn.addEventListener('click', () => {
-  secWindow.close();
-  secWindow = null;
+  soundClick.play();
+  setTimeout(() => {
+    secWindow.close();
+    secWindow = null;
+  }, 200);
 });
 
 /* CUSTOMER FIND DOCK BUTTON */
 
 customerFindBtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   // Get window posiiton to send to main process
   let dimensions = secWindow.getPosition(),
     message = {
@@ -869,20 +873,10 @@ customerFindBtn.addEventListener('click', (e) => {
     };
 
   if (secWindow.getChildWindows().length > 0) {
-    if (process.platform === 'win32') {
-      fadeInOut(secWindow.getChildWindows()[0]);
-      customerSearch.focus();
-    } else {
-      secWindow.getChildWindows()[0].close();
-      customerSearch.focus();
-    }
+    secWindow.getChildWindows()[0].close();
+    customerSearch.focus();
   } else {
-    if (process.platform === 'win32') {
-      ipcRenderer.send('position', message);
-      fadeInOut(secWindow.getChildWindows()[0]);
-    } else {
-      ipcRenderer.send('position', message);
-    }
+    ipcRenderer.send('position', message);
   }
 });
 
@@ -890,6 +884,8 @@ customerFindBtn.addEventListener('click', (e) => {
 /* WINDOW CONTROL ELEMENTS */
 ////////////////////////////
 maxWindow[0].addEventListener('click', (e) => {
+  soundClick.play();
+
   if (secWindow.isMaximized()) {
     secWindow.unmaximize();
     setTimeout(() => {
@@ -907,17 +903,25 @@ maxWindow[0].addEventListener('click', (e) => {
 /* COMMUNICATION FOR CUSTOMER DOCK */
 ipcRenderer.on('dock-sec', (event, message) => {
   let child = secWindow.getChildWindows()[0];
+  customerSearch.value = message;
+
+  /* GET THE PRICELIST FROMT HE DATABASE */
+  jsonFile = customerPrices[message];
+
   child.blur();
   secWindow.focus();
   customerSearch.focus();
-  customerSearch.value = message;
-  customerSearch.dispatchEvent(new Event('keyup'));
-  setTimeout(() => {
+  if (Object.keys(customerPrices).includes(message)) {
+    /* SEND THE NUMBER TO THE SUCTOMER SEARCH MAKE THE ITEM CLICKED AND SHOW UPDATE BUTTON */
+    let item = document.getElementById(message);
+    item.setAttribute('class', 'cusnum-clicked');
+    checkUpdateBtn.style.display = 'flex';
+    disabledBtn.style.display = 'none';
+    checkContinueBtn.style.display = 'none';
     customerSearch.dispatchEvent(new Event('keyup'));
-  }, 100);
-
-  if (document.getElementById(message)) {
-    document.getElementById(message).click();
+  } else {
+    customerSearch.dispatchEvent(new Event('keyup'));
+    customerSearch.dispatchEvent(new Event('keyup'));
   }
 });
 
@@ -988,7 +992,7 @@ ipcRenderer.on('progress-end', (event, message) => {
   /* WAIT FOR MESSAGE SENT TO CLOSE EMAIL POPUP AND RESET */
   ipcRenderer.once('email-close', (e, message) => {
     // CLICK BACK BUTTON
-    backBtn.click();
+    resetForm();
   });
 });
 
@@ -1032,5 +1036,5 @@ ipcRenderer.on('db-status', (e, message) => {
 
 /* MESSAGE TO CLICK BACK BUTTON IF THERE IS AN ERROR IN PYTHON CONVERSION */
 ipcRenderer.on('error', (e, message) => {
-  backBtn.click();
+  resetForm();
 });

@@ -43,17 +43,21 @@ html {
   justify-content: center;
   flex-direction: column;
   align-items: center;
-  font-size: 30px;
   font-weight: bolder;
-  width: fit-content;
+  height: 50%;
+  width: 112%;
+  border-radius: 50%;
+  background-color: #fff;
   z-index: 1;
+  backdrop-filter: blur(4px);
+  filter: drop-shadow(2px 4px 6px black);
 }
 
 #logo {
   position: relative;
-  top: 1vh;
-  padding: 1vh 3vw;
-  width: 100%;
+  left: 20px;
+  top: 4px;
+  width: 86%;
   height: auto;
 }
 

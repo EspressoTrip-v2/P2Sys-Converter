@@ -5,7 +5,6 @@ const { remote, ipcRenderer, shell } = require('electron');
 const mongoose = require('mongoose');
 mongoose.set('bufferCommands', false);
 const fs = require('fs');
-const { restart } = require('nodemon');
 
 /* GET WORKING DIRECTORY */
 const dir = process.cwd();
@@ -50,7 +49,8 @@ let startBtn = document.getElementById('start'),
   mailbtn = document.getElementById('mail-btn'),
   dbLight = document.getElementById('db'),
   databaseText = document.getElementById('dbtext'),
-  systemSettingsBtn = document.getElementById('settings-button');
+  systemSettingsBtn = document.getElementById('settings-button'),
+  soundClick = document.getElementById('click');
 
 //////////////////////////
 /* DATABASE CONNECTION */
@@ -158,11 +158,28 @@ function logfileFunc(message) {
 /* UPDATE ONLINE DATABASES */
 ////////////////////////////
 async function updateDatabase() {
-  /* ADD THE _id BACK INTO THE DATABASES */
-  customerBackUp['_id'] = 'customerBackUp';
-  customerNumberName['_id'] = 'customerNumberName';
-  customerPricelistNumber['_id'] = 'customerPricelistNumber';
-  customerPrices['_id'] = 'customerPrices';
+  /* GET LATEST LOCAL LIBRARIES FOR UPDATE */
+  ///////////////////////////////////////////
+
+  /* CUSTOMER DATABASE IS CUSTOMER NUMBER - PRICELIST NUMBER */
+  let customerPricelistNumber = JSON.parse(
+    fs.readFileSync(`${dir}/data/templates/customerPricelistNumber.json`)
+  );
+
+  /* CUSTOMER NUMBER NAME IS CUSTOMER NUMBER - CUSTOMER NAME */
+  let customerNumberName = JSON.parse(
+    fs.readFileSync(`${dir}/data/templates/customerNumberName.json`)
+  );
+
+  /* ALL ON FILE LAYMAN PRICELISTS */
+  let customerPrices = JSON.parse(
+    fs.readFileSync(`${dir}/data/templates/customerPrices.json`)
+  );
+
+  /* CUSTOMER PRICELIST BACKUP */
+  let customerBackUp = JSON.parse(
+    fs.readFileSync(`${dir}/data/templates/customerBackUp.json`)
+  );
 
   let mes = 'There are inconsistencies in:\n\n# {DATA} #\n\nPlease contact the developer.',
     title = 'DATABASE ERROR',
@@ -314,6 +331,7 @@ async function syncDb() {
 
     /* WAIT FOR LOCAL UPDATES TO COMPLETE */
     let updated = await updateDatabase();
+
     if (updated) {
       dbLight.setAttribute('class', 'db-connected');
       state = db.readyState;
@@ -363,13 +381,19 @@ window.addEventListener('offline', (e) => {
 
 /* START BUTTON */
 startBtn.addEventListener('click', (e) => {
-  ipcRenderer.send('start', 'startPage');
+  soundClick.play();
+  setTimeout(() => {
+    ipcRenderer.send('start', 'startPage');
+  }, 200);
 });
 
 /* EXIT BUTTON */
 exitbtn.addEventListener('click', (e) => {
-  homeWindow.close();
-  homeWindow = null;
+  soundClick.play();
+  setTimeout(() => {
+    homeWindow.close();
+    homeWindow = null;
+  }, 200);
 });
 
 /* ABOUT PAGE EVENTS */
@@ -377,6 +401,8 @@ exitbtn.addEventListener('click', (e) => {
 
 /* ABOUT BUTTON */
 aboutbtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   document.querySelector('.about-screen').style.display = 'flex';
   setTimeout(() => {
     document.querySelector('.about-screen').style.visibility = 'visible';
@@ -384,31 +410,43 @@ aboutbtn.addEventListener('click', (e) => {
   }, 200);
 });
 backbtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   document.querySelector('.about-screen').style.visibility = 'hidden';
   document.querySelector('.about-screen').style.opacity = 0;
 });
 mailbtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   shell.openExternal('mailto:price.to.sys@gmail.com?subject=P2Sys() Inquiry/ Bug report');
 });
 
 /* SYSTEM BUTTONS */
 backBtnSettings.addEventListener('click', (e) => {
+  soundClick.play();
+
   document.querySelector('.system-settings').style.visibility = 'hidden';
   document.querySelector('.system-settings').style.opacity = 0;
 });
 
 /* EMAIL SETUP BUTTON */
 emailSetupBtnSettings.addEventListener('click', (e) => {
+  soundClick.play();
+
   shell.openPath(`${dir}/data/appdata/email.json`);
 });
 
 /* DATABASE SETUP BUTTON */
 databaseSetupBtnSettings.addEventListener('click', (e) => {
+  soundClick.play();
+
   shell.openPath(`${dir}/data/appdata/database.json`);
 });
 
 /* CLEAR LOCALSTORAGE FILES */
 clearCachedEmailsBtnSettings.addEventListener('click', (e) => {
+  soundClick.play();
+
   /* CHECK TO SEE I THERE ARE EMAILS TO REMOVE */
   if (localStorage.getItem('failedEmail')) {
     localStorage.removeItem('failedEmail');
@@ -430,6 +468,8 @@ clearCachedEmailsBtnSettings.addEventListener('click', (e) => {
 
 /* CLEAR PAUSED PRICELISTS FILES */
 clearPausedPricelistsBtnSettings.addEventListener('click', (e) => {
+  soundClick.play();
+
   /* CHECK TO SEE I THERE ARE EMAILS TO REMOVE */
   let localStorageKeys = Object.keys(localStorage),
     keys = '';
@@ -466,7 +506,14 @@ clearPausedPricelistsBtnSettings.addEventListener('click', (e) => {
 
 /* FORCE DB UPDATE */
 forceDbUpdateBtnSettings.addEventListener('click', (e) => {
+  soundClick.play();
   if (db.readyState === 1) {
+    /* CREATE NOTIFICATION */
+    new Notification('DATABASE SYNCING', {
+      icon: `${dir}/renderer/icons/trayTemplate.png`,
+      body: 'Syncing all local files',
+    });
+
     syncDb();
   }
 });
@@ -474,6 +521,8 @@ forceDbUpdateBtnSettings.addEventListener('click', (e) => {
 /* SYSTEM SETTINGS PAGE EVENTS */
 /////////////////////////////////
 systemSettingsBtn.addEventListener('click', (e) => {
+  soundClick.play();
+
   document.querySelector('.about-screen').style.visibility = 'hidden';
   document.querySelector('.about-screen').style.opacity = 0;
 
@@ -497,5 +546,6 @@ systemSettingsBtn.addEventListener('click', (e) => {
 
 /* SYNC DB MESSAGE FROM PROGRESS BAR AFTER CONVERSION*/
 ipcRenderer.on('sync-db', (e, message) => {
+  console.log('message sync');
   syncDb();
 });

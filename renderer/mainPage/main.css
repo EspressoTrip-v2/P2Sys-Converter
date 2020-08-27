@@ -260,6 +260,10 @@ button {
   border: 4px solid #03fd2f;
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
+#about-btn:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
 
 #about-btn:hover img {
   visibility: hidden;
@@ -287,6 +291,10 @@ button {
   background-color: #fff;
   color: var(--button-green);
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+}
+.btn-full:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
 .btn-exit {
@@ -326,6 +334,11 @@ button {
   color: var(--button-red);
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
+.btn-exit:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
 .mail,
 .btn-back,
 .settings-btn {
@@ -397,9 +410,19 @@ button {
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
+.mail:active,
+.settings-btn:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
 .btn-back:hover {
   background-color: #fff;
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+}
+.btn-back:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 #back-icon:hover {
   fill: var(--button-red);
@@ -489,6 +512,7 @@ button {
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
   transition: background-color 0.5s, border 0.5s, font-weight 0.5s, color 0.5s, box-shadow 0.5s;
 }
+
 .system-btn-disabled {
   display: flex;
   justify-content: center;
@@ -518,6 +542,10 @@ button {
   right: 170px;
   top: 258px;
 }
+#back-btn-system:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
 
 .system-settings footer {
   font-size: 15px;
@@ -525,4 +553,26 @@ button {
   padding-top: 20px;
   position: absolute;
   bottom: 15px;
+}
+
+#email-setup:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
+#database-setup:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+#clear-cached-emails:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+#clear-cached-pricelists:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+#db-update:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }

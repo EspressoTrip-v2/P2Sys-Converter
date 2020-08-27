@@ -7,53 +7,23 @@ const dir = process.cwd();
 /* LOCAL MODULES */
 const { customerNameNumber } = require(`${dir}/data/objects.js`);
 
-////////////////////////
-/* MESSAGE LISTENERS */
-//////////////////////
-
-ipcRenderer.on('child-main', (event, message) => {
-  console.log(message);
-});
-
-////////////////
-/* FUNCTIONS */
-//////////////
-
-function addLoader(parent) {
-  let html = `
-    <div id="loader">
-    <img  src="${dir}/renderer/icons/loader.png"/>
-    </div>
-    `;
-  parent.insertAdjacentHTML('beforeend', html);
-}
-
-function removeLoader(parent) {
-  setTimeout(() => {
-    parent.remove();
-  }, 5000);
-}
-
 //////////////
 /* GLOBALS */
 ////////////
-let customerNameListHTML;
+// let customerNameListHTML;
 
 ///////////////////
 /* DOM ELEMENTS */
 /////////////////
 
-let customerListContainer = document.getElementById('customer-list-container');
-
+let customerListContainer = document.getElementById('customer-list-container'),
+  soundClick = document.getElementById('click');
 /* POPULATE LIST OF CUSTOMERS */
 ///////////////////////////////
 
-// Insert spinning logo
-// addLoader(customerListContainer);
-
 let customers = Object.keys(customerNameNumber);
 
-(async () => {
+(() => {
   customers.forEach((el) => {
     let html = `<div title="${
       customerNameNumber[el.toLocaleUpperCase()]
@@ -75,6 +45,7 @@ let customerNameLists = Array.from(document.getElementsByClassName('customer-nam
 /* SEND CUSTOMER NUMBER TO SECWINDOW */
 customerNameLists.forEach((el) => {
   el.addEventListener('click', (e) => {
+    soundClick.play();
     let number = customerNameNumber[e.target.innerText];
     // send ipc
     ipcRenderer.send('dock-sec', number);

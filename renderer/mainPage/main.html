@@ -4,15 +4,16 @@
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'" />
     <link rel="stylesheet" href="main.css" />
+    <script defer src="./mainapp.js"></script>
     <title>P2Sys_()</title>
   </head>
   <body>
+    <audio src="../sounds/click.wav" id="click" style="display: none"></audio>
+
     <div id="container">
       <img id="logo" src="../icons/whitcher-logo.png" />
       <div id="round">
-        <button class="btn-full" id="start" title="Click here to begin" href="#">
-          START
-        </button>
+        <button class="btn-full" id="start" title="Click here to begin" href="#">START</button>
         <button class="btn-exit" id="exit-btn" href="#">EXIT</button>
         <button id="about-btn" title="About Price>>Sys() software" href="#">
           <img src="../icons/ps_logo.png" /><span>ABOUT</span>
@@ -22,7 +23,7 @@
         </div>
       </div>
     </div>
-    <div style="display: none;" class="about-screen">
+    <div style="display: none" class="about-screen">
       <h2><img src="../icons/p2syslogo.png" alt="" /></h2>
       <div class="paragraph">
         <p>
@@ -76,7 +77,7 @@
       </div>
       <footer>P2Sys_() &trade; &nbsp; 2020</footer>
     </div>
-    <div class="system-settings" style="display: none;">
+    <div class="system-settings" style="display: none">
       <div id="system-settings-header"><img src="../icons/loader.png" /></div>
       <div id="system-settings-btn-container">
         <div id="setup-container">
@@ -100,9 +101,5 @@
       </div>
       <footer>P2Sys_() &trade; &nbsp; 2020</footer>
     </div>
-
-    <script>
-      require('./mainapp.js');
-    </script>
   </body>
 </html>

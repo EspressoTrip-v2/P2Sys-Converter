@@ -97,7 +97,7 @@ ipcMain.on('close-loader', (e, message) => {
 
 /* TRAY MENU LAYOUT TEMPLATE */
 let trayMenu = Menu.buildFromTemplate([
-  { label: 'P2Sys()' },
+  { label: 'P2Sys App' },
   { role: 'minimize' },
   { role: 'reload' },
   { role: 'toggleDevTools' },
@@ -127,7 +127,8 @@ function createWindow() {
   // homeWindow.webContents.openDevTools();
 
   // Only show on load completion
-  homeWindow.once('ready-to-show', () => {
+  homeWindow.webContents.once('did-finish-load', () => {
+    loadingWindow.close();
     homeWindow.show();
   });
 
@@ -156,7 +157,7 @@ function createSecWindow(message) {
   secWindow.loadFile(`${dir}/renderer/startPage/startPage.html`);
 
   // Only show on load completion
-  secWindow.once('ready-to-show', () => {
+  secWindow.webContents.once('did-finish-load', () => {
     if (loadingWindow) {
       loadingWindow.close();
     }
@@ -220,7 +221,7 @@ function createChildWindow(message) {
   // childWindow.webContents.openDevTools();
 
   // Only show on load completion
-  childWindow.once('ready-to-show', () => {
+  childWindow.webContents.once('did-finish-load', () => {
     if (loadingWindow) {
       loadingWindow.close();
     }
@@ -248,13 +249,13 @@ function createLoadingWindow() {
     icon: `${dir}/renderer/icons/trayTemplate.png`,
   });
 
-  //   Load html page
+  //   LOAD HTML PAGE
   loadingWindow.loadFile(`${dir}/renderer/loader/loader.html`);
 
-  //   Load dev tools
+  //   LOAD DEV TOOLS
   // loadingWindow.webContents.openDevTools();
 
-  //   Event listener for closing
+  //   EVENT LISTENER FOR CLOSING
   loadingWindow.on('closed', () => {
     loadingWindow = null;
   });
@@ -306,8 +307,9 @@ function createEmailWindow(message) {
 /* APP READY --> CREATE MAIN WINDOW */
 app.on('ready', () => {
   setTimeout(() => {
+    createLoadingWindow();
     createWindow();
-  }, 300);
+  }, 500);
 });
 
 /* QUIT APP WHEN ALL WINDOWS ARE CLOSED */

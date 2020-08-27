@@ -64,6 +64,7 @@ def reformat_layman(pricelist_number, customer_number, df):
     customer_pricelist.replace(0, np.nan, inplace=True)
     customer_pricelist = customer_pricelist.dropna(axis=0,
                                                    subset=['UNITPRICE'])
+    # customer_pricelist = customer_pricelist.dropna(axis=0, subset=['DESC'])
 
     # RETURN ITEMS TO PROCESS S5 AND SYSTEM TEMPLATE
     return {
