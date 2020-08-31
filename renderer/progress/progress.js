@@ -3,7 +3,11 @@ const { PythonShell } = require('python-shell');
 const fs = require('fs');
 
 /* GET WORKING DIRECTORY */
-const dir = process.cwd();
+let dir = process.cwd();
+if (process.platform === 'win32') {
+  let pattern = /[\\]+/g;
+  dir = dir.replace(pattern, '/');
+}
 
 /* REMOTE WINDOWS */
 ///////////////////

@@ -2,8 +2,13 @@
 const nodemailer = require('nodemailer');
 const { shell, ipcRenderer, remote } = require('electron');
 const fs = require('fs');
+
 /* GET WORKING DIRECTORY */
-const dir = process.cwd();
+let dir = process.cwd();
+if (process.platform === 'win32') {
+  let pattern = /[\\]+/g;
+  dir = dir.replace(pattern, '/');
+}
 
 /* LOCAL MODULES */
 const { emailSetup } = require(`${dir}/data/objects.js`);
@@ -97,7 +102,6 @@ function getMessage(text) {
 let mailTransport = nodemailer.createTransport(emailSetup['smtp']);
 
 function verifyConnect(message) {
-  console.log(message);
   /* SHOW NOTIFICATION IF ERROR CONNECTING */
   mailTransport.verify((err, success) => {
     if (err) {

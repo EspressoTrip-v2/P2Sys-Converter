@@ -3,9 +3,17 @@
 const { remote, ipcRenderer } = require('electron');
 
 /* GET WORKING DIRECTORY */
-const dir = process.cwd();
+let dir = process.cwd();
+if (process.platform === 'win32') {
+  let pattern = /[\\]+/g;
+  dir = dir.replace(pattern, '/');
+}
 /* CURRENT DIRECTORY */
-const curDir = __dirname;
+let curDir = __dirname;
+if (process.platform === 'win32') {
+  let pattern = /[\\]+/g;
+  curDir = curDir.replace(pattern, '/');
+}
 
 /* LOCAL MODULES */
 const {

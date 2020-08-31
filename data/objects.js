@@ -3,9 +3,18 @@ const fs = require('fs');
 const { ipcRenderer } = require('electron');
 
 /* GET WORKING DIRECTORY */
-const dir = process.cwd();
+let dir = process.cwd();
+if (process.platform === 'win32') {
+  let pattern = /[\\]+/g;
+  dir = dir.replace(pattern, '/');
+}
+
 /* GET CURRENT DIRECTORY */
-const curDir = __dirname;
+let curDir = __dirname;
+if (process.platform === 'win32') {
+  let pattern = /[\\]+/g;
+  curDir = curDir.replace(pattern, '/');
+}
 
 /* DATABASE GLOBAL VARIABLES */
 

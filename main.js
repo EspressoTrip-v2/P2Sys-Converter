@@ -2,7 +2,11 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
 
 /* GET WORKING DIRECTORY */
-const dir = process.cwd();
+let dir = process.cwd();
+if (process.platform === 'win32') {
+  let pattern = /[\\]+/g;
+  dir = dir.replace(pattern, '/');
+}
 
 /* WINDOW VARIABLES */
 let homeWindow, secWindow, tray, childWindow, loadingWindow, emailWindow;
@@ -186,7 +190,6 @@ function createChildWindow(message) {
       x: message.dimensions[0] - 300,
       y: message.dimensions[1],
       autoHideMenuBar: true,
-      opacity: 0,
       show: false,
       center: true,
       frame: false,
@@ -295,7 +298,7 @@ function createEmailWindow(message) {
       if (loadingWindow) {
         loadingWindow.close();
       }
-    }, 3000);
+    }, 2000);
   });
 
   //   Event listener for closing

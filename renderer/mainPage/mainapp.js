@@ -7,7 +7,11 @@ mongoose.set('bufferCommands', false);
 const fs = require('fs');
 
 /* GET WORKING DIRECTORY */
-const dir = process.cwd();
+let dir = process.cwd();
+if (process.platform === 'win32') {
+  let pattern = /[\\]+/g;
+  dir = dir.replace(pattern, '/');
+}
 
 /* LOCAL MODULES */
 const {
@@ -136,7 +140,7 @@ function messageAlert(type, title, detail, buttons) {
       if (el.length > 3) return el;
     });
     shell.openExternal(
-      `mailto:price.to.sys@gmail.com?subject=DATABASE ERROR: ${issue.join(' ')}`
+      `mailto:juanbo.jb@gmail.com?subject=DATABASE ERROR: ${issue.join(' ')}`
     );
   }
 }
@@ -418,7 +422,7 @@ backbtn.addEventListener('click', (e) => {
 mailbtn.addEventListener('click', (e) => {
   soundClick.play();
 
-  shell.openExternal('mailto:price.to.sys@gmail.com?subject=P2Sys() Inquiry/ Bug report');
+  shell.openExternal('mailto:juanbo.jb@gmail.com?subject=P2Sys() Inquiry/ Bug report');
 });
 
 /* SYSTEM BUTTONS */

@@ -2,8 +2,11 @@
 const { remote, ipcRenderer } = require('electron');
 
 /* GET WORKING DIRECTORY */
-const dir = process.cwd();
-
+let dir = process.cwd();
+if (process.platform === 'win32') {
+  let pattern = /[\\]+/g;
+  dir = dir.replace(pattern, '/');
+}
 /* LOCAL MODULES */
 const { customerNameNumber } = require(`${dir}/data/objects.js`);
 
