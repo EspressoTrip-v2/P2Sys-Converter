@@ -1,15 +1,13 @@
 :root {
-  --main-blue: #3e6ba6ff;
-  --sec-blue: #8eafdafb;
-  --button-red: #cf2115;
-  --button-green: #80c432;
-  --button-gold: #d9793b;
-  --man: #497813;
-  --ps-blue: #00e3fd;
-  --ps-green: #01fa48;
-  --ps-red: #ff0a1c;
+  --psys-blue: #09e1ff;
+  --psys-red: #fe1604;
+  --psys-green: #03c224;
 
-  /* --data-label: 'DATABASE'; */
+  --main: #000;
+  --sec-blue: #05899c;
+  --button-red: #fe1604;
+  --button-green: #03c224;
+  --button-gold: #fe7c04;
 }
 *,
 *::before,
@@ -42,16 +40,6 @@ body {
   align-items: center;
   font-family: sans-serif;
 }
-h2 {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  height: fit-content;
-  width: 80%;
-  top: 25px;
-}
 
 button {
   outline: none;
@@ -62,34 +50,116 @@ button {
   display: flex;
   width: fit-content;
   flex-direction: column;
+  align-items: center;
 }
 #round {
   position: relative;
+  width: 350px;
+  height: 465px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  align-content: center;
   justify-content: center;
-  background-color: #fff;
-  border: 6px solid var(--sec-blue);
-  border-radius: 150px;
-  padding-top: 80px;
-  padding-bottom: 20px;
-  margin-left: 70px;
-  margin-right: 70px;
 }
-#logo {
+#internal-container {
   position: relative;
-  max-width: 100%;
-  margin-bottom: -80px;
+  top: 11px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  border: 3px solid var(--main);
+  border-radius: 20px;
+  width: 80%;
+  height: 240px;
+  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
+}
+
+#psys-logo {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  background-color: var(--sec-blue);
+  border: 2px solid var(--main);
+  border-radius: 20px;
+  height: 100px;
+  width: 100%;
+  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
+}
+
+#psys-logo-container {
+  position: absolute;
+  background-color: #fff;
+  border: 2px solid var(--main);
+  border-radius: 50%;
+  height: 120px;
+  width: 350px;
+  filter: drop-shadow(2px 4px 6px black);
   z-index: 1;
   -webkit-app-region: drag;
 }
-.about-screen footer {
+#psys-logo-container img {
+  position: absolute;
+  bottom: 6px;
+  left: 50px;
+  height: 120px;
+}
+#psys-logo-container::after {
+  position: absolute;
+  content: 'Converter';
+  font-family: Forelle;
+  font-size: 65px;
+  top: 23px;
+  right: 25px;
+}
+#logo {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 80px;
+  border: 3px solid var(--main);
+  border-radius: 20px;
+  bottom: 0;
+  background-color: var(--sec-blue);
+  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
+}
+
+#logo img {
+  position: relative;
+  filter: drop-shadow(2px 4px 6px black);
+  width: 80%;
+  -webkit-user-drag: none;
+}
+
+#version-info {
+  position: absolute;
+  top: 120px;
   font-size: 15px;
+  background-color: var(--sec-blue);
+  border-radius: 5px;
+  width: 80%;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  color: #fff;
+  font-weight: bold;
+}
+
+.about-screen footer {
+  font-size: 12px;
   font-style: italic;
   padding-top: 20px;
-  position: relative;
-  bottom: -106px;
+  position: absolute;
+  bottom: 12px;
 }
 .text {
   font-size: 11px;
@@ -101,13 +171,20 @@ button {
   content: attr(data-label);
 }
 
+#db {
+  border: 2px solid #c5c5c5;
+  bottom: 20px;
+  height: 22px;
+}
+
 .db-light {
-  position: relative;
+  position: absolute;
+  bottom: 15px;
   color: #fff;
   border-radius: 50%;
   background-color: lightgrey;
   display: flex;
-  width: 22vw;
+  width: 100px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -117,13 +194,13 @@ button {
 }
 
 .db-fail {
-  position: relative;
+  position: absolute;
+  bottom: 15px;
   color: #fff;
   border-radius: 50%;
   background-color: var(--button-red);
   display: flex;
-  width: 22vw;
-
+  width: 100px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -133,14 +210,14 @@ button {
 }
 
 .db-connected {
-  position: relative;
+  position: absolute;
+  bottom: 15px;
   color: #fff;
   border-radius: 50%;
   background-color: lightgrey;
   display: flex;
   flex-direction: column;
-  width: 22vw;
-
+  width: 100px;
   justify-content: center;
   align-items: center;
   align-content: center;
@@ -150,14 +227,14 @@ button {
 }
 
 .db-update {
-  position: relative;
+  position: absolute;
+  bottom: 15px;
   color: #fff;
   border-radius: 50%;
   background-color: lightgrey;
   display: flex;
-  width: 22vw;
-
   flex-direction: column;
+  width: 100px;
   justify-content: center;
   align-items: center;
   align-content: center;
@@ -177,14 +254,39 @@ button {
 
 @keyframes db-flash {
   from {
-    background-color: var(--button-gold);
+    background-color: dodgerblue;
   }
   to {
-    background-color: var(--man);
+    background-color: var(--button-green);
   }
 }
 
 /* ABOUT SCREEN */
+#h2 {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  top: -12px;
+  width: 100%;
+}
+#h2 img {
+  position: relative;
+  height: 130px;
+  top: 0;
+  right: 50px;
+}
+
+#h2::after {
+  content: 'About';
+  font-family: Forelle;
+  font-size: 65px;
+  position: absolute;
+  left: 192px;
+  top: 39px;
+}
+
 .about-screen {
   z-index: 2;
   opacity: 0;
@@ -192,17 +294,18 @@ button {
   flex-direction: column;
   justify-content: start;
   align-items: center;
-  height: 90vh;
-  width: 97vw;
+  height: 500px;
+  width: 370px;
   align-content: center;
   background-color: #fff;
   border: 4px solid #111;
-  border-radius: 100px;
-  transition: visibility 0.3s, opacity 0.3s linear;
+  border-radius: 20px;
+  transition: visibility 0.3s 0.3s, opacity 0.3s 0.3s;
+  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
 }
 .paragraph {
   position: relative;
-  top: 21px;
+  top: 25px;
   font-size: 15px;
   display: flex;
   flex-direction: column;
@@ -216,8 +319,15 @@ button {
 }
 
 #buttons {
-  bottom: 35px;
-  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  position: absolute;
+  bottom: 40px;
+  height: 50px;
+  width: 250px;
 }
 
 /* BUTTONS */
@@ -231,57 +341,53 @@ button {
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
 }
 
-#about-btn {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 20px;
-  border-radius: 200px;
-  margin-top: 20px;
-  margin-bottom: 15px;
-  width: 50%;
-  font-weight: bolder;
-  font-size: 15px;
-  color: transparent;
-  border: 4px solid #09e1ff;
-  transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
-}
-#about-btn img {
+#info {
   position: absolute;
-  width: 80%;
-  transition: visibility 0.5s, opacity 0.5s;
+  border-radius: 50%;
+  background-color: var(--sec-blue);
+  border: 0.5px solid var(--sec-blue);
+  width: 30px;
+  height: 30px;
+  top: 8px;
+  right: 8px;
+  transition: box-shadow 0.5s;
+}
+#info-icon {
+  position: relative;
+  fill: #fff;
+  width: 132%;
+  height: 100%;
+  left: -2px;
 }
 
-#about-btn:hover {
+#info-icon:hover {
+  fill: var(--sec-blue);
+}
+
+#info:hover {
   background-color: #fff;
-  color: #fe1604;
-  border: 4px solid #03fd2f;
+  border: 1.5px solid var(--sec-blue);
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
-#about-btn:active {
+
+#info:active {
   transform: scale(0.95);
   box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
-#about-btn:hover img {
-  visibility: hidden;
-  opacity: 0;
-}
-
 .btn-full {
+  position: absolute;
   display: flex;
+  top: 40px;
   justify-content: center;
   border-radius: 200px;
   text-align: center;
-  padding: 10px 20px;
+  padding: 5px 0;
   font-weight: bolder;
   background-color: var(--button-green);
   color: #fff;
   border: 4px solid var(--button-green);
-  margin: 20px 0;
-  width: 60%;
+  width: 145px;
   font-size: 30px;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
@@ -298,35 +404,37 @@ button {
 }
 
 .btn-exit {
+  position: absolute;
+  top: 120px;
   display: flex;
   justify-content: center;
   border-radius: 200px;
   text-align: center;
-  padding: 10px 20px;
+  padding: 5px 0px;
   font-weight: bolder;
   background-color: var(--button-red);
   color: #fff;
   border: 4px solid var(--button-red);
-  margin: 10px 0;
-  width: 60%;
+  width: 145px;
   font-size: 30px;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
 }
 .btn-disabled {
+  position: absolute;
+  top: 120px;
   display: flex;
   justify-content: center;
   border-radius: 200px;
   text-align: center;
-  padding: 10px 20px;
+  padding: 5px 0px;
   font-weight: bolder;
   background-color: grey;
   color: #fff;
   border: 4px solid grey;
-  margin: 10px 0;
-  width: 60%;
+  width: 145px;
   font-size: 30px;
-  transition: background-color 0.5s, border 0.5s, color 0.5s;
+  transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
 }
 
 .btn-exit:hover {
@@ -348,27 +456,27 @@ button {
   padding: 10px 10px;
   font-weight: bolder;
   font-size: 12px;
-  background-color: #09e1ff;
+  background-color: var(--sec-blue);
   border-radius: 200px;
   margin-top: 20px;
   color: #fff;
-  border: 2px solid #09e1ff;
+  border: 2px solid var(--sec-blue);
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
 
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
 }
 .mail {
   position: absolute;
-  top: 64px;
+  bottom: 0;
+  right: 0;
   width: 50px;
   height: 50px;
-  right: -26vw;
   padding: 4px;
 }
 .btn-back {
   position: absolute;
-  top: 64px;
-  right: 56px;
+  bottom: 0;
+  left: 0;
   background-color: var(--button-red);
   border: 2px solid var(--button-red);
   height: 50px;
@@ -376,8 +484,7 @@ button {
 }
 .settings-btn {
   position: absolute;
-  left: -18px;
-  top: 65px;
+  bottom: 0;
   width: 50px;
   height: 50px;
   padding: 8px;
@@ -406,7 +513,7 @@ button {
 .mail:hover,
 .settings-btn:hover {
   background-color: #fff;
-  color: #09e1ff;
+  color: var(--sec-blue);
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
@@ -431,55 +538,63 @@ button {
 /* SYSTEM SETTINGS PAGE */
 
 .system-settings {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
+
   z-index: 2;
   opacity: 0;
   position: absolute;
   flex-direction: column;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
-  height: 97vh;
-  width: 97vw;
+  height: 500px;
+  width: 370px;
   align-content: center;
   background-color: #fff;
   border: 4px solid #111;
-  border-radius: 100px;
-  transition: visibility 0.3s, opacity 0.3s linear;
+  border-radius: 20px;
+  transition: visibility 0.5s, opacity 0.3s;
 }
 #system-settings-header {
-  position: relative;
+  position: absolute;
   display: flex;
-  justify-content: center;
+  top: 5px;
+  justify-content: space-between;
   align-content: center;
   align-items: center;
-  bottom: 31vh;
   font-size: 30px;
-  width: 88%;
+  width: 100%;
   height: 100px;
   border-radius: 200px;
 }
 #system-settings-header img {
-  position: absolute;
-  left: 10px;
+  position: relative;
+  height: 130px;
+  left: 41px;
+  top: 0;
 }
 
 #system-settings-header::after {
   position: absolute;
   content: 'Settings';
-  font-size: 95px;
-  right: 5px;
-  top: -4px;
+  font-size: 65px;
+  right: 50px;
+  top: 28px;
   font-family: Forelle;
 }
 
 #system-settings-btn-container {
   display: flex;
-  top: 150px;
+  top: 120px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   align-content: center;
   position: absolute;
-  width: 90%;
 }
 #setup-container,
 #system-utils {
@@ -538,9 +653,8 @@ button {
 }
 
 #back-btn-system {
-  position: absolute;
-  right: 170px;
-  top: 258px;
+  position: relative;
+  bottom: 0;
 }
 #back-btn-system:active {
   transform: scale(0.95);
@@ -548,11 +662,11 @@ button {
 }
 
 .system-settings footer {
-  font-size: 15px;
+  font-size: 12px;
   font-style: italic;
   padding-top: 20px;
   position: absolute;
-  bottom: 15px;
+  bottom: 8px;
 }
 
 #email-setup:active {

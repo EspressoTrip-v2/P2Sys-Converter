@@ -5,26 +5,43 @@
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'" />
     <link rel="stylesheet" href="main.css" />
     <script defer src="./mainapp.js"></script>
-    <title>P2Sys_()</title>
+    <title>P2Sys-Converter</title>
   </head>
   <body>
     <audio src="../sounds/click.wav" id="click" style="display: none"></audio>
 
     <div id="container">
-      <img id="logo" src="../icons/whitcher-logo.png" />
+      <div id="psys-logo">
+        <div id="psys-logo-container"><img src="../icons/loader.png" alt="" /></div>
+      </div>
       <div id="round">
-        <button class="btn-full" id="start" title="Click here to begin" href="#">START</button>
-        <button class="btn-exit" id="exit-btn" href="#">EXIT</button>
-        <button id="about-btn" title="About Price>>Sys() software" href="#">
-          <img src="../icons/ps_logo.png" /><span>ABOUT</span>
-        </button>
-        <div id="db" title="Database status" class="db-light">
-          <div id="dbtext" class="text" data-label="DATABASE"></div>
+        <div id="internal-container">
+          <button class="btn-full" id="start" title="Click here to begin" href="#">
+            START
+          </button>
+          <button class="btn-exit" id="exit-btn" href="#">EXIT</button>
+          <button id="info">
+            <svg id="info-icon" width="402" height="402" viewBox="0 0 402 402">
+              <path
+                d="M164.5 91.4h73.1c4.9 0 9.2-1.8 12.8-5.4 3.6-3.6 5.4-7.9 5.4-12.8V18.3c0-4.9-1.8-9.2-5.4-12.8C246.8 1.8 242.5 0 237.5 0h-73.1c-4.9 0-9.2 1.8-12.8 5.4 -3.6 3.6-5.4 7.9-5.4 12.9v54.8c0 4.9 1.8 9.2 5.4 12.8C155.2 89.6 159.5 91.4 164.5 91.4z"
+              />
+              <path
+                d="M286.9 334.3c-3.6-3.6-7.9-5.4-12.8-5.4h-18.3V164.5c0-4.9-1.8-9.2-5.4-12.8 -3.6-3.6-7.9-5.4-12.8-5.4H127.9c-4.9 0-9.2 1.8-12.8 5.4 -3.6 3.6-5.4 7.9-5.4 12.8v36.5c0 4.9 1.8 9.2 5.4 12.8 3.6 3.6 7.9 5.4 12.8 5.4h18.3v109.6h-18.3c-4.9 0-9.2 1.8-12.8 5.4 -3.6 3.6-5.4 7.9-5.4 12.8v36.5c0 4.9 1.8 9.2 5.4 12.9 3.6 3.6 7.9 5.4 12.8 5.4h146.2c4.9 0 9.2-1.8 12.8-5.4 3.6-3.6 5.4-7.9 5.4-12.9v-36.5C292.4 342.2 290.6 337.9 286.9 334.3z"
+              />
+            </svg>
+          </button>
+          <div id="db" title="Database status" class="db-light">
+            <div id="dbtext" class="text" data-label="DATABASE"></div>
+          </div>
+        </div>
+        <div id="logo">
+          <img src="../icons/whitcher-logo.png" />
         </div>
       </div>
     </div>
     <div style="display: none" class="about-screen">
-      <h2><img src="../icons/p2syslogo.png" alt="" /></h2>
+      <div id="h2"><img src="../icons/loader.png" alt="" /></div>
+      <div id="version-info"></div>
       <div class="paragraph">
         <p>
           P2Sys is software developed to help assist companies streamline their price-list
@@ -36,7 +53,7 @@
       </div>
       <br />
       <div class="paragraph">
-        For system error's or bug reporting, please click on the email developer button. <br />
+        For system error's or bug reporting, please click on the email button. <br />
       </div>
       <div id="buttons">
         <button class="mail" title="Email Developer" id="mail-btn" href="#">
@@ -75,7 +92,7 @@
           </svg>
         </button>
       </div>
-      <footer>P2Sys_() &trade; &nbsp; 2020</footer>
+      <footer>P2Sys-Converter &trade; &nbsp; 2020</footer>
     </div>
     <div class="system-settings" style="display: none">
       <div id="system-settings-header"><img src="../icons/loader.png" /></div>
@@ -99,7 +116,7 @@
           </svg>
         </button>
       </div>
-      <footer>P2Sys_() &trade; &nbsp; 2020</footer>
+      <footer>P2Sys-Converter &trade; &nbsp; 2020</footer>
     </div>
   </body>
 </html>

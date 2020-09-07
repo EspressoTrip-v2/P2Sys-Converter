@@ -1,5 +1,6 @@
 /* MODULE IMPORTS */
 const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
+require('dotenv').config();
 
 /* GET WORKING DIRECTORY */
 let dir = process.cwd();
@@ -21,80 +22,6 @@ function createTray() {
   tray.setContextMenu(trayMenu);
 }
 
-////////////////////
-/* IPC LISTENERS */
-//////////////////
-
-/* MESSENGER SERVICE BETWEEN RENDERERS */
-ipcMain.on('dock-sec', (event, message) => {
-  secWindow.webContents.send('dock-sec', message);
-});
-
-/* MESSAGE FROM START BUTTON */
-/* Create new customer number search window */
-ipcMain.on('start', (e, message) => {
-  homeWindow.hide();
-  createLoadingWindow();
-  createSecWindow(message);
-});
-
-/* POSITION OF SECWINDOW TO GENERATE DOCK NEXT TO IT */
-ipcMain.on('position', (e, message) => {
-  createChildWindow(message);
-});
-
-/* MESSAGE FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
-ipcMain.on('progress', (e, message) => {
-  /* CREATE THE PROGRESS WINDOW */
-  createChildWindow(message);
-  /* SEND THE FILE TO PYTHON SHELL TO GET CONVERTED */
-  childWindow.webContents.on('did-finish-load', (e) => {
-    childWindow.webContents.send('convert-python', message.jsonObject);
-  });
-});
-
-/* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
-ipcMain.on('progress-end', (e, message) => {
-  /* SEND MESSAGE TO CLOSE THE PROGRES BAR */
-  createLoadingWindow();
-  secWindow.webContents.send('progress-end', message.filePaths);
-});
-
-/* MESSAGE TO SYNC DB AFTER FILES HAVE BEEN WRITTEN TO LOCAL DB */
-ipcMain.on('db-sync', (e, message) => {
-  /* SEND MESSAGE TO UPDATE THE DB */
-  homeWindow.webContents.send('sync-db', null);
-});
-
-/* SEND DB STATUS TO UPDATE OTHER DATABASE INDICATORS */
-ipcMain.on('db-status', (event, message) => {
-  if (secWindow) {
-    secWindow.webContents.send('db-status', message);
-  }
-});
-
-/* MESSAGE TO CREATE EMAIL POPUP CHILD WINDOW */
-ipcMain.on('email-popup', (e, message) => {
-  createEmailWindow(message);
-});
-
-/* SEND MESSAGE SEND AND FORM CAN BE RESET MESSAGE FROM EMAIL POPUP */
-ipcMain.on('email-close', (e, message) => {
-  secWindow.webContents.send('email-close', null);
-});
-
-/* SEND MESSAGE TO CLOSE TABLE WINDOW ON ERROR */
-ipcMain.on('error', (e, message) => {
-  secWindow.webContents.send('error', null);
-});
-
-/* LOADER CLOSE MESSAGE */
-ipcMain.on('close-loader', (e, message) => {
-  if (loadingWindow) {
-    loadingWindow.close();
-  }
-});
-
 ////////////////////////////////
 /* WINDOW CREATION FUNCTIONS */
 //////////////////////////////
@@ -111,8 +38,8 @@ let trayMenu = Menu.buildFromTemplate([
 function createWindow() {
   createTray();
   homeWindow = new BrowserWindow({
-    width: 450,
-    height: 550,
+    width: 400,
+    height: 520,
     resizable: false,
     spellCheck: false,
     center: true,
@@ -145,8 +72,8 @@ function createWindow() {
 /* SECWINDOW CREATION */
 function createSecWindow(message) {
   secWindow = new BrowserWindow({
-    height: 650,
-    width: 400,
+    height: 625,
+    width: 425,
     autoHideMenuBar: true,
     center: true,
     show: false,
@@ -174,7 +101,6 @@ function createSecWindow(message) {
   //   Event listener for closing
   secWindow.on('closed', () => {
     secWindow = null;
-    homeWindow.show();
   });
 }
 
@@ -184,10 +110,10 @@ function createChildWindow(message) {
   if (message.emit === 'startPage') {
     childWindow = new BrowserWindow({
       parent: secWindow,
-      height: 655,
-      width: 300,
+      height: 622,
+      width: 320,
       resizable: false,
-      x: message.dimensions[0] - 300,
+      x: message.dimensions[0] - 320,
       y: message.dimensions[1],
       autoHideMenuBar: true,
       show: false,
@@ -240,8 +166,8 @@ function createChildWindow(message) {
 /* LOADING WINDOW */
 function createLoadingWindow() {
   loadingWindow = new BrowserWindow({
-    height: 500,
-    width: 500,
+    height: 520,
+    width: 520,
     autoHideMenuBar: true,
     center: true,
     frame: false,
@@ -318,4 +244,99 @@ app.on('ready', () => {
 /* QUIT APP WHEN ALL WINDOWS ARE CLOSED */
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+////////////////////
+/* IPC LISTENERS */
+//////////////////
+
+/* MESSENGER SERVICE BETWEEN RENDERERS */
+ipcMain.on('dock-sec', (event, message) => {
+  secWindow.webContents.send('dock-sec', message);
+});
+
+/* MESSAGE FROM START BUTTON */
+/* Create new customer number search window */
+ipcMain.on('start', (e, message) => {
+  homeWindow.hide();
+  createLoadingWindow();
+  createSecWindow(message);
+});
+
+/* POSITION OF SECWINDOW TO GENERATE DOCK NEXT TO IT */
+ipcMain.on('position', (e, message) => {
+  createChildWindow(message);
+});
+
+/* MESSAGE FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
+ipcMain.on('progress', (e, message) => {
+  /* CREATE THE PROGRESS WINDOW */
+  createChildWindow(message);
+  /* SEND THE FILE TO PYTHON SHELL TO GET CONVERTED */
+  childWindow.webContents.on('did-finish-load', (e) => {
+    childWindow.webContents.send('convert-python', message.jsonObject);
+  });
+});
+
+/* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
+ipcMain.on('progress-end', (e, message) => {
+  /* SEND MESSAGE TO CLOSE THE PROGRES BAR */
+  createLoadingWindow();
+  secWindow.webContents.send('progress-end', message.filePaths);
+});
+
+/* MESSAGE TO SYNC DB AFTER FILES HAVE BEEN WRITTEN TO LOCAL DB */
+ipcMain.on('db-sync', (e, message) => {
+  /* SEND MESSAGE TO UPDATE THE DB */
+  homeWindow.webContents.send('sync-db', null);
+});
+
+/* SEND DB STATUS TO UPDATE OTHER DATABASE INDICATORS */
+ipcMain.on('db-status', (event, message) => {
+  if (secWindow) {
+    secWindow.webContents.send('db-status', message);
+  }
+});
+
+/* MESSAGE TO CREATE EMAIL POPUP CHILD WINDOW */
+ipcMain.on('email-popup', (e, message) => {
+  createEmailWindow(message);
+});
+
+/* SEND MESSAGE SEND AND FORM CAN BE RESET MESSAGE FROM EMAIL POPUP */
+ipcMain.on('email-close', (e, message) => {
+  secWindow.webContents.send('email-close', null);
+});
+
+/* SEND MESSAGE TO CLOSE TABLE WINDOW ON ERROR */
+ipcMain.on('error', (e, message) => {
+  secWindow.webContents.send('error', null);
+});
+
+/* LOADER CLOSE MESSAGE */
+ipcMain.on('close-loader', (e, message) => {
+  if (loadingWindow) {
+    loadingWindow.close();
+  }
+});
+
+/* CLOSE DOCK WINDOW */
+ipcMain.on('close-window-dock', (e, message) => {
+  if (secWindow) {
+    childWindow.webContents.send('close-window-dock', null);
+  }
+});
+
+/* RESTART SEC WINDOW */
+ipcMain.on('restart-sec', (e, message) => {
+  setTimeout(() => {
+    createLoadingWindow();
+    createSecWindow(message);
+  }, 300);
+});
+
+/* SHOW HOME WINDOW */
+ipcMain.on('show-home', (e, message) => {
+  secWindow.close();
+  homeWindow.show();
 });

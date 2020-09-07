@@ -1,6 +1,7 @@
 /* MODULES */
 ////////////
 const { remote, ipcRenderer } = require('electron');
+const { set } = require('mongoose');
 
 /* GET WORKING DIRECTORY */
 let dir = process.cwd();
@@ -160,14 +161,11 @@ const createObjectFromHtml = () => {
 
 const resetForm = () => {
   html.style.cssText = 'transform:scale(0)';
+  html.style.display == 'none';
   setTimeout(() => {
-    /* CHANGE WINDOW SIZE */
-    secWindow.unmaximize();
-    secWindow.setMinimumSize(400, 650);
-    secWindow.setSize(400, 650);
-    secWindow.center();
-
-    secWindow.reload();
+    /* RESTART SECWINDOW */
+    ipcRenderer.send('restart-sec', 'startPage');
+    secWindow.close();
   }, 300);
 };
 
@@ -861,10 +859,13 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
 /* CANCEL BUTTON */
 checkCancelbtn.addEventListener('click', () => {
   soundClick.play();
+  /* FADE OUT WINDOW */
+  checkCustomer.style.opacity = '0';
+
+  /* SHOW MAIN WINDOW */
   setTimeout(() => {
-    secWindow.close();
-    secWindow = null;
-  }, 200);
+    ipcRenderer.send('show-home', null);
+  }, 650);
 });
 
 /* CUSTOMER FIND DOCK BUTTON */
@@ -881,8 +882,11 @@ customerFindBtn.addEventListener('click', (e) => {
     };
 
   if (secWindow.getChildWindows().length > 0) {
-    secWindow.getChildWindows()[0].close();
-    customerSearch.focus();
+    ipcRenderer.send('close-window-dock', null);
+    setTimeout(() => {
+      secWindow.getChildWindows()[0].close();
+      customerSearch.focus();
+    }, 500);
   } else {
     ipcRenderer.send('position', message);
   }
@@ -931,6 +935,13 @@ ipcRenderer.on('dock-sec', (event, message) => {
     customerSearch.dispatchEvent(new Event('keyup'));
     customerSearch.dispatchEvent(new Event('keyup'));
   }
+});
+
+/* CHANGE OPACITY AFTER LOAD */
+secWindow.webContents.on('did-finish-load', () => {
+  setTimeout(() => {
+    checkCustomer.style.opacity = '1';
+  }, 300);
 });
 
 /* //// LOCAL oBJECTS //// */

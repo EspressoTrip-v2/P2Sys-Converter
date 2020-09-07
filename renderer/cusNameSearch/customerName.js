@@ -10,17 +10,14 @@ if (process.platform === 'win32') {
 /* LOCAL MODULES */
 const { customerNameNumber } = require(`${dir}/data/objects.js`);
 
-//////////////
-/* GLOBALS */
-////////////
-// let customerNameListHTML;
-
 ///////////////////
 /* DOM ELEMENTS */
 /////////////////
 
 let customerListContainer = document.getElementById('customer-list-container'),
-  soundClick = document.getElementById('click');
+  soundClick = document.getElementById('click'),
+  border = document.getElementById('border');
+
 /* POPULATE LIST OF CUSTOMERS */
 ///////////////////////////////
 
@@ -45,6 +42,7 @@ let customerNameLists = Array.from(document.getElementsByClassName('customer-nam
 //////////////////////
 /* EVENT LISTENERS */
 ////////////////////
+
 /* SEND CUSTOMER NUMBER TO SECWINDOW */
 customerNameLists.forEach((el) => {
   el.addEventListener('click', (e) => {
@@ -73,4 +71,16 @@ searchDock.addEventListener('keyup', (e) => {
     let elMatch = el.innerText.includes(searchDock.value);
     el.style.display = elMatch ? 'block' : 'none';
   });
+});
+
+/* SHOW WINDOW ON LOAD */
+border.style.opacity = '1';
+
+////////////////////////
+/* MESSAGE LISTENERS */
+//////////////////////
+
+/* MESSAGE TO RETRACT WINDOW BEFORE CLOSE */
+ipcRenderer.on('close-window-dock', (e, message) => {
+  border.style.opacity = '0';
 });

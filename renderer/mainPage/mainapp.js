@@ -42,7 +42,7 @@ let homeWindow = remote.getCurrentWindow(),
 
 let startBtn = document.getElementById('start'),
   exitbtn = document.getElementById('exit-btn'),
-  aboutbtn = document.getElementById('about-btn'),
+  aboutbtn = document.getElementById('info'),
   backbtn = document.getElementById('back-btn'),
   backBtnSettings = document.getElementById('back-btn-system'),
   emailSetupBtnSettings = document.getElementById('email-setup'),
@@ -54,7 +54,8 @@ let startBtn = document.getElementById('start'),
   dbLight = document.getElementById('db'),
   databaseText = document.getElementById('dbtext'),
   systemSettingsBtn = document.getElementById('settings-button'),
-  soundClick = document.getElementById('click');
+  soundClick = document.getElementById('click'),
+  versionInfo = document.getElementById('version-info');
 
 //////////////////////////
 /* DATABASE CONNECTION */
@@ -353,6 +354,11 @@ async function syncDb() {
     exitbtn.setAttribute('class', 'btn-exit');
   }
 }
+
+///////////////////////
+/* DOM MANIPULATIONS */
+///////////////////////
+versionInfo.innerText = `P2Sys-Converter (v${remote.app.getVersion()})`;
 
 //////////////////////
 /* EVENT LISTENERS */
