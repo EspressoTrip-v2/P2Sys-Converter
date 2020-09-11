@@ -3,12 +3,18 @@ import pandas as pd
 import numpy as np
 import json
 import warnings
+import os
 warnings.filterwarnings("ignore", 'This pattern has match groups')
 
 import s5_ordersheet
 
+# GET WORKING DIRECTORY #
+# ///////////////////// #
+workdir = os.getcwd()
+
 #  IMPORT MASTER JSON AND CHANGE TO DF #
-with open('./data/templates/masterPricelistTemplate.json', 'r') as jsonfile:
+with open(f'{workdir}/python/templates/masterPricelistTemplate.json',
+          'r') as jsonfile:
     master_json = json.load(jsonfile)
 # COLUMNS/INDEX/DATA
 columns = master_json['columns']

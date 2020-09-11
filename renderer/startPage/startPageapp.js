@@ -1,7 +1,6 @@
 /* MODULES */
 ////////////
 const { remote, ipcRenderer } = require('electron');
-const { set } = require('mongoose');
 
 /* GET WORKING DIRECTORY */
 let dir = process.cwd();
@@ -9,27 +8,20 @@ if (process.platform === 'win32') {
   let pattern = /[\\]+/g;
   dir = dir.replace(pattern, '/');
 }
-/* CURRENT DIRECTORY */
-let curDir = __dirname;
-if (process.platform === 'win32') {
-  let pattern = /[\\]+/g;
-  curDir = curDir.replace(pattern, '/');
-}
 
 /* LOCAL MODULES */
-const {
-  dataObjects,
-  customerPrices,
-  customerPricelistNumber,
-  customerNumberName,
-  customerBackUp,
-  writeLocalDatabase,
-} = require(`${dir}/data/objects`);
-const { tablePopulate } = require(`${curDir}/tablePopulate`);
+const { writeLocalDatabase, dataObjects } = require(`${dir}/objects.js`);
+const { tablePopulate } = require(`${dir}/renderer/startPage/tablePopulate`);
 
 /* CREATE DATE INSTANCE */
 let mainDate = new Date();
 let dateString = `${mainDate.getMonth() + 1}/${mainDate.getFullYear()}`;
+
+/* GET SCREEN SIZE */
+/////////////////////
+/* GET SCREEN SIZE */
+let res = remote.screen.getPrimaryDisplay().size;
+screenWidth = res.width;
 
 /* REMOTE WINDOWS */
 ///////////////////
@@ -44,7 +36,17 @@ let secWindow = remote.getCurrentWindow();
 /* //////////////////////////////////////////////////////////////////////////////// */
 
 // GLOBAL VARIABLES FOR USAGE ON NECESSARY CODE
-let searchValue, target, jsonFile, htmlContent, customerNumber, customerData, pricelistNumber;
+let searchValue,
+  target,
+  jsonFile,
+  htmlContent,
+  customerNumber,
+  customerData,
+  pricelistNumber,
+  customerPrices,
+  customerPricelistNumber,
+  customerNumberName,
+  customerBackUp;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -81,12 +83,6 @@ let backBtn = document.getElementById('back-to-main-btn'),
   /* TABLE COLUMNS DOM*/
   /////////////////////
   treatedColumns = document.getElementById('treated'),
-  /* DB STATUS DOM*/
-  //////////////////
-  customerSearchDb = document.getElementById('db-customer-search'),
-  customerSearchDbText = document.getElementById('db-customer-search-text'),
-  tableDb = document.getElementById('db-table'),
-  tableDbText = document.getElementById('db-table-text'),
   /* PROGRESS FADE DOM */
   //////////////////////
   progressFade = document.getElementById('progress-fade');
@@ -350,16 +346,10 @@ createBtn.addEventListener('click', (e) => {
     /* CREATE THE CUSTOMER PRICELIST OBJECT TO SEND TO PYTHON */
     customerData = createObjectFromHtml();
 
-    /* CREATE MESSAGE TO SEND TO IPC LISTENER */
-    message = {
-      html: `${dir}/renderer/progress/progress.html`,
-      jsonObject: customerData,
-    };
-
     /* FADE THE BACKGROUND AND MESSAGE FOR PROGRESS BAR */
     progressFade.style.visibility = 'visible';
     progressFade.style.backdropFilter = 'blur(4px) grayscale(1)';
-    ipcRenderer.send('progress', message);
+    ipcRenderer.send('progress', customerData);
   }
 });
 
@@ -597,7 +587,7 @@ function addListListeners() {
 
 /* POPLATE THE CUSTOMERLIST AND ADD CORRECT CLASSES */
 
-(function populateList() {
+function populateList() {
   customerNumberList.innerHTML = '';
   customerNumber = Object.keys(customerPrices);
   customerNumber.forEach((el) => {
@@ -614,7 +604,7 @@ function addListListeners() {
     }
   });
   addListListeners();
-})();
+}
 
 /* REMOVE ITEMS IN THE LIST THAT DOES NOT MATCH SEARCH */
 customerSearch.addEventListener('keyup', (e) => {
@@ -898,7 +888,7 @@ customerFindBtn.addEventListener('click', (e) => {
 maxWindow[0].addEventListener('click', (e) => {
   soundClick.play();
 
-  if (secWindow.isMaximized()) {
+  if (secWindow.getSize()[0] === screenWidth) {
     secWindow.unmaximize();
     setTimeout(() => {
       secWindow.center();
@@ -908,9 +898,26 @@ maxWindow[0].addEventListener('click', (e) => {
   }
 });
 
+/* CHANGE OPACITY AFTER LOAD */
+secWindow.webContents.on('did-finish-load', () => {
+  setTimeout(() => {
+    checkCustomer.style.opacity = '1';
+  }, 300);
+});
+
 //////////////////
 /*IPC LISTENERS*/
 ////////////////
+
+/* RECEIVE THE DATABASE OBJECTS THAT WERE DOWNLOADED */
+ipcRenderer.once('database-object', (e, message) => {
+  customerPrices = message.customerPrices;
+  customerPricelistNumber = message.customerPricelistNumber;
+  customerNumberName = message.customerNumberName;
+  customerBackUp = message.customerBackUp;
+
+  populateList();
+});
 
 /* COMMUNICATION FOR CUSTOMER DOCK */
 ipcRenderer.on('dock-sec', (event, message) => {
@@ -935,13 +942,6 @@ ipcRenderer.on('dock-sec', (event, message) => {
     customerSearch.dispatchEvent(new Event('keyup'));
     customerSearch.dispatchEvent(new Event('keyup'));
   }
-});
-
-/* CHANGE OPACITY AFTER LOAD */
-secWindow.webContents.on('did-finish-load', () => {
-  setTimeout(() => {
-    checkCustomer.style.opacity = '1';
-  }, 300);
 });
 
 /* //// LOCAL oBJECTS //// */
@@ -1013,44 +1013,6 @@ ipcRenderer.on('progress-end', (event, message) => {
     // CLICK BACK BUTTON
     resetForm();
   });
-});
-
-ipcRenderer.on('db-status', (e, message) => {
-  /* DISABLE THE CREATE BUTTON */
-  if (message === 4) {
-    createBtn.disabled = true;
-    createBtn.setAttribute('class', 'create-btn-disabled');
-  } else {
-    createBtn.disabled = false;
-    createBtn.setAttribute('class', 'create-btn');
-  }
-
-  /* CONTROL DB STATUS LIGHT */
-  if (message === 1) {
-    /* CUSTOMER SEARCH DB STATUS */
-    customerSearchDb.setAttribute('class', 'db-connected');
-    customerSearchDbText.setAttribute('data-label', 'CONNECTED');
-
-    /* TABLE DB STATUS */
-    tableDb.setAttribute('class', 'db-connected');
-    tableDbText.setAttribute('data-label', 'CONNECTED');
-  } else if (message === 0) {
-    /* CUSTOMER SEARCH DB STATUS */
-    customerSearchDb.setAttribute('class', 'db-fail');
-    customerSearchDbText.setAttribute('data-label', 'ERROR');
-
-    /* TABLE DB STATUS */
-    tableDb.setAttribute('class', 'db-fail');
-    tableDbText.setAttribute('data-label', 'ERROR');
-  } else if (message === 4) {
-    /* CUSTOMER SEARCH DB STATUS */
-    customerSearchDb.setAttribute('class', 'db-update');
-    customerSearchDbText.setAttribute('data-label', 'UPDATING');
-
-    /* TABLE DB STATUS */
-    tableDb.setAttribute('class', 'db-update');
-    tableDbText.setAttribute('data-label', 'UPDATING');
-  }
 });
 
 /* MESSAGE TO CLICK BACK BUTTON IF THERE IS AN ERROR IN PYTHON CONVERSION */

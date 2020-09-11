@@ -1,13 +1,16 @@
 :root {
-  --main-blue: #3e6ba6ff;
-  --sec-blue: #8eafdafb;
-  --button-red: #cf2115;
-  --button-green: #80c432;
-  --button-gold: #d9793b;
+  --psys-blue: #05899c;
+  --psys-red: #fe1604;
+  --psys-green: #03c224;
+
+  --main: #000;
+  --sec-blue: #05899c;
+  --button-red: #fe1604;
+  --button-green: #03c224;
+  --button-gold: #fe7c04;
   --opaque-man: rgba(128, 196, 50, 0.4);
   --auto: #d9793b;
   --opaque-auto: rgba(217, 122, 58, 0.3);
-  --sent-color: #cbe558;
 }
 
 /* Fonts */
@@ -23,7 +26,32 @@ html {
   align-items: center;
   align-content: center;
   height: 100%;
+  width: 100%;
   background-color: transparent;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  height: 500px;
+  width: 430px;
+}
+#header {
+  display: flex;
+  position: relative;
+  width: 430px;
+  height: 65px;
+  background-color: var(--sec-blue);
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  border-radius: 20px;
+  border: 2px solid var(--main);
+  z-index: 1;
+  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
 }
 
 * {
@@ -33,27 +61,36 @@ html {
   font-family: sans-serif;
   -webkit-user-select: none;
 }
-header {
+#logo-background {
   position: relative;
-  top: -4px;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 350px;
+  width: 225px;
+  height: 80px;
+  background-color: #fff;
+  border-radius: 50%;
+  border: 2px solid var(--main);
+  filter: drop-shadow(2px 4px 6px black);
 }
-.logo {
-  position: relative;
-  left: 19px;
-  height: 95%;
-  padding-top: 5px;
-}
-.logo-text {
+#logo-background::after {
+  content: 'Mailer';
+  position: absolute;
+  top: 14px;
+  right: 30px;
+  font-size: 45px;
   font-family: Forelle;
-  position: relative;
-  right: -4px;
-  font-size: 90px;
 }
+
+.logo {
+  position: absolute;
+  top: -2px;
+  left: 38px;
+  height: 75px;
+  -webkit-user-drag: none;
+}
+
 body {
   width: 530px;
   height: 730px;
@@ -70,14 +107,9 @@ body {
   justify-content: space-evenly;
   align-items: center;
   align-content: center;
-  border: 4px solid var(--main-blue);
   border-radius: 20px;
-  background-image: url(../icons/whitcher-logo-small-opacity.png);
-  background-position: center;
-  background-color: #fff;
-  width: 500px;
-  height: 700px;
-  box-shadow: 1px 1px 19px 0px rgba(50, 50, 50, 1);
+  width: 100%;
+  height: 100%;
   transform: scale(0);
   opacity: 0;
   transition: transform 0.2s, opacity 0.2s;
@@ -85,17 +117,17 @@ body {
 
 .text-container {
   position: relative;
-  border: 4px solid var(--main-blue);
   border-radius: 20px;
-  top: -7px;
+  top: -48px;
   display: flex;
-  height: 550px;
+  height: 100%;
+  width: 100%;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 0 20px;
-  padding-bottom: 20px;
+  padding: 0 15px;
   background-color: var(--sec-blue);
+  border: 2px solid var(--main);
   box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
 }
 #email-entry {
@@ -159,6 +191,15 @@ body {
   background-color: #fff;
   border-radius: 200px;
   padding: 5px;
+  overflow: auto;
+}
+
+.excel::-webkit-scrollbar {
+  height: 4px;
+  background-color: var(--main-blue);
+}
+.excel::-webkit-scrollbar-thumb {
+  background-color: var(--sec-blue);
 }
 
 .link {
@@ -196,7 +237,7 @@ body {
   position: relative;
   height: 50px;
   width: 40%;
-  top: 30px;
+  top: 19px;
   background-color: var(--button-green);
   border-radius: 200px;
   border: 3px solid var(--button-green);
@@ -222,11 +263,14 @@ body {
 #sent-letter-container {
   /* visibility: visible; */
   opacity: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   position: absolute;
   transform: scaleY(0);
-  height: 140px;
-  width: 200px;
-  border-radius: 24px;
+  height: 109px;
+  width: 150px;
+  border-radius: 10px;
   background-color: #fff;
   transition: transform 0.8s 0.3s, opacity 0.8s 0.3s;
   box-shadow: 1px 1px 30px 0px rgba(50, 50, 50, 1);
@@ -234,7 +278,7 @@ body {
 #sent-letter-container::before {
   position: absolute;
   font-size: 45px;
-  top: 160px;
+  top: 125px;
   font-weight: bolder;
   content: attr(data-label);
   animation: sending 0.3s linear infinite alternate;
@@ -243,9 +287,8 @@ body {
   position: absolute;
   text-align: center;
   color: #cf2115;
-  right: -6px;
   font-size: 45px;
-  top: 160px;
+  top: 125px;
   font-weight: bolder;
   content: attr(data-fail);
 }
@@ -261,8 +304,8 @@ body {
 
 #sent-letter {
   position: relative;
-  bottom: 30px;
-  width: 200px;
+  bottom: 20px;
+  width: 150px;
 }
 
 #check-container {
@@ -278,4 +321,9 @@ body {
   position: relative;
   width: 120px;
   height: auto;
+}
+@media screen and (max-width: 1280px) {
+  #border {
+    transform: scale(0.95);
+  }
 }

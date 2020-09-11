@@ -14,6 +14,10 @@ import reform
 import s5_ordersheet
 import system_template
 
+# GET WORKING DIRECTORY #
+# ///////////////////// #
+workdir = os.getcwd()
+
 # READ IN JSON FILE FROM ARGV #
 # /////////////////////////// #
 json_pricelist = dict(json.loads(sys.argv[1:][0]))
@@ -218,7 +222,8 @@ def s5_product(col):
     # ADMINISTRATIVE CODE TO CONVERT THE ACCPAC EXCEL FILE #
     # TO USABLE JSON IN THE FUTURE DEVELOPEMENT OF THE APP #
     ########################################################
-    with open('./data/templates/s5_all_products.json', 'r') as json_file:
+    with open(f'{workdir}/python/templates/s5_all_products.json',
+              'r') as json_file:
         s5_json = json.load(json_file)
 
     T_json = s5_json['s5_all_products']['s5_treated']

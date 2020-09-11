@@ -1,4 +1,4 @@
 node_modules/
 data/logfiles/
-data/templates/*.json
+/templates/*.json
 python/__pycache__/

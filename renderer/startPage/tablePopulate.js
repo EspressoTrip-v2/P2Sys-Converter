@@ -1,6 +1,13 @@
+/* GET WORKING DIRECTORY */
+let dir = process.cwd();
+if (process.platform === 'win32') {
+  let pattern = /[\\]+/g;
+  dir = dir.replace(pattern, '/');
+}
+
 /* MODULES */
 ////////////
-const { dataObjects } = require('../../data/objects');
+const { dataObjects } = require(`${dir}/objects.js`);
 
 /* FUNCTION TO POPULATE THE TABLE ROWS */
 exports.tablePopulate = (jsonfile) => {

@@ -10,11 +10,12 @@ if (process.platform === 'win32') {
   dir = dir.replace(pattern, '/');
 }
 
-/* LOCAL MODULES */
-const { emailSetup } = require(`${dir}/data/objects.js`);
-
 /* GET WINDOW */
 let emailWindow = remote.getCurrentWindow();
+
+/* GET SCREEN SIZE */
+let res = remote.screen.getPrimaryDisplay().size;
+screenWidth = res.width;
 
 //////////////////
 /* DOM ELEMENTS */
@@ -32,7 +33,7 @@ let emailRecipients = document.getElementById('email-entry'),
   soundClick = document.getElementById('click');
 
 /* CREATE EMAIL TEXT FOR MESSAGE AND INITIAL ADDRESSES */
-emailRecipients.value = emailSetup['email']['to'];
+emailRecipients.value = process.env.EMAIL_TO;
 
 /* GLOBAL VARIABLES */
 let customerNumber, filePaths, fileNameB, fileNameA, html, dialogReply, failedMessageobj;
@@ -73,7 +74,7 @@ function getText(message) {
 
   /* CREATE THE TRANSPORT MESSAGE */
   /* TEXT OF MESSAGE */
-  let textInitial = emailSetup['email']['text'].replace('{NAME}', customerName),
+  let textInitial = process.env.EMAIL_TEXT.replace('{NAME}', customerName),
     text = textInitial.replace('{NUMBER}', customerNumber);
   /* INSERT THE MESSAGE IN THE TEXT AREA */
   emailMessageArea.value = text;
@@ -86,7 +87,7 @@ function getMessage(text) {
   let transportMessage = {
     to: emailRecipients.value,
     subject: `Emailing ${customerNumber}`,
-    replyTo: emailSetup['email']['replyTo'],
+    replyTo: process.env.EMAIL_REPLYTO,
     text,
     attachments: [{ path: filePaths[0] }, { path: filePaths[1] }],
   };
@@ -99,7 +100,14 @@ function getMessage(text) {
 //////////////////////////////
 
 /* CREATE NODEMAILER TRANSPORTER */
-let mailTransport = nodemailer.createTransport(emailSetup['smtp']);
+let mailTransportObject = {
+  host: process.env.EMAIL_SMTP_HOST,
+  auth: {
+    user: process.env.EMAIL_AUTH_USER,
+    pass: process.env.EMAIL_AUTH_PASSWORD,
+  },
+};
+let mailTransport = nodemailer.createTransport(mailTransportObject);
 
 function verifyConnect(message) {
   /* SHOW NOTIFICATION IF ERROR CONNECTING */
@@ -143,7 +151,7 @@ function verifyConnect(message) {
 
 /* LOGFILE CREATION FUNCTION */
 function logfileFunc(error) {
-  const fileDir = `${dir}/data/logfiles/mail-error-logfile.txt'`;
+  const fileDir = `${dir}/error-log.txt`;
   /* CHECK IF IT EXISTS */
   if (fs.existsSync(fileDir)) {
     fs.appendFile(fileDir, `${new Date()}: Email Error -> ${error}\n`, (err) =>
@@ -239,7 +247,7 @@ function populateExcelHtml(message) {
 
           /* CHANGE THE LETTER TO RED AND CHANGE MESSAGE TO FAIL */
           letterContainer.setAttribute('data-label', '');
-          letterContainer.setAttribute('data-fail', 'SENDING FAILED');
+          letterContainer.setAttribute('data-fail', 'FAILED');
           sentLetter.style.fill = '#cf2115';
           setTimeout(() => {
             letterContainer.style.cssText = 'transform:scaleY(0);opacity:0;';
@@ -249,7 +257,7 @@ function populateExcelHtml(message) {
         } else {
           /* IF SUCCESSFUL SHOW TICK AND TRANSITION  */
           letterCheckbox.style.cssText =
-            'visibility: visible;transform: rotate(360deg) scale(1);';
+            'visibility: visible;transform: rotate(360deg) scale(2);';
           letterContainer.setAttribute('data-label', '');
           sentNotification.play();
           setTimeout(() => {
@@ -275,7 +283,11 @@ function populateExcelHtml(message) {
     shell.openPath(filePaths[1]);
   });
 
-  borderBox.style.cssText = 'transform: scale(1);opacity:1;';
+  if (screenWidth <= 1280) {
+    borderBox.style.cssText = 'transform: scale(.9);opacity:1;';
+  } else {
+    borderBox.style.cssText = 'transform: scale(1);opacity:1;';
+  }
 }
 
 /* ///////////// */

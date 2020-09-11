@@ -64,7 +64,7 @@ html {
 
 #progress {
   position: relative;
-  width: 200px;
+  width: 230px;
   height: 22px;
   background-color: #111;
   border-radius: 1.5em;
@@ -108,7 +108,7 @@ html {
 }
 #spinner-logo {
   position: absolute;
-  width: 230px;
+  width: 250px;
   height: 65px;
   border-radius: 20px;
   filter: drop-shadow(2px 4px 6px black);

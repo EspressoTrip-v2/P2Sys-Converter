@@ -19,20 +19,21 @@
 }
 
 html {
-  width: 500px;
-  height: 500px;
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 body {
   display: flex;
+  position: relative;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   align-content: center;
-  width: 100%;
-  height: 100%;
+  width: 300px;
+  height: 300px;
 }
 
 .spinner {
@@ -40,8 +41,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 60vw;
-  height: 60vw;
+  width: 225px;
+  height: 225px;
   border-radius: 50%;
 }
 
@@ -52,8 +53,8 @@ body {
   flex-direction: column;
   align-items: center;
   font-weight: bolder;
-  height: 145px;
-  width: 380px;
+  width: 270px;
+  height: 100px;
   border-radius: 50%;
   background-color: #fff;
   border: 2px solid #000;
@@ -64,21 +65,22 @@ body {
 
 #logo {
   position: relative;
-  left: -75px;
+  top: -3px;
+  left: -56px;
   padding: 1vh 3vw;
-  width: 165px;
+  width: 110px;
   height: auto;
 }
 
 #progress::before {
   position: absolute;
   content: 'Converter';
-  font-size: 70px;
-  top: 40px;
+  font-size: 50px;
+  top: 20px;
   font-family: Forelle;
   font-weight: 300;
   z-index: 1;
-  left: 178px;
+  left: 121px;
 }
 
 .spinner-sector {
