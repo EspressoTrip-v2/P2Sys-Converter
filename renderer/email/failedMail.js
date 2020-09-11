@@ -9,7 +9,7 @@ if (process.platform === 'win32') {
 }
 
 /* LOCAL MODULES */
-const { emailSetup } = require(`${dir}/data/objects.js`);
+const { emailSetup } = require(`${dir}/objects.js`);
 
 ///////////////////////////
 /* FAILED EMAIL FUNCTION */

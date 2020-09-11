@@ -1,195 +1,171 @@
 <!DOCTYPE html>
 
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'" />
-    <title>New Customer</title>
-    <link rel="stylesheet" href="./startPage.css" />
-    <script defer src="./startPageapp.js"></script>
-  </head>
 
-  <body id="page-body">
-    <audio src="../sounds/click.wav" id="click" style="display: none"></audio>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'" />
+  <title>New Customer</title>
+  <link rel="stylesheet" href="./startPage.css" />
+  <script defer src="./startPageapp.js"></script>
+</head>
 
-    <!-- Customer Search Box -->
-    <!-- /////////////////// -->
-    <div id="check-customer">
-      <div id="p2s-logo"><img src="../icons/loader.png" alt="" /></div>
+<body id="page-body">
+  <div id="progress-fade"></div>
+  <audio src="../sounds/click.wav" id="click" style="display: none"></audio>
 
-      <div class="grab-search">
-        <svg viewBox="0 0 1000 1000">
-          <metadata>
-            Svg Vector Icons : http:&#x2F;&#x2F;www.onlinewebfonts.com&#x2F;icon
-          </metadata>
-          <path
-            d="M814.2 675.4l-43.5-43.6 101.2-101H530.8V872l101-101.2 43.6 43.5L500 990 324.6 814.2l43.6-43.5 101 101.2V530.8H128l101.2 101 -43.5 43.6L10 500l175.8-175.4 43.5 43.6L128 469.2h341.2V128l-101 101.2 -43.6-43.5L500 10l175.4 175.8 -43.6 43.5L530.8 128v341.2H872l-101.2-101 43.5-43.6L990 500 814.2 675.4 814.2 675.4z"
-          />
-        </svg>
+  <!-- Customer Search Box -->
+  <!-- /////////////////// -->
+  <div id="check-customer">
+    <div id="p2s-logo"><img src="../icons/loader.png" alt="" /></div>
+
+    <div class="grab-search">
+      <svg viewBox="0 0 1000 1000">
+        <metadata>
+          Svg Vector Icons : http:&#x2F;&#x2F;www.onlinewebfonts.com&#x2F;icon
+        </metadata>
+        <path
+          d="M814.2 675.4l-43.5-43.6 101.2-101H530.8V872l101-101.2 43.6 43.5L500 990 324.6 814.2l43.6-43.5 101 101.2V530.8H128l101.2 101 -43.5 43.6L10 500l175.8-175.4 43.5 43.6L128 469.2h341.2V128l-101 101.2 -43.6-43.5L500 10l175.4 175.8 -43.6 43.5L530.8 128v341.2H872l-101.2-101 43.5-43.6L990 500 814.2 675.4 814.2 675.4z" />
+      </svg>
+    </div>
+    <div id="check-background">
+      <div id="customer-number-list">
+        <span id="customer-list"></span>
       </div>
-      <div id="check-background">
-        <div id="customer-number-list">
-          <span id="customer-list"></span>
-        </div>
-        <div id="customer-search-container">
-          <form action="javascript:null;">
-            <img src="../icons/search.png" />
-            <input
-              type="text"
-              id="customer-search"
-              placeholder="Customer #..."
-              spellcheck="false"
-              minlength="6"
-              maxlength="7"
-              title="Customer number needs to be 6 digits long"
-              autofocus
-            />
-            <input style="display: none" id="hidden-submit" type="submit" />
-          </form>
-        </div>
+      <div id="customer-search-container">
+        <form action="javascript:null;">
+          <img src="../icons/search.png" />
+          <input type="text" id="customer-search" placeholder="Customer #..." spellcheck="false" minlength="6"
+            maxlength="7" title="Customer number needs to be 6 digits long" autofocus />
+          <input style="display: none" id="hidden-submit" type="submit" />
+        </form>
+      </div>
 
-        <div>
-          <button class="btn" id="check-cancel-btn" href="#">CANCEL</button>
-          <button class="btn" id="check-continue-btn" href="#">CONTINUE</button>
-          <span id="disabled" href="#">DISABLED</span>
-          <button class="btn" id="check-update-btn" href="#">UPDATE</button>
-          <button class="btn" id="resume-editing-btn" href="#">RESUME</button>
-        </div>
-      </div>
-      <div id="assist-box">
-        <button class="btn" id="assist-btn" href="#">CUSTOMER FIND</button>
-      </div>
-      <div id="db-customer-search" title="Database status" class="db-light">
-        <div id="db-customer-search-text" class="text" data-label="DATABASE"></div>
+      <div>
+        <button class="btn" id="check-cancel-btn" href="#">CANCEL</button>
+        <button class="btn" id="check-continue-btn" href="#">CONTINUE</button>
+        <span id="disabled" href="#">DISABLED</span>
+        <button class="btn" id="check-update-btn" href="#">UPDATE</button>
+        <button class="btn" id="resume-editing-btn" href="#">RESUME</button>
       </div>
     </div>
+    <div id="assist-box">
+      <button class="btn" id="assist-btn" href="#">CUSTOMER FIND</button>
+    </div>
+  </div>
 
-    <!-- Main Table Form HTML -->
-    <!-- //////////////////// -->
-    <div id="hider" style="display: hidden">
-      <div id="border">
-        <div id="header">
-          <div class="max">
-            <a href="#"
-              ><svg viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M15 3C14.4 3 14 2.6 14 2 14 1.4 14.4 1 15 1H22C22.6 1 23 1.4 23 2V9C23 9.6 22.6 10 22 10 21.4 10 21 9.6 21 9V4.4L13.7 11.7C13.3 12.1 12.7 12.1 12.3 11.7 11.9 11.3 11.9 10.7 12.3 10.3L19.6 3H15ZM4 6C3.4 6 3 6.4 3 7V20C3 20.6 3.4 21 4 21H17C17.6 21 18 20.6 18 20V13C18 12.4 18.4 12 19 12 19.6 12 20 12.4 20 13V20C20 21.7 18.7 23 17 23H4C2.3 23 1 21.7 1 20V7C1 5.3 2.3 4 4 4H11C11.6 4 12 4.4 12 5 12 5.6 11.6 6 11 6H4Z"
-                  fill="#293644"
-                /></svg
-            ></a>
-          </div>
-          <div class="grab">
-            <svg viewBox="0 0 1000 1000">
-              <metadata>
-                Svg Vector Icons : http:&#x2F;&#x2F;www.onlinewebfonts.com&#x2F;icon
-              </metadata>
+  <!-- Main Table Form HTML -->
+  <!-- //////////////////// -->
+  <div id="hider" style="display: hidden">
+    <div id="border">
+      <div id="header">
+        <div class="max">
+          <a href="#"><svg viewBox="0 0 24 24" fill="none">
               <path
-                d="M814.2 675.4l-43.5-43.6 101.2-101H530.8V872l101-101.2 43.6 43.5L500 990 324.6 814.2l43.6-43.5 101 101.2V530.8H128l101.2 101 -43.5 43.6L10 500l175.8-175.4 43.5 43.6L128 469.2h341.2V128l-101 101.2 -43.6-43.5L500 10l175.4 175.8 -43.6 43.5L530.8 128v341.2H872l-101.2-101 43.5-43.6L990 500 814.2 675.4 814.2 675.4z"
-              />
-            </svg>
+                d="M15 3C14.4 3 14 2.6 14 2 14 1.4 14.4 1 15 1H22C22.6 1 23 1.4 23 2V9C23 9.6 22.6 10 22 10 21.4 10 21 9.6 21 9V4.4L13.7 11.7C13.3 12.1 12.7 12.1 12.3 11.7 11.9 11.3 11.9 10.7 12.3 10.3L19.6 3H15ZM4 6C3.4 6 3 6.4 3 7V20C3 20.6 3.4 21 4 21H17C17.6 21 18 20.6 18 20V13C18 12.4 18.4 12 19 12 19.6 12 20 12.4 20 13V20C20 21.7 18.7 23 17 23H4C2.3 23 1 21.7 1 20V7C1 5.3 2.3 4 4 4H11C11.6 4 12 4.4 12 5 12 5.6 11.6 6 11 6H4Z"
+                fill="#293644" /></svg></a>
+        </div>
+        <div class="grab">
+          <svg viewBox="0 0 1000 1000">
+            <metadata>
+              Svg Vector Icons : http:&#x2F;&#x2F;www.onlinewebfonts.com&#x2F;icon
+            </metadata>
+            <path
+              d="M814.2 675.4l-43.5-43.6 101.2-101H530.8V872l101-101.2 43.6 43.5L500 990 324.6 814.2l43.6-43.5 101 101.2V530.8H128l101.2 101 -43.5 43.6L10 500l175.8-175.4 43.5 43.6L128 469.2h341.2V128l-101 101.2 -43.6-43.5L500 10l175.4 175.8 -43.6 43.5L530.8 128v341.2H872l-101.2-101 43.5-43.6L990 500 814.2 675.4 814.2 675.4z" />
+          </svg>
+        </div>
+        <div class="customer-region-item-a">
+          <button id="info-btn" class="info-btn" href="#">INFO</button>
+          <div id="overflow">
+            <span role="textbox" id="customer-name" spellcheck="false" contenteditable>
+            </span>
           </div>
-          <div class="customer-region-item-a">
-            <button id="info-btn" class="info-btn" href="#">INFO</button>
-            <div id="overflow">
-              <span role="textbox" id="customer-name" spellcheck="false" contenteditable>
-              </span>
+          <button id="email-now" class="email-now" href="#"></button>
+
+          <!-- Customer Info Dock -->
+          <!-- ////////////////// -->
+          <div id="customer-contact-container">
+            <div id="email">
+              <span>EMAIL ADDRESS</span>
+              <input id="client-email" type="email" placeholder="ENTER EMAIL" />
             </div>
-            <button id="email-now" class="email-now" href="#"></button>
 
-            <!-- Customer Info Dock -->
-            <!-- ////////////////// -->
-            <div id="customer-contact-container">
-              <div id="email">
-                <span>EMAIL ADDRESS</span>
-                <input id="client-email" type="email" placeholder="ENTER EMAIL" />
-              </div>
-
-              <div id="phone">
-                <span>TELEPHONE NUMBER</span>
-                <input id="client-phone" type="text"phone" placeholder="ENTER TEL" />
-              </div>
+            <div id="phone">
+              <span>TELEPHONE NUMBER</span>
+              <input id="client-phone" type="text" phone" placeholder="ENTER TEL" />
             </div>
-          </div>
-          <div class="customer-region-item-b">
-            <span id="label-customer-number">
-              <span>CUSTOMER<br />NUMBER</span>
-            </span>
-            <input
-              type="text"
-              id="customer-number"
-              placeholder="CUSTOMER #"
-              disabled
-              spellcheck="false"
-            />
-          </div>
-
-          <div class="price-list-item-a">
-            <span id="label-pricelist">
-              <span>PRICELIST<br />NUMBER</span>
-            </span>
-
-            <input type="text" spellcheck="false" placeholder="PRICELIST #" id="pricelist" />
-          </div>
-
-          <div class="cca-box-item-a">
-            <span id="label-cca">
-              <span>CCA<br />PRICE</span>
-            </span>
-
-            <input type="number" placeholder="CCA PRICE" id="cca-price" />
-            <button href="#" class="cca-auto-out" id="cca-auto">AUTO</button>
-            <button href="#" class="cca-man-in" id="cca-man">MAN</button>
           </div>
         </div>
+        <div class="customer-region-item-b">
+          <span id="label-customer-number">
+            <span>CUSTOMER<br />NUMBER</span>
+          </span>
+          <input type="text" id="customer-number" placeholder="CUSTOMER #" disabled spellcheck="false" />
+        </div>
 
-        <!-- Table -->
-        <!-- ///// -->
-        <main>
-          <div class="table-container">
-            <button class="lock-in" id="lock">
-              <svg id="lock-svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  d="M18 10v-4c0-3.313-2.687-6-6-6s-6 2.687-6 6v4h-3v14h18v-14h-3zm-10-4c0-2.206 1.794-4 4-4s4 1.794 4 4v4h-8v-4zm11 16h-14v-10h14v10z"
-                />
-              </svg>
-            </button>
-            <button class="unlock-out" id="unlock">
-              <svg id="unlock-svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  d="M8 10v-4c0-2.206 1.795-4 4-4s4 1.794 4 4v1h2v-1c0-3.313-2.687-6-6-6s-6 2.687-6 6v4h-3v14h18v-14h-13zm11 12h-14v-10h14v10z"
-                />
-              </svg>
-            </button>
-            <div id="container">
-              <table id="table">
-                <colgroup>
-                  <col id="bundle" />
-                  <col id="dim" />
-                  <col id="len" />
-                  <col id="untreated" />
-                  <col id="treated" />
-                </colgroup>
-              </table>
-            </div>
-          </div>
-        </main>
-        <div id="footer">
-          <button href="#" id="back-to-main-btn" class="btn back-to-main-btn">BACK</button>
-          <div id="db-table" class="db-light">
-            <div id="db-table-text" class="text" data-label="DATABASE"></div>
-          </div>
-          <button href="#" id="pause-btn" title="Database status" class="btn pause-btn">
-            PAUSE
+        <div class="price-list-item-a">
+          <span id="label-pricelist">
+            <span>PRICELIST<br />NUMBER</span>
+          </span>
+
+          <input type="text" spellcheck="false" placeholder="PRICELIST #" id="pricelist" />
+        </div>
+
+        <div class="cca-box-item-a">
+          <span id="label-cca">
+            <span>CCA<br />PRICE</span>
+          </span>
+
+          <input type="number" placeholder="CCA PRICE" id="cca-price" />
+          <button href="#" class="cca-auto-out" id="cca-auto">AUTO</button>
+          <button href="#" class="cca-man-in" id="cca-man">MAN</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <!-- ///// -->
+      <main>
+        <div class="table-container">
+          <button class="lock-in" id="lock">
+            <svg id="lock-svg" width="24" height="24" viewBox="0 0 24 24">
+              <path
+                d="M18 10v-4c0-3.313-2.687-6-6-6s-6 2.687-6 6v4h-3v14h18v-14h-3zm-10-4c0-2.206 1.794-4 4-4s4 1.794 4 4v4h-8v-4zm11 16h-14v-10h14v10z" />
+            </svg>
           </button>
-          <button href="#" id="create-btn" class="create-btn">CREATE</button>
-          <div id="footer-logo">
-            <img src="../icons/loader.png" id="p2sys-logo" />
+          <button class="unlock-out" id="unlock">
+            <svg id="unlock-svg" width="24" height="24" viewBox="0 0 24 24">
+              <path
+                d="M8 10v-4c0-2.206 1.795-4 4-4s4 1.794 4 4v1h2v-1c0-3.313-2.687-6-6-6s-6 2.687-6 6v4h-3v14h18v-14h-13zm11 12h-14v-10h14v10z" />
+            </svg>
+          </button>
+          <div id="container">
+            <table id="table">
+              <colgroup>
+                <col id="bundle" />
+                <col id="dim" />
+                <col id="len" />
+                <col id="untreated" />
+                <col id="treated" />
+              </colgroup>
+            </table>
           </div>
+        </div>
+      </main>
+      <div id="footer">
+        <button href="#" id="back-to-main-btn" class="btn back-to-main-btn">BACK</button>
+        <button href="#" id="pause-btn" title="Database status" class="btn pause-btn">
+          PAUSE
+        </button>
+        <button href="#" id="create-btn" class="create-btn">CREATE</button>
+        <div id="footer-logo">
+          <img src="../icons/loader.png" id="p2sys-logo" />
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- FADE FOR PROGRESS DOCK -->
-    <div id="progress-fade"></div>
-  </body>
+  <!-- FADE FOR PROGRESS DOCK -->
+  </div>
+</body>
+
 </html>

@@ -16,14 +16,15 @@ secWindow = progressWindow.getParentWindow();
 
 /* DOM ELEMENTS */
 /////////////////
-let progressBar = document.getElementById('progress');
+let progressBar = document.getElementById('progress'),
+  progressLabel = document.getElementById('spinner-logo');
 
 /* FUNCTIONS */
 //////////////
 
 /* LOGFILE CREATION FUNCTION */
 function logfileFunc(error) {
-  const fileDir = `${dir}/data/logfiles/conversion-logfile.txt'`;
+  const fileDir = `${dir}/error-log.txt`;
   /* CHECK IF IT EXISTS */
   if (fs.existsSync(fileDir)) {
     fs.appendFile(fileDir, `${new Date()}: Conversion Error -> [${error}]\n`, (err) =>
@@ -60,6 +61,13 @@ ipcRenderer.on('convert-python', (event, message) => {
   pyshell.on('message', (message) => {
     // console.log(message);
     let value = parseInt(message);
+    if (message >= 20 && message < 50) {
+      progressLabel.setAttribute('data-label', 'Processing...');
+    } else if (message >= 50 && message < 80) {
+      progressLabel.setAttribute('data-label', 'Almost Done...');
+    } else if (message >= 80) {
+      progressLabel.setAttribute('data-label', 'Finishing Up...');
+    }
 
     /* SEPARATE THE PATHS INTO USABLE ARRAY */
     if (isNaN(value)) {
@@ -82,6 +90,7 @@ ipcRenderer.on('convert-python', (event, message) => {
       }, 500);
     }
   });
+
   pyshell.end(function (err, code, signal) {
     if (err) {
       logfileFunc(err);
