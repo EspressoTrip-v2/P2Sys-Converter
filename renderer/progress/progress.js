@@ -3,10 +3,24 @@ const { PythonShell } = require('python-shell');
 const fs = require('fs');
 
 /* GET WORKING DIRECTORY */
-let dir = process.cwd();
-if (process.platform === 'win32') {
-  let pattern = /[\\]+/g;
-  dir = dir.replace(pattern, '/');
+let dir;
+function envFileChange() {
+  let fileName = `${process.cwd()}/resources/app.asar`;
+  /* LOCAL MODULES */
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = fileName.replace(pattern, '/');
+  } else dir = fileName;
+}
+if (!process.env.NODE_ENV) {
+  envFileChange();
+} else {
+  dir = process.cwd();
+
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = dir.replace(pattern, '/');
+  }
 }
 
 /* REMOTE WINDOWS */
@@ -62,11 +76,11 @@ ipcRenderer.on('convert-python', (event, message) => {
     // console.log(message);
     let value = parseInt(message);
     if (message >= 20 && message < 50) {
-      progressLabel.setAttribute('data-label', 'Processing...');
+      progressLabel.setAttribute('data-label', 'Processing');
     } else if (message >= 50 && message < 80) {
-      progressLabel.setAttribute('data-label', 'Almost Done...');
+      progressLabel.setAttribute('data-label', 'Almost Done');
     } else if (message >= 80) {
-      progressLabel.setAttribute('data-label', 'Finishing Up...');
+      progressLabel.setAttribute('data-label', 'Finishing Up');
     }
 
     /* SEPARATE THE PATHS INTO USABLE ARRAY */
@@ -97,9 +111,9 @@ ipcRenderer.on('convert-python', (event, message) => {
       progressWindow.hide();
       remote.dialog.showMessageBoxSync(secWindow, {
         type: 'warning',
-        icon: `${dir}/renderer/icons/trayTemplate.png`,
+        icon: `${dir}/renderer/icons/error.png`,
         buttons: ['OK'],
-        message: 'PYTHON CONVERSION ERROR:',
+        message: 'P2SYS CONVERSION ERROR:',
         detail:
           'There was an problem during the file conversion.\nPlease contact your developer.',
       });

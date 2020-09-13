@@ -7,16 +7,27 @@ mongoose.set('bufferCommands', false);
 const fs = require('fs');
 
 /* GET WORKING DIRECTORY */
-let dir = process.cwd();
-if (process.platform === 'win32') {
-  let pattern = /[\\]+/g;
-  dir = dir.replace(pattern, '/');
+let dir;
+function envFileChange() {
+  let fileName = `${process.cwd()}/resources/app.asar`;
+  /* LOCAL MODULES */
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = fileName.replace(pattern, '/');
+  } else dir = fileName;
+}
+if (!process.env.NODE_ENV) {
+  envFileChange();
+} else {
+  dir = process.cwd();
+
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = dir.replace(pattern, '/');
+  }
 }
 
 const { sendFailedMail } = require(`${dir}/renderer/email/failedMail.js`);
-if (localStorage['failedEmail']) {
-  sendFailedMail();
-}
 
 /* GLOBAL VARIABLES */
 /////////////////////
@@ -36,45 +47,22 @@ let startBtn = document.getElementById('start'),
   configView = document.getElementById('config-view'),
   clearCachedEmailsBtnSettings = document.getElementById('clear-cached-emails'),
   clearPausedPricelistsBtnSettings = document.getElementById('clear-cached-pricelists'),
-  forceDbUpdateBtnSettings = document.getElementById('db-update'),
   mailbtn = document.getElementById('mail-btn'),
-  dbLight = document.getElementById('db'),
-  databaseText = document.getElementById('dbtext'),
   systemSettingsBtn = document.getElementById('settings-button'),
   soundClick = document.getElementById('click'),
   versionInfo = document.getElementById('version-info'),
-  mainContainer = document.getElementById('container');
+  mainContainer = document.getElementById('container'),
+  sentSound = document.getElementById('sent');
 
 ///////////////////////
 /* DOM MANIPULATIONS */
 ///////////////////////
 versionInfo.innerText = `P2Sys-Converter (v${remote.app.getVersion()})`;
 
-//////////////////////
-/* EVENT LISTENERS */
-////////////////////
-
-/* ONLINE STATUS MONITORING */
-window.addEventListener('online', (e) => {
-  startInterval();
-});
-
-window.addEventListener('offline', (e) => {
-  new Notification('DATABASE CONNECTION ERROR', {
-    icon: `${dir}/renderer/icons/trayTemplate.png`,
-    body: 'Internet connection failure. Unable to connect to database.',
-    requireInteraction: true,
-  });
-  /* CLEAR THE STATE INTERVAL */
-  clearInterval(stateInterval);
-  /* SET DB STATUS TO ERROR */
-  dbLight.setAttribute('class', 'db-fail');
-  databaseText.setAttribute('data-label', 'ERROR');
-  /* SEND TO OTHER WINDOWS IF AVAILABLE */
-  clearInterval(sendStatus);
-
-  sendDbStatus('getStatus');
-});
+/* SEND FAILED MAIL ITEMS */
+if (localStorage['failedEmail']) {
+  sendFailedMail(sentSound);
+}
 
 /* MAIN PAGE EVENTS */
 /////////////////////
@@ -218,4 +206,14 @@ systemSettingsBtn.addEventListener('click', (e) => {
 /* SHOW WINDOW */
 ipcRenderer.on('show', (e, message) => {
   mainContainer.style.opacity = '1';
+});
+
+/* MESSAGE TO CREATE DOWNLOAD WINDOW */
+ipcRenderer.on('create-download-window', (e, message) => {
+  ipcRenderer.send('create-download-window', null);
+});
+
+/* MESSAGE TO SEND PERCENTAGE DOWNLOADED */
+ipcRenderer.on('update-progress', (e, message) => {
+  ipcRenderer.send('update-progress', message);
 });

@@ -1,14 +1,28 @@
 /* MODULE IMPORTS */
-const { app, BrowserWindow, ipcMain, Tray, Menu, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, dialog, Notification } = require('electron');
 const mongoose = require('mongoose');
 const fs = require('fs');
 require('dotenv').config();
 
 /* GET WORKING DIRECTORY */
-let dir = process.cwd();
-if (process.platform === 'win32') {
-  let pattern = /[\\]+/g;
-  dir = dir.replace(pattern, '/');
+let dir;
+function envFileChange() {
+  let fileName = `${process.cwd()}/resources/app.asar`;
+  /* LOCAL MODULES */
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = fileName.replace(pattern, '/');
+  } else dir = fileName;
+}
+if (!process.env.NODE_ENV) {
+  envFileChange();
+} else {
+  dir = process.cwd();
+
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = dir.replace(pattern, '/');
+  }
 }
 
 /* LOCAL MODULES */
@@ -18,6 +32,8 @@ const {
   customerNumberNameModel,
   customerBackUpModel,
 } = require(`${dir}/database/mongoDbConnect.js`);
+const { writeLocalDatabase } = require(`${dir}/objects.js`);
+const { updater } = require(`${dir}/updater.js`);
 
 /* GLOBAL VARIABLES */
 let homeWindow,
@@ -25,6 +41,7 @@ let homeWindow,
   tray,
   childWindow,
   loadingWindow,
+  updateWindow,
   emailWindow,
   progressWindow,
   dbLoaderWindow,
@@ -37,6 +54,15 @@ let homeWindow,
 ////////////////
 /* FUNCTIONS */
 ////////////////
+
+/* FUNCTION TO CREATE REVERSE OBJECT FOR DOCK */
+function customerNameNumberFunc(data) {
+  newArr = {};
+  Object.entries(data).forEach((el) => {
+    newArr[el[1]] = el[0];
+  });
+  return newArr;
+}
 
 /* FUNCTION TO CREATE TRAY MENU */
 function createTray() {
@@ -59,7 +85,7 @@ function logfileFunc(message) {
 }
 
 //////////////////////////
-/* DATABASE CONNECTION */
+/* CONNECTION ERROR */
 ////////////////////////
 function mongooseConnect() {
   mongoose
@@ -77,8 +103,8 @@ function mongooseConnect() {
       dialog
         .showMessageBox(dbLoaderWindow, {
           type: 'error',
-          title: 'DATABASE CONNECTION ERROR',
-          icon: `${dir}/renderer/icons/trayTemplate.png`,
+          title: 'P2SYS ERROR',
+          icon: `${dir}/renderer/icons/error.png`,
           message:
             'P2Sys Converter was unable to connect to the database. Please try again when a connection is available',
           buttons: ['EXIT'],
@@ -130,11 +156,7 @@ db.once('connected', async () => {
     customerNumberName = customerNumberNameObj._doc;
     delete customerNumberName['_id'];
 
-    /* CREATE REVERSE OBJECT FOR DOCK */
-    customerNameNumber = {};
-    Object.entries(customerNumberName).forEach((el) => {
-      customerNameNumber[el[1]] = el[0];
-    });
+    customerNameNumber = customerNameNumberFunc(customerNumberName);
   } catch (err) {
     logfileFunc(err);
   }
@@ -169,6 +191,48 @@ db.once('connected', async () => {
     logfileFunc(err);
   }
   createWindow();
+
+  /* CREATE THE WRITE FILE OBJECT */
+  let databaseObj = {
+    customerBackUp,
+    customerPrices,
+    customerNumberName,
+    customerPricelistNumber,
+  };
+  writeLocalDatabase(app.getPath('appData'), databaseObj);
+});
+
+db.on('disconnected', () => {
+  if (secWindow) {
+    dialog.showMessageBoxSync(secWindow, {
+      type: 'info',
+      title: 'P2SYS CONNECTION LOST',
+      message: 'The connection to the database has been lost',
+      detail:
+        'If reconnecting fails please PAUSE your work and update when a connection is available.',
+      icon: `${dir}/renderer/icons/info.png`,
+      buttons: ['OK'],
+    });
+  } else {
+    let notification = new Notification({
+      title: 'P2SYS CONNECTION LOST',
+      body: 'The connection to the database has been lost',
+      icon: `${dir}/renderer/icons/info.png`,
+    });
+    notification.show();
+  }
+});
+
+db.on('reconnected', () => {
+  let notification = new Notification({
+    title: 'P2SYS DB CONNECTED',
+    body: 'Reconnected to the database',
+    icon: `${dir}/renderer/icons/info.png`,
+  });
+  notification.show();
+  if (secWindow) {
+    secWindow.webContents.send('reconnected', null);
+  }
 });
 
 ////////////////////////////////
@@ -198,6 +262,10 @@ function createWindow() {
 
   //   Load html page
   homeWindow.loadFile(`${dir}/renderer/mainPage/main.html`);
+
+  setTimeout(() => {
+    updater(homeWindow);
+  }, 2000);
 
   //   Load dev tools
   // homeWindow.webContents.openDevTools();
@@ -348,10 +416,6 @@ function createEmailWindow(message) {
   emailWindow.loadFile(`${dir}/renderer/email/email.html`);
 
   emailWindow.webContents.once('did-finish-load', (e) => {
-    // console.log(message);
-    if (loadingWindow) {
-      loadingWindow.close();
-    }
     emailWindow.webContents.send('email-popup', message);
   });
 
@@ -420,6 +484,36 @@ function createDbLoaderWindow() {
   //   EVENT LISTENER FOR CLOSING
   dbLoaderWindow.on('closed', () => {
     dbLoaderWindow = null;
+  });
+}
+
+/* UPDATING WINDOW */
+function createUpdateWindow() {
+  updateWindow = new BrowserWindow({
+    height: 80,
+    width: 230,
+    x: 0,
+    y: 0,
+    spellCheck: false,
+    resizable: false,
+    autoHideMenuBar: true,
+    alwaysOnTop: true,
+    center: true,
+    frame: false,
+    transparent: true,
+    webPreferences: { nodeIntegration: true, enableRemoteModule: true },
+    icon: `${dir}/renderer/icons/updateTemplate.png`,
+  });
+
+  //   LOAD HTML PAGE
+  updateWindow.loadFile(`${dir}/renderer/update/update.html`);
+
+  //   LOAD DEV TOOLS
+  // updateWindow.webContents.openDevTools();
+
+  //   EVENT LISTENER FOR CLOSING
+  updateWindow.on('closed', () => {
+    updateWindow = null;
   });
 }
 
@@ -513,6 +607,13 @@ ipcMain.on('close-window-dock', (e, message) => {
   }
 });
 
+/* CLOSE LOADER */
+ipcMain.on('loader-close', (e, message) => {
+  if (loadingWindow) {
+    loadingWindow.close();
+  }
+});
+
 /* RESTART SEC WINDOW */
 ipcMain.on('restart-sec', (e, message) => {
   setTimeout(() => {
@@ -525,4 +626,96 @@ ipcMain.on('restart-sec', (e, message) => {
 ipcMain.on('show-home', (e, message) => {
   secWindow.close();
   homeWindow.show();
+});
+
+/* UPDATE THE DATABASE */
+ipcMain.on('update-database', async (e, message) => {
+  /* UPDATE THE LOCAL VARIABLE DATABASES */
+  customerPrices = message.customerPrices;
+  customerPricelistNumber = message.customerPricelistNumber;
+  customerNumberName = message.customerNumberName;
+  customerBackUp = message.customerBackUp;
+  customerNameNumber = customerNameNumberFunc(message.customerNumberName);
+
+  await customerPricesModel.replaceOne(
+    { _id: 'customerPrices' },
+    customerPrices,
+    (err, res) => {
+      if (err) {
+        let notification = new Notification({
+          title: 'P2SYS CP-Db UPDATE ERROR',
+          body:
+            'There was an error in updating the database. Please check the logfile for details',
+          icon: `${dir}/renderer/icons/error.png`,
+        });
+        notification.show();
+        logfileFunc(err);
+      }
+    }
+  );
+  await customerPricelistNumberModel.replaceOne(
+    { _id: 'customerPricelistNumber' },
+    customerPricelistNumber,
+    (err, res) => {
+      if (err) {
+        let notification = new Notification({
+          title: 'P2SYS CPN-Db UPDATE ERROR',
+          body:
+            'There was an error in updating the database. Please check the logfile for details',
+          icon: `${dir}/renderer/icons/error.png`,
+        });
+        notification.show();
+        logfileFunc(err);
+      }
+    }
+  );
+  await customerNumberNameModel.replaceOne(
+    { _id: 'customerNumberName' },
+    customerNumberName,
+    (err, res) => {
+      if (err) {
+        let notification = new Notification({
+          title: 'P2SYS CNN-Db UPDATE ERROR',
+          body:
+            'There was an error in updating the database. Please check the logfile for details',
+          icon: `${dir}/renderer/icons/error.png`,
+        });
+        notification.show();
+        logfileFunc(err);
+      }
+    }
+  );
+  await customerBackUpModel.replaceOne(
+    { _id: 'customerBackUp' },
+    customerBackUp,
+    (err, res) => {
+      if (err) {
+        let notification = new Notification({
+          title: 'P2SYS CB-Db UPDATE ERROR',
+          body:
+            'There was an error in updating the database. Please check the logfile for details',
+          icon: `${dir}/renderer/icons/error.png`,
+        });
+        notification.show();
+        logfileFunc(err);
+      }
+    }
+  );
+  secWindow.webContents.send('database-updated', null);
+});
+
+/* START UPDATE WINDOW */
+ipcMain.on('create-download-window', (e, message) => {
+  createUpdateWindow();
+});
+
+ipcMain.on('update-progress', (e, message) => {
+  if (updateWindow) {
+    updateWindow.webContents.send('download-percent', message);
+    if (message === 100) {
+      setTimeout(() => {
+        updateWindow.close();
+      }, 1000);
+    }
+  }
 });

@@ -300,7 +300,7 @@ df.reset_index(inplace=True, drop=True)
 # CREATE THE FOLDER TO STORE ITEMS INSERT #
 ###########################################
 # GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
-mydocuments_folder = f'{os.environ["HOME"]}/Documents/p2sys/{customer_number}/{time}/'
+mydocuments_folder = f'{os.environ["HOME"]}/Documents/P2SYS-CONVERSIONS/{customer_number}/{time}/'
 os.makedirs(mydocuments_folder, exist_ok=True)
 
 # REPLACE THE SLASHES FOR CORRECT FORMAT

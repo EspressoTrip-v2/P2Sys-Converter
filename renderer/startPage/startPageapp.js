@@ -3,14 +3,28 @@
 const { remote, ipcRenderer } = require('electron');
 
 /* GET WORKING DIRECTORY */
-let dir = process.cwd();
-if (process.platform === 'win32') {
-  let pattern = /[\\]+/g;
-  dir = dir.replace(pattern, '/');
+let dir;
+function envFileChange() {
+  let fileName = `${process.cwd()}/resources/app.asar`;
+  /* LOCAL MODULES */
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = fileName.replace(pattern, '/');
+  } else dir = fileName;
+}
+if (!process.env.NODE_ENV) {
+  envFileChange();
+} else {
+  dir = process.cwd();
+
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = dir.replace(pattern, '/');
+  }
 }
 
 /* LOCAL MODULES */
-const { writeLocalDatabase, dataObjects } = require(`${dir}/objects.js`);
+const { dataObjects } = require(`${dir}/objects.js`);
 const { tablePopulate } = require(`${dir}/renderer/startPage/tablePopulate`);
 
 /* CREATE DATE INSTANCE */
@@ -329,7 +343,7 @@ createBtn.addEventListener('click', (e) => {
     /* CREATE MESSAGE POPUP */
     remote.dialog.showMessageBox(secWindow, {
       type: 'warning',
-      icon: `${dir}/renderer/icons/trayTemplate.png`,
+      icon: `${dir}/renderer/icons/info.png`,
       buttons: ['OK'],
       message: 'MISSING VALUES:',
       detail: 'Please complete the highlighted areas.',
@@ -337,7 +351,7 @@ createBtn.addEventListener('click', (e) => {
   } else if (!customerName.innerText) {
     remote.dialog.showMessageBox(secWindow, {
       type: 'warning',
-      icon: `${dir}/renderer/icons/trayTemplate.png`,
+      icon: `${dir}/renderer/icons/info.png`,
       buttons: ['OK'],
       message: 'CUSTOMER NAME REQUIRED:',
       detail: 'The customer name is a required field.',
@@ -380,7 +394,7 @@ sendEmailbtn.addEventListener('click', (e) => {
     remote.dialog
       .showMessageBox(secWindow, {
         type: 'warning',
-        icon: `${dir}/renderer/icons/trayTemplate.png`,
+        icon: `${dir}/renderer/icons/info.png`,
         buttons: ['OK'],
         message: 'NO EMAIL ADDRESS ON FILE:',
         detail: 'Please enter an email address.',
@@ -849,6 +863,11 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
 /* CANCEL BUTTON */
 checkCancelbtn.addEventListener('click', () => {
   soundClick.play();
+
+  /* CLOSE DOCK IF OPEN */
+  if (secWindow.getChildWindows()[0]) {
+    secWindow.getChildWindows()[0].close();
+  }
   /* FADE OUT WINDOW */
   checkCustomer.style.opacity = '0';
 
@@ -984,21 +1003,18 @@ ipcRenderer.on('progress-end', (event, message) => {
   customerPrices['_id'] = 'customerPrices';
 
   /* CREATE THE WRITE FILE OBJECT */
-  let writeFileObject = {
+  let databaseObj = {
     customerBackUp,
     customerPrices,
     customerNumberName,
     customerPricelistNumber,
   };
 
-  /* SEND TO THE WRITE OBJECT FUNCTION */
-  writeLocalDatabase(writeFileObject);
-
-  // REMOVE ITEM FROM LOCAL STORAGE
-  localStorage.removeItem(searchValue);
+  /* UPDATE ONLINE DB */
+  ipcRenderer.send('update-database', databaseObj);
 
   /* SEND MESSAGE WITH FILE PATHS TO MAIN TO OPEN EMAIL CHILDWINDOW */
-  /* ADD CUSTOMER NUMBER FOE EASIER FILENAME DISCRIPTION */
+  /* ADD CUSTOMER NUMBER FOE EASIER FILENAME DESCRIPTION */
   let newMessage = {
     name: customerName.innerText,
     number: pricelistNumber,
@@ -1018,4 +1034,36 @@ ipcRenderer.on('progress-end', (event, message) => {
 /* MESSAGE TO CLICK BACK BUTTON IF THERE IS AN ERROR IN PYTHON CONVERSION */
 ipcRenderer.on('error', (e, message) => {
   resetForm();
+});
+
+/* CONNECTION MONITORING */
+window.addEventListener('offline', (e) => {
+  new Notification('P2SYS DATABASE CONNECTION ERROR', {
+    icon: `${dir}/renderer/icons/error.png`,
+    body: 'Unable to connect to the database.',
+    requireInteraction: true,
+  });
+  createBtn.setAttribute('class', 'create-btn-disabled');
+});
+
+setTimeout(() => {
+  if (!window.navigator.onLine) {
+    new Notification('P2SYS DATABASE CONNECTION ERROR', {
+      icon: `${dir}/renderer/icons/error.png`,
+      body: 'Unable to connect to the database.',
+      requireInteraction: true,
+    });
+    createBtn.setAttribute('class', 'create-btn-disabled');
+  }
+}, 2000);
+
+/* MESSAGE FROM DB ON LOSS OF CONNECTION */
+ipcRenderer.on('reconnected', (e, message) => {
+  createBtn.setAttribute('class', 'create-btn');
+});
+
+/* RETURN MESSAGE AFTER DATABASE UPDATE TO CREATE EMAIL BOX*/
+ipcRenderer.on('database-updated', (e, message) => {
+  // REMOVE ITEM FROM LOCAL STORAGE
+  localStorage.removeItem(searchValue);
 });

@@ -1,5 +1,5 @@
 :root {
-  --psys-blue: #09e1ff;
+  --psys-blue: #05899c;
   --psys-red: #fe1604;
   --psys-green: #03c224;
 
@@ -45,6 +45,16 @@ body {
 
 button {
   outline: none;
+}
+/* PROGRESS BAR */
+#progress-fade {
+  position: absolute;
+  visibility: hidden;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: none;
+  z-index: 2;
+  transition: backdrop-filter 0.8s linear;
 }
 
 #container {

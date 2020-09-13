@@ -1,13 +1,16 @@
 {
-  "name": "P2Sys-App",
+  "name": "P2Sys-Converter",
   "version": "1.0.0",
   "description": "Price-List conversion program",
   "main": "main.js",
   "scripts": {
     "watch": "nodemon --ignore '*.json' --exec electron .",
-    "start": " electron ."
+    "dev": "NODE_ENV=dev electron .",
+    "release": "electron-builder -w -p 'always'",
+    "build": "electron-builder -w",
+    "postinstall": "electron-builder install-app-deps"
   },
-  "author": "Juan Botha",
+  "author": "JDevSoftware",
   "license": "ISC",
   "devDependencies": {
     "electron": "^9.1.0",
@@ -15,8 +18,58 @@
   },
   "dependencies": {
     "dotenv": "^8.2.0",
+    "electron-log": "^4.2.4",
+    "electron-updater": "^4.3.4",
     "mongoose": "^5.9.27",
     "nodemailer": "^6.4.11",
     "python-shell": "^2.0.1"
+  },
+  "repository": {
+    "type": "bintray",
+    "url": "https://bintray.com/espressotrip-v2/JDevSoftware/"
+  },
+  "build": {
+    "appId": "com.JDevSoftware.P2Sys-Converter",
+    "copyright": "Copyright © 2020 P2Sys-Converter",
+    "publish": {
+      "provider": "bintray",
+      "package": "P2Sys-Converter",
+      "owner": "espressotrip-v2",
+      "repo": "JDevSoftware",
+      "url": "https://bintray.com/espressotrip-v2/JDevSoftware/",
+      "token": "d11c8a929df2d2257c311fc939cdc35d7f4007ca"
+    },
+    "electronUpdaterCompatibility": ">= 2.16",
+    "files": [
+      "!private**/*",
+      "!build**/*",
+      "!README.md**"
+    ],
+    "extraFiles": [
+      "./.env"
+    ],
+    "win": {
+      "publisherName": "JDevSoftware",
+      "verifyUpdateCodeSignature": false,
+      "certificateFile": "private/JDevSoftware.pfx",
+      "certificatePassword": "Juan@198103",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "deleteAppDataOnUninstall": true,
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerSidebar": "./build/installerSidebar.bmp",
+      "uninstallerSidebar": "./build/uninstallerSidebar.bmp",
+      "installerHeaderIcon": "./build/installerHeaderIcon.ico"
+    }
   }
 }

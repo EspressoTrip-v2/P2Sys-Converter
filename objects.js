@@ -1,14 +1,17 @@
 /* MODULES */
 const fs = require('fs');
-const { ipcRenderer } = require('electron');
+const { remote } = require('electron');
 
 /* GET WORKING DIRECTORY */
-let dir = process.cwd();
-if (process.platform === 'win32') {
-  let pattern = /[\\]+/g;
-  dir = dir.replace(pattern, '/');
+let dir;
+function envFileChange() {
+  let fileName = `${process.cwd()}/resources/app.asar`;
+  /* LOCAL MODULES */
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = fileName.replace(pattern, '/');
+  } else dir = fileName;
 }
-
 /* TEMPLATES FOR NEW CUSTOMER CREATION */
 exports.dataObjects = {
   'template-pricelist': {
@@ -127,29 +130,32 @@ function sortDate(datesArr) {
 }
 
 /* FUNCTION OVERWRITE THE LOCAL DATABASES WITH UPDATED INFORMATION */
-exports.writeLocalDatabase = (writeFileObject) => {
-  const backUpDir = `${dir}/.databaseBackup.json`;
+exports.writeLocalDatabase = (filePath, writeFileObject) => {
+  const backUpDir = `${filePath}/P2SYS-DATABASE`;
+  if (!fs.existsSync(backUpDir)) {
+    fs.mkdirSync(backUpDir);
+  }
   let backUpObject;
-  if (fs.existsSync(backUpDir)) {
-    backUpObject = JSON.parse(fs.readFileSync(backUpDir, 'utf8'));
+  if (fs.existsSync(`${backUpDir}/databaseBackup.json`)) {
+    backUpObject = JSON.parse(fs.readFileSync(`${backUpDir}/databaseBackup.json`, 'utf8'));
     let dateKeys = sortDate(Object.keys(backUpObject));
     if (!dateKeys.includes(dateString) && dateKeys.length < 6) {
       backUpObject[dateString] = writeFileObject;
       console.log(backUpObject);
-      fs.writeFile(backUpDir, JSON.stringify(backUpObject), (err) => {
+      fs.writeFile(`${backUpDir}/databaseBackup.json`, JSON.stringify(backUpObject), (err) => {
         console.log(err);
       });
     } else if (!dateKeys.includes(dateString) && dateKeys.length === 6) {
       delete backUpObject[dateKeys[0]];
       backUpObject[dateString] = writeFileObject;
       console.log(dateKeys);
-      fs.writeFile(backUpDir, JSON.stringify(backUpObject), (err) => {
+      fs.writeFile(`${backUpDir}/databaseBackup.json`, JSON.stringify(backUpObject), (err) => {
         console.log(err);
       });
     }
   } else {
     let newObject = JSON.stringify({ [dateString]: writeFileObject });
-    fs.writeFile(backUpDir, newObject, (err) => {
+    fs.writeFile(`${backUpDir}/databaseBackup.json`, newObject, (err) => {
       console.log(err);
     });
   }

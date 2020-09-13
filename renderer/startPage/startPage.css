@@ -32,7 +32,7 @@ button:focus {
 }
 * {
   box-sizing: border-box;
-  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* MAIN TAG SECTION WITH CHILDREN*/

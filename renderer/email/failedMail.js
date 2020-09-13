@@ -2,22 +2,41 @@
 const nodemailer = require('nodemailer');
 
 /* GET WORKING DIRECTORY */
-let dir = process.cwd();
-if (process.platform === 'win32') {
-  let pattern = /[\\]+/g;
-  dir = dir.replace(pattern, '/');
+let dir;
+function envFileChange() {
+  let fileName = `${process.cwd()}/resources/app.asar`;
+  /* LOCAL MODULES */
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = fileName.replace(pattern, '/');
+  } else dir = fileName;
 }
+if (!process.env.NODE_ENV) {
+  envFileChange();
+} else {
+  dir = process.cwd();
 
-/* LOCAL MODULES */
-const { emailSetup } = require(`${dir}/objects.js`);
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = dir.replace(pattern, '/');
+  }
+}
 
 ///////////////////////////
 /* FAILED EMAIL FUNCTION */
 ///////////////////////////
 
-exports.sendFailedMail = async () => {
+exports.sendFailedMail = async (soundElement) => {
   /* CREATE NODEMAILER TRANSPORTER */
-  let mailTransport = nodemailer.createTransport(emailSetup['smtp']);
+  let mailTransportObject = {
+    host: process.env.EMAIL_SMTP_HOST,
+    auth: {
+      user: process.env.EMAIL_AUTH_USER,
+      pass: process.env.EMAIL_AUTH_PASSWORD,
+    },
+  };
+  /* CREATE NODEMAILER TRANSPORTER */
+  let mailTransport = nodemailer.createTransport(mailTransportObject);
 
   /* PARSE STRING TO OBJECT */
   let messages = JSON.parse(localStorage['failedEmail']);
@@ -40,6 +59,7 @@ exports.sendFailedMail = async () => {
         body: `Message sent successfully`,
         requireInteraction: true,
       });
+      soundElement.play();
     } catch (err) {
       failedMessages.push(messages[i]);
       new Notification(`RETRY ${number[1]} FAILED`, {

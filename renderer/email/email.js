@@ -4,10 +4,24 @@ const { shell, ipcRenderer, remote } = require('electron');
 const fs = require('fs');
 
 /* GET WORKING DIRECTORY */
-let dir = process.cwd();
-if (process.platform === 'win32') {
-  let pattern = /[\\]+/g;
-  dir = dir.replace(pattern, '/');
+let dir;
+function envFileChange() {
+  let fileName = `${process.cwd()}/resources/app.asar`;
+  /* LOCAL MODULES */
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = fileName.replace(pattern, '/');
+  } else dir = fileName;
+}
+if (!process.env.NODE_ENV) {
+  envFileChange();
+} else {
+  dir = process.cwd();
+
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = dir.replace(pattern, '/');
+  }
 }
 
 /* GET WINDOW */
@@ -115,7 +129,7 @@ function verifyConnect(message) {
     if (err) {
       /* LOG THE ERROR */
       logfileFunc(err);
-      new Notification('MAIL SERVER ERROR', {
+      new Notification('P2SYS MAIL SERVER ERROR', {
         icon: `${dir}/renderer/icons/trayTemplate.png`,
         body: 'There was a mail server error.\nPlease contact your administrator.',
       });
@@ -126,8 +140,8 @@ function verifyConnect(message) {
       /* GET THE REPLY FOR DIALOG */
       dialogReply = remote.dialog.showMessageBoxSync(emailWindow, {
         type: 'warning',
-        icon: `${dir}/renderer/icons/trayTemplate.png`,
-        title: 'EMAIL SERVER ERROR',
+        icon: `${dir}/renderer/icons/error.png`,
+        title: 'P2SYS EMAIL ERROR',
         buttons: ['CONTINUE', 'CLOSE'],
         message: 'THE EMAIL SERVER COULD NOT BE REACHED:',
         detail:
@@ -166,7 +180,7 @@ function logfileFunc(error) {
 
 /* EMAIL SENT FUNCTION */
 function sendEmail() {
-  borderBox.style.transform = 'scale(0)';
+  borderBox.style.opacity = '0';
   letterContainer.style.cssText = 'transform: scaleY(1);';
 }
 
@@ -240,7 +254,7 @@ function populateExcelHtml(message) {
           localStorageAppend(message);
 
           /* CREATE NOTIFICATION */
-          new Notification('MAIL SEND ERROR', {
+          new Notification('P2SYS MAIL SEND ERROR', {
             icon: `${dir}/renderer/icons/mailFailTemplate.png`,
             body: 'There was a problem sending the message',
           });
@@ -283,11 +297,14 @@ function populateExcelHtml(message) {
     shell.openPath(filePaths[1]);
   });
 
-  if (screenWidth <= 1280) {
-    borderBox.style.cssText = 'transform: scale(.9);opacity:1;';
-  } else {
-    borderBox.style.cssText = 'transform: scale(1);opacity:1;';
-  }
+  borderBox.style.opacity = '1';
+  ipcRenderer.send('loader-close', null);
+
+  // if (screenWidth <= 1280) {
+  //   borderBox.style.opacity = 'transform: scale(.9);opacity:1;';
+  // } else {
+  //   borderBox.style.cssText = 'transform: scale(1);opacity:1;';
+  // }
 }
 
 /* ///////////// */
