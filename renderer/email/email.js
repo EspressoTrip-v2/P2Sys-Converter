@@ -299,12 +299,6 @@ function populateExcelHtml(message) {
 
   borderBox.style.opacity = '1';
   ipcRenderer.send('loader-close', null);
-
-  // if (screenWidth <= 1280) {
-  //   borderBox.style.opacity = 'transform: scale(.9);opacity:1;';
-  // } else {
-  //   borderBox.style.cssText = 'transform: scale(1);opacity:1;';
-  // }
 }
 
 /* ///////////// */

@@ -322,3 +322,8 @@ body {
   width: 120px;
   height: auto;
 }
+@media screen and (max-width: 1280px) {
+  #border {
+    transform: scale(0.95);
+  }
+}

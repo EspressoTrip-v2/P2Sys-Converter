@@ -28,6 +28,9 @@ if (!process.env.NODE_ENV) {
 }
 
 const { sendFailedMail } = require(`${dir}/renderer/email/failedMail.js`);
+if (localStorage['failedEmail']) {
+  sendFailedMail();
+}
 
 /* GLOBAL VARIABLES */
 /////////////////////
