@@ -2,7 +2,6 @@ P2SYS-CONVERTER VERSION 1.0.0
 
 # Changelog
 
-Added:
+- Initial Release
 
-
-Version release date: 12-09-20
+Version release date: 14-09-20

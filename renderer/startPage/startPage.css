@@ -9,9 +9,9 @@
   --button-red: #fe1604;
   --button-green: #03c224;
   --button-gold: #fe7c04;
-  --opaque-man: rgba(128, 196, 50, 0.4);
-  --auto: #d9793b;
-  --opaque-auto: rgba(217, 122, 58, 0.3);
+  --opaque-man: rgba(3, 194, 35, 0.2);
+  --auto: #fe7c04;
+  --opaque-auto: rgba(254, 126, 6, 0.2);
 }
 
 /* Fonts */

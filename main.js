@@ -68,7 +68,15 @@ let homeWindow,
   customerPricelistNumber,
   customerPrices,
   screenHeight,
-  screenWidth;
+  screenWidth,
+  iconImage;
+
+/* ICON FILE */
+if (process.platform === 'win32') {
+  iconImage = `${dir}/renderer/icons/icon.ico`;
+} else {
+  iconImage = `${dir}/renderer/icons/trayTemplate.png`;
+}
 
 ////////////////
 /* FUNCTIONS */
@@ -85,7 +93,7 @@ function customerNameNumberFunc(data) {
 
 /* FUNCTION TO CREATE TRAY MENU */
 function createTray() {
-  tray = new Tray(`${dir}/renderer/icons/trayTemplate.png`);
+  tray = new Tray(iconImage);
   tray.setContextMenu(trayMenu);
 }
 
@@ -280,11 +288,15 @@ function createWindow() {
     center: true,
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
-    webPreferences: { nodeIntegration: true, enableRemoteModule: true },
+    webPreferences: {
+      devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+    },
     autoHideMenuBar: true,
     frame: false,
     transparent: true,
-    icon: `${dir}/renderer/icons/trayTemplate.png`,
+    icon: iconImage,
   });
 
   //   Load html page
@@ -319,9 +331,14 @@ function createSecWindow(message) {
     frame: false,
     spellCheck: false,
     backgroundColor: '#00FFFFFF',
+    alwaysOnTop: true,
     transparent: true,
-    webPreferences: { nodeIntegration: true, enableRemoteModule: true },
-    icon: `${dir}/renderer/icons/trayTemplate.png`,
+    webPreferences: {
+      devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+    },
+    icon: iconImage,
   });
 
   //   Load html page
@@ -341,7 +358,7 @@ function createSecWindow(message) {
     if (loadingWindow) {
       loadingWindow.close();
     }
-    // secWindow.show();
+    secWindow.focus();
   });
 
   //   Load dev tools
@@ -370,8 +387,13 @@ function createChildWindow(message) {
       frame: false,
       spellCheck: false,
       transparent: true,
-      webPreferences: { nodeIntegration: true, enableRemoteModule: true },
-      icon: `${dir}/renderer/icons/trayTemplate.png`,
+      alwaysOnTop: true,
+      webPreferences: {
+        devTools: false,
+        nodeIntegration: true,
+        enableRemoteModule: true,
+      },
+      icon: iconImage,
     });
   }
 
@@ -407,8 +429,12 @@ function createLoadingWindow() {
     spellCheck: false,
     transparent: true,
     alwaysOnTop: true,
-    webPreferences: { nodeIntegration: true, enableRemoteModule: true },
-    icon: `${dir}/renderer/icons/trayTemplate.png`,
+    webPreferences: {
+      devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+    },
+    icon: iconImage,
   });
 
   //   LOAD HTML PAGE
@@ -435,8 +461,13 @@ function createEmailWindow(message) {
     frame: false,
     spellCheck: false,
     transparent: true,
-    webPreferences: { nodeIntegration: true, enableRemoteModule: true },
-    icon: `${dir}/renderer/icons/trayTemplate.png`,
+    alwaysOnTop: true,
+    webPreferences: {
+      devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+    },
+    icon: iconImage,
   });
 
   //   Load html page
@@ -463,15 +494,19 @@ function createProgressWindow() {
     parent: secWindow,
     height: 400,
     width: 400,
-    // show: false,
     spellCheck: false,
     resizable: false,
     autoHideMenuBar: true,
     center: true,
     frame: false,
     transparent: true,
-    webPreferences: { nodeIntegration: true, enableRemoteModule: true },
-    icon: `${dir}/renderer/icons/trayTemplate.png`,
+    alwaysOnTop: true,
+    webPreferences: {
+      devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+    },
+    icon: iconImage,
   });
 
   //   LOAD HTML PAGE
@@ -498,8 +533,12 @@ function createDbLoaderWindow() {
     center: true,
     frame: false,
     transparent: true,
-    webPreferences: { nodeIntegration: true, enableRemoteModule: true },
-    icon: `${dir}/renderer/icons/trayTemplate.png`,
+    webPreferences: {
+      devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+    },
+    icon: iconImage,
   });
 
   //   LOAD HTML PAGE
@@ -530,8 +569,8 @@ function createUpdateWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      nodeIntegration: true,
       devTools: false,
+      nodeIntegration: true,
       enableRemoteModule: true,
     },
     icon: `${dir}/renderer/icons/updateTemplate.png`,
@@ -550,6 +589,9 @@ function createUpdateWindow() {
 
 /* APP READY --> CREATE MAIN WINDOW */
 app.on('ready', () => {
+  /* SET APP NAME FOR WINDOWS NOTIFICATIONS*/
+  app.setAppUserModelId('P2Sys-Converter');
+
   /* GET SCREEN SIZE */
   let res = screen.getPrimaryDisplay().size;
   screenHeight = res.height;

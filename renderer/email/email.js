@@ -110,7 +110,7 @@ function getMessage(text) {
     to: emailRecipients.value,
     subject: `Emailing ${customerNumber}`,
     replyTo: process.env.EMAIL_REPLYTO,
-    text,
+    text: emailMessageArea.value,
     attachments: [{ path: filePaths[0] }, { path: filePaths[1] }],
   };
 
