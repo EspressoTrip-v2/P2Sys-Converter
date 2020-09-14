@@ -8,7 +8,7 @@ import platform
 from datetime import datetime
 time = str(datetime.now())[:10]
 
-# IMPORT CUSTOM MODEULES #
+# IMPORT CUSTOM MODULES #
 # ////////////////////// #
 import reform
 import s5_ordersheet
@@ -297,17 +297,22 @@ df['IC_TREATED'] = ''
 df = df.apply(s5_product, axis=1)
 df.reset_index(inplace=True, drop=True)
 
-# CREATE THE FOLDER TO STORE ITEMS INSERT #
-###########################################
-# GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
-mydocuments_folder = f'{os.environ["HOME"]}/Documents/P2SYS-CONVERSIONS/{customer_number}/{time}/'
-os.makedirs(mydocuments_folder, exist_ok=True)
-
 # REPLACE THE SLASHES FOR CORRECT FORMAT
 system_os = platform.platform(terse=True).split('-')[0]
 if system_os == 'Windows':
+    # CREATE THE FOLDER TO STORE ITEMS INSERT #
+    ###########################################
+    # GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
+    mydocuments_folder = f'{os.environ["HOMEPATH"]}/Documents/P2SYS-CONVERSIONS/{customer_number}/{time}/'
+    os.makedirs(mydocuments_folder, exist_ok=True)
     s = '\\'
     mydocuments_folder = mydocuments_folder.replace('/', s[0])
+else:
+    # CREATE THE FOLDER TO STORE ITEMS INSERT #
+    ###########################################
+    # GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
+    mydocuments_folder = f'{os.environ["HOME"]}/Documents/P2SYS-CONVERSIONS/{customer_number}/{time}/'
+    os.makedirs(mydocuments_folder, exist_ok=True)
 
 # PASS TO SHEET CREATOR CODE #
 ##############################

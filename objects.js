@@ -1,6 +1,5 @@
 /* MODULES */
 const fs = require('fs');
-const { remote } = require('electron');
 
 /* GET WORKING DIRECTORY */
 let dir;
@@ -12,6 +11,15 @@ function envFileChange() {
     dir = fileName.replace(pattern, '/');
   } else dir = fileName;
 }
+
+/* GET APPDATA DIR */
+let appData;
+if (process.platform === 'win32') {
+  appData = `${process.env.APPDATA}/P2Sys-Converter`;
+} else {
+  appData = process.cwd();
+}
+
 /* TEMPLATES FOR NEW CUSTOMER CREATION */
 exports.dataObjects = {
   'template-pricelist': {
@@ -101,16 +109,16 @@ let dateString = `${mainDate.getMonth() + 1}/${mainDate.getFullYear()}`;
 
 /* LOGFILE CREATION FUNCTION */
 function logfileFunc(database) {
-  const fileDir = `${dir}/error-log.txt`;
+  const fileDir = `${appData}/error-log.txt`;
   /* CHECK IF IT EXISTS */
   if (fs.existsSync(fileDir)) {
-    fs.appendFile(
+    fs.appendFileSync(
       fileDir,
       `${new Date()}: Writefile Error ->  In local Database ${database}\n`,
       (err) => console.log(err)
     );
   } else {
-    fs.writeFile(fileDir, `${new Date()}: Updated customer ->  ${database}\n`, (err) =>
+    fs.writeFileSync(fileDir, `${new Date()}: Updated customer ->  ${database}\n`, (err) =>
       console.log(err)
     );
   }
@@ -141,14 +149,12 @@ exports.writeLocalDatabase = (filePath, writeFileObject) => {
     let dateKeys = sortDate(Object.keys(backUpObject));
     if (!dateKeys.includes(dateString) && dateKeys.length < 6) {
       backUpObject[dateString] = writeFileObject;
-      console.log(backUpObject);
       fs.writeFile(`${backUpDir}/databaseBackup.json`, JSON.stringify(backUpObject), (err) => {
         console.log(err);
       });
     } else if (!dateKeys.includes(dateString) && dateKeys.length === 6) {
       delete backUpObject[dateKeys[0]];
       backUpObject[dateString] = writeFileObject;
-      console.log(dateKeys);
       fs.writeFile(`${backUpDir}/databaseBackup.json`, JSON.stringify(backUpObject), (err) => {
         console.log(err);
       });

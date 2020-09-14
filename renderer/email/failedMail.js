@@ -64,12 +64,13 @@ exports.sendFailedMail = async (soundElement) => {
       failedMessages.push(messages[i]);
       new Notification(`RETRY ${number[1]} FAILED`, {
         icon: `${dir}/renderer/icons/mailFailTemplate.png`,
-        body: `The message failed again.\The address might be incorrect. Please clear any backlog messages in the settings panel`,
+        // body: `The message failed again.\The address might be incorrect. Please clear any backlog messages in the settings panel`,
+        body: err,
         requireInteraction: true,
       });
     }
   }
-  if (failedMessages.length == 0) {
+  if (failedMessages.length === 0) {
     localStorage.removeItem('failedEmail');
   } else {
     localStorage.setItem('failedEmail', JSON.stringify(failedMessages));

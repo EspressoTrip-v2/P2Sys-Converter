@@ -28,15 +28,10 @@ if (!process.env.NODE_ENV) {
 }
 
 const { sendFailedMail } = require(`${dir}/renderer/email/failedMail.js`);
-if (localStorage['failedEmail']) {
-  sendFailedMail();
-}
 
 /* GLOBAL VARIABLES */
 /////////////////////
-let homeWindow = remote.getCurrentWindow(),
-  stateInterval,
-  sendStatus;
+let homeWindow = remote.getCurrentWindow();
 
 //////////////////
 /* DOM ELEMENTS*/
@@ -62,11 +57,6 @@ let startBtn = document.getElementById('start'),
 ///////////////////////
 versionInfo.innerText = `P2Sys-Converter (v${remote.app.getVersion()})`;
 
-/* SEND FAILED MAIL ITEMS */
-if (localStorage['failedEmail']) {
-  sendFailedMail(sentSound);
-}
-
 /* MAIN PAGE EVENTS */
 /////////////////////
 
@@ -81,10 +71,13 @@ startBtn.addEventListener('click', (e) => {
 /* EXIT BUTTON */
 exitbtn.addEventListener('click', (e) => {
   soundClick.play();
-  setTimeout(() => {
-    homeWindow.close();
-    homeWindow = null;
-  }, 200);
+
+  ipcRenderer.send('close-main', null);
+
+  // setTimeout(() => {
+  //   homeWindow.close();
+  //   homeWindow = null;
+  // }, 200);
 });
 
 /* ABOUT PAGE EVENTS */
@@ -219,4 +212,11 @@ ipcRenderer.on('create-download-window', (e, message) => {
 /* MESSAGE TO SEND PERCENTAGE DOWNLOADED */
 ipcRenderer.on('update-progress', (e, message) => {
   ipcRenderer.send('update-progress', message);
+});
+
+/* RESEND EMAILS */
+homeWindow.webContents.on('did-finish-load', () => {
+  if (localStorage['failedEmail']) {
+    sendFailedMail(sentSound);
+  }
 });

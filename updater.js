@@ -30,13 +30,22 @@ if (!process.env.NODE_ENV) {
   }
 }
 
+/* GET APPDATA DIR */
+let appData;
+if (process.platform === 'win32') {
+  appData = `${process.env.APPDATA}/P2Sys-Converter`;
+} else {
+  appData = process.cwd();
+}
+
 /* ERROR GENERATOR */
 function erorrFunc(err) {
-  fs.existsSync('errorlog.txt')
-    ? fs.appendFile('errorlog.txt', `${new Date()} -> Update error: ${err}\n`, 'utf8', () =>
+  let fileDir = `${appData}/update-log.txt`;
+  fs.existsSync(fileDir)
+    ? fs.appendFileSync(fileDir, `${new Date()} -> Update error: ${err}\n`, 'utf8', () =>
         console.log('Logfile write')
       )
-    : fs.writeFile('errorlog.txt', `${new Date()} -> Update error: ${err}\n`, 'utf8', () =>
+    : fs.writeFileSync(fileDir, `${new Date()} -> Update error: ${err}\n`, 'utf8', () =>
         console.log('Logfile write')
       );
 }
@@ -50,7 +59,7 @@ exports.updater = (window) => {
   autoUpdater.on('update-available', (info) => {
     dialog
       .showMessageBox(window, {
-        type: 'info',
+        type: 'question',
         title: 'UPDATE AVAILABLE',
         icon: `${dir}/renderer/icons/updateTemplate.png`,
         message: `P2Sys-Converter v${info.version} is available.\nWould you like to download it now?`,

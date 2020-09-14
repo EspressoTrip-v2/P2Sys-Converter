@@ -23,6 +23,14 @@ if (!process.env.NODE_ENV) {
   }
 }
 
+/* GET APPDATA DIR */
+let appData;
+if (process.platform === 'win32') {
+  appData = `${process.env.APPDATA}/P2Sys-Converter`;
+} else {
+  appData = process.cwd();
+}
+
 /* REMOTE WINDOWS */
 ///////////////////
 let progressWindow = remote.getCurrentWindow();
@@ -38,10 +46,10 @@ let progressBar = document.getElementById('progress'),
 
 /* LOGFILE CREATION FUNCTION */
 function logfileFunc(error) {
-  const fileDir = `${dir}/error-log.txt`;
+  const fileDir = `${appData}/error-log.txt`;
   /* CHECK IF IT EXISTS */
   if (fs.existsSync(fileDir)) {
-    fs.appendFile(fileDir, `${new Date()}: Conversion Error -> [${error}]\n`, (err) =>
+    fs.appendFileSync(fileDir, `${new Date()}: Conversion Error -> [${error}]\n`, (err) =>
       console.log(err)
     );
   } else {
@@ -51,7 +59,7 @@ function logfileFunc(error) {
   }
 }
 
-ipcRenderer.on('convert-python', (event, message) => {
+ipcRenderer.on(`convert-python`, (event, message) => {
   let file = message;
   let data = JSON.stringify(file);
 
@@ -62,7 +70,7 @@ ipcRenderer.on('convert-python', (event, message) => {
   let options = {
     mode: 'text',
     pythonOptions: ['-u'],
-    scriptPath: `${dir}/python/`,
+    scriptPath: `${process.cwd()}/python/`,
     args: [data],
   };
 

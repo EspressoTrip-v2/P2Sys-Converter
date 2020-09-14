@@ -24,6 +24,14 @@ if (!process.env.NODE_ENV) {
   }
 }
 
+/* GET APPDATA DIR */
+let appData;
+if (process.platform === 'win32') {
+  appData = `${process.env.APPDATA}/P2Sys-Converter`;
+} else {
+  appData = process.cwd();
+}
+
 /* GET WINDOW */
 let emailWindow = remote.getCurrentWindow();
 
@@ -139,7 +147,7 @@ function verifyConnect(message) {
 
       /* GET THE REPLY FOR DIALOG */
       dialogReply = remote.dialog.showMessageBoxSync(emailWindow, {
-        type: 'warning',
+        type: 'question',
         icon: `${dir}/renderer/icons/error.png`,
         title: 'P2SYS EMAIL ERROR',
         buttons: ['CONTINUE', 'CLOSE'],
@@ -165,10 +173,10 @@ function verifyConnect(message) {
 
 /* LOGFILE CREATION FUNCTION */
 function logfileFunc(error) {
-  const fileDir = `${dir}/error-log.txt`;
+  const fileDir = `${appData}/error-log.txt`;
   /* CHECK IF IT EXISTS */
   if (fs.existsSync(fileDir)) {
-    fs.appendFile(fileDir, `${new Date()}: Email Error -> ${error}\n`, (err) =>
+    fs.appendFileSync(fileDir, `${new Date()}: Email Error -> ${error}\n`, (err) =>
       console.log(err)
     );
   } else {

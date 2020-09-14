@@ -41,12 +41,15 @@
     },
     "electronUpdaterCompatibility": ">= 2.16",
     "files": [
+      "!python**/*",
       "!private**/*",
       "!build**/*",
-      "!README.md**"
+      "!README.md",
+      "!readme_data**/*"
     ],
     "extraFiles": [
-      "./.env"
+      "./.env",
+      "./python/**/*"
     ],
     "win": {
       "publisherName": "JDevSoftware",

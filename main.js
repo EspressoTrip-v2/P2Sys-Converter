@@ -1,5 +1,14 @@
 /* MODULE IMPORTS */
-const { app, BrowserWindow, ipcMain, Tray, Menu, dialog, Notification } = require('electron');
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  Tray,
+  Menu,
+  dialog,
+  Notification,
+  screen,
+} = require('electron');
 const mongoose = require('mongoose');
 const fs = require('fs');
 require('dotenv').config();
@@ -23,6 +32,14 @@ if (!process.env.NODE_ENV) {
     let pattern = /[\\]+/g;
     dir = dir.replace(pattern, '/');
   }
+}
+
+/* GET APPDATA DIR */
+let appData;
+if (process.platform === 'win32') {
+  appData = `${process.env.APPDATA}/P2Sys-Converter`;
+} else {
+  appData = process.cwd();
 }
 
 /* LOCAL MODULES */
@@ -49,7 +66,9 @@ let homeWindow,
   customerNumberName,
   customerNameNumber,
   customerPricelistNumber,
-  customerPrices;
+  customerPrices,
+  screenHeight,
+  screenWidth;
 
 ////////////////
 /* FUNCTIONS */
@@ -73,10 +92,12 @@ function createTray() {
 /* LOGFILE CREATION FUNCTION */
 //////////////////////////////
 function logfileFunc(message) {
-  let fileDir = `${dir}/error-log.txt`;
+  let fileDir = `${appData}/error-log.txt`;
   /* CHECK IF EXISTS */
   if (fs.existsSync(fileDir)) {
-    fs.appendFile(fileDir, `${new Date()}: Database ${message}\n`, (err) => console.log(err));
+    fs.appendFileSync(fileDir, `${new Date()}: Database ${message}\n`, (err) =>
+      console.log(err)
+    );
   } else {
     fs.writeFileSync(fileDir, `${new Date()}: Database ${message}\n`, (err) =>
       console.log(err)
@@ -113,14 +134,20 @@ function mongooseConnect() {
           dbLoaderWindow.close();
         });
 
-      let fileDir = `${dir}/error-log.txt`;
+      let fileDir = `${appData}/error-log.txt`;
       /* CHECK IF IT EXISTS */
       fs.existsSync(fileDir)
-        ? fs.appendFile(fileDir, `${new Date()} -> Connection failure: ${err}\n`, 'utf8', () =>
-            console.log('Logfile write error')
+        ? fs.appendFileSync(
+            fileDir,
+            `${new Date()} -> Connection failure: ${err}\n`,
+            'utf8',
+            () => console.log('Logfile write error')
           )
-        : fs.writeFile(fileDir, `${new Date()} -> Connection failure: ${err}\n`, 'utf8', () =>
-            console.log('Logfile write error')
+        : fs.writeFileSync(
+            fileDir,
+            `${new Date()} -> Connection failure: ${err}\n`,
+            'utf8',
+            () => console.log('Logfile write error')
           );
     });
 }
@@ -240,7 +267,7 @@ db.on('reconnected', () => {
 //////////////////////////////
 
 /* TRAY MENU LAYOUT TEMPLATE */
-let trayMenu = Menu.buildFromTemplate([{ label: 'P2Sys App' }, { role: 'minimize' }]);
+let trayMenu = Menu.buildFromTemplate([{ label: 'P2Sys Converter' }, { role: 'minimize' }]);
 
 /* MAIN WINDOW CREATION */
 function createWindow() {
@@ -489,10 +516,11 @@ function createDbLoaderWindow() {
 
 /* UPDATING WINDOW */
 function createUpdateWindow() {
+  xPos = screenWidth / 2 - 115;
   updateWindow = new BrowserWindow({
     height: 80,
-    width: 230,
-    x: 0,
+    width: 240,
+    x: xPos,
     y: 0,
     spellCheck: false,
     resizable: false,
@@ -501,10 +529,13 @@ function createUpdateWindow() {
     center: true,
     frame: false,
     transparent: true,
-    webPreferences: { nodeIntegration: true, enableRemoteModule: true },
+    webPreferences: {
+      nodeIntegration: true,
+      devTools: false,
+      enableRemoteModule: true,
+    },
     icon: `${dir}/renderer/icons/updateTemplate.png`,
   });
-
   //   LOAD HTML PAGE
   updateWindow.loadFile(`${dir}/renderer/update/update.html`);
 
@@ -519,6 +550,10 @@ function createUpdateWindow() {
 
 /* APP READY --> CREATE MAIN WINDOW */
 app.on('ready', () => {
+  /* GET SCREEN SIZE */
+  let res = screen.getPrimaryDisplay().size;
+  screenHeight = res.height;
+  screenWidth = res.width;
   setTimeout(() => {
     /* CREATE CONNECTION */
     mongooseConnect();
@@ -717,5 +752,30 @@ ipcMain.on('update-progress', (e, message) => {
         updateWindow.close();
       }, 1000);
     }
+  }
+});
+
+/* CLOSE MAIN WINDOW & CHECK TO SEE IF UPDATE IS DOWNLOADING */
+ipcMain.on('close-main', (e, message) => {
+  if (updateWindow) {
+    let answer = dialog.showMessageBoxSync(homeWindow, {
+      type: 'question',
+      title: 'DOWNLOAD IN PROGRESS',
+      icon: `${dir}/renderer/icons/updateTemplate.png`,
+      message: `A update is being downloaded, are you sure you want to exit?`,
+      detail:
+        'Exiting will cause the download to be cancelled. You will have to download the update when asked on the next restart',
+      buttons: ['EXIT', 'CANCEL'],
+    });
+    if (answer === 0) {
+      updateWindow.close();
+      setTimeout(() => {
+        homeWindow.close();
+      }, 50);
+    }
+  } else {
+    setTimeout(() => {
+      homeWindow.close();
+    }, 200);
   }
 });

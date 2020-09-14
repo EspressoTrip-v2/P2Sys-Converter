@@ -613,8 +613,8 @@ button {
   font-size: 12px;
   font-style: italic;
   padding-top: 20px;
-  position: absolute;
-  bottom: 10px;
+  position: relative;
+  bottom: 2px;
 }
 
 #email-setup:active {
