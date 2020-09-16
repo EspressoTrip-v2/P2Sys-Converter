@@ -419,7 +419,15 @@ function createChildWindow(message) {
 
 /* LOADING WINDOW */
 function createLoadingWindow() {
+  let parentWin;
+  if (secWindow) {
+    parentWin = secWindow;
+  } else {
+    parentWin = null;
+  }
+
   loadingWindow = new BrowserWindow({
+    parent: parentWin,
     height: 400,
     width: 400,
     autoHideMenuBar: true,
@@ -439,6 +447,10 @@ function createLoadingWindow() {
 
   //   LOAD HTML PAGE
   loadingWindow.loadFile(`${dir}/renderer/loader/loader.html`);
+
+  loadingWindow.webContents.on('did-finish-load', () => {
+    loadingWindow.moveTop();
+  });
 
   //   LOAD DEV TOOLS
   // loadingWindow.webContents.openDevTools();
@@ -475,6 +487,7 @@ function createEmailWindow(message) {
 
   emailWindow.webContents.once('did-finish-load', (e) => {
     emailWindow.webContents.send('email-popup', message);
+    emailWindow.moveTop();
   });
 
   //   Load dev tools
@@ -512,6 +525,10 @@ function createProgressWindow() {
   //   LOAD HTML PAGE
   progressWindow.loadFile(`${dir}/renderer/progress/progress.html`);
 
+  progressWindow.webContents.on('did-finish-load', () => {
+    progressWindow.moveTop();
+  });
+
   //   LOAD DEV TOOLS
   // progressWindow.webContents.openDevTools();
 
@@ -543,6 +560,10 @@ function createDbLoaderWindow() {
 
   //   LOAD HTML PAGE
   dbLoaderWindow.loadFile(`${dir}/renderer/dbloader/dbloader.html`);
+
+  dbLoaderWindow.webContents.on('did-finish-load', () => {
+    dbLoaderWindow.moveTop();
+  });
 
   //   LOAD DEV TOOLS
   // dbLoaderWindow.webContents.openDevTools();
@@ -643,7 +664,7 @@ ipcMain.on('progress', (e, message) => {
 
 /* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
 ipcMain.on('progress-end', (e, message) => {
-  /* SEND MESSAGE TO CLOSE THE PROGRES BAR */
+  /* SEND MESSAGE TO CLOSE THE PROGRESS BAR */
   createLoadingWindow();
   secWindow.webContents.send('progress-end', message.filePaths);
 });

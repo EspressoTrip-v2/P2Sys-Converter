@@ -111,7 +111,10 @@ function getMessage(text) {
     subject: `Emailing ${customerNumber}`,
     replyTo: process.env.EMAIL_REPLYTO,
     text: emailMessageArea.value,
-    attachments: [{ path: filePaths[0] }, { path: filePaths[1] }],
+    attachments: [
+      { filename: fileNameA, path: filePaths[0] },
+      { filename: fileNameB, path: filePaths[1] },
+    ],
   };
 
   return transportMessage;
