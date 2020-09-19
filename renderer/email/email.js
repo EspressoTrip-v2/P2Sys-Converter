@@ -107,9 +107,9 @@ function getText(message) {
 /* FUNCTION TO CREATE MESSAGE OBJECT TO SEND AS EMAIL */
 function getMessage(text) {
   let transportMessage = {
+    from: process.env.EMAIL_FROM,
     to: emailRecipients.value,
     subject: `Emailing ${customerNumber}`,
-    replyTo: process.env.EMAIL_REPLYTO,
     text: emailMessageArea.value,
     attachments: [
       { filename: fileNameA, path: filePaths[0] },
@@ -127,6 +127,8 @@ function getMessage(text) {
 /* CREATE NODEMAILER TRANSPORTER */
 let mailTransportObject = {
   host: process.env.EMAIL_SMTP_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: process.env.EMAIL_SECURE,
   auth: {
     user: process.env.EMAIL_AUTH_USER,
     pass: process.env.EMAIL_AUTH_PASSWORD,

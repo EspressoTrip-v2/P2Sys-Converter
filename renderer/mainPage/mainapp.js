@@ -117,7 +117,7 @@ backBtnSettings.addEventListener('click', (e) => {
 configView.addEventListener('click', (e) => {
   soundClick.play();
 
-  shell.openPath(`${dir}/.env`);
+  shell.openPath(`${process.cwd()}/.env`);
 });
 
 /* CLEAR LOCALSTORAGE FILES */

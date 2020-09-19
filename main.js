@@ -117,9 +117,10 @@ function logfileFunc(message) {
 /* CONNECTION ERROR */
 ////////////////////////
 function mongooseConnect() {
+  /* REMOVE THIS DATABASE STRING FOR FINAL BUILD */ // TODO:
   mongoose
     .connect(
-      `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
+      `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
       {
         useNewUrlParser: true,
         useCreateIndex: true,
@@ -289,7 +290,7 @@ function createWindow() {
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -334,7 +335,7 @@ function createSecWindow(message) {
     alwaysOnTop: true,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -389,7 +390,7 @@ function createChildWindow(message) {
       transparent: true,
       alwaysOnTop: true,
       webPreferences: {
-        devTools: false,
+        // devTools: false,
         nodeIntegration: true,
         enableRemoteModule: true,
       },
@@ -438,7 +439,7 @@ function createLoadingWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -475,7 +476,7 @@ function createEmailWindow(message) {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -515,7 +516,7 @@ function createProgressWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -551,7 +552,7 @@ function createDbLoaderWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -590,7 +591,7 @@ function createUpdateWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },

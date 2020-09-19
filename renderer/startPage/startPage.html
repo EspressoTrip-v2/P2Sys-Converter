@@ -41,12 +41,24 @@
         </form>
       </div>
 
-      <div>
+      <div id="copy-container">
+        <label for="copy-select">
+          <p id="label-text">CREATE COPY</p>
+          <div id="tick"><svg id="tick-img" viewBox="0 0 63 64.5">
+              <path
+                d="M57.2 2.6c-1.5 0-3.3 0.2-5.6 0.5 -2.3 0.4-3.9 0.8-4.8 1.3 -1 0.5-2.4 1.8-4.4 3.9 -1.9 2-4.4 5.3-7.4 9.5 -3 4.3-5.6 8.4-7.8 12.4 -2 3.5-4 7.4-6 11.5 -1.4-1.8-2.9-3.2-4.4-4.3 -1.9-1.3-3.8-2-5.5-2 -1.7 0-3.7 0.8-5.7 2.3 -2.1 1.6-3.2 3.4-3.2 5.3 0 1.5 0.9 3.2 2.8 5.2 2.7 3 4.9 5.8 6.5 8.3 1.2 1.8 2 3 2.5 3.6 0.6 0.6 1.3 1.1 2.1 1.4 0.8 0.3 2.2 0.4 4.1 0.4 2.7 0 4.5-0.3 5.6-0.9 1.1-0.6 1.9-1.4 2.5-2.5 0.5-1 1.4-2.9 2.6-5.9 3-7.5 7.1-15.4 12.2-23.4 5.1-8 10-14.2 14.7-18.6 1.2-1 1.9-1.8 2.2-2.3C60.8 7.9 61 7.2 61 6.4c0-1-0.4-1.9-1.1-2.6C59.3 3 58.3 2.6 57.2 2.6z"
+                fill="#ffb004" /></svg></div>
+        </label>
+        <input type="checkbox" id="copy-select" value="1">
+
+      </div>
+      <div id="button-container">
         <button class="btn" id="check-cancel-btn" href="#">CANCEL</button>
         <button class="btn" id="check-continue-btn" href="#">CONTINUE</button>
         <span id="disabled" href="#">DISABLED</span>
         <button class="btn" id="check-update-btn" href="#">UPDATE</button>
         <button class="btn" id="resume-editing-btn" href="#">RESUME</button>
+        <button class="btn" id="copy-btn" href="#">COPY</button>
       </div>
     </div>
     <div id="assist-box">
@@ -100,7 +112,11 @@
           <span id="label-customer-number">
             <span>CUSTOMER<br />NUMBER</span>
           </span>
-          <input type="text" id="customer-number" placeholder="CUSTOMER #" disabled spellcheck="false" />
+          <form action="javascript:null">
+            <input type="text" id="customer-number" placeholder="CUSTOMER #" disabled spellcheck="false" minlength="6"
+              maxlength="7" />
+            <input type="submit" id='customer-number-submit' style="display: none;">
+          </form>
         </div>
 
         <div class="price-list-item-a">

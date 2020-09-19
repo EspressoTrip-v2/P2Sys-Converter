@@ -72,8 +72,10 @@ let backBtn = document.getElementById('back-to-main-btn'),
   createBtn = document.getElementById('create-btn'),
   pauseBtn = document.getElementById('pause-btn'),
   customerName = document.getElementById('customer-name'),
+  overflow = document.getElementById('overflow'),
   customerPriceList = document.getElementById('pricelist'),
   customerNumberValue = document.getElementById('customer-number'),
+  customerNumberSubmit = document.getElementById('customer-number-submit'),
   ccaPrice = document.getElementById('cca-price'),
   infobtn = document.getElementById('info-btn'),
   customerContactMenu = document.getElementById('customer-contact-container'),
@@ -113,7 +115,11 @@ let checkCustomer = document.getElementById('check-customer'),
   checkContinueBtn = document.getElementById('check-continue-btn'),
   customerFindBtn = document.getElementById('assist-box'),
   hider = document.getElementById('hider'),
-  checkResumeEditingBtn = document.getElementById('resume-editing-btn');
+  checkResumeEditingBtn = document.getElementById('resume-editing-btn'),
+  checkCopyBtn = document.getElementById('copy-btn'),
+  copyCheckbox = document.getElementById('copy-select'),
+  tickBox = document.getElementById('tick'),
+  tickCheckMark = document.getElementById('tick-img');
 
 //////////////
 /*FUNCTIONS*/
@@ -133,8 +139,8 @@ function ccaAutoMan() {
 /* CREATE THE JSON OBJECT FROM HTML TABLE DATA */
 const createObjectFromHtml = () => {
   /* SET VARIABLES */
-  let tableRows, columns, tableData, jsonObject;
-
+  let tableRows, columns, tableData, jsonObject, customerNum;
+  customerNum = customerNumberValue.value.toUpperCase();
   /* RETRIEVE ALL INFO AND CREATE JSON OBJECT FROM TABLE */
   jsonObject = {};
   jsonObjectData = {};
@@ -156,11 +162,11 @@ const createObjectFromHtml = () => {
     ];
   }
 
-  jsonObject[customerNumberValue.value] = jsonObjectData;
-  jsonObject[customerNumberValue.value]['COLUMNS'] = columns.map((el) => el.innerText);
-  jsonObject[customerNumberValue.value]['CCA'] = parseInt(ccaPrice.value);
-  jsonObject[customerNumberValue.value]['EMAIL'] = clientEmail.value;
-  jsonObject[customerNumberValue.value]['TEL'] = clientPhone.value;
+  jsonObject[customerNum] = jsonObjectData;
+  jsonObject[customerNum]['COLUMNS'] = columns.map((el) => el.innerText);
+  jsonObject[customerNum]['CCA'] = parseInt(ccaPrice.value);
+  jsonObject[customerNum]['EMAIL'] = clientEmail.value;
+  jsonObject[customerNum]['TEL'] = clientPhone.value;
   jsonObject['PRICELIST'] = customerPriceList.value;
   jsonObject['HEADER'] = {
     customerName: customerName.innerText,
@@ -263,9 +269,97 @@ const htmlInnerFill = (customernumber, html) => {
     });
   });
 
-  //TODO: FINISH THE POPUP MENUS FOR THE BACKUP PRICES
+  // POPUP MENUS FOR THE BACKUP PRICES
   getBackupDateStrings(customernumber, cuMenu, ctMenu);
 };
+
+/* FUNCTION TO GENERATE THE TABLE PAGE IF UPDATE OR COPY IS SELECTED */
+function tablePageCreate(type) {
+  /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
+  if (type) {
+    searchValue = customerSearch.value.toUpperCase();
+    if (customerPricelistNumber[searchValue]) {
+      customerPriceList.value = customerPricelistNumber[searchValue];
+      customerPriceList.disabled = true;
+    } else {
+      customerPriceList.value = pricelistNumber;
+    }
+    // FILL TABLE INFO
+    customerNumberValue.value = searchValue;
+    customerName.innerText = customerNumberName[searchValue];
+    customerName.contentEditable = false;
+    clientEmail.value = customerPrices[searchValue]['EMAIL'];
+    clientPhone.value = customerPrices[searchValue]['TEL'];
+  } else {
+    customerNumberValue.disabled = false;
+    customerName.innerText = null;
+
+    /* CUSTOMER NUMBER KEYUP EVENTS FOR COPIED PRICELIST */
+    customerNumberValue.addEventListener('keyup', (e) => {
+      if (customerNumberValue.value.length < 6) {
+        customerNumberSubmit.click();
+      }
+      // USE REGEX TO REMOVE ANY UNWANTED CHAR
+      let pattern = /\w+|\s+/g;
+      if (customerNumberValue.value.length > 0) {
+        let match = customerNumberValue.value.match(pattern).join('');
+        pricelistNumber = match.toUpperCase().replace(' ', '');
+        if (pricelistNumber.length < 6) {
+          pricelistNumber = pricelistNumber.padEnd(6, ' ');
+        } else if (pricelistNumber.length === 7) {
+          pricelistNumber = pricelistNumber.slice(0, 6);
+        }
+        /* ENTER THE PRICELIST NUMBER THAT HAS BEEN GENERATED */
+        customerPriceList.value = pricelistNumber.toUpperCase();
+
+        /* CHECK TO SEE IF CUSTOMER NUMBER ALREADY IN USE */
+        if (Object.keys(customerPrices).includes(customerNumberValue.value.toUpperCase())) {
+          remote.dialog.showMessageBoxSync(secWindow, {
+            type: 'warning',
+            icon: `${dir}/renderer/icons/error.png`,
+            buttons: ['OK'],
+            message: 'CUSTOMER NUMBER NOT AVAILABLE:',
+            detail: 'This CUSTOMER NUMBER is already in use. Please try a different number',
+          });
+
+          customerNumberValue.value = null;
+        }
+      }
+      if (customerNumberValue.value.length === 0) {
+        customerPriceList.value = null;
+      }
+    });
+  }
+
+  ccaPrice.value = customerPrices[searchValue]['CCA'];
+  customerPriceList.disabled = true;
+
+  // POPULATE HTML TABLE
+  htmlContent = tablePopulate(jsonFile);
+  htmlInnerFill(searchValue, htmlContent);
+
+  // HIDE SEARCH BOX
+  checkCustomer.style.visibility = 'hidden';
+  checkCustomer.style.opacity = '0';
+
+  // ADD BACKGROUND TO HTML ELEMENT
+  setTimeout(() => {
+    html.style.backgroundColor = '#fff';
+  }, 300);
+  if (secWindow.getChildWindows().length > 0) {
+    secWindow.getChildWindows()[0].close();
+    setTimeout(() => {
+      hider.style.display = 'flex';
+      secWindow.maximize();
+      secWindow.setMinimumSize(1200, 700);
+    }, 300);
+  }
+  setTimeout(() => {
+    hider.style.display = 'flex';
+    secWindow.maximize();
+    secWindow.setMinimumSize(1200, 700);
+  }, 300);
+}
 
 ///////////////////////////////////
 /* HEADER BUTTON RESET FUNCTION */
@@ -348,14 +442,46 @@ createBtn.addEventListener('click', (e) => {
       message: 'MISSING VALUES:',
       detail: 'Please complete the highlighted areas.',
     });
-  } else if (!customerName.innerText) {
-    remote.dialog.showMessageBox(secWindow, {
+    /* CHECK IF ALL TOP REQUIRED FIELDS HAVE BEEN ENTERED */
+  } else if (
+    customerName.innerText.length === 0 ||
+    customerNumberValue.value.length < 6 ||
+    ccaPrice.value.length === 0
+  ) {
+    remote.dialog.showMessageBoxSync(secWindow, {
       type: 'warning',
-      icon: `${dir}/renderer/icons/info.png`,
+      icon: `${dir}/renderer/icons/error.png`,
       buttons: ['OK'],
-      message: 'CUSTOMER NAME REQUIRED:',
-      detail: 'The customer name is a required field.',
+      message: 'DETAILS REQUIRED:',
+      detail:
+        'CUSTOMER NAME, CUSTOMER NUMBER and CCA PRICE are required fields. Please enter details before creating',
     });
+    /* HIGHLIGHT THE FIELDS THAT ARE MISSING */
+    if (customerName.innerText.length === 0) {
+      customerName.style.backgroundColor = '#ffe558';
+      customerName.style.border = '1px solid #ffe558';
+      overflow.style.backgroundColor = '#ffe558';
+      overflow.style.border = '1px solid #ffe558';
+    } else {
+      customerName.style.backgroundColor = '#fff';
+      customerName.style.border = '1px solid #fff';
+      overflow.style.backgroundColor = '#fff';
+      overflow.style.border = '1px solid #fff';
+    }
+    if (ccaPrice.value.length === 0) {
+      ccaPrice.style.backgroundColor = '#ffe558';
+      ccaPrice.style.border = '1px solid #ffe558';
+    } else {
+      ccaPrice.style.backgroundColor = '#fff';
+      ccaPrice.style.border = '1px solid #fff';
+    }
+    if (customerNumberValue.value.length < 6) {
+      customerNumberValue.style.backgroundColor = '#ffe558';
+      customerNumberValue.style.border = '1px solid #ffe558';
+    } else {
+      customerNumberValue.style.backgroundColor = '#fff';
+      customerNumberValue.style.border = '1px solid #fff';
+    }
   } else {
     /* CREATE THE CUSTOMER PRICELIST OBJECT TO SEND TO PYTHON */
     customerData = createObjectFromHtml();
@@ -370,18 +496,28 @@ createBtn.addEventListener('click', (e) => {
 /* PAUSE BUTTON TO SAVE TO LOCAL STORAGE */
 pauseBtn.addEventListener('click', () => {
   soundClick.play();
+  if (customerName.innerText.length !== 0) {
+    /* CREATE THE STORAGE OBJECT */
+    let localStorageJson = createObjectFromHtml(),
+      searchValue = customerSearch.value.toUpperCase();
 
-  /* CREATE THE STORAGE OBJECT */
-  let localStorageJson = createObjectFromHtml(),
-    searchValue = customerSearch.value.toUpperCase();
-
-  /* STRINGIFY FOR LOCALSTORAGE */
-  localStorageJson = JSON.stringify(localStorageJson);
-  /* SET ITEM */
-  localStorage.setItem(searchValue, localStorageJson);
-  setTimeout(() => {
-    resetForm();
-  }, 200);
+    /* STRINGIFY FOR LOCALSTORAGE */
+    localStorageJson = JSON.stringify(localStorageJson);
+    /* SET ITEM */
+    localStorage.setItem(searchValue, localStorageJson);
+    setTimeout(() => {
+      resetForm();
+    }, 200);
+  } else {
+    remote.dialog.showMessageBoxSync(secWindow, {
+      type: 'error',
+      title: 'CUSTOMER NAME IS REQUIRED',
+      message: 'Please enter a customer name before pausing',
+      buttons: ['OK'],
+      icon: `${dir}/renderer/icons/error.png`,
+    });
+    customerName.focus();
+  }
 });
 
 /* SEND EMAIL BUTTON */
@@ -641,9 +777,15 @@ customerSearch.addEventListener('keyup', (e) => {
     clearList();
     // SHOW THE DISABLED BUTTON AND HIDE OTHERS
     checkUpdateBtn.style.display = 'none';
+    checkCopyBtn.style.display = 'none';
     checkResumeEditingBtn.style.display = 'none';
     disabledBtn.style.display = 'flex';
     target = null;
+
+    /* UNCHECK COPY */
+    copyCheckbox.checked = false;
+    tickBox.style.border = '2px solid var(--sec-blue)';
+    tickCheckMark.style.animation = 'none';
   } else if (
     customerSearch.value.length < 6 &&
     !Object.keys(localStorage).includes(customerSearch.value)
@@ -761,51 +903,7 @@ checkContinueBtn.addEventListener('click', (e) => {
 /* UPDATE BUTTON */
 checkUpdateBtn.addEventListener('click', (e) => {
   soundClick.play();
-
-  /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
-  searchValue = customerSearch.value.toUpperCase();
-
-  // POPULATE HTML TABLE
-  htmlContent = tablePopulate(jsonFile);
-  htmlInnerFill(searchValue, htmlContent);
-
-  // HIDE SEARCH BOX
-  checkCustomer.style.visibility = 'hidden';
-  checkCustomer.style.opacity = '0';
-
-  // FILL TABLE INFO
-  customerNumberValue.value = searchValue;
-  customerName.innerText = customerNumberName[searchValue];
-  customerName.contentEditable = false;
-  ccaPrice.value = customerPrices[searchValue]['CCA'];
-  clientEmail.value = customerPrices[searchValue]['EMAIL'];
-  clientPhone.value = customerPrices[searchValue]['TEL'];
-
-  if (customerPricelistNumber[searchValue]) {
-    customerPriceList.value = customerPricelistNumber[searchValue];
-    customerPriceList.disabled = true;
-  } else {
-    customerPriceList.value = pricelistNumber;
-    customerPriceList.disabled = true;
-  }
-  // ADD BACKGROUND TO HTML ELEMENT
-  setTimeout(() => {
-    html.style.backgroundColor = '#fff';
-  }, 300);
-
-  if (secWindow.getChildWindows().length > 0) {
-    secWindow.getChildWindows()[0].close();
-    setTimeout(() => {
-      hider.style.display = 'flex';
-      secWindow.maximize();
-      secWindow.setMinimumSize(1200, 700);
-    }, 300);
-  }
-  setTimeout(() => {
-    hider.style.display = 'flex';
-    secWindow.maximize();
-    secWindow.setMinimumSize(1200, 700);
-  }, 300);
+  tablePageCreate(true);
 });
 
 /* RESUME BUTTON */
@@ -901,6 +999,35 @@ customerFindBtn.addEventListener('click', (e) => {
   }
 });
 
+/* COPY CHECKBOX EVENTS */
+copyCheckbox.addEventListener('change', (e) => {
+  if (checkUpdateBtn.style.display === 'flex') {
+    soundClick.play();
+    if (e.target.checked) {
+      tickBox.style.border = '2px solid var(--main)';
+      tickCheckMark.style.animation = 'check 0.2s linear forwards';
+      setTimeout(() => {
+        checkUpdateBtn.style.display = 'none';
+        checkCopyBtn.style.display = 'flex';
+      }, 200);
+    }
+  } else if (checkCopyBtn.style.display === 'flex') {
+    soundClick.play();
+    tickBox.style.border = '2px solid var(--sec-blue)';
+    tickCheckMark.style.animation = 'none';
+    setTimeout(() => {
+      checkUpdateBtn.style.display = 'flex';
+      checkCopyBtn.style.display = 'none';
+    }, 200);
+  }
+});
+
+/* COPY BUTTON EVENTS */
+checkCopyBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  tablePageCreate(false);
+});
+
 /////////////////////////////
 /* WINDOW CONTROL ELEMENTS */
 ////////////////////////////
@@ -950,7 +1077,7 @@ ipcRenderer.on('dock-sec', (event, message) => {
   secWindow.focus();
   customerSearch.focus();
   if (Object.keys(customerPrices).includes(message)) {
-    /* SEND THE NUMBER TO THE SUCTOMER SEARCH MAKE THE ITEM CLICKED AND SHOW UPDATE BUTTON */
+    /* SEND THE NUMBER TO THE CUSTOMER SEARCH MAKE THE ITEM CLICKED AND SHOW UPDATE BUTTON */
     let item = document.getElementById(message);
     item.setAttribute('class', 'cusnum-clicked');
     checkUpdateBtn.style.display = 'flex';
@@ -974,27 +1101,27 @@ ipcRenderer.on('dock-sec', (event, message) => {
 ipcRenderer.on('progress-end', (event, message) => {
   /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
   searchValue = customerSearch.value.toUpperCase();
+  let cusNum = customerNumberValue.value.toUpperCase();
 
   /* CREATE THE DATE OBJECT TO INSERT IN CUSTOMER BACKUPS */
   let dateJsonFile = {};
-  dateJsonFile = {};
   if (jsonFile[0].length > 3) {
-    if (customerBackUp[customerNumberValue.value]) {
+    if (customerBackUp[cusNum]) {
       dateJsonFile = jsonFile;
-      customerBackUp[customerNumberValue.value][dateString] = dateJsonFile;
+      customerBackUp[cusNum][dateString] = dateJsonFile;
     } else {
       dateJsonFile[dateString] = jsonFile;
-      customerBackUp[customerNumberValue.value] = dateJsonFile;
+      customerBackUp[cusNum] = dateJsonFile;
     }
   } else {
-    dateJsonFile[dateString] = customerData[customerNumberValue.value];
-    customerBackUp[customerNumberValue.value] = dateJsonFile;
+    dateJsonFile[dateString] = customerData[cusNum];
+    customerBackUp[cusNum] = dateJsonFile;
   }
 
   /* UPDATE ALL THE DATA OBJECTS AND SEND TO GET WRITTEN LOCALLY  */
-  customerPricelistNumber[customerNumberValue.value] = customerPriceList.value;
-  customerNumberName[customerNumberValue.value] = customerName.innerText;
-  customerPrices[customerNumberValue.value] = customerData[customerNumberValue.value];
+  customerPricelistNumber[cusNum] = customerPriceList.value;
+  customerNumberName[cusNum] = customerName.innerText;
+  customerPrices[cusNum] = customerData[cusNum];
 
   /* ADD BACK THE _id FOR ONLINE UPDATE */
   customerBackUp['_id'] = 'customerBackUp';
