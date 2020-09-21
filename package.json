@@ -69,6 +69,7 @@
       ]
     },
     "nsis": {
+      "shortcutName": "Converter",
       "deleteAppDataOnUninstall": true,
       "perMachine": true,
       "oneClick": false,

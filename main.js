@@ -250,7 +250,17 @@ db.on('disconnected', () => {
   if (secWindow) {
     dialog.showMessageBoxSync(secWindow, {
       type: 'info',
-      title: 'P2SYS CONNECTION LOST',
+      title: 'P2SYS DATABASE CONNECTION LOST',
+      message: 'The connection to the database has been lost',
+      detail:
+        'If reconnecting fails please PAUSE your work and update when a connection is available.',
+      icon: `${dir}/renderer/icons/info.png`,
+      buttons: ['OK'],
+    });
+  } else if (homeWindow && homeWindow.isVisible()) {
+    dialog.showMessageBoxSync(homeWindow, {
+      type: 'info',
+      title: 'P2SYS DATABASE CONNECTION LOST',
       message: 'The connection to the database has been lost',
       detail:
         'If reconnecting fails please PAUSE your work and update when a connection is available.',
@@ -319,7 +329,7 @@ function createWindow() {
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
