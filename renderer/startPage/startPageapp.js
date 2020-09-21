@@ -90,6 +90,8 @@ let backBtn = document.getElementById('back-to-main-btn'),
   unlockSvg = document.getElementById('unlock-svg'),
   lengthColumn = document.getElementById('len'),
   soundClick = document.getElementById('click'),
+  minimizeTableBtn = document.getElementById('minimize-table'),
+  calculateBtn = document.getElementById('calculate'),
   /* TABLE COMPONENT DOMS */
   /////////////////////////
   table = document.getElementById('table'),
@@ -118,8 +120,10 @@ let checkCustomer = document.getElementById('check-customer'),
   checkResumeEditingBtn = document.getElementById('resume-editing-btn'),
   checkCopyBtn = document.getElementById('copy-btn'),
   copyCheckbox = document.getElementById('copy-select'),
+  copyContainer = document.getElementById('copy-container'),
   tickBox = document.getElementById('tick'),
-  tickCheckMark = document.getElementById('tick-img');
+  tickCheckMark = document.getElementById('tick-img'),
+  minimizeCheckBtn = document.getElementById('minimize-search');
 
 //////////////
 /*FUNCTIONS*/
@@ -351,13 +355,13 @@ function tablePageCreate(type) {
     setTimeout(() => {
       hider.style.display = 'flex';
       secWindow.maximize();
-      secWindow.setMinimumSize(1200, 700);
+      secWindow.setMinimumSize(950, 700);
     }, 300);
   }
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
-    secWindow.setMinimumSize(1200, 700);
+    secWindow.setMinimumSize(950, 700);
   }, 300);
 }
 
@@ -458,10 +462,14 @@ createBtn.addEventListener('click', (e) => {
     });
     /* HIGHLIGHT THE FIELDS THAT ARE MISSING */
     if (customerName.innerText.length === 0) {
-      customerName.style.backgroundColor = '#ffe558';
-      customerName.style.border = '1px solid #ffe558';
-      overflow.style.backgroundColor = '#ffe558';
-      overflow.style.border = '1px solid #ffe558';
+      customerName.style.fontWeight = 'bolder';
+      customerName.style.animation = 'cca-flash .5s linear 4';
+      overflow.style.animation = 'cca-flash .5s linear 4';
+      setTimeout(() => {
+        customerName.style.fontWeight = 'normal';
+        overflow.style.animation = 'none';
+        customerName.style.animation = 'none';
+      }, 2050);
     } else {
       customerName.style.backgroundColor = '#fff';
       customerName.style.border = '1px solid #fff';
@@ -469,15 +477,23 @@ createBtn.addEventListener('click', (e) => {
       overflow.style.border = '1px solid #fff';
     }
     if (ccaPrice.value.length === 0) {
-      ccaPrice.style.backgroundColor = '#ffe558';
-      ccaPrice.style.border = '1px solid #ffe558';
+      ccaPrice.style.fontWeight = 'bolder';
+      ccaPrice.style.animation = 'cca-flash .5s linear 4';
+      setTimeout(() => {
+        ccaPrice.style.fontWeight = 'normal';
+        ccaPrice.style.animation = 'none';
+      }, 2050);
     } else {
       ccaPrice.style.backgroundColor = '#fff';
       ccaPrice.style.border = '1px solid #fff';
     }
     if (customerNumberValue.value.length < 6) {
-      customerNumberValue.style.backgroundColor = '#ffe558';
-      customerNumberValue.style.border = '1px solid #ffe558';
+      customerNumberValue.style.fontWeight = 'bolder';
+      customerNumberValue.style.animation = 'cca-flash .5s linear 4';
+      setTimeout(() => {
+        customerNumberValue.style.fontWeight = 'normal';
+        customerNumberValue.style.animation = 'none';
+      }, 2050);
     } else {
       customerNumberValue.style.backgroundColor = '#fff';
       customerNumberValue.style.border = '1px solid #fff';
@@ -730,6 +746,7 @@ function addListListeners() {
         checkContinueBtn.style.display = 'none';
         checkResumeEditingBtn.style.display = 'none';
         disabledBtn.style.display = 'none';
+        copyContainer.style.opacity = '1';
       }
     });
   });
@@ -786,6 +803,7 @@ customerSearch.addEventListener('keyup', (e) => {
     copyCheckbox.checked = false;
     tickBox.style.border = '2px solid var(--sec-blue)';
     tickCheckMark.style.animation = 'none';
+    copyContainer.style.opacity = '0';
   } else if (
     customerSearch.value.length < 6 &&
     !Object.keys(localStorage).includes(customerSearch.value)
@@ -822,6 +840,8 @@ customerSearch.addEventListener('keyup', (e) => {
             checkUpdateBtn.style.display = 'none';
             checkResumeEditingBtn.style.display = 'flex';
             customerNumberList.style.backgroundImage = `url('${dir}/renderer/icons/inprogress.png')`;
+            copyContainer.style.opacity = '0';
+            checkCopyBtn.style.display = 'none';
           } else {
             // DISPLAY CONTINUE BUTTON
             jsonFile = dataObjects['template-pricelist'];
@@ -829,6 +849,8 @@ customerSearch.addEventListener('keyup', (e) => {
             disabledBtn.style.display = 'none';
             checkUpdateBtn.style.display = 'none';
             checkResumeEditingBtn.style.display = 'none';
+            copyContainer.style.opacity = '0';
+            checkCopyBtn.style.display = 'none';
           }
         } else if (
           // DISABLE THE CONTINUE BUTTON IF THE SEARCH VALUE IS LESS 6
@@ -840,6 +862,8 @@ customerSearch.addEventListener('keyup', (e) => {
           disabledBtn.style.display = 'flex';
           checkUpdateBtn.style.display = 'none';
           checkResumeEditingBtn.style.display = 'none';
+          copyContainer.style.opacity = '0';
+          checkCopyBtn.style.display = 'none';
         } else if (!localStorage.getItem(customerSearch.value.toUpperCase())) {
           // DISPLAY TICK IF THE SEARCH  VALUE IS CORRECT PATTERN AND LENGTH 6
           customerNumberList.style.backgroundImage = `url('${dir}/renderer/icons/tick.png')`;
@@ -889,14 +913,14 @@ checkContinueBtn.addEventListener('click', (e) => {
     setTimeout(() => {
       hider.style.display = 'flex';
       secWindow.maximize();
-      secWindow.setMinimumSize(1200, 700);
+      secWindow.setMinimumSize(950, 700);
     }, 300);
     searchValue;
   }
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
-    secWindow.setMinimumSize(1200, 700);
+    secWindow.setMinimumSize(950, 700);
   }, 300);
 });
 
@@ -948,13 +972,13 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
     setTimeout(() => {
       hider.style.display = 'flex';
       secWindow.maximize();
-      secWindow.setMinimumSize(1200, 700);
+      secWindow.setMinimumSize(950, 700);
     }, 300);
   }
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
-    secWindow.setMinimumSize(1200, 700);
+    secWindow.setMinimumSize(950, 700);
   }, 300);
 });
 
@@ -1035,13 +1059,31 @@ maxWindow[0].addEventListener('click', (e) => {
   soundClick.play();
 
   if (secWindow.getSize()[0] === screenWidth) {
-    secWindow.unmaximize();
     setTimeout(() => {
-      secWindow.center();
-    }, 50);
+      secWindow.unmaximize();
+      setTimeout(() => {
+        secWindow.center();
+      }, 300);
+    }, 300);
   } else {
-    secWindow.maximize();
+    setTimeout(() => {
+      secWindow.maximize();
+    }, 300);
   }
+});
+
+minimizeCheckBtn.addEventListener('click', () => {
+  soundClick.play();
+  setTimeout(() => {
+    secWindow.minimize();
+  }, 300);
+});
+
+minimizeTableBtn.addEventListener('click', () => {
+  soundClick.play();
+  setTimeout(() => {
+    secWindow.minimize();
+  }, 500);
 });
 
 /* CHANGE OPACITY AFTER LOAD */
@@ -1051,6 +1093,274 @@ secWindow.webContents.on('did-finish-load', () => {
   }, 300);
 });
 
+//////////////////////////////////
+/* PERCENTAGE ADJUST SLIDER BOX */
+//////////////////////////////////
+let v3838 = 0,
+  v3850 = 0,
+  v3876 = 0,
+  v38114 = 0,
+  v38152 = 0,
+  v38228 = 0,
+  v5076 = 0,
+  v50152 = 0,
+  v50228 = 0,
+  v76228 = 0;
+
+/* SLIDERS */
+let slider3838 = document.getElementById('3838'),
+  slider3850 = document.getElementById('3850'),
+  slider3876 = document.getElementById('3876'),
+  slider38114 = document.getElementById('38114'),
+  slider38152 = document.getElementById('38152'),
+  slider38228 = document.getElementById('38228'),
+  slider5076 = document.getElementById('5076'),
+  slider50152 = document.getElementById('50152'),
+  slider50228 = document.getElementById('50228'),
+  slider76228 = document.getElementById('76228');
+sliderAll = document.getElementById('all');
+
+/* SLIDER VALUES */
+let value3838 = document.getElementById('l3838'),
+  value3850 = document.getElementById('l3850'),
+  value3876 = document.getElementById('l3876'),
+  value38114 = document.getElementById('l38114'),
+  value38152 = document.getElementById('l38152'),
+  value38228 = document.getElementById('l38228'),
+  value5076 = document.getElementById('l5076'),
+  value50152 = document.getElementById('l50152'),
+  value50228 = document.getElementById('l50228'),
+  value76228 = document.getElementById('l76228'),
+  valueAll = document.getElementById('Lall');
+
+let percentageContainer = document.getElementById('percentage-adjust'),
+  applyCancelBtn = document.getElementById('cancelBtn'),
+  applyConfirmBtn = document.getElementById('applyBtn');
+
+/* SLIDER EVENT LISTENERS */
+slider3838.addEventListener('input', (e) => {
+  value3838.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v3838 = e.target.value;
+});
+slider3850.addEventListener('input', (e) => {
+  value3850.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v3850 = e.target.value;
+});
+slider3876.addEventListener('input', (e) => {
+  value3876.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v3876 = e.target.value;
+});
+slider38114.addEventListener('input', (e) => {
+  value38114.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v38114 = e.target.value;
+});
+
+slider38152.addEventListener('input', (e) => {
+  value38152.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v38152 = e.target.value;
+});
+slider38228.addEventListener('input', (e) => {
+  value38228.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v38228 = e.target.value;
+});
+slider5076.addEventListener('input', (e) => {
+  value5076.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v5076 = e.target.value;
+});
+slider50152.addEventListener('input', (e) => {
+  value50152.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v50152 = e.target.value;
+});
+slider50228.addEventListener('input', (e) => {
+  value50228.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v50228 = e.target.value;
+});
+slider76228.addEventListener('input', (e) => {
+  value76228.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v76228 = e.target.value;
+});
+sliderAll.addEventListener('input', (e) => {
+  valueAll.innerText = e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  /* 38 X 38 */
+  value3838.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v3838 = e.target.value;
+  slider3838.value = e.target.value;
+  /* 38 X 50 */
+  value3850.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v3850 = e.target.value;
+  slider3850.value = e.target.value;
+  /* 38 X 76 */
+  value3876.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v3876 = e.target.value;
+  slider3876.value = e.target.value;
+  /* 38 X 114 */
+  value38114.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v38114 = e.target.value;
+  slider38114.value = e.target.value;
+  /* 38 X 152 */
+  value38152.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v38152 = e.target.value;
+  slider38152.value = e.target.value;
+  /* 38 X 228 */
+  value38228.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v38228 = e.target.value;
+  slider38228.value = e.target.value;
+  /* 50 X 76 */
+  value5076.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v5076 = e.target.value;
+  slider5076.value = e.target.value;
+  /* 50 X 152 */
+  value50152.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v50152 = e.target.value;
+  slider50152.value = e.target.value;
+  /* 50 X 228 */
+  value50228.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v50228 = e.target.value;
+  slider50228.value = e.target.value;
+  /* 70 X 228 */
+  value76228.innerText =
+    e.target.value <= 0 ? e.target.value + '%' : '+' + e.target.value + '%';
+  v76228 = e.target.value;
+  slider76228.value = e.target.value;
+});
+
+/* CALCULATE BUTTON */
+calculateBtn.addEventListener('click', (e) => {
+  autoCaaBtn.click();
+
+  setTimeout(() => {
+    progressFade.style.visibility = 'visible';
+    progressFade.style.backdropFilter = 'blur(2px)';
+    percentageContainer.style.transform = 'scale(1)';
+  }, 300);
+});
+
+/* FUNCTION FOR PERCENTAGE CALC */
+function calculatePercent(untreated) {
+  /* SET VALUES THAT NEED TO BE CYCLED */
+  let valueA = parseInt(v3838);
+
+  /* UNTREATED CALCULATIONS */
+  untreated.forEach((el) => {
+    let totalA,
+      inputValA = parseInt(el.value);
+    if (el.id.includes('USER3')) valueA = parseInt(v3850);
+    if (el.id.includes('USER6')) valueA = parseInt(v3876);
+    if (el.id.includes('USER9')) valueA = parseInt(v38114);
+    if (el.id.includes('USER12')) valueA = parseInt(v38152);
+    if (el.id.includes('USER15')) valueA = parseInt(v38228);
+    if (el.id.includes('USER18')) valueA = parseInt(v5076);
+    if (el.id.includes('USER21')) valueA = parseInt(v50152);
+    if (el.id.includes('USER24')) valueA = parseInt(v50228);
+    if (el.id.includes('USER27')) valueA = parseInt(v76228);
+
+    /* SET COLOR FOR INDICATION */
+    if (valueA < 0) {
+      el.style.color = 'var(--button-red';
+      el.style.fontWeight = 'bold';
+    } else if (valueA > 0) {
+      el.style.color = 'var(--button-green';
+      el.style.fontWeight = 'bold';
+    }
+
+    /* CALCULATE PERCENTAGE */
+    totalA = Math.round((valueA / 100) * inputValA);
+    el.value = totalA + inputValA;
+    el.dispatchEvent(new Event('keyup'));
+  });
+}
+
+/* RESET ALL SLIDERS TO ZERO */
+function resetSlider() {
+  valueAll.innerText = '0%';
+  sliderAll.value = 0;
+  /* 38 X 38 */
+  value3838.innerText = '0%';
+  v3838 = 0;
+  slider3838.value = 0;
+  /* 38 X 50 */
+  value3850.innerText = '0%';
+  v3850 = 0;
+  slider3850.value = 0;
+  /* 38 X 76 */
+  value3876.innerText = '0%';
+  v3876 = 0;
+  slider3876.value = 0;
+  /* 38 X 114 */
+  value38114.innerText = '0%';
+  v38114 = 0;
+  slider38114.value = 0;
+  /* 38 X 152 */
+  value38152.innerText = '0%';
+  v38152 = 0;
+  slider38152.value = 0;
+  /* 38 X 228 */
+  value38228.innerText = '0%';
+  v38228 = 0;
+  slider38228.value = 0;
+  /* 50 X 76 */
+  value5076.innerText = '0%';
+  v5076 = 0;
+  slider5076.value = 0;
+  /* 50 X 152 */
+  value50152.innerText = '0%';
+  v50152 = 0;
+  slider50152.value = 0;
+  /* 50 X 228 */
+  value50228.innerText = '0%';
+  v50228 = 0;
+  slider50228.value = 0;
+  /* 70 X 228 */
+  value76228.innerText = '0%';
+  v76228 = 0;
+  slider76228.value = 0;
+}
+
+/* APPLY CONFIRM BUTTON */
+applyConfirmBtn.addEventListener('click', (e) => {
+  let untreatedColumnClass = Array.from(
+    document.getElementsByClassName('price-entries-untreated')
+  );
+
+  calculatePercent(untreatedColumnClass);
+
+  /* test */
+  progressFade.style.visibility = 'hidden';
+  progressFade.style.backdropFilter = 'none';
+  percentageContainer.style.transform = 'scale(0)';
+  manCaaBtn.click();
+  resetSlider();
+});
+
+/* APPLY CANCEL BUTTON */
+applyCancelBtn.addEventListener('click', (e) => {
+  manCaaBtn.click();
+  setTimeout(() => {
+    progressFade.style.visibility = 'hidden';
+    progressFade.style.backdropFilter = 'none';
+    percentageContainer.style.transform = 'scale(0)';
+    resetSlider();
+  }, 300);
+});
 //////////////////
 /*IPC LISTENERS*/
 ////////////////
@@ -1068,25 +1378,38 @@ ipcRenderer.once('database-object', (e, message) => {
 /* COMMUNICATION FOR CUSTOMER DOCK */
 ipcRenderer.on('dock-sec', (event, message) => {
   let child = secWindow.getChildWindows()[0];
-  customerSearch.value = message;
 
-  /* GET THE PRICELIST FROMT HE DATABASE */
-  jsonFile = customerPrices[message];
+  if (customerSearch.value !== message) {
+    /* RESET CHECKBOX */
+    copyCheckbox.checked = false;
+    tickBox.style.border = '2px solid var(--sec-blue)';
+    tickCheckMark.style.animation = 'none';
 
-  child.blur();
-  secWindow.focus();
-  customerSearch.focus();
-  if (Object.keys(customerPrices).includes(message)) {
-    /* SEND THE NUMBER TO THE CUSTOMER SEARCH MAKE THE ITEM CLICKED AND SHOW UPDATE BUTTON */
-    let item = document.getElementById(message);
-    item.setAttribute('class', 'cusnum-clicked');
-    checkUpdateBtn.style.display = 'flex';
-    disabledBtn.style.display = 'none';
-    checkContinueBtn.style.display = 'none';
-    customerSearch.dispatchEvent(new Event('keyup'));
-  } else {
-    customerSearch.dispatchEvent(new Event('keyup'));
-    customerSearch.dispatchEvent(new Event('keyup'));
+    /* FILL SEARCH BOX WITH CUSTOMER NUMBER */
+    customerSearch.value = message;
+    /* SET CUSTOMER NUMBER GLOBAL VARIABLE */
+    searchValue = message;
+
+    /* GET THE PRICELIST FROMT HE DATABASE */
+    jsonFile = customerPrices[message];
+
+    child.blur();
+    secWindow.focus();
+    customerSearch.focus();
+    if (Object.keys(customerPrices).includes(message)) {
+      /* SEND THE NUMBER TO THE CUSTOMER SEARCH MAKE THE ITEM CLICKED AND SHOW UPDATE BUTTON */
+      let item = document.getElementById(message);
+      item.setAttribute('class', 'cusnum-clicked');
+      checkUpdateBtn.style.display = 'flex';
+      disabledBtn.style.display = 'none';
+      checkContinueBtn.style.display = 'none';
+      copyContainer.style.opacity = '1';
+
+      customerSearch.dispatchEvent(new Event('keyup'));
+    } else {
+      customerSearch.dispatchEvent(new Event('keyup'));
+      customerSearch.dispatchEvent(new Event('keyup'));
+    }
   }
 });
 
@@ -1165,24 +1488,13 @@ ipcRenderer.on('error', (e, message) => {
 
 /* CONNECTION MONITORING */
 window.addEventListener('offline', (e) => {
-  new Notification('P2SYS DATABASE CONNECTION ERROR', {
+  new Notification('P2SYS OFFLINE', {
     icon: `${dir}/renderer/icons/error.png`,
-    body: 'Unable to connect to the database.',
+    body: 'There is no available internet connection.',
     requireInteraction: true,
   });
   createBtn.setAttribute('class', 'create-btn-disabled');
 });
-
-setTimeout(() => {
-  if (!window.navigator.onLine) {
-    new Notification('P2SYS DATABASE CONNECTION ERROR', {
-      icon: `${dir}/renderer/icons/error.png`,
-      body: 'Unable to connect to the database.',
-      requireInteraction: true,
-    });
-    createBtn.setAttribute('class', 'create-btn-disabled');
-  }
-}, 2000);
 
 /* MESSAGE FROM DB ON LOSS OF CONNECTION */
 ipcRenderer.on('reconnected', (e, message) => {

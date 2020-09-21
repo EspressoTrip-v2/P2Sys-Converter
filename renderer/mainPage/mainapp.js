@@ -50,7 +50,10 @@ let startBtn = document.getElementById('start'),
   soundClick = document.getElementById('click'),
   versionInfo = document.getElementById('version-info'),
   mainContainer = document.getElementById('container'),
-  sentSound = document.getElementById('sent');
+  sentSound = document.getElementById('sent'),
+  minimizeBtn = document.getElementById('minimize'),
+  dbContainer = document.getElementById('db'),
+  dbLogo = document.getElementById('db-logo');
 
 ///////////////////////
 /* DOM MANIPULATIONS */
@@ -82,6 +85,12 @@ exitbtn.addEventListener('click', (e) => {
 
 /* ABOUT PAGE EVENTS */
 //////////////////////
+minimizeBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  setTimeout(() => {
+    homeWindow.minimize();
+  }, 300);
+});
 
 /* ABOUT BUTTON */
 aboutbtn.addEventListener('click', (e) => {
@@ -181,6 +190,21 @@ clearPausedPricelistsBtnSettings.addEventListener('click', (e) => {
   }
 });
 
+/* ONLINE LISTENER */
+window.addEventListener('offline', (e) => {
+  dbContainer.title = 'Connection Lost';
+  dbLogo.style.fill = 'var(--button-red';
+  dbLogo.style.animation = 'none';
+
+  if (homeWindow.isVisible()) {
+    new Notification('P2SYS OFFLINE', {
+      icon: `${dir}/renderer/icons/error.png`,
+      body: 'There is no available internet connection.',
+      requireInteraction: true,
+    });
+  }
+});
+
 /* SYSTEM SETTINGS PAGE EVENTS */
 /////////////////////////////////
 systemSettingsBtn.addEventListener('click', (e) => {
@@ -202,6 +226,12 @@ systemSettingsBtn.addEventListener('click', (e) => {
 /* SHOW WINDOW */
 ipcRenderer.on('show', (e, message) => {
   mainContainer.style.opacity = '1';
+});
+
+/* DB CONNECTION */
+ipcRenderer.on('db', (e, message) => {
+  dbContainer.title = message;
+  dbLogo.style.animation = 'connect 0.1s linear infinite alternate';
 });
 
 /* MESSAGE TO CREATE DOWNLOAD WINDOW */

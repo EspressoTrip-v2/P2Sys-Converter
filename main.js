@@ -112,22 +112,30 @@ function logfileFunc(message) {
     );
   }
 }
+//////////////////////
+/* GLOBAL VARIABLES */
+//////////////////////
+let connectionString, connectionName;
 
 //////////////////////////
 /* CONNECTION ERROR */
 ////////////////////////
 function mongooseConnect() {
-  /* REMOVE THIS DATABASE STRING FOR FINAL BUILD */ // TODO:
+  /* TEST DATABASE */
+  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  // connectionName = 'Test Database';
+
+  /* AC WHITCHER DATABASE */
+  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  connectionName = 'A.C Whitcher Database';
+
   mongoose
-    .connect(
-      `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
-      {
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useFindAndModify: false,
-        useUnifiedTopology: true,
-      }
-    )
+    .connect(connectionString, {
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      useFindAndModify: false,
+      useUnifiedTopology: true,
+    })
     .catch((err) => {
       /* INITIAL EROR CONNECTION */
       dialog
@@ -250,12 +258,15 @@ db.on('disconnected', () => {
       buttons: ['OK'],
     });
   } else {
-    let notification = new Notification({
-      title: 'P2SYS CONNECTION LOST',
-      body: 'The connection to the database has been lost',
-      icon: `${dir}/renderer/icons/info.png`,
-    });
-    notification.show();
+    /* CHECK TO SEE IF THERE IS AN AVAILABLE WINDOW */
+    if (homeWindow | secWindow) {
+      let notification = new Notification({
+        title: 'P2SYS CONNECTION LOST',
+        body: 'The connection to the database has been lost',
+        icon: `${dir}/renderer/icons/info.png`,
+      });
+      notification.show();
+    }
   }
 });
 
@@ -269,14 +280,32 @@ db.on('reconnected', () => {
   if (secWindow) {
     secWindow.webContents.send('reconnected', null);
   }
+  if (homeWindow) {
+    homeWindow.webContents.send('db', connectionName);
+  }
 });
 
 ////////////////////////////////
 /* WINDOW CREATION FUNCTIONS */
 //////////////////////////////
 
+/* GET VERSION CHANGELOG */
+const version = fs.readFileSync(`${process.cwd()}/build/release-notes.md`, 'utf8');
+
 /* TRAY MENU LAYOUT TEMPLATE */
-let trayMenu = Menu.buildFromTemplate([{ label: 'P2Sys Converter' }, { role: 'minimize' }]);
+let trayMenu = Menu.buildFromTemplate([
+  {
+    label: 'About',
+    click: () => {
+      let parent = secWindow ? secWindow : homeWindow;
+      dialog.showMessageBoxSync(parent, {
+        detail: version,
+        buttons: ['OK'],
+        icon: `${dir}/renderer/icons/converter-logo.png`,
+      });
+    },
+  },
+]);
 
 /* MAIN WINDOW CREATION */
 function createWindow() {
@@ -314,6 +343,7 @@ function createWindow() {
   homeWindow.webContents.on('did-finish-load', () => {
     dbLoaderWindow.close();
     homeWindow.webContents.send('show', null);
+    homeWindow.webContents.send('db', connectionName);
   });
 
   //   Event listener for closing
@@ -335,7 +365,7 @@ function createSecWindow(message) {
     alwaysOnTop: true,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -390,7 +420,7 @@ function createChildWindow(message) {
       transparent: true,
       alwaysOnTop: true,
       webPreferences: {
-        // devTools: false,
+        devTools: false,
         nodeIntegration: true,
         enableRemoteModule: true,
       },
@@ -439,7 +469,7 @@ function createLoadingWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -476,7 +506,7 @@ function createEmailWindow(message) {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -516,7 +546,7 @@ function createProgressWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -552,7 +582,7 @@ function createDbLoaderWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -591,7 +621,7 @@ function createUpdateWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },

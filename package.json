@@ -1,6 +1,6 @@
 {
   "name": "P2Sys-Converter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Price-List conversion program",
   "main": "main.js",
   "scripts": {
@@ -50,7 +50,8 @@
     ],
     "extraFiles": [
       "./.env",
-      "./python/**/*"
+      "./python/**/*",
+      "build/release-notes.md"
     ],
     "win": {
       "publisherName": "JDevSoftware",
@@ -69,6 +70,7 @@
     },
     "nsis": {
       "deleteAppDataOnUninstall": true,
+      "perMachine": true,
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "installerSidebar": "./build/installerSidebar.bmp",

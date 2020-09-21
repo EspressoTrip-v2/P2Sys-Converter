@@ -21,13 +21,16 @@
 
     <div class="grab-search">
       <svg viewBox="0 0 1000 1000">
-        <metadata>
-          Svg Vector Icons : http:&#x2F;&#x2F;www.onlinewebfonts.com&#x2F;icon
-        </metadata>
         <path
           d="M814.2 675.4l-43.5-43.6 101.2-101H530.8V872l101-101.2 43.6 43.5L500 990 324.6 814.2l43.6-43.5 101 101.2V530.8H128l101.2 101 -43.5 43.6L10 500l175.8-175.4 43.5 43.6L128 469.2h341.2V128l-101 101.2 -43.6-43.5L500 10l175.4 175.8 -43.6 43.5L530.8 128v341.2H872l-101.2-101 43.5-43.6L990 500 814.2 675.4 814.2 675.4z" />
       </svg>
     </div>
+    <a href="#" id="minimize-search">
+      <svg viewBox="0 0 56.8 34">
+        <path
+          d="M30.7 32.7L55.3 8.1c1.1-1.1 1.1-2.7 0-3.8L53.1 2 30.7 24.3c-1.1 1.1-2.8 1.1-3.9 0L4.5 2 2.2 4.3C1.1 5.4 1.1 7 2.2 8.1l24.6 24.6C27.9 33.7 29.7 33.7 30.7 32.7L30.7 32.7z"
+          fill="#3E3E3E" /></svg>
+    </a>
     <div id="check-background">
       <div id="customer-number-list">
         <span id="customer-list"></span>
@@ -71,12 +74,18 @@
   <div id="hider" style="display: hidden">
     <div id="border">
       <div id="header">
-        <div class="max">
-          <a href="#"><svg viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 3C14.4 3 14 2.6 14 2 14 1.4 14.4 1 15 1H22C22.6 1 23 1.4 23 2V9C23 9.6 22.6 10 22 10 21.4 10 21 9.6 21 9V4.4L13.7 11.7C13.3 12.1 12.7 12.1 12.3 11.7 11.9 11.3 11.9 10.7 12.3 10.3L19.6 3H15ZM4 6C3.4 6 3 6.4 3 7V20C3 20.6 3.4 21 4 21H17C17.6 21 18 20.6 18 20V13C18 12.4 18.4 12 19 12 19.6 12 20 12.4 20 13V20C20 21.7 18.7 23 17 23H4C2.3 23 1 21.7 1 20V7C1 5.3 2.3 4 4 4H11C11.6 4 12 4.4 12 5 12 5.6 11.6 6 11 6H4Z"
-                fill="#293644" /></svg></a>
-        </div>
+        <a href="#" id="minimize-table">
+          <svg viewBox="0 0 56.8 34">
+            <path
+              d="M30.7 32.7L55.3 8.1c1.1-1.1 1.1-2.7 0-3.8L53.1 2 30.7 24.3c-1.1 1.1-2.8 1.1-3.9 0L4.5 2 2.2 4.3C1.1 5.4 1.1 7 2.2 8.1l24.6 24.6C27.9 33.7 29.7 33.7 30.7 32.7L30.7 32.7z"
+              fill="#3E3E3E" /></svg>
+        </a>
+
+        <a href="#" class="max"><svg viewBox="0 0 24 24" fill="none">
+            <path
+              d="M15 3C14.4 3 14 2.6 14 2 14 1.4 14.4 1 15 1H22C22.6 1 23 1.4 23 2V9C23 9.6 22.6 10 22 10 21.4 10 21 9.6 21 9V4.4L13.7 11.7C13.3 12.1 12.7 12.1 12.3 11.7 11.9 11.3 11.9 10.7 12.3 10.3L19.6 3H15ZM4 6C3.4 6 3 6.4 3 7V20C3 20.6 3.4 21 4 21H17C17.6 21 18 20.6 18 20V13C18 12.4 18.4 12 19 12 19.6 12 20 12.4 20 13V20C20 21.7 18.7 23 17 23H4C2.3 23 1 21.7 1 20V7C1 5.3 2.3 4 4 4H11C11.6 4 12 4.4 12 5 12 5.6 11.6 6 11 6H4Z"
+              fill="#293644" /></svg></a>
+
         <div class="grab">
           <svg viewBox="0 0 1000 1000">
             <metadata>
@@ -169,10 +178,19 @@
       </main>
       <div id="footer">
         <button href="#" id="back-to-main-btn" class="btn back-to-main-btn">BACK</button>
-        <button href="#" id="pause-btn" title="Database status" class="btn pause-btn">
+        <button href="#" id="pause-btn" class="btn pause-btn">
           PAUSE
         </button>
         <button href="#" id="create-btn" class="create-btn">CREATE</button>
+        <button id="calculate">
+          <svg viewBox="0 0 1000 1000" id="calculate-logo" fill="#fff">
+
+            <path
+              d="M867.5 278c0 16.9-13.6 30.6-30.6 30.6H163.2c-17.1 0-30.8-13.7-30.8-30.6l0-122.6c0-16.9 13.6-30.6 30.7-30.6h673.8c17 0 30.6 13.7 30.6 30.6L867.5 278 867.5 278zM829.4 523.1c0 8.5-7.1 15.2-15.3 15.2H599.5c-8.3 0-15.3-6.7-15.3-15.2v-30.6c0-8.4 7-15.4 15.3-15.4h214.7c8.2 0 15.3 6.9 15.3 15.4V523.1L829.4 523.1zM790.9 895.4c-20.7 0-38.3-17.1-38.3-38.3 0-21.1 17.5-38.3 38.3-38.3 21.2 0 38.6 17.2 38.6 38.3C829.4 878.3 812.1 895.4 790.9 895.4zM631 890.9l-21.9-21.8c-5.5-5.8-5.5-15.4 0-21.5L760.9 696c6-5.9 15.9-5.9 21.6 0l21.8 21.6c5.9 6 5.9 15.6 0 21.7L652.6 890.9C646.6 896.9 636.9 896.9 631 890.9L631 890.9zM584.3 729.7c0-21 17-38.3 38.3-38.3 21.2 0 38.1 17.2 38.1 38.3 0 21.2-17 38.3-38.1 38.3C601.2 768 584.3 750.9 584.3 729.7zM416 523.1c0 8.5-7.1 15.2-15.6 15.2h-76.5v76.6c0 8.4-6.9 15.4-15.3 15.4h-30.7c-8.6 0-15.4-6.9-15.4-15.4v-76.6h-76.4c-8.5 0-15.4-6.7-15.4-15.2v-30.6c0-8.4 6.9-15.4 15.4-15.4h76.4v-76.8c0-8.3 6.8-15.2 15.4-15.2h30.7c8.4 0 15.3 6.9 15.3 15.2v76.8h76.5c8.5 0 15.6 6.9 15.6 15.4V523.1zM390.6 847.6c6 6.1 6 15.7 0 21.5L369 890.9c-6 6-15.6 6-21.6 0l-54.1-54.1 -54.2 54.1c-6 6-15.6 6-21.5 0l-21.9-21.8c-5.9-5.8-5.9-15.4 0-21.5l54.2-54.2 -54.2-54.2c-5.9-6-5.9-15.6 0-21.7l21.9-21.6c5.9-5.9 15.5-5.9 21.5 0l54.2 54.3 54.2-54.3c6-5.9 15.6-5.9 21.6 0l21.6 21.6c6 6 6 15.6 0 21.7l-54.1 54.2L390.6 847.6 390.6 847.6zM829.4 9.9H170.8C81.9 9.9 10 82.1 10 170.8v658.6c0 88.9 71.9 160.6 160.8 160.6h658.7c88.5 0 160.6-71.8 160.6-160.6V170.8C990 82.1 918 9.9 829.4 9.9L829.4 9.9z" />
+          </svg>
+
+
+        </button>
         <div id="footer-logo">
           <img src="../icons/loader.png" id="p2sys-logo" />
         </div>
@@ -180,7 +198,72 @@
     </div>
   </div>
 
-  <!-- FADE FOR PROGRESS DOCK -->
+  <!-- PERCENTAGE ADJUST -->
+  <div id="percentage-adjust">
+    <div id="percentage-container">
+      <span class="percentage-label">38 X 38</span>
+      <span class="value" id="l3838">0%</span>
+      <input class="range" type="range" id="3838" min="-15" max="15" step="1" value="0">
+
+      <span class="percentage-label">38 X 50</span>
+      <span class="value" id="l3850">0%</span>
+      <input class="range" type="range" id="3850" min="-15" max="15" step="1" value="0">
+
+      <span class="percentage-label">38 X 76</span>
+      <span class="value" id="l3876">0%</span>
+      <input class="range" type="range" id="3876" min="-15" max="15" step="1" value="0">
+
+      <span class="percentage-label">38 X 114</span>
+      <span class="value" id="l38114">0%</span>
+      <input class="range" type="range" id="38114" min="-15" max="15" step="1" value="0">
+
+      <span class="percentage-label">38 X 152</span>
+      <span class="value" id="l38152">0%</span>
+      <input class="range" type="range" id="38152" min="-15" max="15" step="1" value="0">
+
+      <span class="percentage-label">38 X 228</span>
+      <span class="value" id="l38228">0%</span>
+      <input class="range" type="range" id="38228" min="-15" max="15" step="1" value="0">
+
+      <span class="percentage-label">50 X 76</span>
+      <span class="value" id="l5076">0%</span>
+      <input class="range" type="range" id="5076" min="-15" max="15" step="1" value="0">
+
+      <span class="percentage-label">50 X 152</span>
+      <span class="value" id="l50152">0%</span>
+      <input class="range" type="range" id="50152" min="-15" max="15" step="1" value="0">
+
+      <span class="percentage-label">50 X 228</span>
+      <span class="value" id="l50228">0%</span>
+      <input class="range" type="range" id="50228" min="-15" max="15" step="1" value="0">
+
+      <span class="percentage-label">76 X 228</span>
+      <span class="value" id="l76228">0%</span>
+      <input class="range" type="range" id="76228" min="-15" max="15" step="1" value="0">
+
+
+    </div>
+    <div id="all-container">
+      <span class="percentage-label">All</span>
+      <span class="value" id="Lall">0%</span>
+      <input class="range" type="range" id="all" min="-15" max="15" step="1" value="0">
+    </div>
+    <button class="btn" id="applyBtn">
+      <svg id="apply-accept-logo" viewBox="0 0 80.6 61.2" fill="#fff">
+        <path
+          d="M29.7 61.2c-1.2 0-2.4-0.5-3.3-1.4L1.4 34.8c-1.8-1.8-1.8-4.8 0-6.6 1.8-1.8 4.8-1.8 6.6 0l21.5 21.5L72.4 1.6c1.7-1.9 4.7-2.1 6.6-0.4 1.9 1.7 2.1 4.7 0.4 6.6L33.1 59.6c-0.9 1-2.1 1.5-3.4 1.6C29.7 61.2 29.7 61.2 29.7 61.2z" />
+      </svg>
+    </button>
+    <button class="btn" id="cancelBtn">
+
+      <svg id="apply-cancel-logo" width="15" height="15" viewBox="0 0 15 15" fill="#fff">
+        <path
+          d="M2.6 1.3L7.5 6.1l4.8-4.8C12.5 1.1 12.7 1 13 1c0.6 0 1 0.4 1 1 0 0.2-0.1 0.5-0.3 0.7L8.8 7.5l4.9 4.9c0.2 0.2 0.3 0.4 0.3 0.6 0 0.6-0.4 1-1 1 -0.3 0-0.5-0.1-0.7-0.3L7.5 8.9l-4.8 4.9C2.5 13.9 2.2 14 2 14c-0.6 0-1-0.4-1-1 0-0.2 0.1-0.5 0.3-0.7L6.2 7.5 1.3 2.6C1.1 2.4 1 2.2 1 2c0-0.6 0.4-1 1-1C2.2 1 2.5 1.1 2.6 1.3z" />
+      </svg>
+    </button>
+
+  </div>
+
   </div>
 </body>
 
