@@ -108,17 +108,15 @@ let dateString = `${mainDate.getMonth() + 1}/${mainDate.getFullYear()}`;
 /* //////// */
 
 /* LOGFILE CREATION FUNCTION */
-function logfileFunc(database) {
+function logfileFunc(error) {
   const fileDir = `${appData}/error-log.txt`;
   /* CHECK IF IT EXISTS */
   if (fs.existsSync(fileDir)) {
-    fs.appendFileSync(
-      fileDir,
-      `${new Date()}: Writefile Error ->  In local Database ${database}\n`,
-      (err) => console.log(err)
+    fs.appendFileSync(fileDir, `${new Date()}: Object.js error -> ${error}\n`, (err) =>
+      console.log(err)
     );
   } else {
-    fs.writeFileSync(fileDir, `${new Date()}: Updated customer ->  ${database}\n`, (err) =>
+    fs.writeFileSync(fileDir, `${new Date()}:  Object.js error -> ${error}\n`, (err) =>
       console.log(err)
     );
   }
@@ -150,19 +148,19 @@ exports.writeLocalDatabase = (filePath, writeFileObject) => {
     if (!dateKeys.includes(dateString) && dateKeys.length < 6) {
       backUpObject[dateString] = writeFileObject;
       fs.writeFile(`${backUpDir}/databaseBackup.json`, JSON.stringify(backUpObject), (err) => {
-        console.log(err);
+        logfileFunc(err);
       });
     } else if (!dateKeys.includes(dateString) && dateKeys.length === 6) {
       delete backUpObject[dateKeys[0]];
       backUpObject[dateString] = writeFileObject;
       fs.writeFile(`${backUpDir}/databaseBackup.json`, JSON.stringify(backUpObject), (err) => {
-        console.log(err);
+        logfileFunc(err);
       });
     }
   } else {
     let newObject = JSON.stringify({ [dateString]: writeFileObject });
     fs.writeFile(`${backUpDir}/databaseBackup.json`, newObject, (err) => {
-      console.log(err);
+      logfileFunc(err);
     });
   }
 };

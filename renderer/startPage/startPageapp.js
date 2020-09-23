@@ -129,6 +129,58 @@ let checkCustomer = document.getElementById('check-customer'),
 /*FUNCTIONS*/
 ////////////
 
+/* ADD PADDING TO SHORT CUSTOMER NUMBERS */
+function paddingAddPricelistNum(value) {
+  let newValue;
+  if (value.length < 6) {
+    newValue = value.padEnd(6, ' ');
+    return newValue;
+  } else if (value.length === 7) {
+    newValue = value.slice(0, 6);
+    return newValue;
+  } else {
+    return value;
+  }
+}
+
+/* CHECK IF CUSTOMER EXISTS */
+function checkExistingCustomer() {
+  /* CUSTOMER NUMBER KEYUP EVENTS FOR COPIED PRICELIST */
+  customerNumberValue.addEventListener('keyup', (e) => {
+    if (customerNumberValue.value.length < 6) {
+      customerNumberSubmit.click();
+    }
+    // USE REGEX TO REMOVE ANY UNWANTED CHAR
+    let pattern = /\w+|\s+/g;
+    if (customerNumberValue.value.length > 0) {
+      let match = customerNumberValue.value.match(pattern).join('');
+      pricelistNumber = match.toUpperCase().replace(' ', '');
+
+      /* REGEX TO FIX SYNTAX OF CUSTOMER NUMBER TO PRICELISTNUMBER */
+      pricelistNumber = paddingAddPricelistNum(pricelistNumber);
+
+      /* ENTER THE PRICELIST NUMBER THAT HAS BEEN GENERATED */
+      customerPriceList.value = pricelistNumber.toUpperCase();
+
+      /* CHECK TO SEE IF CUSTOMER NUMBER ALREADY IN USE */
+      if (Object.keys(customerPrices).includes(customerNumberValue.value.toUpperCase())) {
+        remote.dialog.showMessageBoxSync(secWindow, {
+          type: 'warning',
+          icon: `${dir}/renderer/icons/error.png`,
+          buttons: ['OK'],
+          message: 'CUSTOMER NUMBER NOT AVAILABLE:',
+          detail: 'This CUSTOMER NUMBER is already in use. Please try a different number',
+        });
+
+        customerNumberValue.value = null;
+      }
+    }
+    if (customerNumberValue.value.length === 0) {
+      customerPriceList.value = null;
+    }
+  });
+}
+
 /* CCA AUTO/MAN FUNCTION CONTROL FOR KEYUP IN CELLS */
 // THIS FUNCTION IS CREATED SO THAT THE EVENT CAN BE REMOVED ON MANUAL MODE
 function ccaAutoMan() {
@@ -297,42 +349,6 @@ function tablePageCreate(type) {
   } else {
     customerNumberValue.disabled = false;
     customerName.innerText = null;
-
-    /* CUSTOMER NUMBER KEYUP EVENTS FOR COPIED PRICELIST */
-    customerNumberValue.addEventListener('keyup', (e) => {
-      if (customerNumberValue.value.length < 6) {
-        customerNumberSubmit.click();
-      }
-      // USE REGEX TO REMOVE ANY UNWANTED CHAR
-      let pattern = /\w+|\s+/g;
-      if (customerNumberValue.value.length > 0) {
-        let match = customerNumberValue.value.match(pattern).join('');
-        pricelistNumber = match.toUpperCase().replace(' ', '');
-        if (pricelistNumber.length < 6) {
-          pricelistNumber = pricelistNumber.padEnd(6, ' ');
-        } else if (pricelistNumber.length === 7) {
-          pricelistNumber = pricelistNumber.slice(0, 6);
-        }
-        /* ENTER THE PRICELIST NUMBER THAT HAS BEEN GENERATED */
-        customerPriceList.value = pricelistNumber.toUpperCase();
-
-        /* CHECK TO SEE IF CUSTOMER NUMBER ALREADY IN USE */
-        if (Object.keys(customerPrices).includes(customerNumberValue.value.toUpperCase())) {
-          remote.dialog.showMessageBoxSync(secWindow, {
-            type: 'warning',
-            icon: `${dir}/renderer/icons/error.png`,
-            buttons: ['OK'],
-            message: 'CUSTOMER NUMBER NOT AVAILABLE:',
-            detail: 'This CUSTOMER NUMBER is already in use. Please try a different number',
-          });
-
-          customerNumberValue.value = null;
-        }
-      }
-      if (customerNumberValue.value.length === 0) {
-        customerPriceList.value = null;
-      }
-    });
   }
 
   ccaPrice.value = customerPrices[searchValue]['CCA'];
@@ -427,39 +443,33 @@ createBtn.addEventListener('click', (e) => {
   /* CHECK THE LENGTHS OF THOSE ARRAY AND HIGHLIGHT THE MISSING INPUTS */
   if (treatedMissingBool.length > 0 || untreatedMissingBool.length > 0) {
     treatedMissingBool.forEach((el) => {
-      el.style.backgroundColor = '#ffe558';
-      el.style.border = '1px solid #ffe558';
+      el.style.backgroundColor = '#ffa60079';
+      el.style.border = '1px solid #ffa500';
       el.style.color = 'black';
       el.placeholder = '';
     });
+
     untreatedMissingBool.forEach((el) => {
-      el.style.backgroundColor = '#ffe558';
-      el.style.border = '1px solid #ffe558';
+      el.style.backgroundColor = '#ffa60079';
+      el.style.border = '1px solid #ffa500';
       el.style.color = 'black';
       el.placeholder = '';
     });
     /* CREATE MESSAGE POPUP */
-    remote.dialog.showMessageBox(secWindow, {
-      type: 'warning',
-      icon: `${dir}/renderer/icons/info.png`,
-      buttons: ['OK'],
-      message: 'MISSING VALUES:',
-      detail: 'Please complete the highlighted areas.',
-    });
-    /* CHECK IF ALL TOP REQUIRED FIELDS HAVE BEEN ENTERED */
-  } else if (
-    customerName.innerText.length === 0 ||
-    customerNumberValue.value.length < 6 ||
-    ccaPrice.value.length === 0
-  ) {
     remote.dialog.showMessageBoxSync(secWindow, {
       type: 'warning',
       icon: `${dir}/renderer/icons/error.png`,
       buttons: ['OK'],
-      message: 'DETAILS REQUIRED:',
-      detail:
-        'CUSTOMER NAME, CUSTOMER NUMBER and CCA PRICE are required fields. Please enter details before creating',
+      message: 'MISSING VALUES:',
+      detail: 'Please complete the highlighted fields.',
     });
+    /* CHECK IF ALL TOP REQUIRED FIELDS HAVE BEEN ENTERED */
+  }
+  if (
+    customerName.innerText.length === 0 ||
+    customerNumberValue.value.length < 6 ||
+    ccaPrice.value.length === 0
+  ) {
     /* HIGHLIGHT THE FIELDS THAT ARE MISSING */
     if (customerName.innerText.length === 0) {
       customerName.style.fontWeight = 'bolder';
@@ -729,7 +739,6 @@ function addListListeners() {
       // SET THE CLICKED CLASS ON THE SELECTED ELEMENT
       el.setAttribute('class', 'cusnum-clicked');
       customerSearch.value = el.textContent;
-      customerSearch.dispatchEvent(new Event('keyup'));
 
       // FIRST CHECK TO SEE IF THERE IS A LOCALLY STORED VERSION
       // PRICELIST OF THE SELECTED CUSTOMER AND SHOW THE RESUME BUTTON
@@ -781,11 +790,9 @@ customerSearch.addEventListener('keyup', (e) => {
   if (customerSearch.value) {
     let match = customerSearch.value.match(pattern).join('');
     pricelistNumber = match.toUpperCase().replace(' ', '');
-    if (pricelistNumber.length < 6) {
-      pricelistNumber = pricelistNumber.padEnd(6, ' ');
-    } else if (pricelistNumber.length === 7) {
-      pricelistNumber = pricelistNumber.slice(0, 6);
-    }
+
+    /* REGEX TO FIX SYNTAX OF CUSTOMER NUMBER TO PRICELISTNUMBER */
+    pricelistNumber = paddingAddPricelistNum(pricelistNumber);
   }
 
   // REHIDE THE UPDATE BUTTON AND RESUME IF SEARCH CHANGES
@@ -831,27 +838,16 @@ customerSearch.addEventListener('keyup', (e) => {
           // AND THE SEARCH VALUE ISNT IN THE CURRENT CUSTOMER PRICELISTS
           window.getComputedStyle(checkContinueBtn).display === 'none' &&
           customerSearch.value.length >= 6 &&
-          !customerNumber.includes(customerSearch.value)
+          !customerNumber.includes(customerSearch.value.toUpperCase())
         ) {
-          if (localStorage.getItem(customerSearch.value.toUpperCase())) {
-            // DISPLAY CONTINUE BUTTON
-            checkContinueBtn.style.display = 'none';
-            disabledBtn.style.display = 'none';
-            checkUpdateBtn.style.display = 'none';
-            checkResumeEditingBtn.style.display = 'flex';
-            customerNumberList.style.backgroundImage = `url('${dir}/renderer/icons/inprogress.png')`;
-            copyContainer.style.opacity = '0';
-            checkCopyBtn.style.display = 'none';
-          } else {
-            // DISPLAY CONTINUE BUTTON
-            jsonFile = dataObjects['template-pricelist'];
-            checkContinueBtn.style.display = 'flex';
-            disabledBtn.style.display = 'none';
-            checkUpdateBtn.style.display = 'none';
-            checkResumeEditingBtn.style.display = 'none';
-            copyContainer.style.opacity = '0';
-            checkCopyBtn.style.display = 'none';
-          }
+          // DISPLAY CONTINUE BUTTON
+          jsonFile = dataObjects['template-pricelist'];
+          checkContinueBtn.style.display = 'flex';
+          disabledBtn.style.display = 'none';
+          checkUpdateBtn.style.display = 'none';
+          checkResumeEditingBtn.style.display = 'none';
+          copyContainer.style.opacity = '0';
+          checkCopyBtn.style.display = 'none';
         } else if (
           // DISABLE THE CONTINUE BUTTON IF THE SEARCH VALUE IS LESS 6
           window.getComputedStyle(checkContinueBtn).display === 'flex' &&
@@ -864,7 +860,10 @@ customerSearch.addEventListener('keyup', (e) => {
           checkResumeEditingBtn.style.display = 'none';
           copyContainer.style.opacity = '0';
           checkCopyBtn.style.display = 'none';
-        } else if (!localStorage.getItem(customerSearch.value.toUpperCase())) {
+        } else if (
+          !localStorage.getItem(customerSearch.value.toUpperCase()) &&
+          !customerNumber.includes(customerSearch.value.toUpperCase())
+        ) {
           // DISPLAY TICK IF THE SEARCH  VALUE IS CORRECT PATTERN AND LENGTH 6
           customerNumberList.style.backgroundImage = `url('${dir}/renderer/icons/tick.png')`;
           searchValue = customerSearch.value.toUpperCase();
@@ -1050,6 +1049,9 @@ copyCheckbox.addEventListener('change', (e) => {
 checkCopyBtn.addEventListener('click', (e) => {
   soundClick.play();
   tablePageCreate(false);
+  progressFade.style.visibility = 'visible';
+  progressFade.style.backdropFilter = 'blur(3px)';
+  ipcRenderer.send('open-copySelection', 'open');
 });
 
 /////////////////////////////
@@ -1135,7 +1137,10 @@ let value3838 = document.getElementById('l3838'),
 
 let percentageContainer = document.getElementById('percentage-adjust'),
   applyCancelBtn = document.getElementById('cancelBtn'),
-  applyConfirmBtn = document.getElementById('applyBtn');
+  applyConfirmBtn = document.getElementById('applyBtn'),
+  roundAllBox = document.getElementById('round-all-tick'),
+  roundAllCheckMark = document.getElementById('round-all-tick-img'),
+  roundAllCheckbox = document.getElementById('round-all-select');
 
 /* SLIDER EVENT LISTENERS */
 slider3838.addEventListener('input', (e) => {
@@ -1243,13 +1248,26 @@ sliderAll.addEventListener('input', (e) => {
   slider76228.value = e.target.value;
 });
 
+/* ROUNDALL CHECKBOX EVENTS */
+roundAllCheckbox.addEventListener('change', (e) => {
+  soundClick.play();
+  if (e.target.checked) {
+    roundAllBox.style.border = '2px solid var(--main)';
+    roundAllCheckMark.style.animation = 'check 0.2s linear forwards';
+  } else {
+    soundClick.play();
+    roundAllBox.style.border = '2px solid var(--sec-blue)';
+    roundAllCheckMark.style.animation = 'none';
+  }
+});
+
 /* CALCULATE BUTTON */
 calculateBtn.addEventListener('click', (e) => {
   autoCaaBtn.click();
 
   setTimeout(() => {
     progressFade.style.visibility = 'visible';
-    progressFade.style.backdropFilter = 'blur(2px)';
+    progressFade.style.backdropFilter = 'blur(3px)';
     percentageContainer.style.transform = 'scale(1)';
   }, 300);
 });
@@ -1257,7 +1275,10 @@ calculateBtn.addEventListener('click', (e) => {
 /* FUNCTION FOR PERCENTAGE CALC */
 function calculatePercent(untreated) {
   /* SET VALUES THAT NEED TO BE CYCLED */
-  let valueA = parseInt(v3838);
+  let valueA = parseInt(v3838),
+    tempNum,
+    tempNumEnd,
+    endValue;
 
   /* UNTREATED CALCULATIONS */
   untreated.forEach((el) => {
@@ -1284,8 +1305,37 @@ function calculatePercent(untreated) {
 
     /* CALCULATE PERCENTAGE */
     totalA = Math.round((valueA / 100) * inputValA);
-    el.value = totalA + inputValA;
-    el.dispatchEvent(new Event('keyup'));
+
+    /* CHECK IF ROUND ALL BOX IS CHECKED */
+    if (roundAllCheckbox.checked) {
+      /* ROUND TO NEAREST 10 */
+      tempNum = (totalA + inputValA).toString();
+      tempNumEnd = parseInt(tempNum[tempNum.length - 1]);
+      /* CONVERT TO STRING */
+      if (tempNumEnd >= 5) {
+        endValue = totalA + inputValA - tempNumEnd + 10;
+      } else {
+        endValue = totalA + inputValA - tempNumEnd;
+      }
+
+      el.value = endValue;
+      el.dispatchEvent(new Event('keyup'));
+    } else {
+      if (totalA !== 0) {
+        /* ROUND TO NEAREST 10 */
+        tempNum = (totalA + inputValA).toString();
+        tempNumEnd = parseInt(tempNum[tempNum.length - 1]);
+        /* CONVERT TO STRING */
+        if (tempNumEnd >= 5) {
+          endValue = totalA + inputValA - tempNumEnd + 10;
+        } else {
+          endValue = totalA + inputValA - tempNumEnd;
+        }
+
+        el.value = endValue;
+        el.dispatchEvent(new Event('keyup'));
+      }
+    }
   });
 }
 
@@ -1335,6 +1385,13 @@ function resetSlider() {
   slider76228.value = 0;
 }
 
+/* RESET ROUNDALL CHECKBOX */
+function resetRoundAllCheckbox() {
+  roundAllBox.style.border = '2px solid var(--sec-blue)';
+  roundAllCheckMark.style.animation = 'none';
+  roundAllCheckbox.checked = false;
+}
+
 /* APPLY CONFIRM BUTTON */
 applyConfirmBtn.addEventListener('click', (e) => {
   let untreatedColumnClass = Array.from(
@@ -1348,7 +1405,9 @@ applyConfirmBtn.addEventListener('click', (e) => {
   progressFade.style.backdropFilter = 'none';
   percentageContainer.style.transform = 'scale(0)';
   manCaaBtn.click();
+  /* RESET SLIDERS AND ROUND ALL CHECK BOX */
   resetSlider();
+  resetRoundAllCheckbox();
 });
 
 /* APPLY CANCEL BUTTON */
@@ -1358,12 +1417,27 @@ applyCancelBtn.addEventListener('click', (e) => {
     progressFade.style.visibility = 'hidden';
     progressFade.style.backdropFilter = 'none';
     percentageContainer.style.transform = 'scale(0)';
+    /* RESET SLIDERS AND ROUND ALL CHECK BOX */
     resetSlider();
+    resetRoundAllCheckbox();
   }, 300);
 });
 //////////////////
 /*IPC LISTENERS*/
 ////////////////
+
+/* REMOVE FADE */
+ipcRenderer.on('remove-fade', (e, message) => {
+  if (message) {
+    progressFade.style.visibility = 'hidden';
+    progressFade.style.backdropFilter = 'none';
+    /* ACTIVATE EVENTLISTENER FOR CUSTOMER NUMBER ENTRY */
+    checkExistingCustomer();
+  } else {
+    progressFade.style.visibility = 'hidden';
+    progressFade.style.backdropFilter = 'none';
+  }
+});
 
 /* RECEIVE THE DATABASE OBJECTS THAT WERE DOWNLOADED */
 ipcRenderer.once('database-object', (e, message) => {
@@ -1379,37 +1453,37 @@ ipcRenderer.once('database-object', (e, message) => {
 ipcRenderer.on('dock-sec', (event, message) => {
   let child = secWindow.getChildWindows()[0];
 
-  if (customerSearch.value !== message) {
-    /* RESET CHECKBOX */
-    copyCheckbox.checked = false;
-    tickBox.style.border = '2px solid var(--sec-blue)';
-    tickCheckMark.style.animation = 'none';
+  /* RESET CHECKBOX */
+  copyCheckbox.checked = false;
+  tickBox.style.border = '2px solid var(--sec-blue)';
+  tickCheckMark.style.animation = 'none';
 
-    /* FILL SEARCH BOX WITH CUSTOMER NUMBER */
-    customerSearch.value = message;
-    /* SET CUSTOMER NUMBER GLOBAL VARIABLE */
-    searchValue = message;
+  /* FILL SEARCH BOX WITH CUSTOMER NUMBER */
+  customerSearch.value = message;
+  /* SET CUSTOMER NUMBER GLOBAL VARIABLE */
+  searchValue = message;
 
-    /* GET THE PRICELIST FROMT HE DATABASE */
-    jsonFile = customerPrices[message];
+  /* GET THE PRICELIST FROM HE DATABASE */
+  jsonFile = customerPrices[message];
 
-    child.blur();
-    secWindow.focus();
-    customerSearch.focus();
-    if (Object.keys(customerPrices).includes(message)) {
-      /* SEND THE NUMBER TO THE CUSTOMER SEARCH MAKE THE ITEM CLICKED AND SHOW UPDATE BUTTON */
-      let item = document.getElementById(message);
-      item.setAttribute('class', 'cusnum-clicked');
-      checkUpdateBtn.style.display = 'flex';
-      disabledBtn.style.display = 'none';
-      checkContinueBtn.style.display = 'none';
-      copyContainer.style.opacity = '1';
-
-      customerSearch.dispatchEvent(new Event('keyup'));
-    } else {
-      customerSearch.dispatchEvent(new Event('keyup'));
-      customerSearch.dispatchEvent(new Event('keyup'));
-    }
+  child.blur();
+  secWindow.focus();
+  customerSearch.focus();
+  if (Object.keys(customerPrices).includes(message)) {
+    /* SEND THE NUMBER TO THE CUSTOMER SEARCH MAKE THE ITEM CLICKED AND SHOW UPDATE BUTTON */
+    let item = document.getElementById(message);
+    item.setAttribute('class', 'cusnum-clicked');
+    checkUpdateBtn.style.display = 'flex';
+    disabledBtn.style.display = 'none';
+    checkContinueBtn.style.display = 'none';
+    copyContainer.style.opacity = '1';
+    /* KEYUP EVENT TO FORCE SORT ALGORITHM  */
+    customerSearch.dispatchEvent(new Event('keyup'));
+    /* DISPLAY THE ITEM AS CLICKED */
+    item.style.display = 'block';
+  } else {
+    customerSearch.dispatchEvent(new Event('keyup'));
+    customerSearch.dispatchEvent(new Event('keyup'));
   }
 });
 
@@ -1460,14 +1534,14 @@ ipcRenderer.on('progress-end', (event, message) => {
     customerPricelistNumber,
   };
 
-  /* UPDATE ONLINE DB */
+  /* UPDATE DB */
   ipcRenderer.send('update-database', databaseObj);
 
   /* SEND MESSAGE WITH FILE PATHS TO MAIN TO OPEN EMAIL CHILDWINDOW */
   /* ADD CUSTOMER NUMBER FOE EASIER FILENAME DESCRIPTION */
   let newMessage = {
     name: customerName.innerText,
-    number: pricelistNumber,
+    number: cusNum,
     filePaths: message,
   };
 
@@ -1482,7 +1556,7 @@ ipcRenderer.on('progress-end', (event, message) => {
 });
 
 /* MESSAGE TO CLICK BACK BUTTON IF THERE IS AN ERROR IN PYTHON CONVERSION */
-ipcRenderer.on('error', (e, message) => {
+ipcRenderer.on('reset-form', (e, message) => {
   resetForm();
 });
 
@@ -1494,15 +1568,48 @@ window.addEventListener('offline', (e) => {
     requireInteraction: true,
   });
   createBtn.setAttribute('class', 'create-btn-disabled');
+  createBtn.disabled = true;
 });
+
+/* CHECK IF THERE IS AN INTERNET CONNECTION  */
+setTimeout(() => {
+  if (!window.navigator.onLine) {
+    createBtn.setAttribute('class', 'create-btn-disabled');
+    createBtn.disabled = true;
+  }
+}, 2000);
 
 /* MESSAGE FROM DB ON LOSS OF CONNECTION */
 ipcRenderer.on('reconnected', (e, message) => {
   createBtn.setAttribute('class', 'create-btn');
+  createBtn.disabled = false;
 });
 
 /* RETURN MESSAGE AFTER DATABASE UPDATE TO CREATE EMAIL BOX*/
 ipcRenderer.on('database-updated', (e, message) => {
   // REMOVE ITEM FROM LOCAL STORAGE
   localStorage.removeItem(searchValue);
+});
+
+/* ENTER NAME AND NUMBER FROM CUSTOMER DATABASE DURING COPY  */
+ipcRenderer.on('form-contents', (e, message) => {
+  let cusNum;
+  customerName.innerText = message.customerName;
+  customerName.contentEditable = false;
+  /* SAFETY TO MAKE SURE THERE ARE NO VALUES LESS THAN 6 DUE TO DATABASE ISSUES */
+  if (message.customerNumber.length < 6) {
+    cusNum = message.customerNumber.padEnd(6, ' ');
+    customerNumberValue.value = cusNum;
+    customerNumberValue.disabled = true;
+    customerNumberName[customerName] = cusNum;
+    customerPriceList.value = customerPricelistNumber[message.customerNumber];
+    pricelistNumber = cusNum;
+  } else {
+    /* STANDARD ROUTE TO FILL ENTRIES */
+    customerNumberValue.value = message.customerNumber;
+    customerNumberValue.dispatchEvent(new Event('keyup'));
+    customerNumberValue.disabled = true;
+    customerPriceList.value = customerPricelistNumber[message.customerNumber];
+    pricelistNumber = customerPricelistNumber[message.customerNumber];
+  }
 });

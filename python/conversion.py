@@ -299,20 +299,35 @@ df.reset_index(inplace=True, drop=True)
 
 # REPLACE THE SLASHES FOR CORRECT FORMAT
 system_os = platform.platform(terse=True).split('-')[0]
+
+# STRIP WHITESPACE FOR FILENAME
+strip_number = customer_number.strip()
 if system_os == 'Windows':
     # CREATE THE FOLDER TO STORE ITEMS INSERT #
     ###########################################
     # GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
-    mydocuments_folder = f'{os.environ["HOMEPATH"]}/Documents/P2SYS-CONVERSIONS/{customer_number}/{time}/'
+    mydocuments_folder = f'{os.environ["HOMEPATH"]}/Documents/P2SYS-CONVERSIONS/{strip_number}/{time}/'
     os.makedirs(mydocuments_folder, exist_ok=True)
-    s = '\\'
-    mydocuments_folder = mydocuments_folder.replace('/', s[0])
+
+    # GET THE SERVER FILE PATH FROM ARGV
+    if sys.argv[1:][1] == 'none':
+        server_filepath = 'none'
+    else:
+        server_filepath = f'{sys.argv[1:][1]}/GENERATED_PRICE-LISTS/{strip_number}/{time}/'
+        try:
+            os.makedirs(server_filepath, exist_ok=True)
+        except:
+            pass
+
+    # s = '\\'
+    # mydocuments_folder = mydocuments_folder.replace('/', s[0])
 else:
     # CREATE THE FOLDER TO STORE ITEMS INSERT #
     ###########################################
     # GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
-    mydocuments_folder = f'{os.environ["HOME"]}/Documents/P2SYS-CONVERSIONS/{customer_number}/{time}/'
+    mydocuments_folder = f'{os.environ["HOME"]}/Documents/P2SYS-CONVERSIONS/{strip_number}/{time}/'
     os.makedirs(mydocuments_folder, exist_ok=True)
+    server_filepath = sys.argv[1:][1]
 
 # PASS TO SHEET CREATOR CODE #
 ##############################
@@ -326,11 +341,13 @@ print(90)
 # SEND TO S5
 s5_ordersheet.create_s5_ordersheet(mydocuments_folder,
                                    reform_file['customer_number'],
-                                   reform_file['customer_pricelist'])
+                                   reform_file['customer_pricelist'],
+                                   server_filepath)
 
 system_template.system_template_fn(mydocuments_folder,
                                    reform_file['customer_number'],
-                                   reform_file['customer_pricelist'])
+                                   reform_file['customer_pricelist'],
+                                   server_filepath)
 
 # PASS FILE PATHS FOR EMAIL
 path_arr = list(os.listdir(mydocuments_folder))

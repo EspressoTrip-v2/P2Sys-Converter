@@ -1,16 +1,23 @@
-P2SYS-CONVERTER VERSION 1.0.1
+P2SYS-CONVERTER VERSION 1.0.2
 
-Changelog
+** CHANGELOG **
 
-added:
+Bugs:
 
-- Ability to copy existing price-lists to make new customer entries
-- Minimize buttons to hide windows
-- Price modifier to adjust percentages per product line or all
-- Added coloring to see what values have increased or decreased
-- Smaller minimum window size for better resizing (950 X 700)
-- About version sub-menu in system tray
-- Changed install routine to stop per user selection
-- Improved internet connection notifications.
+- Fixed Create button bug on loss of network connection.
+- Fixed customer number to price-list number REGEX conversions.
+- Fixed selection transfer when searching for customer names.
 
-Version release date: 20-09-20
+Added:
+
+- Correction on short customer numbers, mitigate possible database irregularities.
+- Server side backup for AC Whitcher.
+
+Features:
+
+- Added rounding to percentage calculator, round to nearest 10 integer.
+- Added check box to round all values on percentage selector.
+- Added option to select new customer or existing customer on copy.
+- Added search box for existing customer selection, auto populate on selection.
+
+** Version release date: 23-09-20 **

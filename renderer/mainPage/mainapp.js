@@ -76,11 +76,6 @@ exitbtn.addEventListener('click', (e) => {
   soundClick.play();
 
   ipcRenderer.send('close-main', null);
-
-  // setTimeout(() => {
-  //   homeWindow.close();
-  //   homeWindow = null;
-  // }, 200);
 });
 
 /* ABOUT PAGE EVENTS */

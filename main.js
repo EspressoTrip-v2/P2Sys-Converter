@@ -62,6 +62,7 @@ let homeWindow,
   emailWindow,
   progressWindow,
   dbLoaderWindow,
+  copySelectionWindow,
   customerBackUp,
   customerNumberName,
   customerNameNumber,
@@ -88,6 +89,8 @@ function customerNameNumberFunc(data) {
   Object.entries(data).forEach((el) => {
     newArr[el[1]] = el[0];
   });
+  delete newArr['_id'];
+
   return newArr;
 }
 
@@ -329,7 +332,7 @@ function createWindow() {
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -375,7 +378,7 @@ function createSecWindow(message) {
     alwaysOnTop: true,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -430,7 +433,7 @@ function createChildWindow(message) {
       transparent: true,
       alwaysOnTop: true,
       webPreferences: {
-        devTools: false,
+        // devTools: false,
         nodeIntegration: true,
         enableRemoteModule: true,
       },
@@ -479,7 +482,7 @@ function createLoadingWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -516,7 +519,7 @@ function createEmailWindow(message) {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -533,8 +536,6 @@ function createEmailWindow(message) {
 
   //   Load dev tools
   // emailWindow.webContents.openDevTools();
-
-  // Only show on load completion
 
   //   Event listener for closing
   emailWindow.on('closed', () => {
@@ -556,7 +557,7 @@ function createProgressWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -592,7 +593,7 @@ function createDbLoaderWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -631,7 +632,7 @@ function createUpdateWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -646,6 +647,44 @@ function createUpdateWindow() {
   //   EVENT LISTENER FOR CLOSING
   updateWindow.on('closed', () => {
     updateWindow = null;
+  });
+}
+
+/* COPY SELECTION WINDOW */
+function createCopySelectionWindow() {
+  copySelectionWindow = new BrowserWindow({
+    parent: secWindow,
+    height: 500,
+    width: 350,
+    spellCheck: false,
+    resizable: false,
+    backgroundColor: '#00FFFFFF',
+    autoHideMenuBar: true,
+    alwaysOnTop: true,
+    center: true,
+    frame: false,
+    transparent: true,
+    webPreferences: {
+      // devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+    },
+    icon: iconImage,
+  });
+  //   LOAD HTML PAGE
+  copySelectionWindow.loadFile(`${dir}/renderer/copySelection/copySelection.html`);
+
+  // Only show on load completion
+  copySelectionWindow.webContents.once('did-finish-load', () => {
+    copySelectionWindow.webContents.send('copy-selection', customerNameNumber);
+  });
+
+  //   LOAD DEV TOOLS
+  // copySelectionWindow.webContents.openDevTools();
+
+  //   EVENT LISTENER FOR CLOSING
+  copySelectionWindow.on('closed', () => {
+    copySelectionWindow = null;
   });
 }
 
@@ -675,8 +714,13 @@ app.on('window-all-closed', () => {
 /* IPC LISTENERS */
 //////////////////
 
+/* OPEN COPY SELECTION WINDOW */
+ipcMain.on('open-copySelection', (e, message) => {
+  createCopySelectionWindow();
+});
+
 /* MESSENGER SERVICE BETWEEN RENDERERS */
-ipcMain.on('dock-sec', (event, message) => {
+ipcMain.on('dock-sec', (e, message) => {
   secWindow.webContents.send('dock-sec', message);
 });
 
@@ -728,8 +772,8 @@ ipcMain.on('email-close', (e, message) => {
 });
 
 /* SEND MESSAGE TO CLOSE TABLE WINDOW ON ERROR */
-ipcMain.on('error', (e, message) => {
-  secWindow.webContents.send('error', null);
+ipcMain.on('reset-form', (e, message) => {
+  secWindow.webContents.send('reset-form', null);
 });
 
 /* LOADER CLOSE MESSAGE */
@@ -767,10 +811,28 @@ ipcMain.on('show-home', (e, message) => {
   homeWindow.show();
 });
 
+/* SEND CUSTOMER NAME AND NUMBER TO TABLE */
+ipcMain.on('form-contents', (e, message) => {
+  if (secWindow) {
+    secWindow.webContents.send('form-contents', message);
+  }
+});
+
+/* REMOVE FADE FROM SECWINDOW */
+ipcMain.on('remove-fade', (e, message) => {
+  if (secWindow) {
+    secWindow.webContents.send('remove-fade', message);
+  }
+});
+
 /* UPDATE THE DATABASE */
 ipcMain.on('update-database', async (e, message) => {
+  /* CREATE OBJECTS WITH _id FOR THE ONLINE DB */
+  let dbcustomerPrices = { ...message.customerPrices };
+
   /* UPDATE THE LOCAL VARIABLE DATABASES */
   customerPrices = message.customerPrices;
+  delete customerPrices['_id'];
   customerPricelistNumber = message.customerPricelistNumber;
   customerNumberName = message.customerNumberName;
   customerBackUp = message.customerBackUp;
@@ -778,7 +840,7 @@ ipcMain.on('update-database', async (e, message) => {
 
   await customerPricesModel.replaceOne(
     { _id: 'customerPrices' },
-    customerPrices,
+    dbcustomerPrices,
     (err, res) => {
       if (err) {
         let notification = new Notification({

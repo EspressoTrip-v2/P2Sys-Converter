@@ -87,17 +87,17 @@ function getText(message) {
 
   if (filePaths[0].includes('S5')) {
     /* DISPLAY FILE NAMES */
-    fileNameA = `S5_${customerNumber}.xlsx`;
-    fileNameB = `${customerNumber}_system.xlsx`;
+    fileNameA = `S5_${customerNumber.trim()}.xlsx`;
+    fileNameB = `${customerNumber.trim()}_system.xlsx`;
   } else {
-    fileNameB = `S5_${customerNumber}.xlsx`;
-    fileNameA = `${customerNumber}_system.xlsx`;
+    fileNameB = `S5_${customerNumber.trim()}.xlsx`;
+    fileNameA = `${customerNumber.trim()}_system.xlsx`;
   }
 
   /* CREATE THE TRANSPORT MESSAGE */
   /* TEXT OF MESSAGE */
   let textInitial = process.env.EMAIL_TEXT.replace('{NAME}', customerName),
-    text = textInitial.replace('{NUMBER}', customerNumber);
+    text = textInitial.replace('{NUMBER}', customerNumber.trim());
   /* INSERT THE MESSAGE IN THE TEXT AREA */
   emailMessageArea.value = text;
 
@@ -109,7 +109,7 @@ function getMessage(text) {
   let transportMessage = {
     from: process.env.EMAIL_FROM,
     to: emailRecipients.value,
-    subject: `Emailing ${customerNumber}`,
+    subject: `Emailing ${customerNumber.trim()}`,
     text: emailMessageArea.value,
     attachments: [
       { filename: fileNameA, path: filePaths[0] },

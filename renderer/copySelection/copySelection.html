@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'" />
+    <link rel="stylesheet" href="copySelection.css" />
+    <script defer src="./copySelection.js"></script>
+    <title>COPY SELECTION</title>
+</head>
+
+<body>
+    <audio src="../sounds/click.wav" id="click" style="display: none"></audio>
+
+    <div id="border">
+        <div id="container">
+            <header>
+                <img src="../icons/whitcher-logo.png" />
+            </header>
+            <main>
+                <div id="background-container">
+                    <div id="container-background">
+                        <div id="customer-list-container"></div>
+                    </div>
+                </div>
+            </main>
+            <footer>
+                <div id="customer-search-container">
+                    <div id="search-input">
+                        <img src="../icons/search.png" alt="" />
+                        <input id="customer-search" type="text" placeholder="Search..." spellcheck="false" autofocus />
+                    </div>
+                </div>
+                <button class="btn" id="select" style="display: none">SELECT</button>
+                <button class="btn" id="back">BACK</button>
+                <button class="btn-disabled" id="disabled">DISABLED</button>
+            </footer>
+        </div>
+    </div>
+    <div id="ask-user">
+        <div id="existing-customer-container">
+            <label for="existing-customer-select" id="existing-customer-label">
+                <div id="logo-existing-customer">
+                    <svg viewBox="0 0 240.95 261.27">
+
+                        <g transform="translate(222.44 11.563)" fill="#fff">
+                            <path
+                                d="m-72.662 244.6c-14.288 2.2225-29.739 3.5454-44.741 3.5454-49.768 0-105.04-5.08-105.04-28.84v-16.933c0-21.881 33.47-42.095 69.903-49.107 0 0 11.007-5.8473 8.3344-16.933-11.562-13.97-13.996-28.787-13.996-28.787-1.9844-0.87312-4.8154-2.5664-6.5881-4.8948-4.0746-5.5298-7.8317-17.436-7.0115-25.77 0.84667-8.6254 3.175-5.8738 3.4396-7.276-7.329-18.68-3.8364-41.54 5.5562-58.288 18.785-33.602 59.108-23.707 65.564-11.086 38.576-7.1702 36.883 52.943 31.671 68.95 0 0 3.519 0.68792 2.7252 15.372-0.71438 14.737-13.176 24.527-13.176 24.527-0.39688 4.0217-5.3181 16.351-13.414 27.226-1.5346 3.2279-1.8785 5.8208-1.614 7.9904-7.276 11.642-11.536 25.321-11.536 40.005-0.0529 24.633 11.747 46.434 29.924 60.299z"
+                                stroke-width=".26458" />
+                            <path
+                                d="m15.938 234.74-20.595-20.584c5.6402-8.094 8.9778-17.909 8.9778-28.515 0-27.561-22.34-49.889-49.889-49.889-27.561 0-49.889 22.34-49.889 49.889s22.34 49.889 49.889 49.889c10.606 0 20.421-3.3376 28.515-8.9778l20.584 20.584c3.4306 3.4306 8.9778 3.4306 12.408 0 3.4306-3.4074 3.4306-8.9662 0-12.397zm-61.507-13.455c-19.677 0-35.644-15.955-35.644-35.644 0-19.677 15.955-35.644 35.644-35.644 19.677 0 35.644 15.955 35.644 35.644s-15.955 35.644-35.644 35.644z"
+                                stroke-width=".11629" />
+                        </g>
+                    </svg>
+                </div>
+                <p id="existing-customer-text" title="Select customer from database">SEARCH CUSTOMER</p>
+                <div id="existing-customer-tick"><svg id="existing-customer-tick-img" viewBox="0 0 63 64.5">
+                        <path
+                            d="M57.2 2.6c-1.5 0-3.3 0.2-5.6 0.5 -2.3 0.4-3.9 0.8-4.8 1.3 -1 0.5-2.4 1.8-4.4 3.9 -1.9 2-4.4 5.3-7.4 9.5 -3 4.3-5.6 8.4-7.8 12.4 -2 3.5-4 7.4-6 11.5 -1.4-1.8-2.9-3.2-4.4-4.3 -1.9-1.3-3.8-2-5.5-2 -1.7 0-3.7 0.8-5.7 2.3 -2.1 1.6-3.2 3.4-3.2 5.3 0 1.5 0.9 3.2 2.8 5.2 2.7 3 4.9 5.8 6.5 8.3 1.2 1.8 2 3 2.5 3.6 0.6 0.6 1.3 1.1 2.1 1.4 0.8 0.3 2.2 0.4 4.1 0.4 2.7 0 4.5-0.3 5.6-0.9 1.1-0.6 1.9-1.4 2.5-2.5 0.5-1 1.4-2.9 2.6-5.9 3-7.5 7.1-15.4 12.2-23.4 5.1-8 10-14.2 14.7-18.6 1.2-1 1.9-1.8 2.2-2.3C60.8 7.9 61 7.2 61 6.4c0-1-0.4-1.9-1.1-2.6C59.3 3 58.3 2.6 57.2 2.6z"
+                            fill="#ffb004" /></svg></div>
+            </label>
+            <input type="checkbox" id="existing-customer-select">
+        </div>
+        <div id="new-container">
+            <label id="new-label" for="new-select">
+                <div id="logo-new-customer">
+                    <svg viewBox="0 0 1e3 1e3">
+                        <path
+                            d="m576.1 977.3c-54 8.4-112.4 13.4-169.1 13.4-188.1 0-397-19.2-397-109v-64c0-82.7 126.5-159.1 264.2-185.6 0 0 41.6-22.1 31.5-64-43.7-52.8-52.9-108.8-52.9-108.8-7.5-3.3-18.2-9.7-24.9-18.5-15.4-20.9-29.6-65.9-26.5-97.4 3.2-32.6 12-22.2 13-27.5-27.7-70.6-14.5-157 21-220.3 71-127 223.4-89.6 247.8-41.9 145.8-27.1 139.4 200.1 119.7 260.6 0 0 13.3 2.6 10.3 58.1-2.7 55.7-49.8 92.7-49.8 92.7-1.5 15.2-20.1 61.8-50.7 102.9-5.8 12.2-7.1 22-6.1 30.2-27.5 44-43.6 95.7-43.6 151.2-0.2 93.1 44.4 175.5 113.1 227.9zm413.9-227.7c0 132.8-107.7 240.5-240.5 240.5s-240.5-107.7-240.5-240.5 107.7-240.5 240.5-240.5 240.5 107.6 240.5 240.5zm-107.8-34.1h-99.4v-98.8h-67v98.8h-99.4v68.3h99.4v98.8h67v-98.8h99.4v-68.3z"
+                            fill="#fff" />
+                    </svg>
+                </div>
+                <p id="new-text" title="Create a new customer">NEW CUSTOMER</p>
+                <div id="new-tick"><svg id="new-tick-img" viewBox="0 0 63 64.5">
+                        <path
+                            d="M57.2 2.6c-1.5 0-3.3 0.2-5.6 0.5 -2.3 0.4-3.9 0.8-4.8 1.3 -1 0.5-2.4 1.8-4.4 3.9 -1.9 2-4.4 5.3-7.4 9.5 -3 4.3-5.6 8.4-7.8 12.4 -2 3.5-4 7.4-6 11.5 -1.4-1.8-2.9-3.2-4.4-4.3 -1.9-1.3-3.8-2-5.5-2 -1.7 0-3.7 0.8-5.7 2.3 -2.1 1.6-3.2 3.4-3.2 5.3 0 1.5 0.9 3.2 2.8 5.2 2.7 3 4.9 5.8 6.5 8.3 1.2 1.8 2 3 2.5 3.6 0.6 0.6 1.3 1.1 2.1 1.4 0.8 0.3 2.2 0.4 4.1 0.4 2.7 0 4.5-0.3 5.6-0.9 1.1-0.6 1.9-1.4 2.5-2.5 0.5-1 1.4-2.9 2.6-5.9 3-7.5 7.1-15.4 12.2-23.4 5.1-8 10-14.2 14.7-18.6 1.2-1 1.9-1.8 2.2-2.3C60.8 7.9 61 7.2 61 6.4c0-1-0.4-1.9-1.1-2.6C59.3 3 58.3 2.6 57.2 2.6z"
+                            fill="#ffb004" /></svg></div>
+            </label>
+            <input type="checkbox" id="new-select">
+        </div>
+        <button class="btn" id="select-start">SELECT</button>
+        <button class="btn" id="select-back">CANCEL</button>
+
+
+    </div>
+
+
+
+</body>
+
+</html>

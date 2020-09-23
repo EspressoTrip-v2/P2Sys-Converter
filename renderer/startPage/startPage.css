@@ -1253,7 +1253,7 @@ tr:nth-child(3n + 1) {
 #applyBtn {
   position: absolute;
   bottom: 9px;
-  right: 50px;
+  right: 120px;
   background-color: var(--button-green);
   color: #fff;
   border: 2px solid var(--button-green);
@@ -1304,7 +1304,7 @@ tr:nth-child(3n + 1) {
 #cancelBtn {
   position: absolute;
   bottom: 9px;
-  left: 50px;
+  left: 10px;
   background-color: var(--button-red);
   color: #fff;
   border: 2px solid var(--button-red);
@@ -1362,6 +1362,49 @@ tr:nth-child(3n + 1) {
 
 #calculate-logo:hover {
   fill: dodgerblue;
+}
+
+#round-all-container {
+  position: absolute;
+  bottom: 0px;
+  width: 100px;
+  right: 0px;
+  height: 55px;
+}
+
+#round-all-select {
+  position: absolute;
+  opacity: 0;
+}
+
+#round-all-text {
+  position: absolute;
+  bottom: 18px;
+  margin-right: 5px;
+  font-weight: bold;
+  color: #fff;
+  font-size: 15px;
+}
+
+#round-all-tick {
+  position: absolute;
+  right: 50px;
+  bottom: 10px;
+  width: 18px;
+  height: 18px;
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 2px;
+  border: 2px solid var(--sec-blue);
+}
+#round-all-tick-img {
+  position: absolute;
+  transform: scale(0);
+  width: 22px;
+  height: auto;
+  bottom: 1px;
+  left: 0;
+  animation: none;
 }
 
 .cca-auto-out {

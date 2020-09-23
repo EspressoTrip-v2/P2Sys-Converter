@@ -1,16 +1,13 @@
 import pandas as pd
 import numpy as np
 import xlsxwriter
-import os
+import shutil
 import json
 
 import warnings
 warnings.filterwarnings("ignore", 'This pattern has match groups')
 warnings.filterwarnings("ignore", 'divide by zero encountered in true_divide')
 warnings.filterwarnings("ignore", 'invalid value encountered in multiply')
-
-# GET THE CURRENT WORKING directory
-cur_dir = os.getcwd()
 
 # SHEET COLUMNS
 columns_sample_item_pricing = ['CURRENCY', 'ITEMNO', 'PRICELIST', 'DESC']
@@ -32,9 +29,10 @@ columns_sample_pricing_details = [
 
 
 # TEMPLATE FUNCTION
-def system_template_fn(directory, customer_number, customer_pricelist):
+def system_template_fn(directory, customer_number, customer_pricelist,
+                       server_path):
 
-    file_directory = f'{directory}/{customer_number}_system.xlsx'
+    file_directory = f'{directory}/{customer_number.strip()}_system.xlsx'
 
     # ITEM_PRICING
     IPcols = columns_sample_item_pricing
@@ -111,3 +109,13 @@ def system_template_fn(directory, customer_number, customer_pricelist):
                              f'=Item_Pricing_Details!$A$1:$K${PD.shape[0]+4}')
 
         writer.save()
+
+    if server_path == 'none':
+        pass
+    else:
+        try:
+            shutil.copyfile(
+                f'{directory}/{customer_number.strip()}_system.xlsx',
+                f'{server_path}/{customer_number.strip()}_system.xlsx')
+        except:
+            pass

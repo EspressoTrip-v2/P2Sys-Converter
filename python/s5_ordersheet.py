@@ -2,14 +2,16 @@ import pandas as pd
 import numpy as np
 import xlsxwriter
 import warnings
-import os
+import shutil
 import platform
-warnings.filterwarnings("ignore", 'This pattern has match groups')
+warnings.filterwarnings("ignore",
+                        'This pattern has match grouserver_filepathps')
 warnings.filterwarnings("ignore", 'divide by zero encountered in true_divide')
 warnings.filterwarnings("ignore", 'invalid value encountered in multiply')
 
 
-def create_s5_ordersheet(directory, customer_number, customer_pricelist):
+def create_s5_ordersheet(directory, customer_number, customer_pricelist,
+                         server_path):
 
     # CREATE THE COLUMNS TO BE USED IN THE ORDERSHEET #
     ###################################################
@@ -286,7 +288,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
     _076U_rownum = _076U.shape[0]
 
     # CREATE XLSX WRITER
-    writer = pd.ExcelWriter(f'{directory}/S5_{customer_number}.xlsx',
+    writer = pd.ExcelWriter(f'{directory}/S5_{customer_number.strip()}.xlsx',
                             engine='xlsxwriter')
 
     # CONVERT THE DATAFRAME TO EXCEL
@@ -497,14 +499,6 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
                            '''S7 AVAILABLE AT AN ADDITIONAL 11%''',
                            merge_formatC)
 
-    # # COLUMN WIDTH ALL
-    # worksheet1.set_column(0, 6, 20)
-    # worksheet2.set_column(0, 6, 20)
-    # worksheet3.set_column(0, 6, 20)
-    # worksheet4.set_column(0, 6, 20)
-    # worksheet5.set_column(0, 6, 20)
-    # worksheet6.set_column(0, 6, 20)
-
     # DEFAULT ROW
     worksheet1.set_default_row(16)
     worksheet2.set_default_row(16)
@@ -567,3 +561,13 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist):
         worksheet6.write(f'G{i}', '', unlocked)
 
     writer.save()
+
+    if server_path == 'none':
+        pass
+    else:
+        try:
+            shutil.copyfile(
+                f'{directory}/S5_{customer_number.strip()}.xlsx',
+                f'{server_path}/S5_{customer_number.strip()}.xlsx')
+        except:
+            pass

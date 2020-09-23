@@ -65,13 +65,21 @@ ipcRenderer.on(`convert-python`, (event, message) => {
 
   /* PYTHON PROCESSING FUNCTION */
   ///////////////////////////////
+  let temp = '/data';
+
+  let serverPath;
+  if (fs.existsSync(process.env.SERVER_PATH)) {
+    serverPath = process.env.SERVER_PATH;
+  } else {
+    serverPath = 'none';
+  }
 
   /* CREATE OPTIONS OBJECT FOR PYSHELL */
   let options = {
     mode: 'text',
     pythonOptions: ['-u'],
     scriptPath: `${process.cwd()}/python/`,
-    args: [data],
+    args: [data, serverPath],
   };
 
   /* CREATE PYSHELL  */
@@ -81,7 +89,6 @@ ipcRenderer.on(`convert-python`, (event, message) => {
   let filePaths;
 
   pyshell.on('message', (message) => {
-    // console.log(message);
     let value = parseInt(message);
     if (message >= 20 && message < 50) {
       progressLabel.setAttribute('data-label', 'Processing');
@@ -125,7 +132,7 @@ ipcRenderer.on(`convert-python`, (event, message) => {
         detail:
           'There was an problem during the file conversion.\nPlease contact your developer.',
       });
-      ipcRenderer.send('error', null);
+      ipcRenderer.send('reset-form', null);
       progressWindow.close();
     }
   });
