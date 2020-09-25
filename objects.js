@@ -148,19 +148,25 @@ exports.writeLocalDatabase = (filePath, writeFileObject) => {
     if (!dateKeys.includes(dateString) && dateKeys.length < 6) {
       backUpObject[dateString] = writeFileObject;
       fs.writeFile(`${backUpDir}/databaseBackup.json`, JSON.stringify(backUpObject), (err) => {
-        logfileFunc(err);
+        if (err) {
+          logfileFunc(err);
+        }
       });
     } else if (!dateKeys.includes(dateString) && dateKeys.length === 6) {
       delete backUpObject[dateKeys[0]];
       backUpObject[dateString] = writeFileObject;
       fs.writeFile(`${backUpDir}/databaseBackup.json`, JSON.stringify(backUpObject), (err) => {
-        logfileFunc(err);
+        if (err) {
+          logfileFunc(err);
+        }
       });
     }
   } else {
     let newObject = JSON.stringify({ [dateString]: writeFileObject });
     fs.writeFile(`${backUpDir}/databaseBackup.json`, newObject, (err) => {
-      logfileFunc(err);
+      if (err) {
+        logfileFunc(err);
+      }
     });
   }
 };

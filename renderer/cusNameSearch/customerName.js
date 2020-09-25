@@ -83,9 +83,15 @@ function populateCustomerNames() {
   ////////////////
 
   searchDock.addEventListener('keyup', (e) => {
+    let pattern = /[\s\W]+/g,
+      temp,
+      text;
     searchDock.value = searchDock.value.toUpperCase();
+    temp = searchDock.value.replace(pattern, '');
     customerNameLists.forEach((el) => {
-      let elMatch = el.innerText.includes(searchDock.value);
+      text = el.innerText.replace(pattern, '');
+      console.log(temp, text);
+      let elMatch = text.includes(temp);
       el.style.display = elMatch ? 'block' : 'none';
     });
   });

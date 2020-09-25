@@ -27,7 +27,7 @@ let copySelectionWindow = remote.getCurrentWindow();
 
 /* GLOBAL VARIABLES */
 /////////////////////
-let customerNameNumber, customerName, customerNumber;
+let customerNameNumber, customerPrices, customerName, customerNumber;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -109,7 +109,8 @@ function populateCustomerNames() {
   //////////////////////////////////////
 
   let customerNameLists = Array.from(document.getElementsByClassName('customer-name')),
-    searchDock = document.getElementById('customer-search');
+    searchDock = document.getElementById('customer-search'),
+    customerPricesKeys = Object.keys(customerPrices);
 
   //////////////////////
   /* EVENT LISTENERS */
@@ -185,7 +186,7 @@ function populateCustomerNames() {
         userAsk.style.transform = 'scale(0)';
         setTimeout(() => {
           /* REMOVE SECWINDOW FADE AND CLOSE WINDOW AFTER SCALE */
-          /* MESSAGE TRUE TO START CUSTOMER NUMBER EVENTLISTENER */
+          /* MESSAGE TRUE TO START CUSTOMER NUMBER AND CUSTOMER NAME EVENTLISTENERS */
           ipcRenderer.send('remove-fade', true);
           copySelectionWindow.close();
         }, 300);
@@ -217,10 +218,23 @@ function populateCustomerNames() {
   ////////////////
 
   searchDock.addEventListener('keyup', (e) => {
+    let pattern = /[\s\W]+/g,
+      temp,
+      text;
     searchDock.value = searchDock.value.toUpperCase();
+    temp = searchDock.value.replace(pattern, '');
     customerNameLists.forEach((el) => {
-      let elMatch = el.innerText.includes(searchDock.value);
-      el.style.display = elMatch ? 'block' : 'none';
+      if (customerPricesKeys.includes(el.title)) {
+        el.style.display = 'none';
+      } else {
+        text = el.innerText.replace(pattern, '');
+        let elMatch = text.includes(temp);
+        if (elMatch) {
+          el.style.display = 'block';
+        } else {
+          el.style.display = 'none';
+        }
+      }
     });
   });
 
@@ -238,6 +252,7 @@ function populateCustomerNames() {
 
 /* GET CUSTOMER OBJECT */
 ipcRenderer.on('copy-selection', (e, message) => {
-  customerNameNumber = message;
+  customerNameNumber = message.customerNameNumber;
+  customerPrices = message.customerPrices;
   populateCustomerNames();
 });

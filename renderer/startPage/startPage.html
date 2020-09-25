@@ -66,6 +66,18 @@
     </div>
     <div id="assist-box">
       <button class="btn" id="assist-btn" href="#">CUSTOMER FIND</button>
+      <button class="btn" id="view-pause" title="Sort paused only">
+
+        <svg viewBox="0 0 1e3 1e3" id="view-pause-icon">
+          <g transform="translate(0 511) scale(.1 -.1)">
+            <path
+              d="m360.5 4976.4c-114.4-50.2-231.5-192.5-251-304-8.4-50.2-11.2-2136.6-8.4-4641.5 8.4-4546.6 8.4-4552.2 66.9-4627.5 30.7-41.8 92-103.2 133.9-133.9 75.3-58.6 100.4-58.6 2025.1-58.6s1949.8 0 2025.1 58.6c41.8 30.7 103.2 92.1 133.9 133.9l58.6 75.3v9255.1l-58.6 75.3c-30.7 41.8-92 103.2-133.9 133.9-75.3 58.6-106 58.6-1991.6 64.2-1551 5.5-1933.1-0.1-2e3 -30.8zm3305.3-4870.1v-4016.7h-2677.7v8033.4h2677.8v-4016.7z" />
+            <path
+              d="m5716 4976.4c-114.3-50.2-231.5-192.5-251-304-8.4-50.2-11.1-2136.6-8.4-4641.5 8.4-4546.6 8.4-4552.2 67-4627.5 30.7-41.8 92-103.2 133.9-133.9 75.3-58.6 100.4-58.6 2025.1-58.6 1924.6 0 1949.8 0 2025 58.6 41.8 30.7 103.2 92.1 133.9 133.9l58.6 75.3v9255.1l-58.6 75.3c-30.7 41.8-92.1 103.2-133.9 133.9-75.3 58.6-106 58.6-1991.6 64.2-1550.9 5.5-1933.1-0.1-2e3 -30.8zm3305.3-4870.1v-4016.7h-2677.7v8033.4h2677.8v-4016.7z" />
+          </g>
+        </svg>
+
+      </button>
     </div>
   </div>
 
@@ -94,7 +106,9 @@
             <path
               d="M814.2 675.4l-43.5-43.6 101.2-101H530.8V872l101-101.2 43.6 43.5L500 990 324.6 814.2l43.6-43.5 101 101.2V530.8H128l101.2 101 -43.5 43.6L10 500l175.8-175.4 43.5 43.6L128 469.2h341.2V128l-101 101.2 -43.6-43.5L500 10l175.4 175.8 -43.6 43.5L530.8 128v341.2H872l-101.2-101 43.5-43.6L990 500 814.2 675.4 814.2 675.4z" />
           </svg>
+
         </div>
+
         <div class="customer-region-item-a">
           <button id="info-btn" class="info-btn" href="#">INFO</button>
           <div id="overflow">
@@ -114,6 +128,13 @@
             <div id="phone">
               <span>TELEPHONE NUMBER</span>
               <input id="client-phone" type="text" phone" placeholder="ENTER TEL" />
+            </div>
+          </div>
+
+          <div id="customer-displaybox-container">
+            <div id="display-box-label">ARE YOU LOOKING FOR?</div>
+            <div id="overflow-container">
+              <div id="customer-displaybox"></div>
             </div>
           </div>
         </div>

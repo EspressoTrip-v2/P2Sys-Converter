@@ -125,12 +125,12 @@ let connectionString, connectionName;
 ////////////////////////
 function mongooseConnect() {
   /* TEST DATABASE */
-  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  // connectionName = 'Test Database';
+  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  connectionName = 'Test Database';
 
   /* AC WHITCHER DATABASE */
-  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  connectionName = 'A.C Whitcher Database';
+  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  // connectionName = 'A.C Whitcher Database';
 
   mongoose
     .connect(connectionString, {
@@ -332,7 +332,7 @@ function createWindow() {
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -378,7 +378,7 @@ function createSecWindow(message) {
     alwaysOnTop: true,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -396,6 +396,7 @@ function createSecWindow(message) {
       customerPricelistNumber,
       customerNumberName,
       customerBackUp,
+      customerNameNumber,
     };
     secWindow.webContents.send('database-object', dbObj);
 
@@ -433,7 +434,7 @@ function createChildWindow(message) {
       transparent: true,
       alwaysOnTop: true,
       webPreferences: {
-        // devTools: false,
+        devTools: false,
         nodeIntegration: true,
         enableRemoteModule: true,
       },
@@ -482,7 +483,7 @@ function createLoadingWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -519,7 +520,7 @@ function createEmailWindow(message) {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -557,7 +558,7 @@ function createProgressWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -593,7 +594,7 @@ function createDbLoaderWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -632,7 +633,7 @@ function createUpdateWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -665,7 +666,7 @@ function createCopySelectionWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -676,7 +677,10 @@ function createCopySelectionWindow() {
 
   // Only show on load completion
   copySelectionWindow.webContents.once('did-finish-load', () => {
-    copySelectionWindow.webContents.send('copy-selection', customerNameNumber);
+    copySelectionWindow.webContents.send('copy-selection', {
+      customerPrices,
+      customerNameNumber,
+    });
   });
 
   //   LOAD DEV TOOLS
@@ -902,7 +906,6 @@ ipcMain.on('update-database', async (e, message) => {
       }
     }
   );
-  secWindow.webContents.send('database-updated', null);
 });
 
 /* START UPDATE WINDOW */

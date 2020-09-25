@@ -319,8 +319,6 @@ if system_os == 'Windows':
         except:
             pass
 
-    # s = '\\'
-    # mydocuments_folder = mydocuments_folder.replace('/', s[0])
 else:
     # CREATE THE FOLDER TO STORE ITEMS INSERT #
     ###########################################
