@@ -52,14 +52,17 @@ let customerListContainer = document.getElementById('customer-list-container'),
 ///////////////////////////////
 
 function populateCustomerNames() {
-  let customers = Object.keys(customerNameNumber);
+  let customers = Object.keys(customerNameNumber),
+    customerPricesKeys = Object.keys(customerPrices);
 
   (() => {
     customers.forEach((el) => {
-      let html = `<div title="${
-        customerNameNumber[el.toLocaleUpperCase()]
-      }" class="customer-name">${el.toUpperCase()}</div>`;
-      customerListContainer.insertAdjacentHTML('beforeend', html);
+      if (!customerPricesKeys.includes(customerNameNumber[el])) {
+        let html = `<div title="${
+          customerNameNumber[el.toLocaleUpperCase()]
+        }" class="customer-name">${el.toUpperCase()}</div>`;
+        customerListContainer.insertAdjacentHTML('beforeend', html);
+      }
     });
   })();
 
@@ -109,8 +112,7 @@ function populateCustomerNames() {
   //////////////////////////////////////
 
   let customerNameLists = Array.from(document.getElementsByClassName('customer-name')),
-    searchDock = document.getElementById('customer-search'),
-    customerPricesKeys = Object.keys(customerPrices);
+    searchDock = document.getElementById('customer-search');
 
   //////////////////////
   /* EVENT LISTENERS */
@@ -224,16 +226,12 @@ function populateCustomerNames() {
     searchDock.value = searchDock.value.toUpperCase();
     temp = searchDock.value.replace(pattern, '');
     customerNameLists.forEach((el) => {
-      if (customerPricesKeys.includes(el.title)) {
-        el.style.display = 'none';
+      text = el.innerText.replace(pattern, '');
+      let elMatch = text.includes(temp);
+      if (elMatch) {
+        el.style.display = 'block';
       } else {
-        text = el.innerText.replace(pattern, '');
-        let elMatch = text.includes(temp);
-        if (elMatch) {
-          el.style.display = 'block';
-        } else {
-          el.style.display = 'none';
-        }
+        el.style.display = 'none';
       }
     });
   });

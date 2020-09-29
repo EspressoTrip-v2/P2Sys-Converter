@@ -125,12 +125,12 @@ let connectionString, connectionName;
 ////////////////////////
 function mongooseConnect() {
   /* TEST DATABASE */
-  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  connectionName = 'Test Database';
+  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  // connectionName = 'Test Database';
 
   /* AC WHITCHER DATABASE */
-  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  // connectionName = 'A.C Whitcher Database';
+  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  connectionName = 'A.C Whitcher Database';
 
   mongoose
     .connect(connectionString, {
@@ -312,6 +312,7 @@ let trayMenu = Menu.buildFromTemplate([
     click: () => {
       let parent = secWindow ? secWindow : homeWindow;
       dialog.showMessageBoxSync(parent, {
+        type: 'info',
         detail: version,
         buttons: ['OK'],
         icon: `${dir}/renderer/icons/converter-logo.png`,
@@ -324,15 +325,15 @@ let trayMenu = Menu.buildFromTemplate([
 function createWindow() {
   createTray();
   homeWindow = new BrowserWindow({
-    width: 400,
-    height: 520,
-    resizable: false,
+    width: 300,
+    height: 420,
+    // resizable: false,
     spellCheck: false,
     center: true,
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -368,8 +369,8 @@ function createWindow() {
 /* SECWINDOW CREATION */
 function createSecWindow(message) {
   secWindow = new BrowserWindow({
-    height: 600,
-    width: 365,
+    height: 500,
+    width: 295,
     autoHideMenuBar: true,
     center: true,
     frame: false,
@@ -378,7 +379,7 @@ function createSecWindow(message) {
     alwaysOnTop: true,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -421,7 +422,7 @@ function createChildWindow(message) {
   if (message.emit === 'startPage') {
     childWindow = new BrowserWindow({
       parent: secWindow,
-      height: 600,
+      height: 500,
       width: 300,
       resizable: false,
       x: message.dimensions[0] - 300,
@@ -434,7 +435,7 @@ function createChildWindow(message) {
       transparent: true,
       alwaysOnTop: true,
       webPreferences: {
-        devTools: false,
+        // devTools: false,
         nodeIntegration: true,
         enableRemoteModule: true,
       },
@@ -473,8 +474,8 @@ function createLoadingWindow() {
 
   loadingWindow = new BrowserWindow({
     parent: parentWin,
-    height: 400,
-    width: 400,
+    height: 280,
+    width: 280,
     autoHideMenuBar: true,
     backgroundColor: '#00FFFFFF',
     center: true,
@@ -483,7 +484,7 @@ function createLoadingWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -510,8 +511,8 @@ function createLoadingWindow() {
 function createEmailWindow(message) {
   emailWindow = new BrowserWindow({
     parent: secWindow,
-    height: 750,
-    width: 550,
+    height: 500,
+    width: 380,
     autoHideMenuBar: true,
     center: true,
     backgroundColor: '#00FFFFFF',
@@ -520,7 +521,7 @@ function createEmailWindow(message) {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -548,17 +549,18 @@ function createEmailWindow(message) {
 function createProgressWindow() {
   progressWindow = new BrowserWindow({
     parent: secWindow,
-    height: 400,
-    width: 400,
+    height: 250,
+    width: 250,
     spellCheck: false,
     resizable: false,
+    backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
     center: true,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -584,17 +586,18 @@ function createProgressWindow() {
 /* DBLOADER WINDOW */
 function createDbLoaderWindow() {
   dbLoaderWindow = new BrowserWindow({
-    height: 400,
-    width: 400,
+    height: 250,
+    width: 250,
     spellCheck: false,
     resizable: false,
+    backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
     alwaysOnTop: true,
     center: true,
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -627,13 +630,14 @@ function createUpdateWindow() {
     y: 0,
     spellCheck: false,
     resizable: false,
+    backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
     alwaysOnTop: true,
     center: true,
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -655,8 +659,8 @@ function createUpdateWindow() {
 function createCopySelectionWindow() {
   copySelectionWindow = new BrowserWindow({
     parent: secWindow,
-    height: 500,
-    width: 350,
+    height: 480,
+    width: 300,
     spellCheck: false,
     resizable: false,
     backgroundColor: '#00FFFFFF',
@@ -666,7 +670,7 @@ function createCopySelectionWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },

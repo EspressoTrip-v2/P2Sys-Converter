@@ -9,6 +9,8 @@
   --button-red: #fe1604;
   --button-green: #03c224;
   --button-gold: #fe7c04;
+
+  --hover-blue: rgba(5, 138, 158, 0.5);
 }
 * {
   box-sizing: border-box;
@@ -43,7 +45,8 @@ main {
   align-items: center;
   align-content: center;
   padding: 10px 3px;
-  height: 245px;
+  height: 225px;
+  width: 260px;
   background-color: var(--sec-blue);
 }
 
@@ -55,12 +58,11 @@ header {
   justify-content: center;
   background-color: var(--sec-blue);
   border-radius: 20px;
-  width: 300px;
+  width: 260px;
   align-content: center;
 }
 header img {
   position: relative;
-  top: 5px;
   height: auto;
   width: 100%;
   padding: 1px;
@@ -101,15 +103,15 @@ body {
 #container {
   position: relative;
   border: 2px solid var(--main);
-  border-radius: 20px;
+  border-radius: 10px;
   background-color: var(--sec-blue);
 }
 
 footer {
   position: relative;
   display: flex;
-  width: 300px;
-  height: 85px;
+  width: 260px;
+  height: 75px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -117,34 +119,30 @@ footer {
 }
 
 .customer-name {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  justify-items: center;
   text-align: center;
   font-size: 15px;
-  margin-top: 3px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding-top: 5px;
+  padding-bottom: 5px;
   background-color: #fff;
-  border: 2px solid #fff;
-  border-bottom: 2px solid #e9ebeeb0;
-  border-radius: 10px;
+  border: 1px solid #fff;
+  border-radius: 5px;
 }
-.customer-name-clicked {
-  display: flex;
+
+.customer-name:hover {
   color: #fff;
-  flex-direction: column;
-  justify-content: center;
-  justify-items: center;
+  background-color: var(--hover-blue);
+}
+
+.customer-name-clicked {
+  color: #fff;
   text-align: center;
   font-size: 15px;
-  margin-top: 3px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  font-weight: bold;
+  padding-top: 5px;
+  padding-bottom: 5px;
   background-color: var(--sec-blue);
-  border: 2px solid var(--main);
-  border-radius: 10px;
+  border: 1px solid var(--main);
+  border-radius: 5px;
 }
 
 #background-container {
@@ -159,7 +157,7 @@ footer {
   border: 2px solid var(--main);
   border-radius: 10px;
   height: 200px;
-  width: 280px;
+  width: 250px;
 }
 
 #container-background {
@@ -184,8 +182,8 @@ footer {
 
 #customer-search-container {
   position: absolute;
-  bottom: 65px;
-  width: 280px;
+  bottom: 50px;
+  width: 245px;
 }
 
 #customer-search {
@@ -215,7 +213,6 @@ footer {
 #search-input {
   display: flex;
   flex-direction: row;
-  height: 46px;
   justify-content: center;
   justify-items: center;
   padding: 5px 12px;
@@ -226,19 +223,18 @@ footer {
 #search-input img {
   width: auto;
   position: relative;
-  left: -8px;
-  height: 34px;
+  left: -5px;
+  height: 28px;
   -webkit-user-drag: none;
 }
 
 #customer-list-container {
   position: relative;
   display: flex;
-  width: 270px;
+  width: 240px;
   flex-direction: column;
   justify-content: center;
   align-content: center;
-  padding: 0 10px;
   background-color: #fff;
 }
 
@@ -265,13 +261,13 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 200px;
+  border-radius: 10px;
   outline: none;
   background-color: var(--button-gold);
   color: #fff;
   border: 2px solid var(--button-gold);
   font-size: 15px;
-  padding: 10px 0px;
+  padding: 7px 0px;
   font-weight: bolder;
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
 }
@@ -281,27 +277,27 @@ footer {
   position: relative;
   justify-content: center;
   align-items: center;
-  border-radius: 200px;
+  border-radius: 10px;
   outline: none;
   background-color: grey;
   color: #fff;
   border: 2px solid grey;
   font-size: 15px;
-  padding: 10px 0px;
+  padding: 7px 0px;
   font-weight: bolder;
 }
 #disabled {
   position: absolute;
-  right: 20px;
-  bottom: 14px;
-  width: 120px;
+  right: 15px;
+  bottom: 7px;
+  width: 100px;
 }
 
 #select {
   position: absolute;
-  right: 20px;
-  bottom: 14px;
-  width: 120px;
+  right: 15px;
+  bottom: 7px;
+  width: 100px;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
 }
 
@@ -319,9 +315,9 @@ footer {
 #select-start {
   position: absolute;
   display: flex;
-  right: 20px;
-  bottom: 10px;
-  width: 120px;
+  right: 17px;
+  bottom: 7px;
+  width: 100px;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
 }
 
@@ -340,9 +336,9 @@ footer {
   position: absolute;
   background-color: var(--button-red);
   border: 2px solid var(--button-red);
-  left: 20px;
-  bottom: 14px;
-  width: 120px;
+  left: 15px;
+  bottom: 7px;
+  width: 100px;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
 }
 
@@ -362,9 +358,9 @@ footer {
   display: flex;
   background-color: var(--button-red);
   border: 2px solid var(--button-red);
-  left: 20px;
-  bottom: 10px;
-  width: 120px;
+  left: 10px;
+  bottom: 7px;
+  width: 100px;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
 }
 
@@ -382,11 +378,11 @@ footer {
 #ask-user {
   position: absolute;
   transform: scale(0);
-  width: 300px;
-  height: 190px;
+  width: 255px;
+  height: 160px;
   background-color: var(--sec-blue);
   border: 2px solid var(--main);
-  border-radius: 20px;
+  border-radius: 10px;
   filter: drop-shadow(2px 4px 6px black);
   display: flex;
   flex-direction: column;
@@ -398,9 +394,9 @@ footer {
 
 #existing-customer-container {
   position: absolute;
-  top: 10px;
-  width: 280px;
-  height: 55px;
+  top: 7px;
+  width: 240px;
+  height: 45px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -409,14 +405,14 @@ footer {
   border-radius: 10px;
 }
 #logo-existing-customer {
-  width: 30px;
+  width: 25px;
   position: absolute;
-  left: 0px;
+  top: 6px;
+  left: 10px;
 }
 
 #existing-customer-label {
   position: relative;
-  left: 16px;
   width: 100%;
   height: 100%;
   display: flex;
@@ -426,8 +422,8 @@ footer {
 }
 #existing-customer-text {
   position: absolute;
-  bottom: 2px;
-  left: 50px;
+  top: -3px;
+  left: 40px;
   font-weight: bold;
   color: #fff;
   font-size: 15px;
@@ -439,7 +435,7 @@ footer {
 
 #existing-customer-tick {
   position: absolute;
-  right: 35px;
+  right: 10px;
   width: 18px;
   height: 18px;
   background-color: #fff;
@@ -459,9 +455,9 @@ footer {
 
 #new-container {
   position: absolute;
-  top: 70px;
-  width: 280px;
-  height: 55px;
+  top: 60px;
+  width: 240px;
+  height: 45px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -470,14 +466,14 @@ footer {
   border-radius: 10px;
 }
 #logo-new-customer {
-  width: 30px;
+  width: 25px;
   position: absolute;
-  left: 0px;
+  top: 6px;
+  left: 10px;
 }
 
 #new-label {
   position: relative;
-  left: 16px;
   width: 100%;
   height: 100%;
   display: flex;
@@ -487,8 +483,8 @@ footer {
 }
 #new-text {
   position: absolute;
-  bottom: 2px;
-  left: 50px;
+  top: -3px;
+  left: 40px;
   font-weight: bold;
   color: #fff;
   font-size: 15px;
@@ -500,7 +496,7 @@ footer {
 
 #new-tick {
   position: absolute;
-  right: 35px;
+  right: 10px;
   width: 18px;
   height: 18px;
   background-color: #fff;

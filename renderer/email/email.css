@@ -11,6 +11,7 @@
   --opaque-man: rgba(128, 196, 50, 0.4);
   --auto: #d9793b;
   --opaque-auto: rgba(217, 122, 58, 0.3);
+  --hover-blue: #058a9e1a;
 }
 
 /* Fonts */
@@ -36,19 +37,20 @@ main {
   justify-content: center;
   align-items: center;
   align-content: center;
-  height: 500px;
-  width: 430px;
+  height: 425px;
+  width: 365px;
 }
 #header {
   display: flex;
   position: relative;
-  width: 430px;
-  height: 65px;
+  bottom: 5px;
+  width: 365px;
+  height: 50px;
   background-color: var(--sec-blue);
   justify-content: center;
   align-items: center;
   align-content: center;
-  border-radius: 20px;
+  border-radius: 10px;
   border: 2px solid var(--main);
   z-index: 1;
   box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
@@ -67,8 +69,8 @@ main {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 225px;
-  height: 80px;
+  width: 200px;
+  height: 65px;
   background-color: #fff;
   border-radius: 50%;
   border: 2px solid var(--main);
@@ -79,23 +81,22 @@ main {
   position: absolute;
   top: 14px;
   right: 30px;
-  font-size: 45px;
+  font-size: 35px;
   font-family: Forelle;
 }
 
 .logo {
   position: absolute;
-  top: -2px;
+  top: -5px;
   left: 38px;
-  height: 75px;
+  height: 65px;
   -webkit-user-drag: none;
+  -webkit-app-region: drag;
 }
 
 body {
-  width: 530px;
-  height: 730px;
   display: flex;
-  border-radius: 20px;
+  border-radius: 10px;
   justify-content: center;
   align-items: center;
 }
@@ -105,10 +106,10 @@ body {
   display: flex;
   transform: scale(0.9);
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   align-content: center;
-  border-radius: 20px;
+  border-radius: 10px;
   width: 100%;
   height: 100%;
   opacity: 0;
@@ -117,23 +118,23 @@ body {
 
 .text-container {
   position: relative;
-  border-radius: 20px;
-  top: -48px;
+  border-radius: 10px;
+  top: 0;
   display: flex;
   height: 100%;
   width: 100%;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 0 15px;
+  padding: 0 5px;
   background-color: var(--sec-blue);
   border: 2px solid var(--main);
   box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
 }
 #email-entry {
-  height: 60px;
-  margin-bottom: 20px;
-  padding: 10px;
+  height: 50px;
+  margin-bottom: 15px;
+  padding: 5px;
 }
 
 #email-entry::-webkit-scrollbar {
@@ -146,15 +147,15 @@ body {
 }
 
 .entry {
-  border-radius: 10px;
+  border-radius: 5px;
   border: 2px solid #fff;
-  width: 400px;
+  width: 350px;
   height: 180px;
   outline: none;
-  padding: 10px;
+  padding: 5px;
   resize: none;
   margin-bottom: 20px;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 #email-message::-webkit-scrollbar {
@@ -167,29 +168,30 @@ body {
 }
 
 .excel-image {
-  width: 34px;
+  width: 25px;
 }
 .label {
   display: flex;
   position: relative;
-  left: -25px;
+  left: 5px;
   justify-content: left;
   font-weight: bold;
   width: 350px;
   padding-bottom: 10px;
-  font-size: 18px;
+  font-size: 15px;
   color: #fff;
 }
 
 .excel {
   position: relative;
+  bottom: 15px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
-  height: 50px;
+  height: 35px;
   background-color: #fff;
-  border-radius: 200px;
+  border-radius: 5px;
   padding: 5px;
   overflow: auto;
 }
@@ -215,19 +217,19 @@ body {
 }
 
 #file-a-label {
-  margin-left: 10px;
-  font-size: 16px;
+  margin-left: 5px;
+  font-size: 15px;
 }
 #file-b-label {
-  margin-left: 10px;
-  font-size: 16px;
+  margin-left: 5px;
+  font-size: 15px;
 }
 
 #letter {
   position: relative;
-  top: -20px;
+  top: -18px;
   left: -3px;
-  height: 85px;
+  height: 70px;
   width: 100%;
   fill: #fff;
   transition: fill 0.5s;
@@ -235,11 +237,11 @@ body {
 
 #send {
   position: relative;
-  height: 50px;
-  width: 40%;
-  top: 15px;
+  height: 40px;
+  width: 110px;
+  top: 0px;
   background-color: var(--button-gold);
-  border-radius: 200px;
+  border-radius: 10px;
   border: 3px solid var(--button-gold);
   outline: none;
   overflow: hidden;
@@ -262,49 +264,64 @@ body {
 }
 #sent-letter-container {
   /* visibility: visible; */
-  opacity: 1;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   position: absolute;
-  transform: scaleY(0);
-  height: 109px;
-  width: 150px;
+  transform: scale(0);
+  height: 72px;
+  width: 100px;
   border-radius: 10px;
   background-color: #fff;
-  transition: transform 0.8s 0.3s, opacity 0.8s 0.3s;
-  box-shadow: 1px 1px 30px 0px rgba(50, 50, 50, 1);
+  /* transition: transform 0.8s 0.3s, opacity 0.8s 0.3s; */
+  box-shadow: 1px 1px 14px 0px rgba(50, 50, 50, 1);
+  animation: none;
 }
 #sent-letter-container::before {
   position: absolute;
-  font-size: 45px;
-  top: 125px;
+  font-size: 25px;
+  top: 85px;
   font-weight: bolder;
   content: attr(data-label);
-  animation: sending 0.3s linear infinite alternate;
 }
+
 #sent-letter-container::after {
   position: absolute;
   text-align: center;
   color: #cf2115;
-  font-size: 45px;
-  top: 125px;
+  font-size: 25px;
+  top: 85px;
   font-weight: bolder;
   content: attr(data-fail);
 }
 
-@keyframes sending {
-  from {
-    opacity: 1;
+@keyframes pulseMail {
+  0% {
+    transform: scale(0.5);
   }
-  to {
-    opacity: 0;
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(0.5);
+  }
+}
+
+@keyframes pulseFail {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(0);
   }
 }
 
 #sent-letter {
   position: relative;
-  bottom: 20px;
+  bottom: 15px;
   width: 150px;
 }
 
@@ -321,9 +338,4 @@ body {
   position: relative;
   width: 120px;
   height: auto;
-}
-@media screen and (max-width: 1280px) {
-  #border {
-    transform: scale(0.95);
-  }
 }

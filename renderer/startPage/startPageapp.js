@@ -1,6 +1,7 @@
 /* MODULES */
 ////////////
 const { remote, ipcRenderer } = require('electron');
+const { set } = require('mongoose');
 
 /* GET WORKING DIRECTORY */
 let dir;
@@ -62,7 +63,8 @@ let searchValue,
   customerNumberName,
   customerNameNumber,
   customerBackUp,
-  cusNum;
+  cusNum,
+  notObject;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -79,11 +81,6 @@ let backBtn = document.getElementById('back-to-main-btn'),
   customerNumberValue = document.getElementById('customer-number'),
   customerNumberSubmit = document.getElementById('customer-number-submit'),
   ccaPrice = document.getElementById('cca-price'),
-  infobtn = document.getElementById('info-btn'),
-  customerContactMenu = document.getElementById('customer-contact-container'),
-  sendEmailbtn = document.getElementById('email-now'),
-  clientEmail = document.getElementById('client-email'),
-  clientPhone = document.getElementById('client-phone'),
   manCaaBtn = document.getElementById('cca-man'),
   autoCaaBtn = document.getElementById('cca-auto'),
   lengthLockBtn = document.getElementById('lock'),
@@ -92,8 +89,10 @@ let backBtn = document.getElementById('back-to-main-btn'),
   unlockSvg = document.getElementById('unlock-svg'),
   lengthColumn = document.getElementById('len'),
   soundClick = document.getElementById('click'),
+  soundPop = document.getElementById('pop'),
   minimizeTableBtn = document.getElementById('minimize-table'),
   calculateBtn = document.getElementById('calculate'),
+  neverShowAgainBtn = Array.from(document.getElementsByClassName('never-show')),
   /* TABLE COMPONENT DOMS */
   /////////////////////////
   table = document.getElementById('table'),
@@ -130,6 +129,7 @@ let checkCustomer = document.getElementById('check-customer'),
   customerDisplayBoxContainer = document.getElementById('customer-displaybox-container'),
   customerDisplayBox = document.getElementById('customer-displaybox'),
   viewPauseBtn = document.getElementById('view-pause');
+
 //////////////
 /*FUNCTIONS*/
 ////////////
@@ -298,8 +298,8 @@ const createObjectFromHtml = () => {
   jsonObject[customerNum] = jsonObjectData;
   jsonObject[customerNum]['COLUMNS'] = columns.map((el) => el.innerText);
   jsonObject[customerNum]['CCA'] = parseInt(ccaPrice.value);
-  jsonObject[customerNum]['EMAIL'] = clientEmail.value;
-  jsonObject[customerNum]['TEL'] = clientPhone.value;
+  jsonObject[customerNum]['EMAIL'] = '';
+  jsonObject[customerNum]['TEL'] = '';
   jsonObject['PRICELIST'] = customerPriceList.value;
   jsonObject['HEADER'] = {
     customerName: customerName.innerText,
@@ -421,8 +421,6 @@ function tablePageCreate(type) {
     customerNumberValue.value = searchValue;
     customerName.innerText = customerNumberName[searchValue];
     customerName.contentEditable = false;
-    clientEmail.value = customerPrices[searchValue]['EMAIL'];
-    clientPhone.value = customerPrices[searchValue]['TEL'];
   } else {
     customerNumberValue.disabled = false;
     customerName.innerText = null;
@@ -444,7 +442,7 @@ function tablePageCreate(type) {
 
   // ADD BACKGROUND TO HTML ELEMENT
   setTimeout(() => {
-    html.style.backgroundColor = '#fff';
+    html.style.backgroundColor = '#f1f1f1';
   }, 300);
   if (secWindow.getChildWindows().length > 0) {
     secWindow.getChildWindows()[0].close();
@@ -629,41 +627,6 @@ pauseBtn.addEventListener('click', () => {
   }
 });
 
-/* SEND EMAIL BUTTON */
-sendEmailbtn.addEventListener('click', (e) => {
-  soundClick.play();
-
-  if (clientEmail.value) {
-    window.location = `mailto:${clientEmail.value}`;
-  } else {
-    remote.dialog
-      .showMessageBox(secWindow, {
-        type: 'warning',
-        icon: `${dir}/renderer/icons/info.png`,
-        buttons: ['OK'],
-        message: 'NO EMAIL ADDRESS ON FILE:',
-        detail: 'Please enter an email address.',
-      })
-      .then((response) => {
-        infobtn.click();
-      });
-  }
-});
-/* INFO BUTTON */
-infobtn.addEventListener('click', (e) => {
-  soundClick.play();
-
-  if (window.getComputedStyle(customerContactMenu).visibility === 'hidden') {
-    customerContactMenu.style.visibility = 'visible';
-    customerContactMenu.style.transform = 'scaleY(1)';
-  } else {
-    customerContactMenu.style.transform = 'scaleY(0)';
-    setTimeout(() => {
-      customerContactMenu.style.visibility = 'hidden';
-    }, 250);
-  }
-});
-
 /* LENGTH LOCK BUTTON */
 lengthLockBtn.addEventListener('click', (e) => {
   soundClick.play();
@@ -683,8 +646,30 @@ lengthLockBtn.addEventListener('click', (e) => {
   }
 });
 
-/* LENGTH UNLOCK BUTTON */
-lengthUnlockBtn.addEventListener('click', (e) => {
+let lockbuttonPop = document.getElementById('lockbutton-popup'),
+  lockbuttonPopYes = document.getElementById('lockbutton-yes'),
+  lockbuttonPopNo = document.getElementById('lockbutton-no');
+/* LOCKBUTTON NOTIFICATION FUNCTION */
+function notificationBubbleLockbutton() {
+  notObject = JSON.parse(localStorage.getItem('notifications'));
+  if (notObject.lockbutton) {
+    soundPop.play();
+    lockbuttonPop.show();
+    lockbuttonPopYes.addEventListener('click', (e) => {
+      soundPop.play();
+      lockbuttonPop.close();
+      unlockLength();
+    });
+    lockbuttonPopNo.addEventListener('click', (e) => {
+      soundPop.play();
+      lockbuttonPop.close();
+    });
+  } else if (!notObject.lockbutton) {
+    unlockLength();
+  }
+}
+
+function unlockLength() {
   soundClick.play();
   if (lengthUnlockBtn.classList.value === 'unlock-out') {
     lengthUnlockBtn.setAttribute('class', 'unlock-in');
@@ -694,17 +679,45 @@ lengthUnlockBtn.addEventListener('click', (e) => {
     lengthLockBtn.setAttribute('class', 'lock-out');
     lockSvg.style.fill = 'var(--button-gold)';
 
-    /* DISABLE CELLS */
+    /* ENABLE CELLS */
     for (let i = 0; i < 30; i++) {
       document.getElementById(`ER${i}`).disabled = false;
     }
   }
+}
+
+/* LENGTH UNLOCK BUTTON */
+
+lengthUnlockBtn.addEventListener('click', (e) => {
+  notificationBubbleLockbutton();
 });
 
-/* AUTO CCA BUTTON */
-autoCaaBtn.addEventListener('click', (e) => {
-  soundClick.play();
+let CCAPop = document.getElementById('CCA-popup'),
+  CCAPopYes = document.getElementById('CCA-yes'),
+  CCAPopNo = document.getElementById('CCA-no');
+/* CCA NOTIFICATION */
+function notificationBubbleAutocca() {
+  notObject = JSON.parse(localStorage.getItem('notifications'));
+  if (notObject.autocca) {
+    soundPop.play();
+    CCAPop.show();
+    CCAPopYes.addEventListener('click', (e) => {
+      soundPop.play();
+      CCAPop.close();
+      CCAAutoSwitch();
+    });
+    CCAPopNo.addEventListener('click', (e) => {
+      soundPop.play();
+      CCAPop.close();
+    });
+  } else if (!notObject.autocca) {
+    CCAAutoSwitch();
+  }
+}
 
+/* FUNCTION TO SWITCH CCA */
+function CCAAutoSwitch() {
+  soundClick.play();
   // Check to see if there is an entry in the cca price and the button is out
   if (autoCaaBtn.classList.value === 'cca-auto-out' && ccaPrice.value) {
     autoCaaBtn.setAttribute('class', 'cca-auto-in');
@@ -734,7 +747,7 @@ autoCaaBtn.addEventListener('click', (e) => {
     untreatedColumnClass.forEach((el) => {
       el.addEventListener('keyup', ccaAutoMan);
     });
-  } else {
+  } else if (ccaPrice.value.length < 1) {
     ccaPrice.type = 'text';
     ccaPrice.style.fontWeight = 'bolder';
     ccaPrice.value = 'ENTER PRICE';
@@ -746,10 +759,15 @@ autoCaaBtn.addEventListener('click', (e) => {
       ccaPrice.style.animation = 'none';
     }, 2050);
   }
+}
+
+/* AUTO CCA BUTTON */
+
+autoCaaBtn.addEventListener('click', (e) => {
+  notificationBubbleAutocca();
 });
 
-/* MANUAL CCA BUTTON */
-manCaaBtn.addEventListener('click', (e) => {
+function CCAManualSwitch() {
   soundClick.play();
 
   if (manCaaBtn.classList.value === 'cca-man-out') {
@@ -774,6 +792,11 @@ manCaaBtn.addEventListener('click', (e) => {
       el.removeEventListener('keyup', ccaAutoMan);
     });
   }
+}
+
+/* MANUAL CCA BUTTON */
+manCaaBtn.addEventListener('click', (e) => {
+  CCAManualSwitch();
 });
 
 /////////////////////////////////
@@ -865,10 +888,14 @@ function populateList() {
   customerNumber = Object.keys(customerPrices);
 
   let localStorageKeys = Object.keys(localStorage);
-  let idx = localStorageKeys.indexOf('failedEmail');
+  let idxEmail = localStorageKeys.indexOf('failedEmail');
+  let idxNot = localStorageKeys.indexOf('notifications');
 
-  if (idx !== -1) {
-    localStorageKeys.splice(idx, 1);
+  if (idxEmail !== -1) {
+    localStorageKeys.splice(idxEmail, 1);
+  }
+  if (idxNot !== -1) {
+    localStorageKeys.splice(idxNot, 1);
   }
 
   customerNumber.forEach((el) => {
@@ -1072,8 +1099,6 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
     ? customerPricelistNumber[searchValue]
     : searchValue;
   customerPriceList.disabled = true;
-  clientEmail.value = localPricelist[searchValue]['EMAIL'];
-  clientPhone.value = localPricelist[searchValue]['TEL'];
   ccaPrice.value = localPricelist[searchValue]['CCA'];
 
   // ADD BACKGROUND TO HTML ELEMENT
@@ -1137,11 +1162,66 @@ customerFindBtn.addEventListener('click', (e) => {
   }
 });
 
+/* NEVER SHOW AGAIN BUTTON */
+neverShowAgainBtn.forEach((el) => {
+  el.addEventListener('click', (e) => {
+    soundPop.play();
+    let pnode = e.target.parentNode.id;
+    if (pnode === 'copy-popup') {
+      let storage = JSON.parse(localStorage.getItem('notifications'));
+      storage.copy = false;
+      localStorage.setItem('notifications', JSON.stringify(storage));
+      copyPop.close();
+    }
+    if (pnode === 'lockbutton-popup') {
+      let storage = JSON.parse(localStorage.getItem('notifications'));
+      storage.lockbutton = false;
+      localStorage.setItem('notifications', JSON.stringify(storage));
+      lockbuttonPop.close();
+    }
+    if (pnode === 'CCA-popup') {
+      let storage = JSON.parse(localStorage.getItem('notifications'));
+      storage.autocca = false;
+      localStorage.setItem('notifications', JSON.stringify(storage));
+      CCAPop.close();
+    }
+    if (pnode === 'calculatebutton-popup') {
+      let storage = JSON.parse(localStorage.getItem('notifications'));
+      storage.calculate = false;
+      localStorage.setItem('notifications', JSON.stringify(storage));
+      calculateButtonPop.close();
+    }
+    if (pnode === 'roundall-popup') {
+      let storage = JSON.parse(localStorage.getItem('notifications'));
+      storage.roundall = false;
+      localStorage.setItem('notifications', JSON.stringify(storage));
+      roundAllPop.close();
+    }
+  });
+});
+
+/* COPY NOTIFICATION */
+let copyPop = document.getElementById('copy-popup'),
+  copyPopYes = document.getElementById('copy-yes');
+function notificationBubbleCopy() {
+  /* READ IN THE LOCAL STORAGE OBJECT AND CHECK FLAG */
+  let notObject = JSON.parse(localStorage.getItem('notifications'));
+  if (notObject.copy) {
+    soundPop.play();
+    copyPop.show();
+    copyPopYes.addEventListener('click', (e) => {
+      soundPop.play();
+      copyPop.close();
+    });
+  }
+}
+
 /* COPY CHECKBOX EVENTS */
 copyCheckbox.addEventListener('change', (e) => {
   if (checkUpdateBtn.style.display === 'flex') {
     soundClick.play();
     if (e.target.checked) {
+      notificationBubbleCopy();
       tickBox.style.border = '2px solid var(--main)';
       tickCheckMark.style.animation = 'check 0.2s linear forwards';
       setTimeout(() => {
@@ -1206,10 +1286,14 @@ minimizeTableBtn.addEventListener('click', () => {
 /* PAUSE BUTTON FLAG FUNCTION */
 function checkLocalStorage() {
   let localStorageKeys = Object.keys(localStorage);
-  let idx = localStorageKeys.indexOf('failedEmail');
+  let idxEmail = localStorageKeys.indexOf('failedEmail');
+  let idxNot = localStorageKeys.indexOf('notifications');
 
-  if (idx !== -1) {
-    localStorageKeys.splice(idx, 1);
+  if (idxEmail !== -1) {
+    localStorageKeys.splice(idxEmail, 1);
+  }
+  if (idxNot !== -1) {
+    localStorageKeys.splice(idxNot, 1);
   }
 
   if (localStorageKeys.length > 0) {
@@ -1225,8 +1309,10 @@ secWindow.webContents.on('did-finish-load', () => {
     checkCustomer.style.opacity = '1';
     if (checkLocalStorage()) {
       setTimeout(() => {
-        viewPauseBtn.style.animation = 'pop 0.3s linear forwards';
+        viewPauseBtn.style.animation = 'pop 0.3s linear forwards 1';
+        soundPop.play();
         viewPauseBtn.addEventListener('click', (e) => {
+          clearList();
           soundClick.play();
           setTimeout(() => {
             showPausedItems();
@@ -1390,10 +1476,27 @@ sliderAll.addEventListener('input', (e) => {
   slider76228.value = e.target.value;
 });
 
+let roundAllPop = document.getElementById('roundall-popup'),
+  roundAllPopYes = document.getElementById('roundall-yes');
+
+/* CALCULATE NOTIFICATION */
+function notificationBubbleRoundall() {
+  notObject = JSON.parse(localStorage.getItem('notifications'));
+  if (notObject.roundall) {
+    soundPop.play();
+    roundAllPop.show();
+    roundAllPopYes.addEventListener('click', (e) => {
+      soundPop.play();
+      roundAllPop.close();
+    });
+  }
+}
+
 /* ROUNDALL CHECKBOX EVENTS */
 roundAllCheckbox.addEventListener('change', (e) => {
   soundClick.play();
   if (e.target.checked) {
+    notificationBubbleRoundall();
     roundAllBox.style.border = '2px solid var(--main)';
     roundAllCheckMark.style.animation = 'check 0.2s linear forwards';
   } else {
@@ -1403,15 +1506,47 @@ roundAllCheckbox.addEventListener('change', (e) => {
   }
 });
 
-/* CALCULATE BUTTON */
-calculateBtn.addEventListener('click', (e) => {
-  autoCaaBtn.click();
+/* CALCULATE NOTIFICATION */
+let calculateButtonPop = document.getElementById('calculatebutton-popup'),
+  calculateButtonPopYes = document.getElementById('calculatebutton-yes'),
+  calculateButtonPopNo = document.getElementById('calculatebutton-no');
+function notificationBubbleCalculate() {
+  notObject = JSON.parse(localStorage.getItem('notifications'));
+  if (notObject.calculate) {
+    soundPop.play();
+    calculateButtonPop.show();
+    calculateButtonPopYes.addEventListener('click', (e) => {
+      soundPop.play();
+      calculateButtonPop.close();
+      calculateButtonPress();
+    });
+    calculateButtonPopNo.addEventListener('click', (e) => {
+      soundPop.play();
+      calculateButtonPop.close();
+    });
+  } else if (!notObject.calculate) {
+    calculateButtonPress();
+  }
+}
 
+function calculateButtonPress() {
+  /* PRESS CCA BUTTON FUNCTION */
+  CCAAutoSwitch();
+  /* SHOW PERCENTAGE CALCULATOR*/
   setTimeout(() => {
     progressFade.style.visibility = 'visible';
     progressFade.style.backdropFilter = 'blur(3px)';
-    percentageContainer.style.transform = 'scale(1)';
+    if (secWindow.getSize()[0] >= 1280) {
+      percentageContainer.style.transform = 'scale(1)';
+    } else {
+      percentageContainer.style.transform = 'scale(0.8)';
+    }
   }, 300);
+}
+
+/* CALCULATE BUTTON */
+calculateBtn.addEventListener('click', (e) => {
+  notificationBubbleCalculate();
 });
 
 /* FUNCTION FOR PERCENTAGE CALC */

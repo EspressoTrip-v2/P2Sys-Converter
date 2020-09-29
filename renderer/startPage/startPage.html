@@ -13,6 +13,7 @@
 <body id="page-body">
   <div id="progress-fade"></div>
   <audio src="../sounds/click.wav" id="click" style="display: none"></audio>
+  <audio src="../sounds/pop.wav" id="pop" style="display: none"></audio>
 
   <!-- Customer Search Box -->
   <!-- /////////////////// -->
@@ -45,7 +46,7 @@
       </div>
 
       <div id="copy-container">
-        <label for="copy-select" title="Copy selected price-list">
+        <label for="copy-select">
           <p id="label-text">CREATE COPY</p>
           <div id="tick"><svg id="tick-img" viewBox="0 0 63 64.5">
               <path
@@ -53,7 +54,6 @@
                 fill="#ffb004" /></svg></div>
         </label>
         <input type="checkbox" id="copy-select" value="1">
-
       </div>
       <div id="button-container">
         <button class="btn" id="check-cancel-btn" href="#">CANCEL</button>
@@ -65,8 +65,24 @@
       </div>
     </div>
     <div id="assist-box">
-      <button class="btn" id="assist-btn" href="#">CUSTOMER FIND</button>
-      <button class="btn" id="view-pause" title="Sort paused only">
+      <button class="btn" id="assist-btn" href="#" title="Search customer database">
+        <div id="logo-assist">
+          <svg viewBox="0 0 240.95 261.27">
+
+            <g transform="translate(222.44 11.563)" fill="#000">
+              <path
+                d="m-72.662 244.6c-14.288 2.2225-29.739 3.5454-44.741 3.5454-49.768 0-105.04-5.08-105.04-28.84v-16.933c0-21.881 33.47-42.095 69.903-49.107 0 0 11.007-5.8473 8.3344-16.933-11.562-13.97-13.996-28.787-13.996-28.787-1.9844-0.87312-4.8154-2.5664-6.5881-4.8948-4.0746-5.5298-7.8317-17.436-7.0115-25.77 0.84667-8.6254 3.175-5.8738 3.4396-7.276-7.329-18.68-3.8364-41.54 5.5562-58.288 18.785-33.602 59.108-23.707 65.564-11.086 38.576-7.1702 36.883 52.943 31.671 68.95 0 0 3.519 0.68792 2.7252 15.372-0.71438 14.737-13.176 24.527-13.176 24.527-0.39688 4.0217-5.3181 16.351-13.414 27.226-1.5346 3.2279-1.8785 5.8208-1.614 7.9904-7.276 11.642-11.536 25.321-11.536 40.005-0.0529 24.633 11.747 46.434 29.924 60.299z"
+                stroke-width=".26458" />
+              <path
+                d="m15.938 234.74-20.595-20.584c5.6402-8.094 8.9778-17.909 8.9778-28.515 0-27.561-22.34-49.889-49.889-49.889-27.561 0-49.889 22.34-49.889 49.889s22.34 49.889 49.889 49.889c10.606 0 20.421-3.3376 28.515-8.9778l20.584 20.584c3.4306 3.4306 8.9778 3.4306 12.408 0 3.4306-3.4074 3.4306-8.9662 0-12.397zm-61.507-13.455c-19.677 0-35.644-15.955-35.644-35.644 0-19.677 15.955-35.644 35.644-35.644 19.677 0 35.644 15.955 35.644 35.644s-15.955 35.644-35.644 35.644z"
+                stroke-width=".11629" />
+            </g>
+          </svg>
+        </div>
+
+
+      </button>
+      <button id="view-pause" title="Display only paused items">
 
         <svg viewBox="0 0 1e3 1e3" id="view-pause-icon">
           <g transform="translate(0 511) scale(.1 -.1)">
@@ -79,6 +95,27 @@
 
       </button>
     </div>
+    <!-- Copy popup -->
+    <dialog id="copy-popup">
+      <h3>IMPORTANT:</h3>
+      <p>
+        Create copy will create a copy of the internal pricing structure of the selected customer.
+        <br>
+        <br>
+        This will give you the option of selecting from the list of customers that do not have price-lists, or
+        alternatively create a new customer.
+      </p>
+      <a href="#" id="copy-yes" title="Continue">
+        <svg enable-background="new 0 0 1000 1000" viewBox="0 0 1e3 1e3" id="copy-yes-logo">
+          <path
+            d="m765.1 392.2-296.9 298.8c-7.3 7.4-17.5 12-28.7 12s-21.4-4.6-28.7-12l-161.7-148.5c-7.3-7.4-11.9-17.6-11.9-28.9 0-22.6 18.2-40.8 40.6-40.8 11.2 0 21.3 4.6 28.7 12l133 119.7 268.2-270c7.3-7.4 17.5-12 28.7-12 22.4 0 40.6 18.3 40.6 40.8 0 11.3-4.6 21.5-11.9 28.9z" />
+          <path
+            d="m500 10c-270.6 0-490 219.4-490 490s219.4 490 490 490 490-219.4 490-490-219.4-490-490-490zm0 909c-231.4 0-419-187.6-419-419s187.6-419 419-419 419 187.6 419 419-187.6 419-419 419z" />
+        </svg>
+
+      </a>
+      <a href="#" class="never-show">NEVER SHOW AGAIN</a>
+    </dialog>
   </div>
 
   <!-- Main Table Form HTML -->
@@ -100,9 +137,7 @@
 
         <div class="grab">
           <svg viewBox="0 0 1000 1000">
-            <metadata>
-              Svg Vector Icons : http:&#x2F;&#x2F;www.onlinewebfonts.com&#x2F;icon
-            </metadata>
+
             <path
               d="M814.2 675.4l-43.5-43.6 101.2-101H530.8V872l101-101.2 43.6 43.5L500 990 324.6 814.2l43.6-43.5 101 101.2V530.8H128l101.2 101 -43.5 43.6L10 500l175.8-175.4 43.5 43.6L128 469.2h341.2V128l-101 101.2 -43.6-43.5L500 10l175.4 175.8 -43.6 43.5L530.8 128v341.2H872l-101.2-101 43.5-43.6L990 500 814.2 675.4 814.2 675.4z" />
           </svg>
@@ -110,27 +145,13 @@
         </div>
 
         <div class="customer-region-item-a">
-          <button id="info-btn" class="info-btn" href="#">INFO</button>
           <div id="overflow">
             <span role="textbox" id="customer-name" spellcheck="false" contenteditable>
             </span>
           </div>
-          <button id="email-now" class="email-now" href="#"></button>
 
-          <!-- Customer Info Dock -->
-          <!-- ////////////////// -->
-          <div id="customer-contact-container">
-            <div id="email">
-              <span>EMAIL ADDRESS</span>
-              <input id="client-email" type="email" placeholder="ENTER EMAIL" />
-            </div>
 
-            <div id="phone">
-              <span>TELEPHONE NUMBER</span>
-              <input id="client-phone" type="text" phone" placeholder="ENTER TEL" />
-            </div>
-          </div>
-
+          <!-- SUGGESTION DOCK -->
           <div id="customer-displaybox-container">
             <div id="display-box-label">ARE YOU LOOKING FOR?</div>
             <div id="overflow-container">
@@ -143,8 +164,8 @@
             <span>CUSTOMER<br />NUMBER</span>
           </span>
           <form action="javascript:null">
-            <input type="text" id="customer-number" placeholder="CUSTOMER #" disabled spellcheck="false" minlength="6"
-              maxlength="7" />
+            <input type="text" id="customer-number" placeholder="CUSTOMER #" minlength="6" maxlength="7"
+              spellcheck="false" />
             <input type="submit" id='customer-number-submit' style="display: none;">
           </form>
         </div>
@@ -153,7 +174,6 @@
           <span id="label-pricelist">
             <span>PRICELIST<br />NUMBER</span>
           </span>
-
           <input type="text" spellcheck="false" placeholder="PRICELIST #" id="pricelist" />
         </div>
 
@@ -165,6 +185,38 @@
           <input type="number" placeholder="CCA PRICE" id="cca-price" />
           <button href="#" class="cca-auto-out" id="cca-auto">AUTO</button>
           <button href="#" class="cca-man-in" id="cca-man">MAN</button>
+
+          <!-- CCA popup -->
+          <dialog id="CCA-popup">
+            <h3>IMPORTANT:</h3>
+            <p>
+              Clicking this button will cause all the treated cells to be recalculated from the entered CCA PRICE.
+              If you have manually entered treated items, these will be replaced.
+              <br>
+              <br>
+              Once clicked the pricing will be calculated live as you enter the untreated pricing.
+            </p>
+            <a href="#" id="CCA-yes" title="Continue">
+              <svg enable-background="new 0 0 1000 1000" viewBox="0 0 1e3 1e3" id="CCA-yes-logo">
+                <path
+                  d="m765.1 392.2-296.9 298.8c-7.3 7.4-17.5 12-28.7 12s-21.4-4.6-28.7-12l-161.7-148.5c-7.3-7.4-11.9-17.6-11.9-28.9 0-22.6 18.2-40.8 40.6-40.8 11.2 0 21.3 4.6 28.7 12l133 119.7 268.2-270c7.3-7.4 17.5-12 28.7-12 22.4 0 40.6 18.3 40.6 40.8 0 11.3-4.6 21.5-11.9 28.9z" />
+                <path
+                  d="m500 10c-270.6 0-490 219.4-490 490s219.4 490 490 490 490-219.4 490-490-219.4-490-490-490zm0 909c-231.4 0-419-187.6-419-419s187.6-419 419-419 419 187.6 419 419-187.6 419-419 419z" />
+              </svg>
+
+            </a>
+            <a href="#" id="CCA-no" title="Cancel">
+
+              <svg enable-background="new 0 0 1000 1000" viewBox="0 0 1e3 1e3" id="CCA-no-logo">
+
+                <path
+                  d="m319.1 250.2-67.9 67.9 174.2 174.2-174.2 174.2 67.9 67.9 174.2-174.2 174.2 174.2 67.9-67.9-174.1-174.2 174.2-174.2-67.9-67.9-174.3 174.2-174.2-174.2zm180.9-164.6c57.4 0 111.2 10.8 161.3 32.5s93.9 51.2 131.6 88.5c37.6 37.3 67.3 81.2 89 131.6s32.5 104.3 32.5 161.7c0 56.8-10.8 110.4-32.5 160.8s-51.4 94.3-89 131.6-81.5 67-131.6 89-103.8 33-161.3 33-111.2-11-161.3-33-93.9-51.7-131.6-89c-37.6-37.3-67.3-81.2-89-131.6s-32.5-104-32.5-160.8c0-57.4 10.8-111.3 32.5-161.7s51.4-94.3 89-131.6 81.5-66.8 131.6-88.5c50.1-21.6 103.9-32.5 161.3-32.5zm0-75.6c-67.6 0-131.3 12.8-190.9 38.3-59.7 25.5-111.7 60.5-156 104.8s-79.3 96.3-104.8 156c-25.5 59.6-38.3 123.3-38.3 190.9s12.8 131.1 38.3 190.4 60.5 111.2 104.8 155.5 96.3 79.4 156 105.3c59.6 25.9 123.3 38.8 190.9 38.8s131.3-12.9 190.9-38.8c59.7-25.8 111.7-60.9 156-105.3 44.3-44.3 79.3-96.2 104.8-155.5s38.3-122.8 38.3-190.4-12.8-131.3-38.3-190.9c-25.5-59.7-60.5-111.7-104.8-156s-96.3-79.3-156-104.8c-59.6-25.5-123.3-38.3-190.9-38.3z" />
+              </svg>
+
+            </a>
+            <a href="#" class="never-show">NEVER SHOW AGAIN</a>
+          </dialog>
+
         </div>
       </div>
 
@@ -184,6 +236,41 @@
                 d="M8 10v-4c0-2.206 1.795-4 4-4s4 1.794 4 4v1h2v-1c0-3.313-2.687-6-6-6s-6 2.687-6 6v4h-3v14h18v-14h-13zm11 12h-14v-10h14v10z" />
             </svg>
           </button>
+
+          <!-- Lock button popup -->
+          <dialog id="lockbutton-popup">
+            <h3>IMPORTANT:</h3>
+            <p>
+              There are restrictions to how lengths can be edited, please follow the patterns shown when placing your
+              mouse on
+              the entry.
+              <br>
+              <br>
+              The algorithm follows the product listing lengths in 300 increments. Leaving out a length or including
+              incorrect
+              lengths
+              will cause product gaps in the generated price-lists.
+            </p>
+            <a href="#" id="lockbutton-yes" title="Continue">
+              <svg enable-background="new 0 0 1000 1000" viewBox="0 0 1e3 1e3" id="lockbutton-yes-logo">
+                <path
+                  d="m765.1 392.2-296.9 298.8c-7.3 7.4-17.5 12-28.7 12s-21.4-4.6-28.7-12l-161.7-148.5c-7.3-7.4-11.9-17.6-11.9-28.9 0-22.6 18.2-40.8 40.6-40.8 11.2 0 21.3 4.6 28.7 12l133 119.7 268.2-270c7.3-7.4 17.5-12 28.7-12 22.4 0 40.6 18.3 40.6 40.8 0 11.3-4.6 21.5-11.9 28.9z" />
+                <path
+                  d="m500 10c-270.6 0-490 219.4-490 490s219.4 490 490 490 490-219.4 490-490-219.4-490-490-490zm0 909c-231.4 0-419-187.6-419-419s187.6-419 419-419 419 187.6 419 419-187.6 419-419 419z" />
+              </svg>
+
+            </a>
+            <a href="#" id="lockbutton-no" title="Cancel">
+
+              <svg enable-background="new 0 0 1000 1000" viewBox="0 0 1e3 1e3" id="lockbutton-no-logo">
+
+                <path
+                  d="m319.1 250.2-67.9 67.9 174.2 174.2-174.2 174.2 67.9 67.9 174.2-174.2 174.2 174.2 67.9-67.9-174.1-174.2 174.2-174.2-67.9-67.9-174.3 174.2-174.2-174.2zm180.9-164.6c57.4 0 111.2 10.8 161.3 32.5s93.9 51.2 131.6 88.5c37.6 37.3 67.3 81.2 89 131.6s32.5 104.3 32.5 161.7c0 56.8-10.8 110.4-32.5 160.8s-51.4 94.3-89 131.6-81.5 67-131.6 89-103.8 33-161.3 33-111.2-11-161.3-33-93.9-51.7-131.6-89c-37.6-37.3-67.3-81.2-89-131.6s-32.5-104-32.5-160.8c0-57.4 10.8-111.3 32.5-161.7s51.4-94.3 89-131.6 81.5-66.8 131.6-88.5c50.1-21.6 103.9-32.5 161.3-32.5zm0-75.6c-67.6 0-131.3 12.8-190.9 38.3-59.7 25.5-111.7 60.5-156 104.8s-79.3 96.3-104.8 156c-25.5 59.6-38.3 123.3-38.3 190.9s12.8 131.1 38.3 190.4 60.5 111.2 104.8 155.5 96.3 79.4 156 105.3c59.6 25.9 123.3 38.8 190.9 38.8s131.3-12.9 190.9-38.8c59.7-25.8 111.7-60.9 156-105.3 44.3-44.3 79.3-96.2 104.8-155.5s38.3-122.8 38.3-190.4-12.8-131.3-38.3-190.9c-25.5-59.7-60.5-111.7-104.8-156s-96.3-79.3-156-104.8c-59.6-25.5-123.3-38.3-190.9-38.3z" />
+              </svg>
+
+            </a>
+            <a href="#" class="never-show">NEVER SHOW AGAIN</a>
+          </dialog>
           <div id="container">
             <table id="table">
               <colgroup>
@@ -212,6 +299,39 @@
 
 
         </button>
+        <!-- CALCULATE popup -->
+        <dialog id="calculatebutton-popup">
+          <h3>IMPORTANT:</h3>
+          <p>
+            Percentage calculator activates the AUTO CCA. If you are unaware of the consequences of using AUTO
+            CCA,
+            please click cancel and click on the AUTO button to read the help message.
+            <br>
+            <br>
+            If you are already aware of the functionality you can click continue.
+          </p>
+          <a href="#" id="calculatebutton-yes" title="Continue">
+            <svg enable-background="new 0 0 1000 1000" viewBox="0 0 1e3 1e3" id="calculatebutton-yes-logo">
+              <path
+                d="m765.1 392.2-296.9 298.8c-7.3 7.4-17.5 12-28.7 12s-21.4-4.6-28.7-12l-161.7-148.5c-7.3-7.4-11.9-17.6-11.9-28.9 0-22.6 18.2-40.8 40.6-40.8 11.2 0 21.3 4.6 28.7 12l133 119.7 268.2-270c7.3-7.4 17.5-12 28.7-12 22.4 0 40.6 18.3 40.6 40.8 0 11.3-4.6 21.5-11.9 28.9z" />
+              <path
+                d="m500 10c-270.6 0-490 219.4-490 490s219.4 490 490 490 490-219.4 490-490-219.4-490-490-490zm0 909c-231.4 0-419-187.6-419-419s187.6-419 419-419 419 187.6 419 419-187.6 419-419 419z" />
+            </svg>
+
+          </a>
+          <a href="#" id="calculatebutton-no" title="Cancel">
+
+            <svg enable-background="new 0 0 1000 1000" viewBox="0 0 1e3 1e3" id="calculatebutton-no-logo">
+
+              <path
+                d="m319.1 250.2-67.9 67.9 174.2 174.2-174.2 174.2 67.9 67.9 174.2-174.2 174.2 174.2 67.9-67.9-174.1-174.2 174.2-174.2-67.9-67.9-174.3 174.2-174.2-174.2zm180.9-164.6c57.4 0 111.2 10.8 161.3 32.5s93.9 51.2 131.6 88.5c37.6 37.3 67.3 81.2 89 131.6s32.5 104.3 32.5 161.7c0 56.8-10.8 110.4-32.5 160.8s-51.4 94.3-89 131.6-81.5 67-131.6 89-103.8 33-161.3 33-111.2-11-161.3-33-93.9-51.7-131.6-89c-37.6-37.3-67.3-81.2-89-131.6s-32.5-104-32.5-160.8c0-57.4 10.8-111.3 32.5-161.7s51.4-94.3 89-131.6 81.5-66.8 131.6-88.5c50.1-21.6 103.9-32.5 161.3-32.5zm0-75.6c-67.6 0-131.3 12.8-190.9 38.3-59.7 25.5-111.7 60.5-156 104.8s-79.3 96.3-104.8 156c-25.5 59.6-38.3 123.3-38.3 190.9s12.8 131.1 38.3 190.4 60.5 111.2 104.8 155.5 96.3 79.4 156 105.3c59.6 25.9 123.3 38.8 190.9 38.8s131.3-12.9 190.9-38.8c59.7-25.8 111.7-60.9 156-105.3 44.3-44.3 79.3-96.2 104.8-155.5s38.3-122.8 38.3-190.4-12.8-131.3-38.3-190.9c-25.5-59.7-60.5-111.7-104.8-156s-96.3-79.3-156-104.8c-59.6-25.5-123.3-38.3-190.9-38.3z" />
+            </svg>
+
+          </a>
+          <a href="#" class="never-show">NEVER SHOW AGAIN</a>
+        </dialog>
+
+
         <div id="footer-logo">
           <img src="../icons/loader.png" id="p2sys-logo" />
         </div>
@@ -292,10 +412,37 @@
               fill="#ffb004" /></svg></div>
       </label>
       <input type="checkbox" id="round-all-select" value="1">
+      <!-- Round All popup -->
+      <dialog id="roundall-popup">
+        <h3>IMPORTANT:</h3>
+        <p>
+          Round all will round all entered values to the nearest 10 integer as per examples below.
+          <br>
+          <br>
+          5555 &nbsp; &#8649; &nbsp; 5560
+          <br>
+          5554 &nbsp; &#8649; &nbsp; 5550
+          <br>
+          <br>
+          If unchecked only the adjusted values will be rounded.
+        </p>
+        <a href="#" id="roundall-yes" title="Continue">
+          <svg enable-background="new 0 0 1000 1000" viewBox="0 0 1e3 1e3" id="roundall-yes-logo">
+            <path
+              d="m765.1 392.2-296.9 298.8c-7.3 7.4-17.5 12-28.7 12s-21.4-4.6-28.7-12l-161.7-148.5c-7.3-7.4-11.9-17.6-11.9-28.9 0-22.6 18.2-40.8 40.6-40.8 11.2 0 21.3 4.6 28.7 12l133 119.7 268.2-270c7.3-7.4 17.5-12 28.7-12 22.4 0 40.6 18.3 40.6 40.8 0 11.3-4.6 21.5-11.9 28.9z" />
+            <path
+              d="m500 10c-270.6 0-490 219.4-490 490s219.4 490 490 490 490-219.4 490-490-219.4-490-490-490zm0 909c-231.4 0-419-187.6-419-419s187.6-419 419-419 419 187.6 419 419-187.6 419-419 419z" />
+          </svg>
+
+        </a>
+        <a href="#" class="never-show">NEVER SHOW AGAIN</a>
+      </dialog>
     </div>
 
   </div>
   </div>
+
+
 </body>
 
 </html>

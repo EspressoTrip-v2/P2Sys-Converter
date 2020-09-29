@@ -51,6 +51,7 @@ let emailRecipients = document.getElementById('email-entry'),
   letterContainer = document.getElementById('sent-letter-container'),
   letterCheckbox = document.getElementById('check-container'),
   sentNotification = document.getElementById('sent-audio'),
+  errorNotification = document.getElementById('error-audio'),
   sentLetter = document.getElementById('sent-letter'),
   soundClick = document.getElementById('click');
 
@@ -194,7 +195,7 @@ function logfileFunc(error) {
 /* EMAIL SENT FUNCTION */
 function sendEmail() {
   borderBox.style.opacity = '0';
-  letterContainer.style.cssText = 'transform: scaleY(1);';
+  letterContainer.style.animation = 'pulseMail 1.5s ease-in-out infinite';
 }
 
 /* EXCEL BOX AND MAIL SEND FUNCTION */
@@ -275,20 +276,23 @@ function populateExcelHtml(message) {
           /* CHANGE THE LETTER TO RED AND CHANGE MESSAGE TO FAIL */
           letterContainer.setAttribute('data-label', '');
           letterContainer.setAttribute('data-fail', 'FAILED');
+          letterContainer.style.animation = 'pulseFail 1.5s ease-in-out 1 forwards';
           sentLetter.style.fill = '#cf2115';
+          errorNotification.play();
           setTimeout(() => {
-            letterContainer.style.cssText = 'transform:scaleY(0);opacity:0;';
+            letterContainer.style.animation = 'none';
             ipcRenderer.send('email-close', null);
             emailWindow.close();
-          }, 1800);
+          }, 2000);
         } else {
           /* IF SUCCESSFUL SHOW TICK AND TRANSITION  */
           letterCheckbox.style.cssText =
             'visibility: visible;transform: rotate(360deg) scale(2);';
           letterContainer.setAttribute('data-label', '');
+          letterContainer.style.animation = 'none';
+          letterContainer.style.transform = 'scale(0)';
           sentNotification.play();
           setTimeout(() => {
-            letterContainer.style.cssText = 'transform:scaleY(0);opacity:0;';
             letterCheckbox.style.cssText = 'transform:scaleY(0);opacity:0;';
             setTimeout(() => {
               ipcRenderer.send('email-close', null);

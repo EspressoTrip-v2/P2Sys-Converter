@@ -33,6 +33,19 @@ const { sendFailedMail } = require(`${dir}/renderer/email/failedMail.js`);
 /////////////////////
 let homeWindow = remote.getCurrentWindow();
 
+/* CHECK TO SEE IF FIRST TIME DISPLAY NOTIFICATIONS HAVE BEEN INITIATED */
+if (!localStorage.getItem('notifications')) {
+  let notObject = {
+    lockbutton: true,
+    autocca: true,
+    roundall: true,
+    copy: true,
+    calculate: true,
+    pausedprices: true, //Not used in popup now maybe in future, still checks to see if set
+  };
+  localStorage.setItem('notifications', JSON.stringify(notObject));
+}
+
 //////////////////
 /* DOM ELEMENTS*/
 ////////////////
@@ -53,7 +66,8 @@ let startBtn = document.getElementById('start'),
   sentSound = document.getElementById('sent'),
   minimizeBtn = document.getElementById('minimize'),
   dbContainer = document.getElementById('db'),
-  dbLogo = document.getElementById('db-logo');
+  dbLogo = document.getElementById('db-logo'),
+  soundPop = document.getElementById('pop');
 
 ///////////////////////
 /* DOM MANIPULATIONS */
@@ -147,42 +161,62 @@ clearCachedEmailsBtnSettings.addEventListener('click', (e) => {
   }
 });
 
-/* CLEAR PAUSED PRICELISTS FILES */
-clearPausedPricelistsBtnSettings.addEventListener('click', (e) => {
-  soundClick.play();
-
-  /* CHECK TO SEE I THERE ARE EMAILS TO REMOVE */
-  let localStorageKeys = Object.keys(localStorage),
-    keys = '';
-
-  if (localStorageKeys.includes('failedEmail')) {
-    localStorageKeys.splice(localStorageKeys.indexOf('failedEmail'), 1);
-    localStorageKeys.forEach((key) => {
-      localStorage.removeItem(key);
-      keys += `${key}, `;
+/* CALCULATE NOTIFICATION */
+let pausedPricesPop = document.getElementById('removepausedprices-popup'),
+  pausedPricesPopYes = document.getElementById('removepausedprices-yes'),
+  pausedPricesPopNo = document.getElementById('removepausedprices-no');
+function notificationPausePrices() {
+  notObject = JSON.parse(localStorage.getItem('notifications'));
+  if (notObject.pausedprices) {
+    soundPop.play();
+    pausedPricesPop.show();
+    pausedPricesPopYes.addEventListener('click', (e) => {
+      soundPop.play();
+      pausedPricesPop.close();
+      pausedPricesPress();
     });
-
-    new Notification('Price-lists removed', {
-      icon: `${dir}/renderer/icons/info.png`,
-      body: `Price-lists for:\n${keys}Have been removed.`,
-      requireInteraction: true,
-    });
-  } else {
-    localStorageKeys.forEach((key) => {
-      localStorage.removeItem(key);
-      keys += `${key}, `;
-    });
-
-    let message =
-      keys.length > 0 ? `Price-lists for:\n${keys}Have been removed.` : 'No price-lists found';
-
-    localStorage.clear();
-    new Notification('Price-lists removed', {
-      icon: `${dir}/renderer/icons/info.png`,
-      body: message,
-      requireInteraction: true,
+    pausedPricesPopNo.addEventListener('click', (e) => {
+      soundPop.play();
+      pausedPricesPop.close();
     });
   }
+}
+
+/* PAUSED EMAIL BUTTON FUNCTION */
+function pausedPricesPress() {
+  soundClick.play();
+  /* GET THE LOCAL STORAGE KEYS */
+  let localStorageKeys = Object.keys(localStorage);
+  /* REMOVE THE FAILED EMAIL AND NOTIFICATION FLAGS */
+  let idxNotify = localStorageKeys.indexOf('notifications');
+  localStorageKeys.splice(idxNotify, 1);
+  let idxEmail = localStorageKeys.indexOf('failedEmails');
+  if (idxEmail !== -1) {
+    localStorageKeys.splice(idxEmail, 1);
+  }
+  let numbers = '';
+
+  localStorageKeys.forEach((el) => {
+    numbers += ` ${el},`;
+    localStorage.removeItem(el);
+  });
+
+  if (numbers.length > 1) {
+    new Notification('PRICE-LISTS REMOVED', {
+      body: `Paused price-lists ${numbers} have been removed`,
+      icon: `${dir}/renderer/icons/info.png`,
+    });
+  } else {
+    new Notification('PRICE-LISTS REMOVED', {
+      body: 'There are no pricelists to remove.',
+      icon: `${dir}/renderer/icons/info.png`,
+    });
+  }
+}
+
+/* CLEAR PAUSED PRICELISTS FILES */
+clearPausedPricelistsBtnSettings.addEventListener('click', (e) => {
+  notificationPausePrices();
 });
 
 /* ONLINE LISTENER */
