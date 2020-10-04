@@ -74,10 +74,17 @@ exports.updater = (window) => {
       });
   });
 
-  /* SEND MESSAGE FOR DOWNLOAD PROGRESS */
-  autoUpdater.signals.progress((info) => {
-    window.webContents.send('update-progress', info.percent);
-  });
+  /* TRY PROGRESS EVENT EMITTER FIRST */
+  try {
+    autoUpdater.on('download-progress', (info) => {
+      window.webContents.send('update-progress', info.percent);
+    });
+  } catch (err) {
+    /* SEND MESSAGE FOR DOWNLOAD PROGRESS */
+    autoUpdater.signals.progress((info) => {
+      window.webContents.send('update-progress', info.percent);
+    });
+  }
 
   /* SEND MESSAGE ON UPDATE READY TO INSTALL */
   autoUpdater.on('update-downloaded', () => {
@@ -92,6 +99,8 @@ exports.updater = (window) => {
       .then((selection) => {
         if (selection.response === 0) {
           autoUpdater.quitAndInstall(false, true);
+        } else if (selection.response === 1) {
+          window.webContents.send('close-updatewindow', null);
         }
       });
   });

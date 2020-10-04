@@ -198,11 +198,11 @@ body {
 
 #send {
   position: absolute;
-  bottom: 10px;
+  bottom: 8px;
   background-color: var(--button-green);
   border-radius: 8px;
   border: 2px solid var(--button-green);
-  font-size: 12px;
+  font-size: 15px;
   padding: 5px 20px;
   font-weight: bold;
   outline: none;
@@ -224,7 +224,9 @@ body {
 
 #failed-container {
   position: absolute;
-  width: 95px;
+  width: 65px;
+  height: 65px;
+  padding: 8px;
   opacity: 1;
   transform: scale(0);
   display: flex;
@@ -232,13 +234,13 @@ body {
   align-items: center;
   align-content: center;
   justify-content: center;
-  padding: 5px 20px;
   -webkit-app-region: drag;
-  border-radius: 10px;
+  border-radius: 50%;
   fill: #fff;
   background-color: var(--button-red);
   animation: none;
   transition: opacity 0.3s 4s;
+  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
 }
 /* shake 0.2s linear infinite alternate */
 @keyframes shake {
@@ -254,19 +256,21 @@ body {
   position: absolute;
   transform: scale(0);
   opacity: 1;
-  width: 95px;
+  width: 65px;
+  height: 65px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   align-content: center;
   justify-content: center;
-  padding: 5px 20px;
-  border-radius: 10px;
+  border-radius: 50%;
   fill: #fff;
   background-color: var(--button-green);
   -webkit-app-region: drag;
   animation: none;
   transition: opacity 0.3s 4s;
+  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
 }
 /* pop 0.3s linear 1 forwards */
 
@@ -285,19 +289,36 @@ body {
 #sending-container {
   position: absolute;
   transform: scale(0);
-  width: 95px;
+  width: 65px;
+  height: 65px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   align-content: center;
   justify-content: center;
-  padding: 5px 20px;
-  border-radius: 8px;
+  border-radius: 50%;
   fill: #fff;
   background-color: var(--button-gold);
   animation: pulse 1s ease-in-out infinite;
   -webkit-app-region: drag;
   transition: transform 0.3s;
+  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
+}
+
+#sent {
+  position: relative;
+  top: 3px;
+}
+
+#fail {
+  position: relative;
+  top: 3px;
+}
+
+#sending {
+  position: relative;
+  top: 3px;
 }
 
 @keyframes pulse {

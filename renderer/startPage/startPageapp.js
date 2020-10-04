@@ -326,12 +326,9 @@ const createObjectFromHtml = () => {
 };
 
 const resetForm = () => {
-  html.style.cssText = 'transform: scale(0);';
-  setTimeout(() => {
-    /* RESTART SECWINDOW */
-    ipcRenderer.send('restart-sec', 'startPage');
-    secWindow.close();
-  }, 1000);
+  /* RESTART SECWINDOW */
+  ipcRenderer.send('restart-sec', 'startPage');
+  secWindow.close();
 };
 
 ////////////////////////////////////
@@ -637,12 +634,8 @@ createBtn.addEventListener('click', (e) => {
     progressFade.style.backdropFilter = 'blur(4px) grayscale(1)';
     ipcRenderer.send('progress', customerData);
   }
-  // htm.style.backgroundColor = 'transparent';
-  // html.style.transform = 'scale(0)';
-  html.style.cssText = 'transform: scale(0);';
-  setTimeout(() => {
-    secWindow.hide();
-  }, 1000);
+
+  secWindow.hide();
 });
 
 /* PAUSE BUTTON TO SAVE TO LOCAL STORAGE */

@@ -198,10 +198,10 @@ function sendEmail() {
   setTimeout(() => {
     ipcRenderer.send('email-close', null);
     emailWindow.setBounds({
-      width: 120,
-      height: 105,
-      x: screenWidth - 125,
-      y: screenHeight - 150,
+      width: 90,
+      height: 90,
+      x: screenWidth - 100,
+      y: screenHeight - 125,
     });
     setTimeout(() => {
       sendingMail.style.transform = 'scale(1)';

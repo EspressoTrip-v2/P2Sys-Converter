@@ -125,12 +125,12 @@ let connectionString, connectionName;
 ////////////////////////
 function mongooseConnect() {
   /* TEST DATABASE */
-  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  connectionName = 'Test Database';
+  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  // connectionName = 'Test Database';
 
   /* AC WHITCHER DATABASE */
-  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  // connectionName = 'A.C Whitcher Database';
+  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  connectionName = 'A.C Whitcher Database';
 
   mongoose
     .connect(connectionString, {
@@ -250,7 +250,7 @@ db.once('connected', async () => {
 });
 
 db.on('disconnected', () => {
-  if (secWindow) {
+  if (secWindow && secWindow.isVisible()) {
     dialog.showMessageBoxSync(secWindow, {
       type: 'info',
       title: 'P2SYS DATABASE CONNECTION LOST',
@@ -267,6 +267,15 @@ db.on('disconnected', () => {
       message: 'The connection to the database has been lost',
       detail:
         'If reconnecting fails please PAUSE your work and update when a connection is available.',
+      icon: `${dir}/renderer/icons/info.png`,
+      buttons: ['OK'],
+    });
+  } else if (emailWindow && emailWindow.isVisible()) {
+    dialog.showMessageBoxSync(emailWindow, {
+      type: 'info',
+      title: 'P2SYS DATABASE CONNECTION LOST',
+      message: 'The connection to the database has been lost',
+      detail: 'The email will fail on send, however it will be sent on the next restart',
       icon: `${dir}/renderer/icons/info.png`,
       buttons: ['OK'],
     });
@@ -333,7 +342,7 @@ function createWindow() {
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -379,10 +388,10 @@ function createSecWindow(message) {
     frame: false,
     spellCheck: false,
     backgroundColor: '#00FFFFFF',
-    alwaysOnTop: true,
+    // alwaysOnTop: true,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -439,7 +448,7 @@ function createChildWindow(message) {
       transparent: true,
       alwaysOnTop: true,
       webPreferences: {
-        // devTools: false,
+        devTools: false,
         nodeIntegration: true,
         enableRemoteModule: true,
       },
@@ -489,7 +498,7 @@ function createLoadingWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -526,7 +535,7 @@ function createEmailWindow(message) {
     alwaysOnTop: true,
     maximizable: false,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -566,7 +575,7 @@ function createProgressWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -604,7 +613,7 @@ function createDbLoaderWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -645,7 +654,7 @@ function createUpdateWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -679,7 +688,7 @@ function createCopySelectionWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -811,6 +820,13 @@ ipcMain.on('close-window-dock', (e, message) => {
 ipcMain.on('loader-close', (e, message) => {
   if (loadingWindow) {
     loadingWindow.close();
+  }
+});
+
+/* CLOSE UPDATE WINDOW */
+ipcMain.on('close-updatewindow', (e, message) => {
+  if (updateWindow) {
+    updateWindow.close();
   }
 });
 
