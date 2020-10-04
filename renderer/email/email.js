@@ -1,6 +1,6 @@
 /* MODULES */
 const nodemailer = require('nodemailer');
-const { shell, ipcRenderer, remote } = require('electron');
+const { screen, ipcRenderer, remote } = require('electron');
 const fs = require('fs');
 
 /* GET WORKING DIRECTORY */
@@ -38,6 +38,7 @@ let emailWindow = remote.getCurrentWindow();
 /* GET SCREEN SIZE */
 let res = remote.screen.getPrimaryDisplay().size;
 screenWidth = res.width;
+screenHeight = res.height;
 
 //////////////////
 /* DOM ELEMENTS */
@@ -45,15 +46,14 @@ screenWidth = res.width;
 
 let emailRecipients = document.getElementById('email-entry'),
   emailMessageArea = document.getElementById('email-message'),
-  excel = document.getElementsByClassName('excel')[0],
   sendBtn = document.getElementById('send'),
   borderBox = document.getElementById('border'),
-  letterContainer = document.getElementById('sent-letter-container'),
-  letterCheckbox = document.getElementById('check-container'),
   sentNotification = document.getElementById('sent-audio'),
   errorNotification = document.getElementById('error-audio'),
-  sentLetter = document.getElementById('sent-letter'),
-  soundClick = document.getElementById('click');
+  soundClick = document.getElementById('click'),
+  sendingMail = document.getElementById('sending-container'),
+  failedMail = document.getElementById('failed-container'),
+  sentMail = document.getElementById('sent-container');
 
 /* CREATE EMAIL TEXT FOR MESSAGE AND INITIAL ADDRESSES */
 emailRecipients.value = process.env.EMAIL_TO;
@@ -163,7 +163,7 @@ function verifyConnect(message) {
       });
       if (dialogReply === 0) {
         /* GET THE MESSAGE OBJECT TO SAVE FOR RETRY ON RELOAD */
-        populateExcelHtml(message);
+        populateEmail(message);
       } else {
         /* SEND FAILED OBJECT TO LOCALSTORAGE FUNCTION */
         failedMessageobj = getMessage(getText(message));
@@ -172,7 +172,7 @@ function verifyConnect(message) {
         emailWindow.close();
       }
     } else {
-      populateExcelHtml(message);
+      populateEmail(message);
     }
   });
 }
@@ -195,60 +195,24 @@ function logfileFunc(error) {
 /* EMAIL SENT FUNCTION */
 function sendEmail() {
   borderBox.style.opacity = '0';
-  letterContainer.style.animation = 'pulseMail 1.5s ease-in-out infinite';
+  setTimeout(() => {
+    ipcRenderer.send('email-close', null);
+    emailWindow.setBounds({
+      width: 120,
+      height: 105,
+      x: screenWidth - 125,
+      y: screenHeight - 150,
+    });
+    setTimeout(() => {
+      sendingMail.style.transform = 'scale(1)';
+    }, 500);
+  }, 500);
 }
 
 /* EXCEL BOX AND MAIL SEND FUNCTION */
-function populateExcelHtml(message) {
+function populateEmail(message) {
   /* GET THE MESSAGE TEXT */
   let text = getText(message);
-
-  html = `
-
-<a href="#" title="Double click to open" class="link" id="file-a">
-<svg class="excel-image" viewBox="0 0 30 30">
-  <style>
-    .a {
-      fill: #08743b;
-    }
-  </style>
-  <path
-    d="M28.7 7.5l-5.5-6.3 -1.1-1.3H9.3c-1.7 0-3.1 1.4-3.1 3.1V7h1.9L8.1 3.8c0-1 0.8-1.8 1.8-1.8l11 0v5.2c0 1.9 1.6 3.5 3.5 3.5h3.8l-0.2 15.1c0 1-0.8 1.8-1.8 1.8l-16.6 0c-0.9 0-1.6-0.9-1.6-1.9v-1.3H6.1v1.9c0 1.9 1.3 3.5 2.9 3.5l17.8 0c1.7 0 3.1-1.4 3.1-3.1V9L28.7 7.5"
-    fill="#434440"
-  />
-  <path d="M20.2 25.4H0V6.1h20.2V25.4M1.9 23.4h16.3V8H1.9" class="a" />
-  <polyline
-    points="15.7 20.8 12.3 20.8 10 17.5 7.6 20.8 4.1 20.8 8.4 15.5 5 10.8 8.4 10.8 10 13.4 11.7 10.8 15.2 10.8 11.6 15.5 15.7 20.8 "
-    class="a"
-  />
-</svg>
-<span id="file-a-label">${fileNameA}</span>
-</a>
-<a href="#" title="Double click to open" class="link" id="file-b">
-<svg class="excel-image" viewBox="0 0 30 30">
-  <style>
-    .a {
-      fill: #08743b;
-    }
-  </style>
-  <path
-    d="M28.7 7.5l-5.5-6.3 -1.1-1.3H9.3c-1.7 0-3.1 1.4-3.1 3.1V7h1.9L8.1 3.8c0-1 0.8-1.8 1.8-1.8l11 0v5.2c0 1.9 1.6 3.5 3.5 3.5h3.8l-0.2 15.1c0 1-0.8 1.8-1.8 1.8l-16.6 0c-0.9 0-1.6-0.9-1.6-1.9v-1.3H6.1v1.9c0 1.9 1.3 3.5 2.9 3.5l17.8 0c1.7 0 3.1-1.4 3.1-3.1V9L28.7 7.5"
-    fill="#434440"
-  />
-  <path d="M20.2 25.4H0V6.1h20.2V25.4M1.9 23.4h16.3V8H1.9" class="a" />
-  <polyline
-    points="15.7 20.8 12.3 20.8 10 17.5 7.6 20.8 4.1 20.8 8.4 15.5 5 10.8 8.4 10.8 10 13.4 11.7 10.8 15.2 10.8 11.6 15.5 15.7 20.8 "
-    class="a"
-  />
-</svg>
-<span id="file-b-label">${fileNameB}</span>
-</a>
-`;
-
-  /* GENERATED DOM ELEMENTS */
-  ////////////////////////////
-  let excelLinks = document.getElementsByClassName('link');
-  excel.insertAdjacentHTML('beforeend', html);
 
   /* EVENT LISTENERS */
 
@@ -259,12 +223,19 @@ function populateExcelHtml(message) {
     soundClick.play();
     let message = getMessage(text);
     setTimeout(() => {
-      /* HIDE EMAIL BOX SHOW LETTER */
       sendEmail();
       mailTransport.sendMail(message, (err, info) => {
+        /* HIDE SENDING ICON */
+        sendingMail.style.display = 'none';
         if (err) {
+          /* HIDE SENDING ICON */
+
+          sendingMail.style.display = 'none';
+
+          /* LOG ERROR */
           logfileFunc(err);
 
+          /* SEND TO LOCAL STORAGE */
           localStorageAppend(message);
 
           /* CREATE NOTIFICATION */
@@ -273,45 +244,27 @@ function populateExcelHtml(message) {
             body: 'There was a problem sending the message',
           });
 
-          /* CHANGE THE LETTER TO RED AND CHANGE MESSAGE TO FAIL */
-          letterContainer.setAttribute('data-label', '');
-          letterContainer.setAttribute('data-fail', 'FAILED');
-          letterContainer.style.animation = 'pulseFail 1.5s ease-in-out 1 forwards';
-          sentLetter.style.fill = '#cf2115';
-          errorNotification.play();
           setTimeout(() => {
-            letterContainer.style.animation = 'none';
-            ipcRenderer.send('email-close', null);
+            /* SHOW FAILED ICON */
+            errorNotification.play();
+            failedMail.style.animation = 'shake 0.2s 0.3s linear infinite alternate';
+            failedMail.style.opacity = '0';
+          }, 500);
+
+          setTimeout(() => {
             emailWindow.close();
-          }, 2000);
+          }, 15000);
         } else {
-          /* IF SUCCESSFUL SHOW TICK AND TRANSITION  */
-          letterCheckbox.style.cssText =
-            'visibility: visible;transform: rotate(360deg) scale(2);';
-          letterContainer.setAttribute('data-label', '');
-          letterContainer.style.animation = 'none';
-          letterContainer.style.transform = 'scale(0)';
+          /* SHOW SENT ICON */
           sentNotification.play();
+          sentMail.style.animation = 'pop 0.3s 0.3s linear 1 forwards';
+          sentMail.style.opacity = '0';
           setTimeout(() => {
-            letterCheckbox.style.cssText = 'transform:scaleY(0);opacity:0;';
-            setTimeout(() => {
-              ipcRenderer.send('email-close', null);
-              emailWindow.close();
-            }, 1800);
-          }, 1000);
+            emailWindow.close();
+          }, 7000);
         }
       });
     }, 200);
-  });
-
-  /* FILE LINKS */
-  /* FILE A */
-  excelLinks[0].addEventListener('dblclick', (e) => {
-    shell.openPath(filePaths[0]);
-  });
-  /* FILE B */
-  excelLinks[1].addEventListener('dblclick', (e) => {
-    shell.openPath(filePaths[1]);
   });
 
   borderBox.style.opacity = '1';

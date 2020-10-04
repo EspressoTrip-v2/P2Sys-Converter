@@ -29,31 +29,38 @@ html {
   height: 100%;
   width: 100%;
   background-color: transparent;
+  overflow: hidden;
 }
 
 main {
   display: flex;
+  position: relative;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   align-content: center;
-  height: 425px;
-  width: 365px;
+  height: 285px;
+  width: 265px;
 }
 #header {
   display: flex;
   position: relative;
-  bottom: 5px;
-  width: 365px;
-  height: 50px;
+  width: 265px;
+  height: 35px;
   background-color: var(--sec-blue);
   justify-content: center;
   align-items: center;
   align-content: center;
-  border-radius: 10px;
-  border: 2px solid var(--main);
   z-index: 1;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  border: 1px solid var(--main);
+  border-bottom: none;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+#boundry {
+  position: relative;
+  border-radius: 10px;
+  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
 }
 
 * {
@@ -64,34 +71,35 @@ main {
   -webkit-user-select: none;
 }
 #logo-background {
-  position: relative;
+  position: absolute;
+  top: -11px;
+  z-index: 2;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 200px;
-  height: 65px;
+  width: 150px;
+  height: 55px;
   background-color: #fff;
   border-radius: 50%;
   border: 2px solid var(--main);
   filter: drop-shadow(2px 4px 6px black);
+  -webkit-app-region: drag;
 }
 #logo-background::after {
   content: 'Mailer';
   position: absolute;
-  top: 14px;
-  right: 30px;
-  font-size: 35px;
+  right: 12px;
+  font-size: 31px;
   font-family: Forelle;
 }
 
 .logo {
   position: absolute;
-  top: -5px;
-  left: 38px;
-  height: 65px;
+  top: -3px;
+  left: 20px;
+  height: 53px;
   -webkit-user-drag: none;
-  -webkit-app-region: drag;
 }
 
 body {
@@ -104,7 +112,6 @@ body {
 #border {
   position: relative;
   display: flex;
-  transform: scale(0.9);
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -117,112 +124,66 @@ body {
 }
 
 .text-container {
-  position: relative;
-  border-radius: 10px;
+  position: absolute;
   top: 0;
+  transform-origin: top;
   display: flex;
   height: 100%;
   width: 100%;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 0 5px;
+  border: 1px solid var(--main);
+  border-top: none;
   background-color: var(--sec-blue);
-  border: 2px solid var(--main);
-  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
 }
 #email-entry {
   height: 50px;
-  margin-bottom: 15px;
-  padding: 5px;
+  margin-bottom: 10px;
 }
 
 #email-entry::-webkit-scrollbar {
   width: 4px;
-  background-color: var(--main-blue);
 }
 #email-entry::-webkit-scrollbar-thumb {
   height: 3px;
-  background-color: var(--sec-blue);
+  background-color: #c1c1c1;
 }
 
 .entry {
   border-radius: 5px;
-  border: 2px solid #fff;
-  width: 350px;
-  height: 180px;
+  bottom: 13px;
+  position: relative;
+  border: 1px solid #f1f1f1;
+  width: 250px;
+  height: 117px;
   outline: none;
   padding: 5px;
   resize: none;
-  margin-bottom: 20px;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 #email-message::-webkit-scrollbar {
   width: 4px;
-  background-color: var(--main-blue);
 }
 #email-message::-webkit-scrollbar-thumb {
   height: 3px;
-  background-color: var(--sec-blue);
+  background-color: #c1c1c1;
 }
 
-.excel-image {
-  width: 25px;
-}
 .label {
   display: flex;
   position: relative;
+  bottom: 13px;
   left: 5px;
   justify-content: left;
   font-weight: bold;
-  width: 350px;
-  padding-bottom: 10px;
-  font-size: 15px;
+  width: 255px;
+  padding-bottom: 5px;
+  font-size: 12px;
   color: #fff;
-}
-
-.excel {
-  position: relative;
-  bottom: 15px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  width: 100%;
-  height: 35px;
-  background-color: #fff;
-  border-radius: 5px;
-  padding: 5px;
-  overflow: auto;
-}
-
-.excel::-webkit-scrollbar {
-  height: 4px;
-  background-color: var(--main-blue);
-}
-.excel::-webkit-scrollbar-thumb {
-  background-color: var(--sec-blue);
-}
-
-.link {
-  position: relative;
-  margin-right: 10px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  align-content: center;
-  text-decoration: none;
-  color: #000000;
-}
-
-#file-a-label {
-  margin-left: 5px;
-  font-size: 15px;
-}
-#file-b-label {
-  margin-left: 5px;
-  font-size: 15px;
 }
 
 #letter {
@@ -231,26 +192,28 @@ body {
   left: -3px;
   height: 70px;
   width: 100%;
-  fill: #fff;
+  fill: #000;
   transition: fill 0.5s;
 }
 
 #send {
-  position: relative;
-  height: 40px;
-  width: 110px;
-  top: 0px;
-  background-color: var(--button-gold);
-  border-radius: 10px;
-  border: 3px solid var(--button-gold);
+  position: absolute;
+  bottom: 10px;
+  background-color: var(--button-green);
+  border-radius: 8px;
+  border: 2px solid var(--button-green);
+  font-size: 12px;
+  padding: 5px 20px;
+  font-weight: bold;
   outline: none;
-  overflow: hidden;
+  color: #fff;
   box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
 }
 #send:hover {
   background-color: #fff;
-  border: 3px solid var(--button-gold);
+  border: 2px solid var(--button-green);
+  color: var(--button-green);
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
@@ -259,83 +222,89 @@ body {
   box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
-#letter:hover {
-  fill: var(--button-gold);
-}
-#sent-letter-container {
-  /* visibility: visible; */
+#failed-container {
+  position: absolute;
+  width: 95px;
+  opacity: 1;
+  transform: scale(0);
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
   justify-content: center;
-  align-items: flex-start;
+  padding: 5px 20px;
+  -webkit-app-region: drag;
+  border-radius: 10px;
+  fill: #fff;
+  background-color: var(--button-red);
+  animation: none;
+  transition: opacity 0.3s 4s;
+}
+/* shake 0.2s linear infinite alternate */
+@keyframes shake {
+  from {
+    transform: rotate(-5deg);
+  }
+  to {
+    transform: rotate(5deg);
+  }
+}
+
+#sent-container {
   position: absolute;
   transform: scale(0);
-  height: 72px;
-  width: 100px;
-  border-radius: 10px;
-  background-color: #fff;
-  /* transition: transform 0.8s 0.3s, opacity 0.8s 0.3s; */
-  box-shadow: 1px 1px 14px 0px rgba(50, 50, 50, 1);
-  animation: none;
-}
-#sent-letter-container::before {
-  position: absolute;
-  font-size: 25px;
-  top: 85px;
-  font-weight: bolder;
-  content: attr(data-label);
-}
-
-#sent-letter-container::after {
-  position: absolute;
-  text-align: center;
-  color: #cf2115;
-  font-size: 25px;
-  top: 85px;
-  font-weight: bolder;
-  content: attr(data-fail);
-}
-
-@keyframes pulseMail {
-  0% {
-    transform: scale(0.5);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(0.5);
-  }
-}
-
-@keyframes pulseFail {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(0);
-  }
-}
-
-#sent-letter {
-  position: relative;
-  bottom: 15px;
-  width: 150px;
-}
-
-#check-container {
-  /* visibility: visible; */
   opacity: 1;
-  transform: rotate(0deg) scale(0);
-  position: absolute;
-  width: fit-content;
-  transition: transform 0.8s, opacity 0.8s;
+  width: 95px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  padding: 5px 20px;
+  border-radius: 10px;
+  fill: #fff;
+  background-color: var(--button-green);
+  -webkit-app-region: drag;
+  animation: none;
+  transition: opacity 0.3s 4s;
+}
+/* pop 0.3s linear 1 forwards */
+
+@keyframes pop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
-#check {
-  position: relative;
-  width: 120px;
-  height: auto;
+#sending-container {
+  position: absolute;
+  transform: scale(0);
+  width: 95px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  padding: 5px 20px;
+  border-radius: 8px;
+  fill: #fff;
+  background-color: var(--button-gold);
+  animation: pulse 1s ease-in-out infinite;
+  -webkit-app-region: drag;
+  transition: transform 0.3s;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

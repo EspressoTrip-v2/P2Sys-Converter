@@ -50,13 +50,25 @@ exports.tablePopulate = (jsonfile) => {
       pattern = dataObjects['regex-patterns']['standard'];
       title = '(#.#)-(#.#)';
     }
-
+    /* <td id="BR${el}" class="BR">${row[0]}</td> */
+    /*  <td id="DR${el}" class="DR">${row[1]}</td> */
     // Length and price entries
     htmlInner += `
     
     <tr id="R${el}" ">
-      <td id="BR${el}">${row[0]}</td>
-      <td id="DR${el}">${row[1]}</td>
+      <td>
+      <input type="text" id="BR${el}" class="BR" value="${
+      row[0]
+    }" style="border: none;" disabled/>
+      </td>
+      
+      <td>
+      <input type="text" id="DR${el}" class="DR" value="${
+      row[1]
+    }" style="border: none;" disabled/>
+      </td>
+      
+     
       
       <td>
       <form action="javascript:null;"><input pattern=${pattern} id="ER${el}"  title="${title}" class="table-entries" type="text" value="${

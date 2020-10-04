@@ -161,7 +161,7 @@ clearCachedEmailsBtnSettings.addEventListener('click', (e) => {
   }
 });
 
-/* CALCULATE NOTIFICATION */
+/* PAUSED PRICES NOTIFICATION */
 let pausedPricesPop = document.getElementById('removepausedprices-popup'),
   pausedPricesPopYes = document.getElementById('removepausedprices-yes'),
   pausedPricesPopNo = document.getElementById('removepausedprices-no');
@@ -187,18 +187,13 @@ function pausedPricesPress() {
   soundClick.play();
   /* GET THE LOCAL STORAGE KEYS */
   let localStorageKeys = Object.keys(localStorage);
-  /* REMOVE THE FAILED EMAIL AND NOTIFICATION FLAGS */
-  let idxNotify = localStorageKeys.indexOf('notifications');
-  localStorageKeys.splice(idxNotify, 1);
-  let idxEmail = localStorageKeys.indexOf('failedEmails');
-  if (idxEmail !== -1) {
-    localStorageKeys.splice(idxEmail, 1);
-  }
   let numbers = '';
 
   localStorageKeys.forEach((el) => {
-    numbers += ` ${el},`;
-    localStorage.removeItem(el);
+    if (el !== 'notifications' && el !== 'failedEmail') {
+      numbers += ` ${el},`;
+      localStorage.removeItem(el);
+    }
   });
 
   if (numbers.length > 1) {

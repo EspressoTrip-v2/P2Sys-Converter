@@ -125,12 +125,12 @@ let connectionString, connectionName;
 ////////////////////////
 function mongooseConnect() {
   /* TEST DATABASE */
-  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  // connectionName = 'Test Database';
+  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  connectionName = 'Test Database';
 
   /* AC WHITCHER DATABASE */
-  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  connectionName = 'A.C Whitcher Database';
+  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  // connectionName = 'A.C Whitcher Database';
 
   mongoose
     .connect(connectionString, {
@@ -327,7 +327,7 @@ function createWindow() {
   homeWindow = new BrowserWindow({
     width: 300,
     height: 420,
-    // resizable: false,
+    resizable: false,
     spellCheck: false,
     center: true,
     alwaysOnTop: true,
@@ -363,6 +363,9 @@ function createWindow() {
   //   Event listener for closing
   homeWindow.on('closed', () => {
     homeWindow = null;
+    if (!emailWindow) {
+      app.quit();
+    }
   });
 }
 
@@ -430,6 +433,7 @@ function createChildWindow(message) {
       autoHideMenuBar: true,
       backgroundColor: '#00FFFFFF',
       center: true,
+      skipTaskbar: true,
       frame: false,
       spellCheck: false,
       transparent: true,
@@ -480,6 +484,7 @@ function createLoadingWindow() {
     backgroundColor: '#00FFFFFF',
     center: true,
     frame: false,
+    skipTaskbar: true,
     spellCheck: false,
     transparent: true,
     alwaysOnTop: true,
@@ -510,9 +515,8 @@ function createLoadingWindow() {
 /* EMAIL POPUP WINDOW */
 function createEmailWindow(message) {
   emailWindow = new BrowserWindow({
-    parent: secWindow,
-    height: 500,
-    width: 380,
+    height: 355,
+    width: 285,
     autoHideMenuBar: true,
     center: true,
     backgroundColor: '#00FFFFFF',
@@ -520,12 +524,13 @@ function createEmailWindow(message) {
     spellCheck: false,
     transparent: true,
     alwaysOnTop: true,
+    maximizable: false,
     webPreferences: {
       // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
-    icon: iconImage,
+    icon: `${dir}/renderer/icons/mailTemplate.png`,
   });
 
   //   Load html page
@@ -556,6 +561,7 @@ function createProgressWindow() {
     backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
     center: true,
+    skipTaskbar: true,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -593,6 +599,7 @@ function createDbLoaderWindow() {
     backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
     alwaysOnTop: true,
+    skipTaskbar: true,
     center: true,
     frame: false,
     transparent: true,
@@ -633,6 +640,7 @@ function createUpdateWindow() {
     backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
     alwaysOnTop: true,
+    skipTaskbar: true,
     center: true,
     frame: false,
     transparent: true,
@@ -665,6 +673,7 @@ function createCopySelectionWindow() {
     resizable: false,
     backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
+    skipTaskbar: true,
     alwaysOnTop: true,
     center: true,
     frame: false,

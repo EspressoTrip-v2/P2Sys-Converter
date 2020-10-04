@@ -43,7 +43,7 @@ main {
   flex-direction: column;
   justify-content: center;
   background-color: #fff;
-  border: 3px solid var(--main);
+  border: 2px solid var(--main);
   border-radius: 10px;
   padding: 10px 3px;
   width: 260px;
@@ -56,7 +56,7 @@ header {
   flex-direction: column;
   justify-content: center;
   background-color: var(--sec-blue);
-  border: 3px solid var(--main);
+  border: 2px solid var(--main);
   border-radius: 10px;
   height: 65px;
   width: 260px;
@@ -164,7 +164,7 @@ footer {
   justify-items: center;
   align-items: center;
   background-color: var(--sec-blue);
-  border: 3px solid var(--main);
+  border: 2px solid var(--main);
   border-radius: 10px;
   height: 65px;
 }
@@ -240,6 +240,6 @@ footer {
   top: 21px;
   margin: 5rem auto;
   align-self: center;
-  border: 3px solid var(--main);
+  border: 2px solid var(--main);
   border-radius: 8px;
 }

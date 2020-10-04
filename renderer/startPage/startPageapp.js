@@ -64,7 +64,13 @@ let searchValue,
   customerNameNumber,
   customerBackUp,
   cusNum,
-  notObject;
+  notObject,
+  bundleSizeColumn,
+  bundleSizeHeading,
+  exmillPrice,
+  exmillTransportCost,
+  untreatedColumnClass,
+  treatedColumnClass;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -93,6 +99,17 @@ let backBtn = document.getElementById('back-to-main-btn'),
   minimizeTableBtn = document.getElementById('minimize-table'),
   calculateBtn = document.getElementById('calculate'),
   neverShowAgainBtn = Array.from(document.getElementsByClassName('never-show')),
+  exmillBtn = document.getElementById('exmill'),
+  exmillBtnDisabled = document.getElementById('exmill-disabled'),
+  exmillContainer = document.getElementById('exmill-transport-container'),
+  exmillApplyBtn = document.getElementById('exmill-transport-apply'),
+  exmillTransportValue = document.getElementById('exmill-transport-value'),
+  exmillPop = document.getElementById('exmill-popup'),
+  exmillYes = document.getElementById('exmill-yes'),
+  exmillInfoPop = document.getElementById('exmill-info-popup'),
+  exmillInfoYes = document.getElementById('exmill-info-yes'),
+  transportFooterContainer = document.getElementById('transport-value'),
+  transportFooterValue = document.getElementById('t-value'),
   /* TABLE COMPONENT DOMS */
   /////////////////////////
   table = document.getElementById('table'),
@@ -287,8 +304,8 @@ const createObjectFromHtml = () => {
   /* TABLE ROW INNER ID FOR BUNDLE SIZE: BR, DIMENSIONS: DR, LENGTH: ER, UNTREATED: USER, TREATED: TSER */
   for (var i = 0; i < tableData.length; i++) {
     jsonObjectData[i] = [
-      document.getElementById(`BR${i}`).innerText,
-      document.getElementById(`DR${i}`).innerText,
+      document.getElementById(`BR${i}`).value,
+      document.getElementById(`DR${i}`).value,
       document.getElementById(`ER${i}`).value,
       parseInt(document.getElementById(`USER${i}`).value),
       parseInt(document.getElementById(`TSER${i}`).value),
@@ -309,13 +326,12 @@ const createObjectFromHtml = () => {
 };
 
 const resetForm = () => {
-  html.style.cssText = 'transform:scale(0)';
-  html.style.display == 'none';
+  html.style.cssText = 'transform: scale(0);';
   setTimeout(() => {
     /* RESTART SECWINDOW */
     ipcRenderer.send('restart-sec', 'startPage');
     secWindow.close();
-  }, 300);
+  }, 1000);
 };
 
 ////////////////////////////////////
@@ -406,7 +422,23 @@ const htmlInnerFill = (customernumber, html) => {
   getBackupDateStrings(customernumber, cuMenu, ctMenu);
 };
 
-/* FUNCTION TO GENERATE THE TABLE PAGE IF UPDATE OR COPY IS SELECTED */
+/* ACTIVATE EXMILL BUTTON FUNCTION */
+function activateExmillBtn() {
+  if (ccaPrice.value.length > 0) {
+    /* ACTIVATE THE EXMILL BUTTON */
+    if (Object.keys(customerPrices).includes('@EXMILL')) {
+      exmillBtn.style.display = 'block';
+      exmillBtnDisabled.style.display = 'none';
+    } else {
+      setTimeout(() => {
+        soundPop.play();
+        exmillPop.show();
+      }, 2000);
+    }
+  }
+}
+
+/* FUNCTION TO FILL THE TABLE PAGE IF UPDATE OR COPY IS SELECTED */
 function tablePageCreate(type) {
   /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
   if (type) {
@@ -457,6 +489,9 @@ function tablePageCreate(type) {
     secWindow.maximize();
     secWindow.setMinimumSize(950, 700);
   }, 300);
+
+  /* CHECK TO ACTIVATE EXMILL BTN */
+  activateExmillBtn();
 }
 
 ///////////////////////////////////
@@ -497,14 +532,18 @@ backBtn.addEventListener('click', () => {
 
 /* CREATE BUTTON */
 createBtn.addEventListener('click', (e) => {
+  /* MAKE SURE BUNDLE SIZES ARE NOT SHOWING EXMILL */
+  repopulateBundleSize();
+
   soundClick.play();
+
   /* CHECK ALL VALUE ENTRIES AND WARN IF MISSING */
   let treatedMissingBool = [],
-    untreatedMissingBool = [],
-    untreatedColumnClass = Array.from(
-      document.getElementsByClassName('price-entries-untreated')
-    ),
-    treatedColumnClass = Array.from(document.getElementsByClassName('price-entries-treated'));
+    untreatedMissingBool = [];
+  untreatedColumnClass = Array.from(
+    document.getElementsByClassName('price-entries-untreated')
+  );
+  treatedColumnClass = Array.from(document.getElementsByClassName('price-entries-treated'));
 
   /* SEND HTML ELEMENTS WITH NO VALUES TO ARRAY */
   treatedColumnClass.forEach((el) => {
@@ -598,10 +637,17 @@ createBtn.addEventListener('click', (e) => {
     progressFade.style.backdropFilter = 'blur(4px) grayscale(1)';
     ipcRenderer.send('progress', customerData);
   }
+  // htm.style.backgroundColor = 'transparent';
+  // html.style.transform = 'scale(0)';
+  html.style.cssText = 'transform: scale(0);';
+  setTimeout(() => {
+    secWindow.hide();
+  }, 1000);
 });
 
 /* PAUSE BUTTON TO SAVE TO LOCAL STORAGE */
 pauseBtn.addEventListener('click', () => {
+  repopulateBundleSize();
   soundClick.play();
   if (customerName.innerText.length !== 0) {
     /* CREATE THE STORAGE OBJECT */
@@ -722,6 +768,7 @@ function CCAAutoSwitch() {
   if (autoCaaBtn.classList.value === 'cca-auto-out' && ccaPrice.value) {
     autoCaaBtn.setAttribute('class', 'cca-auto-in');
     autoCaaBtn.disabled = true;
+    ccaPrice.disabled = true;
     treatedColumns.style.backgroundColor = 'var(--opaque-auto)';
 
     // Disable all treated cells
@@ -774,6 +821,7 @@ function CCAManualSwitch() {
     // Set man button in
     manCaaBtn.setAttribute('class', 'cca-man-in');
     manCaaBtn.disabled = true;
+    ccaPrice.disabled = false;
     treatedColumns.style.backgroundColor = 'var(--opaque-man)';
 
     // Make treated cell active
@@ -797,8 +845,205 @@ function CCAManualSwitch() {
 /* MANUAL CCA BUTTON */
 manCaaBtn.addEventListener('click', (e) => {
   CCAManualSwitch();
+  repopulateBundleSize();
+  transportFooterContainer.close();
 });
 
+/* EXMILL FUNCTIONS AND BUTTON */
+/* FUNCTION TO REPOPULATE THE BUNDLE SIZE WITH ORIGINAL INFO AND CHANGE BACK THE BACKGROUND */
+function repopulateBundleSize() {
+  /* ASSIGN CREATED DOM ELEMENTS */
+  bundleSizeColumn = document.getElementById('bundle');
+  bundleSizeHeading = document.getElementById('bundle-size');
+  bundleSizeHeading.innerText = 'BUNDLE SIZE';
+  bundleSizeHeading.style.backgroundColor = 'var(--main)';
+  bundleSizeColumn.setAttribute('class', 'standard');
+
+  let br, element;
+  for (let i = 0; i < 30; i++) {
+    /* CREATE BUNDLE SIZE ENTRY ID */
+    br = `BR${i}`;
+    element = document.getElementById(br);
+    element.style.color = '#000';
+    element.value = jsonFile[i][0];
+  }
+}
+
+/* FUNCTION TO CREATE THE PERCENTAGE STRING FOR EXMILL */
+function createExmillPercent(pricelistvalue, exmillvalue) {
+  let string, newInt;
+  let value = (pricelistvalue / exmillvalue - 1) * 100;
+  if (value > 1) {
+    newInt = value.toFixed(2);
+    return `+${newInt}%`;
+  } else if (value < 1) {
+    newInt = value.toFixed(2);
+    return `${newInt}%`;
+  }
+}
+
+/* FUNCTION TO LIVE CALCULATE THE EXMILL VALUE */
+function exmillKeyUp() {
+  /* GET BUNDLE SIZE ELEMENT BY REPLACING LETTERS IN ID */
+  let br = document.getElementById(this.id.replace('USER', 'BR')),
+    /* GET EXMILL VALUE BY REPLACING LETTERS IN ID */
+    exmillValue =
+      exmillPrice[parseInt(this.id.replace('USER', ''))][4] - parseInt(exmillTransportCost);
+  /* CALCULATE TREATED VALUE BY ADDING CCA PRICE */
+  let ctValue =
+    parseInt(this.value) + parseInt(ccaPrice.value) - parseInt(exmillTransportCost);
+
+  /* CHECK TO SEE IF VALUE IS UNDEFINED AND SEND TO INPUT */
+  let calcValue = createExmillPercent(ctValue, exmillValue);
+  if (calcValue) {
+    br.value = calcValue;
+  } else if (calcValue === undefined) {
+    br.value = '-';
+    br.style.color = '#000';
+    br.style.fontWeight = 'normal';
+  }
+
+  /* CHANGE COLOR OF TEXT */
+  if ((ctValue / exmillValue - 1) * 100 > 0) {
+    br.style.color = 'var(--dark-green)';
+    br.style.fontWeight = 'bold';
+  } else if ((ctValue / exmillValue - 1) * 100 < 0) {
+    br.style.color = 'var(--button-red';
+    br.style.fontWeight = 'bold';
+  }
+}
+
+/* FUNCTION TO MAKE EXMILL COMPARISON */
+function compareExmill() {
+  /* SET THE COLOR AND HEADING */
+  bundleSizeHeading.innerText = 'EX-MILL %';
+  bundleSizeHeading.style.backgroundColor = 'dodgerblue';
+  bundleSizeColumn.setAttribute('class', 'exm');
+
+  let brInput, ctInputValue, element, exmillValue;
+  for (let i = 0; i < 30; i++) {
+    /* CREATE BUNDLE SIZE ENTRY ID */
+    /* PRICELIST TREATED VALUE */
+    ctInputValue =
+      parseInt(document.getElementById(`TSER${i}`).value) - parseInt(exmillTransportCost);
+    /* EXMILL TREATED VALUE */
+    exmillValue = parseInt(exmillPrice[i][4]) - parseInt(exmillTransportCost);
+
+    /* PARSE BUNDLE SIZE ID */
+    brInput = `BR${i}`;
+    element = document.getElementById(brInput);
+
+    /* CHECK IF VALUE IS UNDEFINED AND SEND TO INPUT */
+    let calcValue = createExmillPercent(ctInputValue, exmillValue);
+    if (calcValue) {
+      element.value = calcValue;
+    } else if (calcValue === undefined) {
+      element.value = '-';
+    }
+
+    /* CHANGE THE COLOR  */
+    if ((ctInputValue / exmillValue - 1) * 100 > 0) {
+      element.style.color = 'var(--dark-green)';
+      element.style.fontWeight = 'bold';
+    } else if ((ctInputValue / exmillValue - 1) * 100 < 0) {
+      element.style.color = 'var(--button-red';
+      element.style.fontWeight = 'bold';
+    }
+  }
+}
+
+/* EXMILL BUTTON FUNCTION */
+function exmillClick() {
+  if (window.getComputedStyle(exmillContainer).transform === 'matrix(0, 0, 0, 1, 0, 0)') {
+    /* RESET THE TRANSPORT VALUE IF VISIBLE */
+
+    if (
+      window.getComputedStyle(transportFooterContainer).transform ===
+      'matrix(1, 0, 0, 1, 0, 0)'
+    ) {
+      transportFooterContainer.close();
+      setTimeout(() => {
+        transportFooterValue.innerText = '';
+      }, 300);
+    } else {
+      transportFooterValue.innerText = '';
+    }
+
+    /* SET CCA AUTO */
+    CCAAutoSwitch();
+    /* OPEN DOCK */
+    exmillContainer.style.transform = 'scaleX(1)';
+    exmillTransportValue.focus();
+    /* ADD KEYUP EVENTS FOR LIVE ADJUSTMENT */
+    untreatedColumnClass.forEach((el) => {
+      el.addEventListener('keyup', exmillKeyUp);
+    });
+    /* RESET THE BUNDLE COLUMN TO RESET CALCULATION IF ALREADY DONE */
+    setTimeout(() => {
+      repopulateBundleSize();
+    }, 300);
+  } else {
+    /* SET CCA MANUAL */
+    CCAManualSwitch();
+    /* REMOVE THE EVENT LISTENERS */
+    untreatedColumnClass.forEach((el) => {
+      el.removeEventListener('keyup', exmillKeyUp);
+    });
+    /* CLOSE THE DOCK */
+    exmillContainer.style.transform = 'scaleX(0)';
+    exmillTransportValue.value = '';
+    /* DISABLE THE APPLY BUTTON */
+    exmillApplyBtn.setAttribute('class', 'exmill-btn-disabled');
+  }
+}
+
+/* YES BUTTON FOR EXMILL POPUP */
+exmillYes.addEventListener('click', (e) => {
+  soundPop.play();
+  exmillPop.close();
+});
+
+/* EXMILL BUTTON  */
+exmillBtn.addEventListener('click', (e) => {
+  soundClick.play();
+
+  exmillClick();
+});
+
+/* EVENT LISTENER FOR EXMILL INPUT TO ACTIVATE APPLY BUTTON */
+exmillTransportValue.addEventListener('keyup', (e) => {
+  /* ACTIVATE APPLY BUTTON ONLY WHEN VALUE IS ENTERED */
+  if (exmillTransportValue.value.length < 2) {
+    exmillApplyBtn.setAttribute('class', 'exmill-btn-disabled');
+    exmillApplyBtn.disabled = true;
+  } else {
+    exmillApplyBtn.setAttribute('class', 'exmill-enabled-apply');
+    exmillApplyBtn.disabled = false;
+  }
+});
+
+/* EXMILL APPLY BUTTON */
+exmillApplyBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  exmillTransportCost = exmillTransportValue.value;
+  transportFooterValue.innerText = exmillTransportCost;
+  setTimeout(() => {
+    compareExmill();
+    setTimeout(() => {
+      exmillContainer.style.transform = 'scaleX(0)';
+      exmillTransportValue.value = '';
+      exmillApplyBtn.setAttribute('class', 'exmill-btn-disabled');
+      exmillTransportValue.value = '';
+      exmillApplyBtn.setAttribute('class', 'exmill-btn-disabled');
+      setTimeout(() => {
+        transportFooterContainer.show();
+      }, 500);
+    }, 200);
+  }, 200);
+});
+
+/* exmillApplyBtn
+exmillTransportValue */
 /////////////////////////////////
 /* CUSTOMER NUMBER SEARCH BOX */
 ///////////////////////////////
@@ -888,15 +1133,6 @@ function populateList() {
   customerNumber = Object.keys(customerPrices);
 
   let localStorageKeys = Object.keys(localStorage);
-  let idxEmail = localStorageKeys.indexOf('failedEmail');
-  let idxNot = localStorageKeys.indexOf('notifications');
-
-  if (idxEmail !== -1) {
-    localStorageKeys.splice(idxEmail, 1);
-  }
-  if (idxNot !== -1) {
-    localStorageKeys.splice(idxNot, 1);
-  }
 
   customerNumber.forEach((el) => {
     if (localStorage.getItem(el)) {
@@ -915,10 +1151,12 @@ function populateList() {
   });
   if (localStorageKeys.length > 0) {
     localStorageKeys.forEach((el) => {
-      let html = `
-      <dl class="cusnum-resume" id="${el}">${el}</dl>
-      `;
-      customerNumberList.insertAdjacentHTML('beforeend', html);
+      if (el !== 'notifications' && el !== 'failedEmail') {
+        let html = `
+        <dl class="cusnum-resume" id="${el}">${el}</dl>
+        `;
+        customerNumberList.insertAdjacentHTML('beforeend', html);
+      }
     });
   }
   addListListeners();
@@ -927,7 +1165,9 @@ function populateList() {
 /* REMOVE ITEMS IN THE LIST THAT DOES NOT MATCH SEARCH */
 customerSearch.addEventListener('keyup', (e) => {
   // USE REGEX TO REMOVE ANY UNWANTED CHAR
-  let pattern = /\w+|\s+/g;
+  let pattern = /\w+|\s+/g,
+    matchStop = /[.]/g;
+  customerSearch.value = customerSearch.value.replace(matchStop, '');
 
   if (customerSearch.value) {
     let match = customerSearch.value.match(pattern).join('');
@@ -1063,6 +1303,19 @@ checkContinueBtn.addEventListener('click', (e) => {
     secWindow.maximize();
     secWindow.setMinimumSize(950, 700);
   }, 300);
+
+  /* ACTIVATE EXMILL BUTTON */
+  activateExmillBtn();
+
+  /* SHOW INFO POPUP FOR EXMILL */
+  setTimeout(() => {
+    soundPop.play();
+    exmillInfoPop.show();
+    exmillInfoYes.addEventListener('click', (e) => {
+      soundPop.play();
+      exmillInfoPop.close();
+    });
+  }, 2000);
 });
 
 /* UPDATE BUTTON */
@@ -1078,11 +1331,14 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
   /* SET THE SEARCH VALUE TO CUSTOMER SEARCH VALUE UPPERCASE*/
   searchValue = customerSearch.value.toUpperCase();
 
-  let localPricelist = JSON.parse(localStorage.getItem(searchValue));
-
+  // let localStorageObject = JSON.parse(localStorage.getItem(searchValue));
+  /* GET OBJECT FROM LOCAL STORAGE */
   let localStorageObject = JSON.parse(localStorage.getItem(searchValue));
+  /* SET JSONfILE */
+  jsonFile = localStorageObject[searchValue];
+  console.log(jsonFile);
   // POPULATE HTML TABLE
-  htmlContent = tablePopulate(localPricelist[searchValue]);
+  htmlContent = tablePopulate(localStorageObject[searchValue]);
   htmlInnerFill(searchValue, htmlContent);
 
   // HIDE SEARCH BOX
@@ -1099,7 +1355,7 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
     ? customerPricelistNumber[searchValue]
     : searchValue;
   customerPriceList.disabled = true;
-  ccaPrice.value = localPricelist[searchValue]['CCA'];
+  ccaPrice.value = localStorageObject[searchValue]['CCA'];
 
   // ADD BACKGROUND TO HTML ELEMENT
   setTimeout(() => {
@@ -1119,6 +1375,9 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
     secWindow.maximize();
     secWindow.setMinimumSize(950, 700);
   }, 300);
+
+  /* ACTIVATE EXMILL BUTTON */
+  activateExmillBtn();
 });
 
 /* CANCEL BUTTON */
@@ -1285,18 +1544,15 @@ minimizeTableBtn.addEventListener('click', () => {
 
 /* PAUSE BUTTON FLAG FUNCTION */
 function checkLocalStorage() {
-  let localStorageKeys = Object.keys(localStorage);
-  let idxEmail = localStorageKeys.indexOf('failedEmail');
-  let idxNot = localStorageKeys.indexOf('notifications');
+  let localStorageKeys = Object.keys(localStorage),
+    storageArr = [];
+  localStorageKeys.forEach((el) => {
+    if (el !== 'notifications' && el !== 'failedEmail') {
+      storageArr.push(el);
+    }
+  });
 
-  if (idxEmail !== -1) {
-    localStorageKeys.splice(idxEmail, 1);
-  }
-  if (idxNot !== -1) {
-    localStorageKeys.splice(idxNot, 1);
-  }
-
-  if (localStorageKeys.length > 0) {
+  if (storageArr.length > 0) {
     return true;
   } else {
     return false;
@@ -1576,7 +1832,7 @@ function calculatePercent(untreated) {
       el.style.color = 'var(--button-red';
       el.style.fontWeight = 'bold';
     } else if (valueA > 0) {
-      el.style.color = 'var(--button-green';
+      el.style.color = 'var(--dark-green)';
       el.style.fontWeight = 'bold';
     }
 
@@ -1724,7 +1980,7 @@ ipcRenderer.once('database-object', (e, message) => {
   customerNumberName = message.customerNumberName;
   customerNameNumber = message.customerNameNumber;
   customerBackUp = message.customerBackUp;
-
+  exmillPrice = customerPrices['@EXMILL'];
   populateList();
 });
 

@@ -150,7 +150,10 @@ button {
   width: 215px;
   height: 80px;
   border: 2px solid var(--main);
-  border-radius: 10px;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-top-right-radius: 50px;
+  border-top-left-radius: 50px;
   top: -18px;
   background-color: var(--sec-blue);
   box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
@@ -292,7 +295,7 @@ button {
 #info-icon {
   position: relative;
   border-radius: 50%;
-  fill: var(--sec-blue);
+  fill: var(--main);
   width: 15px;
   height: 15px;
   left: -2px;
