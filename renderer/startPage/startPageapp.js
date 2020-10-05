@@ -880,8 +880,7 @@ function exmillKeyUp() {
   /* GET BUNDLE SIZE ELEMENT BY REPLACING LETTERS IN ID */
   let br = document.getElementById(this.id.replace('USER', 'BR')),
     /* GET EXMILL VALUE BY REPLACING LETTERS IN ID */
-    exmillValue =
-      exmillPrice[parseInt(this.id.replace('USER', ''))][4] - parseInt(exmillTransportCost);
+    exmillValue = exmillPrice[parseInt(this.id.replace('USER', ''))][4];
   /* CALCULATE TREATED VALUE BY ADDING CCA PRICE */
   let ctValue =
     parseInt(this.value) + parseInt(ccaPrice.value) - parseInt(exmillTransportCost);
@@ -920,7 +919,7 @@ function compareExmill() {
     ctInputValue =
       parseInt(document.getElementById(`TSER${i}`).value) - parseInt(exmillTransportCost);
     /* EXMILL TREATED VALUE */
-    exmillValue = parseInt(exmillPrice[i][4]) - parseInt(exmillTransportCost);
+    exmillValue = parseInt(exmillPrice[i][4]);
 
     /* PARSE BUNDLE SIZE ID */
     brInput = `BR${i}`;
