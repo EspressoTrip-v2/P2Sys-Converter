@@ -342,7 +342,7 @@ function createWindow() {
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -391,7 +391,7 @@ function createSecWindow(message) {
     // alwaysOnTop: true,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -448,7 +448,7 @@ function createChildWindow(message) {
       transparent: true,
       alwaysOnTop: true,
       webPreferences: {
-        // devTools: false,
+        devTools: false,
         nodeIntegration: true,
         enableRemoteModule: true,
       },
@@ -498,7 +498,7 @@ function createLoadingWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -535,7 +535,7 @@ function createEmailWindow(message) {
     alwaysOnTop: true,
     maximizable: false,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -575,7 +575,7 @@ function createProgressWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -613,7 +613,7 @@ function createDbLoaderWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -654,7 +654,7 @@ function createUpdateWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
@@ -688,7 +688,7 @@ function createCopySelectionWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
     },
