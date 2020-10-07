@@ -89,6 +89,7 @@ ipcRenderer.on(`convert-python`, (event, message) => {
   let filePaths;
 
   pyshell.on('message', (message) => {
+    console.log(message);
     let value = parseInt(message);
     if (message >= 20 && message < 50) {
       progressLabel.setAttribute('data-label', 'Processing');

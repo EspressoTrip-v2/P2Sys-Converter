@@ -8,6 +8,9 @@ import platform
 from datetime import datetime
 time = str(datetime.now())[:10]
 
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+
 # IMPORT CUSTOM MODULES #
 # ////////////////////// #
 import reform
@@ -125,28 +128,47 @@ def length(col):
     for i in range(len(col)):
         col[i] = col[i].lstrip('.')
         col[i] = int(float(col[i]) * 1000)
-    col = sorted(col)
+    col = col
     return col
 
 
 # PERCENTAGE STDOUT
 print(40)
 
+# CREATE A DICTIONARY OF INCL AND ECL INDEX VALUES
+inc_excl = {}
+for ind, row in df['LENGTH'].items():
+    if 'EXCL' in row:
+        inc_excl[ind] = 0
+
+    if 'AND' in row:
+        inc_excl[ind] = 1
+
+    else:
+        inc_excl[ind] = 'none'
+
 # CLEAN THE LENGTH COLUMN OF ALL LETTERS AND DASHES
 df['LENGTH'] = df['LENGTH'].str.replace('[a-zA-Z\(\)\-]', ' ').str.split()
 df['LENGTH'] = df['LENGTH'].apply(length)
 
-
-# REMOVE THE DUPLICATE LENGHTS WHERE THERE ARE EXCLUSIONS AND INCLUSIONS #
+# REMOVE THE DUPLICATE LENGTHS WHERE THERE ARE EXCLUSIONS AND INCLUSIONS #
 # ////////////////////////////////////////////////////////////////////// #
-def remove_dup():
-    for c in range(df['LENGTH'].shape[0]):
-        try:
-            for item in df['LENGTH'][c - 1]:
-                for s in df['LENGTH'][c]:
-                    if s == item:
-                        df['LENGTH'][c].remove(item)
 
+# EXCLUDE SIZES DICT
+excl_sizes = {}
+
+
+def remove_dup():
+    for c in range(0, df['LENGTH'].shape[0], 3):
+        try:
+            if inc_excl[str(c)] == 1:
+                if len(df['LENGTH'][c]) == 3:
+                    excl_sizes[c + 1] = df['LENGTH'][c][-1]
+                    df['LENGTH'][c + 1].remove(df['LENGTH'][c][-1])
+                elif len(df['LENGTH'][c]) == 4:
+                    excl_sizes[c + 1] = df['LENGTH'][c][-2:]
+                    for i in df['LENGTH'][c][-2:]:
+                        df['LENGTH'][c + 1].remove(i)
         except:
             pass
 
@@ -161,14 +183,17 @@ print(50)
 def dim(col):
     l = list(np.arange(col[0], col[1] + 300, 300))
     for i in col[2:]:
-        l.append(i)
+        if i in l:
+            pass
+        else:
+            l.append(i)
     return sorted(l)
 
 
 df['LENGTH'] = df['LENGTH'].apply(dim)
 
 
-# FUNCTION TO INCLUDE CORRECT LENGHTS FOR ODD EVEN #
+# FUNCTION TO INCLUDE CORRECT LENGTHS FOR ODD EVEN #
 # //////////////////////////////////////////////// #
 def odd_even(col):
 
@@ -192,15 +217,16 @@ print(60)
 
 # REMOVE THE EXCLUDED AND ADD INCLUDED LENGTHS #
 # //////////////////////////////////////////// #
-# TODO: THIS CODE NEEDS TO BE ADJUSTED FOR ANY LENGTH INCLUSION EXCLUSION IN THE FUTURE
 def excl_incl():
-    for n in range(len(df['LENGTH'])):
-        try:
-            for item in df['LENGTH'][n - 1]:
-                if item in df['LENGTH'][n]:
-                    df['LENGTH'][n].remove(item)
-        except:
-            pass
+    for k, v in excl_sizes.items():
+        l = df['LENGTH'][int(k)].copy()
+        if isinstance(v, list):
+            for i in v:
+                l.remove(i)
+            df['LENGTH'][int(k)] = l
+        else:
+            l.remove(v)
+            df['LENGTH'][int(k)] = l
 
 
 excl_incl()

@@ -43,16 +43,17 @@ exports.tablePopulate = (jsonfile) => {
     if (dataObjects['regex-patterns']['sequence']['odds-evens'].includes(el)) {
       pattern = dataObjects['regex-patterns']['odds-evens'];
       title = '(ODD|EVEN) LENGTHS (#.#)-(#.#)\n(#.#)-(#.#)';
-    } else if (dataObjects['regex-patterns']['sequence']['excl-and'].includes(el)) {
-      pattern = dataObjects['regex-patterns']['excl-and'];
-      title = '(#.#)-(#.#) (EXCL|AND) (#.#) (#.#)\n(#.#)-(#.#) (EXCL|AND) (#.#)\n(#.#)-(#.#)';
+    } else if (dataObjects['regex-patterns']['sequence']['and'].includes(el)) {
+      pattern = dataObjects['regex-patterns']['and'];
+      title = '(#.#)-(#.#) (AND) (#.#) (#.#)\n(#.#)-(#.#) (AND) (#.#)\n(#.#)-(#.#)';
+    } else if (dataObjects['regex-patterns']['sequence']['excl'].includes(el)) {
+      pattern = dataObjects['regex-patterns']['excl'];
+      title = '(#.#)-(#.#) (EXCL) (#.#) (#.#)\n(#.#)-(#.#) (EXCL) (#.#)\n(#.#)-(#.#)';
     } else {
       pattern = dataObjects['regex-patterns']['standard'];
       title = '(#.#)-(#.#)';
     }
-    /* <td id="BR${el}" class="BR">${row[0]}</td> */
-    /*  <td id="DR${el}" class="DR">${row[1]}</td> */
-    // Length and price entries
+
     htmlInner += `
     
     <tr id="R${el}" ">
