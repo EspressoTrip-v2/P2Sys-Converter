@@ -99,7 +99,7 @@ exports.updater = (window) => {
       .then((selection) => {
         if (selection.response === 0) {
           autoUpdater.quitAndInstall(false, true);
-        } else if (selection.response === 1) {
+        } else {
           window.webContents.send('close-updatewindow', null);
         }
       });

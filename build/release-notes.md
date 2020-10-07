@@ -1,5 +1,5 @@
-P2SYS-CONVERTER VERSION 1.0.7
+P2SYS-CONVERTER VERSION 1.0.8
 
-!!!!!! IMPORTANT UPDATE !!!!!!
+changelog:
 
-- Major bug correction, calculation in EXMILL formula
+- Fix conversion error for EXCL/ AND prices during price list generation.

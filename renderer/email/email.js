@@ -201,7 +201,7 @@ function sendEmail() {
       width: 90,
       height: 90,
       x: screenWidth - 100,
-      y: screenHeight - 125,
+      y: screenHeight - 135,
     });
     setTimeout(() => {
       sendingMail.style.transform = 'scale(1)';
