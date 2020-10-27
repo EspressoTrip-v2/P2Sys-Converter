@@ -435,6 +435,12 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist,
         'bg_color': 'white'
     })
 
+    # CELL COLOR FORMAT FOR ORDER NUMBER
+    color_format = workbook.add_format()
+    color_format.set_align('center')
+    color_format.set_align('vcenter')
+    color_format.set_border()
+
     # MERGE CELLS AND ENTER WRITING
     worksheet1.merge_range('A1:H1', 'A.C. Whitcher (PTY) Ltd', merge_formatA)
     worksheet2.merge_range('A1:H1', 'A.C. Whitcher (PTY) Ltd', merge_formatA)
@@ -443,12 +449,19 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist,
     worksheet5.merge_range('A1:H1', 'A.C. Whitcher (PTY) Ltd', merge_formatA)
     worksheet6.merge_range('A1:H1', 'A.C. Whitcher (PTY) Ltd', merge_formatA)
 
-    worksheet1.merge_range('C3:H3', '', merge_formatA)
-    worksheet2.merge_range('C3:H3', '', merge_formatA)
-    worksheet3.merge_range('C3:H3', '', merge_formatA)
-    worksheet4.merge_range('C3:H3', '', merge_formatA)
-    worksheet5.merge_range('C3:H3', '', merge_formatA)
-    worksheet6.merge_range('C3:H3', '', merge_formatA)
+    worksheet1.merge_range('C3:F3', '', merge_formatA)
+    worksheet2.merge_range('C3:F3', '', merge_formatA)
+    worksheet3.merge_range('C3:F3', '', merge_formatA)
+    worksheet4.merge_range('C3:F3', '', merge_formatA)
+    worksheet5.merge_range('C3:F3', '', merge_formatA)
+    worksheet6.merge_range('C3:F3', '', merge_formatA)
+
+    worksheet1.write_string(2, 6, 'ORDER NO:', color_format)
+    worksheet2.write_string(2, 6, 'ORDER NO:', color_format)
+    worksheet3.write_string(2, 6, 'ORDER NO:', color_format)
+    worksheet4.write_string(2, 6, 'ORDER NO:', color_format)
+    worksheet5.write_string(2, 6, 'ORDER NO:', color_format)
+    worksheet6.write_string(2, 6, 'ORDER NO:', color_format)
 
     worksheet1.write_string(2, 0, 'CUSTOMER:')
     worksheet2.write_string(2, 0, 'CUSTOMER:')
@@ -529,6 +542,21 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist,
     worksheet4.protect('acwhitcher1234')
     worksheet5.protect('acwhitcher1234')
     worksheet6.protect('acwhitcher1234')
+
+    # CELL COLOR FORMAT FOR ORDER NUMBER
+    color_format_unlocked = workbook.add_format()
+    color_format_unlocked.set_bg_color('yellow')
+    color_format_unlocked.set_border()
+    color_format_unlocked.set_locked(False)
+    color_format_unlocked.set_align('center')
+    color_format_unlocked.set_align('vcenter')
+
+    worksheet2.write_string(2, 7, 'ENTER ORDER #', color_format_unlocked)
+    worksheet3.write_string(2, 7, 'ENTER ORDER #', color_format_unlocked)
+    worksheet4.write_string(2, 7, 'ENTER ORDER #', color_format_unlocked)
+    worksheet5.write_string(2, 7, 'ENTER ORDER #', color_format_unlocked)
+    worksheet6.write_string(2, 7, 'ENTER ORDER #', color_format_unlocked)
+    worksheet1.write_string(2, 7, 'ENTER ORDER #', color_format_unlocked)
 
     unlocked = workbook.add_format({
         'align': 'center',

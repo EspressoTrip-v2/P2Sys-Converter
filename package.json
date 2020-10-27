@@ -1,6 +1,6 @@
 {
   "name": "P2Sys-Converter",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Price-List conversion program",
   "main": "main.js",
   "scripts": {
