@@ -31,7 +31,7 @@ customer_number = list(json_pricelist.keys())[0]
 pricelist_number = json_pricelist['PRICELIST']
 
 # EXTRACT INDEX NUMBERS REMOVE LAST THREE ENTRIES
-idx = list(json_pricelist[customer_number].keys())[:-5]
+idx = list(json_pricelist[customer_number].keys())[:-4]
 
 # EXTRACT COLUMNS
 columns = json_pricelist[customer_number]['COLUMNS']
@@ -39,7 +39,7 @@ columns = json_pricelist[customer_number]['COLUMNS']
 running_cols = ['UNT_RUNNING', 'TR_RUNNING']
 
 # EXTRACT VALUES
-values = list(json_pricelist[customer_number].values())[:-5]
+values = list(json_pricelist[customer_number].values())[:-4]
 
 # PERCENTAGE STDOUT
 print(10)
@@ -50,6 +50,8 @@ print(10)
 df = pd.DataFrame(values, index=idx, columns=columns)
 df[running_cols[0]] = 0
 df[running_cols[1]] = 0
+
+# print(df.iloc[-4:, :])
 
 # SIMPLIFY SIZING COLUMN TO MATCH ITEMS ON SYSTEM TEMPLATE
 df['DIMENSIONS'] = df['DIMENSIONS'].str.lower().str.replace('\s',
@@ -269,8 +271,6 @@ def s5_product(col):
 
     p_list_t = []
     p_list_u = []
-
-    # PERCENTAGE STDOUT
 
     for length in col['LENGTH']:
 
