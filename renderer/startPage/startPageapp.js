@@ -578,6 +578,7 @@ createBtn.addEventListener('click', (e) => {
       detail: 'Please complete the highlighted fields.',
     });
     /* CHECK IF ALL TOP REQUIRED FIELDS HAVE BEEN ENTERED */
+    return;
   }
   if (
     customerName.innerText.length === 0 ||
@@ -594,19 +595,21 @@ createBtn.addEventListener('click', (e) => {
         overflow.style.animation = 'none';
         customerName.style.animation = 'none';
       }, 2050);
+      return;
     } else {
       customerName.style.backgroundColor = '#fff';
       customerName.style.border = '1px solid #fff';
       overflow.style.backgroundColor = '#fff';
       overflow.style.border = '1px solid #fff';
     }
-    if (ccaPrice.value.length === 0) {
+    if (ccaPrice.value.trim().length == 0) {
       ccaPrice.style.fontWeight = 'bolder';
       ccaPrice.style.animation = 'cca-flash .5s linear 4';
       setTimeout(() => {
         ccaPrice.style.fontWeight = 'normal';
         ccaPrice.style.animation = 'none';
       }, 2050);
+      return;
     } else {
       ccaPrice.style.backgroundColor = '#fff';
       ccaPrice.style.border = '1px solid #fff';
@@ -618,6 +621,7 @@ createBtn.addEventListener('click', (e) => {
         customerNumberValue.style.fontWeight = 'normal';
         customerNumberValue.style.animation = 'none';
       }, 2050);
+      return;
     } else {
       customerNumberValue.style.backgroundColor = '#fff';
       customerNumberValue.style.border = '1px solid #fff';
@@ -625,6 +629,7 @@ createBtn.addEventListener('click', (e) => {
   } else {
     /* CREATE THE CUSTOMER PRICELIST OBJECT TO SEND TO PYTHON */
     customerData = createObjectFromHtml();
+
     if (!jsonFile) {
       jsonFile = customerData[Object.keys(customerData)[0]];
     }
@@ -858,7 +863,8 @@ function repopulateBundleSize() {
     br = `BR${i}`;
     element = document.getElementById(br);
     element.style.color = '#000';
-    element.value = jsonFile[i][0];
+    /* GET THE BUNDLE SIZES FROM THE OBJECT TEMPLATE */
+    element.value = dataObjects['template-pricelist'][i][0];
   }
 }
 
@@ -1338,6 +1344,7 @@ checkResumeEditingBtn.addEventListener('click', (e) => {
   checkCustomer.style.opacity = '0';
   // FILL TABLE INFO
   customerNumberValue.value = searchValue;
+  customerNumberValue.disabled = true;
   customerName.innerText = customerNumberName[searchValue]
     ? customerNumberName[searchValue]
     : localStorageObject['HEADER']['customerName'];

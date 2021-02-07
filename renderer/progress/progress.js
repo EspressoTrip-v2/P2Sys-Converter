@@ -65,7 +65,6 @@ ipcRenderer.on(`convert-python`, (event, message) => {
 
   /* PYTHON PROCESSING FUNCTION */
   ///////////////////////////////
-  let temp = '/data';
 
   let serverPath;
   if (fs.existsSync(process.env.SERVER_PATH)) {

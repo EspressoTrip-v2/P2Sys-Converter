@@ -1,11 +1,11 @@
 {
   "name": "P2Sys-Converter",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Price-List conversion program",
   "main": "main.js",
   "scripts": {
     "watch": "nodemon --ignore '*.json' --exec electron .",
-    "dev": "NODE_ENV=dev electron .",
+    "dev": "set NODE_ENV=dev && electron .",
     "release": "electron-builder -w -p 'always'",
     "build": "electron-builder -w",
     "postinstall": "electron-builder install-app-deps"
@@ -37,8 +37,7 @@
       "package": "P2Sys-Converter",
       "owner": "espressotrip-v2",
       "repo": "JDevSoftware",
-      "url": "https://bintray.com/espressotrip-v2/JDevSoftware/",
-      "token": "d11c8a929df2d2257c311fc939cdc35d7f4007ca"
+      "url": "https://bintray.com/espressotrip-v2/JDevSoftware/"
     },
     "electronUpdaterCompatibility": ">= 2.16",
     "files": [
