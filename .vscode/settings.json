@@ -1,9 +1,24 @@
 {
     "python.formatting.provider": "black",
     "python.linting.enabled": true,
-    "python.pythonPath": "/usr/bin/python3",
+    "python.pythonPath": "C:\\Users\\Juan\\AppData\\Local\\Programs\\Python\\Python38\\python.exe",
     "python.linting.pylintEnabled": false,
     "python.linting.pylamaEnabled": false,
     "python.linting.flake8Enabled": false,
-    "python.linting.pydocstyleEnabled": true
+    "python.linting.pydocstyleEnabled": true,
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "root",
+            "password": "toor",
+            "database": "LocalHost",
+            "username": "root"
+        }
+    ]
 }

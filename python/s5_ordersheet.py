@@ -588,9 +588,11 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
         total_format = workbook.add_format()
         total_format.set_align("center")
         total_format.set_align("vcenter")
-        total_format.set_bottom()
         total_format.set_hidden()
-        total_format.set_top()
+        total_format.set_bottom(6)
+        total_format.set_right()
+        total_format.set_left()
+        total_format.set_top(6)
         total_format.set_bold()
         total_format.set_num_format('_(###0.00_);_(\(###0.00\);_(" "??_);_(@_)')
 
@@ -701,9 +703,14 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
             row_countA += 1
 
         # ADD ENTRIES TO SUMMARY SHEET
-        worksheet1.merge_range("A34:C34", " ", color_format_unlocked)
-        worksheet1.write_string(row_countA, 3, "TOTAL ORDER VALUE", total_format)
+        worksheet1.write_string("A34", " ", color_format_unlocked)
+        worksheet1.write_string(row_countA, 1, "TOTALS", color_format_locked)
+        # TOTAL PRICE
         worksheet1.write_formula(row_countA, 4, f"=SUM(E5:E{row_countA})", total_format)
+        # TOTAL M3
+        worksheet1.write_formula(row_countA, 3, f"=SUM(D5:D{row_countA})", total_format)
+        # TOTAL BUNDLE
+        worksheet1.write_formula(row_countA, 2, f"=SUM(C5:C{row_countA})", total_format)
 
         # WORKSHEET 2
         worksheet2.set_column(0, 2, 20, column_format1)
