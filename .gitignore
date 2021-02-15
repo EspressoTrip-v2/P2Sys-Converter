@@ -4,3 +4,4 @@ data/logfiles/
 python/__pycache__/
 private/
 .env
+.vscode/
