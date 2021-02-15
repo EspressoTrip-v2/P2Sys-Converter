@@ -1,6 +1,16 @@
 /* MODULES */
 const mongoose = require('mongoose');
 
+/* SCHEDULE PRICELIST SCHEMA */
+/* SCHEMA */
+const schedulePricesSchema = new mongoose.Schema(
+  {},
+  { strict: false, _id: false, versionKey: false }
+);
+/* MODEL */
+const schedulePricesModel = mongoose.model('Schedule_Prices', schedulePricesSchema);
+exports.schedulePricesModel = schedulePricesModel;
+
 /* CUSTOMER PRICELISTS ALREADY CREATED */
 /* SCHEMA */
 const customerPricesSchema = new mongoose.Schema(

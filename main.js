@@ -48,6 +48,7 @@ const {
   customerPricelistNumberModel,
   customerNumberNameModel,
   customerBackUpModel,
+  schedulePricesModel,
 } = require(`${dir}/database/mongoDbConnect.js`);
 const { writeLocalDatabase } = require(`${dir}/objects.js`);
 const { updater } = require(`${dir}/updater.js`);
@@ -67,6 +68,7 @@ let homeWindow,
   customerNumberName,
   customerNameNumber,
   customerPricelistNumber,
+  schedulePrices,
   customerPrices,
   screenHeight,
   screenWidth,
@@ -125,12 +127,12 @@ let connectionString, connectionName;
 ////////////////////////
 function mongooseConnect() {
   /* TEST DATABASE */
-  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  // connectionName = 'Test Database';
+  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  connectionName = 'Test Database';
 
   /* AC WHITCHER DATABASE */
-  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  connectionName = 'A.C Whitcher Database';
+  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  // connectionName = 'A.C Whitcher Database';
 
   mongoose
     .connect(connectionString, {
@@ -224,12 +226,25 @@ db.once('connected', async () => {
   try {
     dbLoaderWindow.webContents.send('db-download', {
       database: 'Downloading CP-Db',
-      percentage: 90,
+      percentage: 85,
     });
 
     let customerPricesObj = await customerPricesModel.findById('customerPrices').exec();
     customerPrices = customerPricesObj._doc;
     delete customerPrices['_id'];
+  } catch (err) {
+    logfileFunc(err);
+  }
+
+  try {
+    dbLoaderWindow.webContents.send('db-download', {
+      database: 'Downloading SP-Db',
+      percentage: 90,
+    });
+
+    let schedulePricesObj = await schedulePricesModel.findById('schedulePrices').exec();
+    schedulePrices = schedulePricesObj._doc;
+    delete schedulePrices['_id'];
     dbLoaderWindow.webContents.send('db-download', {
       database: 'Success',
       percentage: 100,
@@ -342,9 +357,10 @@ function createWindow() {
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     autoHideMenuBar: true,
     frame: false,
@@ -391,9 +407,10 @@ function createSecWindow(message) {
     // alwaysOnTop: true,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: iconImage,
   });
@@ -410,6 +427,7 @@ function createSecWindow(message) {
       customerNumberName,
       customerBackUp,
       customerNameNumber,
+      schedulePrices,
     };
     secWindow.webContents.send('database-object', dbObj);
 
@@ -448,9 +466,10 @@ function createChildWindow(message) {
       transparent: true,
       alwaysOnTop: true,
       webPreferences: {
-        devTools: false,
+        // devTools: false,
         nodeIntegration: true,
         enableRemoteModule: true,
+        contextIsolation: false,
       },
       icon: iconImage,
     });
@@ -498,9 +517,10 @@ function createLoadingWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: iconImage,
   });
@@ -535,9 +555,10 @@ function createEmailWindow(message) {
     alwaysOnTop: true,
     maximizable: false,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: `${dir}/renderer/icons/mailTemplate.png`,
   });
@@ -575,9 +596,10 @@ function createProgressWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: iconImage,
   });
@@ -613,9 +635,10 @@ function createDbLoaderWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: iconImage,
   });
@@ -654,9 +677,10 @@ function createUpdateWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: `${dir}/renderer/icons/updateTemplate.png`,
   });
@@ -688,9 +712,10 @@ function createCopySelectionWindow() {
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: iconImage,
   });
@@ -870,6 +895,7 @@ ipcMain.on('update-database', async (e, message) => {
   customerNumberName = message.customerNumberName;
   customerBackUp = message.customerBackUp;
   customerNameNumber = customerNameNumberFunc(message.customerNumberName);
+  schedulePrices = message.schedulePrices;
 
   await customerPricesModel.replaceOne(
     { _id: 'customerPrices' },
@@ -926,6 +952,23 @@ ipcMain.on('update-database', async (e, message) => {
       if (err) {
         let notification = new Notification({
           title: 'P2SYS CB-Db UPDATE ERROR',
+          body:
+            'There was an error in updating the database. Please check the logfile for details',
+          icon: `${dir}/renderer/icons/error.png`,
+        });
+        notification.show();
+        logfileFunc(err);
+      }
+    }
+  );
+
+  await schedulePricesModel.replaceOne(
+    { _id: 'schedulePrices' },
+    schedulePrices,
+    (err, res) => {
+      if (err) {
+        let notification = new Notification({
+          title: 'P2SYS SP-Db UPDATE ERROR',
           body:
             'There was an error in updating the database. Please check the logfile for details',
           icon: `${dir}/renderer/icons/error.png`,

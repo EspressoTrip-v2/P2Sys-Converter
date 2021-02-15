@@ -1371,6 +1371,45 @@ tr {
   font-weight: bolder;
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
 }
+
+.schedule-button {
+  position: absolute;
+  right: 36vw;
+  background-color: var(--button-yellow);
+  color: #fff;
+  border: 2px solid var(--button-yellow);
+  width: 60px;
+  box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
+  height: 40px;
+}
+
+.schedule-button:hover {
+  background-color: #fff;
+  text-align: center;
+  color: var(--button-yellow);
+  box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+}
+.schedule-button:active {
+  transform: scale(0.95);
+  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
+}
+
+#timer {
+  position: absolute;
+  fill: #fff;
+  top: -2px;
+  left: -2px;
+  padding: 5px;
+  width: 110%;
+  height: 110%;
+  border-radius: 10px;
+  transition: fill 0.5s;
+}
+
+#timer:hover {
+  fill: var(--button-yellow);
+}
+
 .back-to-main-btn {
   position: absolute;
   left: 10vw;
@@ -3437,8 +3476,13 @@ tr {
 
   #calculate,
   #exmill,
-  #exmill-disabled {
+  #exmill-disabled,
+  #schedule-button {
     transform: scale(0.75);
+  }
+
+  #schedule-button {
+    right: 33vw;
   }
 
   #customer-displaybox-container {

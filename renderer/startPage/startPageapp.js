@@ -63,6 +63,7 @@ let searchValue,
   customerNumberName,
   customerNameNumber,
   customerBackUp,
+  schedulePrices,
   cusNum,
   notObject,
   bundleSizeColumn,
@@ -1975,6 +1976,7 @@ ipcRenderer.on('remove-fade', (e, message) => {
 /* RECEIVE THE DATABASE OBJECTS THAT WERE DOWNLOADED */
 ipcRenderer.once('database-object', (e, message) => {
   customerPrices = message.customerPrices;
+  schedulePrices = message.schedulePrices;
   customerPricelistNumber = message.customerPricelistNumber;
   customerNumberName = message.customerNumberName;
   customerNameNumber = message.customerNameNumber;
@@ -2066,6 +2068,7 @@ ipcRenderer.on('progress-end', (event, message) => {
     customerPrices,
     customerNumberName,
     customerPricelistNumber,
+    schedulePrices: null, //TODO: Fix this
   };
 
   /* UPDATE DB */
