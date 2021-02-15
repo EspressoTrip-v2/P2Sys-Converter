@@ -39,6 +39,8 @@ exports.tablePopulate = (jsonfile) => {
   idx.forEach((el) => {
     // Create regex pattern for correct row
     let row = jsonfile[el];
+    let bundleSize = dataObjects['template-pricelist'][el][0];
+
     let pattern, title;
     if (dataObjects['regex-patterns']['sequence']['odds-evens'].includes(el)) {
       pattern = dataObjects['regex-patterns']['odds-evens'];
@@ -58,9 +60,7 @@ exports.tablePopulate = (jsonfile) => {
     
     <tr id="R${el}" ">
       <td>
-      <input type="text" id="BR${el}" class="BR" value="${
-      row[0]
-    }" style="border: none;" disabled/>
+      <input type="text" id="BR${el}" class="BR" value="${bundleSize}" style="border: none;" disabled/>
       </td>
       
       <td>

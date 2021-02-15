@@ -1,4 +1,5 @@
 # MODULES
+import s5_ordersheet
 import pandas as pd
 import numpy as np
 import json
@@ -6,7 +7,6 @@ import warnings
 import os
 warnings.filterwarnings("ignore", 'This pattern has match groups')
 
-import s5_ordersheet
 
 # GET WORKING DIRECTORY #
 # ///////////////////// #
@@ -45,7 +45,7 @@ def reformat_layman(pricelist_number, customer_number, df):
     customer_pricelist['CURRENCY'] = 'ZAR'
     customer_pricelist['PRICELIST'] = pricelist_number
 
-    # LOOP THOUGHT THE SEPERATED TREATED/UNTREATED PRODUCTS AN DALOWCATE PRICES ON THE MASTERPRICELIST FILE
+    # LOOP THOUGHT THE SEPERATED TREATED/UNTREATED PRODUCTS AND ALLOCATE PRICES ON THE MASTERPRICELIST FILE
     for k, v in D.items():
 
         # ADD THE PRICES TO THE CORRECT ITEMNO UNTREATED

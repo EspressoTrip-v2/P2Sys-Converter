@@ -1,5 +1,11 @@
-P2SYS-CONVERTER VERSION 1.1.0
+P2SYS-CONVERTER VERSION 1.1.1
 
 changelog:
 
-- Fixed missing 76 X 228 entries in S5 Order sheet.
+- Updates to customer order sheet
+- Summary page added with creation dates and new order number
+
+fixes:
+
+- Fix crash when trying to create a paused price-list with missing values
+- Minor exception handling adjustments
