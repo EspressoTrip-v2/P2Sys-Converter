@@ -1,17 +1,24 @@
 :root {
-  --psys-blue: #05899c;
-  --psys-red: #fe1604;
-  --psys-green: #03c224;
-
   --main: #000;
+  --main-hover: rgb(46, 45, 45);
   --sec-blue: #05899c;
-  --button-red: #fe1604;
-  --button-green: #03c224;
+  --sec-blue-hover: #08d1ee;
+  --scrollbar-track: rgba(5, 136, 156, 0.1);
+
+  --button-red: #d63031;
+  --button-red-hover: #de5b5b;
+
+  --button-green: #00b894;
+  --button-green-hover: #00daaf;
   --button-gold: #fe7c04;
-  --opaque-man: rgba(128, 196, 50, 0.4);
-  --auto: #d9793b;
-  --opaque-auto: rgba(217, 122, 58, 0.3);
-  --hover-blue: #058a9e1a;
+  --auto: rgba(254, 125, 4, 0.2);
+  --man: rgba(0, 184, 147, 0.2);
+
+  --button-gold-hover: #ce6301;
+
+  --hover-blue: rgba(5, 136, 156, 0.5);
+  --button-disabled: #b2bec3;
+  --text-color: #2d3436;
 }
 
 /* Fonts */
@@ -39,23 +46,21 @@ main {
   justify-content: center;
   align-items: center;
   align-content: center;
-  height: 285px;
-  width: 265px;
+  height: 78vh;
+  width: 92vw;
 }
 #header {
   display: flex;
   position: relative;
-  width: 265px;
-  height: 35px;
-  background-color: var(--sec-blue);
+  width: 92vw;
+  height: 15vh;
+  background-color: #fff;
   justify-content: center;
   align-items: center;
   align-content: center;
   z-index: 1;
-  border: 1px solid var(--main);
-  border-bottom: none;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
 }
 #boundry {
   position: relative;
@@ -72,33 +77,26 @@ main {
 }
 #logo-background {
   position: absolute;
-  top: -11px;
+  top: 0;
   z-index: 2;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 150px;
-  height: 55px;
-  background-color: #fff;
-  border-radius: 50%;
-  border: 2px solid var(--main);
-  filter: drop-shadow(2px 4px 6px black);
+  width: 100%;
+  height: 14vh;
   -webkit-app-region: drag;
 }
 #logo-background::after {
   content: 'Mailer';
-  position: absolute;
-  right: 12px;
-  font-size: 31px;
+  position: relative;
+  font-size: 15vw;
   font-family: Forelle;
 }
 
 .logo {
-  position: absolute;
-  top: -3px;
-  left: 20px;
-  height: 53px;
+  position: relative;
+  height: 22vw;
   -webkit-user-drag: none;
 }
 
@@ -133,15 +131,13 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 1px solid var(--main);
-  border-top: none;
-  background-color: var(--sec-blue);
-  border-bottom-right-radius: 10px;
-  border-bottom-left-radius: 10px;
+  background-color: #fff;
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
 }
 #email-entry {
-  height: 50px;
-  margin-bottom: 10px;
+  height: 14vh;
+  margin-bottom: 2vh;
 }
 
 #email-entry::-webkit-scrollbar {
@@ -153,16 +149,15 @@ body {
 }
 
 .entry {
-  border-radius: 5px;
-  bottom: 13px;
+  bottom: 4vh;
   position: relative;
-  border: 1px solid #f1f1f1;
-  width: 250px;
-  height: 117px;
+  border: 1px solid #000;
+  width: 90vw;
+  height: 43.5vh;
   outline: none;
-  padding: 5px;
+  padding: 1vw;
   resize: none;
-  font-size: 12px;
+  font-size: 4vw;
 }
 
 #email-message::-webkit-scrollbar {
@@ -176,14 +171,13 @@ body {
 .label {
   display: flex;
   position: relative;
-  bottom: 13px;
-  left: 5px;
+  bottom: 3vh;
+  left: 1vw;
   justify-content: left;
   font-weight: bold;
-  width: 255px;
-  padding-bottom: 5px;
-  font-size: 12px;
-  color: #fff;
+  width: 91vw;
+  padding-bottom: 1vh;
+  font-size: 4.5vw;
 }
 
 #letter {
@@ -198,28 +192,23 @@ body {
 
 #send {
   position: absolute;
-  bottom: 8px;
+  bottom: 0;
   background-color: var(--button-green);
-  border-radius: 8px;
   border: 2px solid var(--button-green);
-  font-size: 15px;
-  padding: 5px 20px;
+  font-size: 6vw;
   font-weight: bold;
+  width: 35vw;
+  height: 8vh;
   outline: none;
   color: #fff;
-  box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
-  transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
 }
 #send:hover {
-  background-color: #fff;
-  border: 2px solid var(--button-green);
-  color: var(--button-green);
-  box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+  background-color: var(--button-green-hover);
+  border: 2px solid var(--button-green-hover);
 }
 
 #send:active {
   transform: scale(0.95);
-  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
 #failed-container {

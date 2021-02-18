@@ -53,7 +53,7 @@ function erorrFunc(err) {
 /*  CREATE HTML FOR THE PROGRESS WINDOW */
 exports.updater = (window) => {
   autoUpdater.checkForUpdates().catch((err) => {
-    erorrFunc(err);
+    erorrFunc(err.stack);
   });
 
   autoUpdater.on('update-available', (info) => {
@@ -106,6 +106,6 @@ exports.updater = (window) => {
   });
 
   autoUpdater.on('error', (err) => {
-    erorrFunc(err);
+    erorrFunc(err.stack);
   });
 };

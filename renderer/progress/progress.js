@@ -38,8 +38,7 @@ secWindow = progressWindow.getParentWindow();
 
 /* DOM ELEMENTS */
 /////////////////
-let progressBar = document.getElementById('progress'),
-  progressLabel = document.getElementById('spinner-logo');
+let progressLabel = document.getElementById('spinner-logo');
 
 /* FUNCTIONS */
 //////////////
@@ -102,12 +101,7 @@ ipcRenderer.on(`convert-python`, (event, message) => {
     if (isNaN(value)) {
       filePaths = message.split(',');
     }
-    if (value < 100) {
-      /* PUSH THE STDIN VALUE FROM PYTHON TO THE PERCENTAGE OF THE PROGRESS BAR */
-      progressBar.style.setProperty('--width', value);
-    } else if (value === 100) {
-      progressBar.style.setProperty('--width', value);
-
+    if (value === 100) {
       setTimeout(() => {
         let message = {
           channel: 'progress-end',
@@ -122,7 +116,7 @@ ipcRenderer.on(`convert-python`, (event, message) => {
 
   pyshell.end(function (err, code, signal) {
     if (err) {
-      logfileFunc(err);
+      logfileFunc(err.stack);
       progressWindow.hide();
       remote.dialog.showMessageBoxSync(secWindow, {
         type: 'warning',

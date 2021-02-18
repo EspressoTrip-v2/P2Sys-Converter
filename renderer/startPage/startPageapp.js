@@ -63,7 +63,6 @@ let searchValue,
   customerNumberName,
   customerNameNumber,
   customerBackUp,
-  schedulePrices,
   cusNum,
   notObject,
   bundleSizeColumn,
@@ -472,7 +471,7 @@ function tablePageCreate(type) {
 
   // ADD BACKGROUND TO HTML ELEMENT
   setTimeout(() => {
-    html.style.backgroundColor = '#f1f1f1';
+    html.style.backgroundColor = '#fff';
   }, 300);
   if (secWindow.getChildWindows().length > 0) {
     secWindow.getChildWindows()[0].close();
@@ -500,12 +499,12 @@ const btnReset = () => {
     autoCaaBtn.setAttribute('class', 'cca-auto-out');
     manCaaBtn.setAttribute('class', 'cca-man-in');
     autoCaaBtn.disabled = false;
-    treatedColumns.style.backgroundColor = 'var(--opaque-man)';
+    treatedColumns.style.backgroundColor = 'var(--man)';
   }
   if (lengthLockBtn.classList.value === 'lock-out') {
     lengthLockBtn.setAttribute('class', 'lock-in');
     lockSvg.style.fill = '#fff';
-    lengthColumn.style.backgroundColor = 'var(--opaque-auto)';
+    lengthColumn.style.backgroundColor = 'var(--auto)';
 
     lengthUnlockBtn.setAttribute('class', 'unlock-out');
     unlockSvg.style.fill = 'var(--button-green)';
@@ -679,7 +678,7 @@ lengthLockBtn.addEventListener('click', (e) => {
   if (lengthLockBtn.classList.value === 'lock-out') {
     lengthLockBtn.setAttribute('class', 'lock-in');
     lockSvg.style.fill = '#fff';
-    lengthColumn.style.backgroundColor = 'var(--opaque-auto)';
+    lengthColumn.style.backgroundColor = 'var(--auto)';
 
     lengthUnlockBtn.setAttribute('class', 'unlock-out');
     unlockSvg.style.fill = 'var(--button-green)';
@@ -719,7 +718,7 @@ function unlockLength() {
   if (lengthUnlockBtn.classList.value === 'unlock-out') {
     lengthUnlockBtn.setAttribute('class', 'unlock-in');
     unlockSvg.style.fill = '#fff';
-    lengthColumn.style.backgroundColor = 'var(--opaque-man)';
+    lengthColumn.style.backgroundColor = 'var(--man)';
 
     lengthLockBtn.setAttribute('class', 'lock-out');
     lockSvg.style.fill = 'var(--button-gold)';
@@ -768,7 +767,7 @@ function CCAAutoSwitch() {
     autoCaaBtn.setAttribute('class', 'cca-auto-in');
     autoCaaBtn.disabled = true;
     ccaPrice.disabled = true;
-    treatedColumns.style.backgroundColor = 'var(--opaque-auto)';
+    treatedColumns.style.backgroundColor = 'var(--auto)';
 
     // Disable all treated cells
     for (let i = 0; i < 30; i++) {
@@ -821,7 +820,7 @@ function CCAManualSwitch() {
     manCaaBtn.setAttribute('class', 'cca-man-in');
     manCaaBtn.disabled = true;
     ccaPrice.disabled = false;
-    treatedColumns.style.backgroundColor = 'var(--opaque-man)';
+    treatedColumns.style.backgroundColor = 'var(--man)';
 
     // Make treated cell active
     for (let i = 0; i < 30; i++) {
@@ -864,6 +863,7 @@ function repopulateBundleSize() {
     br = `BR${i}`;
     element = document.getElementById(br);
     element.style.color = '#000';
+    element.style.fontWeight = 'normal';
     /* GET THE BUNDLE SIZES FROM THE OBJECT TEMPLATE */
     element.value = dataObjects['template-pricelist'][i][0];
   }
@@ -916,7 +916,7 @@ function exmillKeyUp() {
 function compareExmill() {
   /* SET THE COLOR AND HEADING */
   bundleSizeHeading.innerText = 'EX-MILL %';
-  bundleSizeHeading.style.backgroundColor = 'dodgerblue';
+  bundleSizeHeading.style.backgroundColor = 'var(--main-hover';
   bundleSizeColumn.setAttribute('class', 'exm');
 
   let brInput, ctInputValue, element, exmillValue;
@@ -1757,7 +1757,7 @@ roundAllCheckbox.addEventListener('change', (e) => {
     roundAllCheckMark.style.animation = 'check 0.2s linear forwards';
   } else {
     soundClick.play();
-    roundAllBox.style.border = '2px solid var(--sec-blue)';
+    roundAllBox.style.border = '2px solid var(--main)';
     roundAllCheckMark.style.animation = 'none';
   }
 });
@@ -1792,11 +1792,7 @@ function calculateButtonPress() {
   setTimeout(() => {
     progressFade.style.visibility = 'visible';
     progressFade.style.backdropFilter = 'blur(3px)';
-    if (secWindow.getSize()[0] >= 1280) {
-      percentageContainer.style.transform = 'scale(1)';
-    } else {
-      percentageContainer.style.transform = 'scale(0.8)';
-    }
+    percentageContainer.style.transform = 'scale(1)';
   }, 300);
 }
 
@@ -1920,7 +1916,7 @@ function resetSlider() {
 
 /* RESET ROUNDALL CHECKBOX */
 function resetRoundAllCheckbox() {
-  roundAllBox.style.border = '2px solid var(--sec-blue)';
+  roundAllBox.style.border = '2px solid var(--main)';
   roundAllCheckMark.style.animation = 'none';
   roundAllCheckbox.checked = false;
 }
@@ -1976,7 +1972,6 @@ ipcRenderer.on('remove-fade', (e, message) => {
 /* RECEIVE THE DATABASE OBJECTS THAT WERE DOWNLOADED */
 ipcRenderer.once('database-object', (e, message) => {
   customerPrices = message.customerPrices;
-  schedulePrices = message.schedulePrices;
   customerPricelistNumber = message.customerPricelistNumber;
   customerNumberName = message.customerNumberName;
   customerNameNumber = message.customerNameNumber;
@@ -2058,6 +2053,7 @@ ipcRenderer.on('progress-end', (event, message) => {
 
   /* ADD BACK THE _id FOR ONLINE UPDATE */
   customerBackUp['_id'] = 'customerBackUp';
+  customerBackUp['check'] = new Date().getFullYear();
   customerPricelistNumber['_id'] = 'customerPricelistNumber';
   customerNumberName['_id'] = 'customerNumberName';
   customerPrices['_id'] = 'customerPrices';
@@ -2068,7 +2064,6 @@ ipcRenderer.on('progress-end', (event, message) => {
     customerPrices,
     customerNumberName,
     customerPricelistNumber,
-    schedulePrices: null, //TODO: Fix this
   };
 
   /* UPDATE DB */

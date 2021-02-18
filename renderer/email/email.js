@@ -142,7 +142,7 @@ function verifyConnect(message) {
   mailTransport.verify((err, success) => {
     if (err) {
       /* LOG THE ERROR */
-      logfileFunc(err);
+      logfileFunc(err.stack);
       new Notification('P2SYS MAIL SERVER ERROR', {
         icon: `${dir}/renderer/icons/trayTemplate.png`,
         body: 'There was a mail server error.\nPlease contact your administrator.',
@@ -233,7 +233,7 @@ function populateEmail(message) {
           sendingMail.style.display = 'none';
 
           /* LOG ERROR */
-          logfileFunc(err);
+          logfileFunc(err.stack);
 
           /* SEND TO LOCAL STORAGE */
           localStorageAppend(message);

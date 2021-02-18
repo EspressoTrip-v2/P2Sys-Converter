@@ -1,13 +1,25 @@
+/* Set main colors */
 :root {
-  --psys-blue: #05899c;
-  --psys-red: #fe1604;
-  --psys-green: #03c224;
-
   --main: #000;
+  --main-hover: rgb(46, 45, 45);
   --sec-blue: #05899c;
-  --button-red: #fe1604;
-  --button-green: #03c224;
+  --sec-blue-hover: #08d1ee;
+  --scrollbar-track: rgba(5, 136, 156, 0.1);
+
+  --button-red: #d63031;
+  --button-red-hover: #de5b5b;
+
+  --button-green: #00b894;
+  --button-green-hover: #00daaf;
   --button-gold: #fe7c04;
+  --auto: rgba(254, 125, 4, 0.08);
+  --man: rgba(0, 184, 147, 0.08);
+
+  --button-gold-hover: #ce6301;
+
+  --hover-blue: rgba(5, 136, 156, 0.5);
+  --button-disabled: #b2bec3;
+  --text-color: #2d3436;
 }
 *,
 *::before,
@@ -51,39 +63,43 @@ button {
   position: relative;
   opacity: 0;
   display: flex;
-  width: fit-content;
+  width: 100vw;
+  height: 100vh;
   flex-direction: column;
   align-items: center;
   transition: opacity 0.5s;
 }
 #round {
   position: relative;
-  width: 265px;
-  height: 310px;
+  width: 94vw;
+  height: 94vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   align-content: center;
   justify-content: center;
+  border-radius: 3px;
+  background-color: #fff;
+  box-shadow: 1px 1px 4px 0px rgba(50, 50, 50, 0.5);
 }
 
 #internal-container {
-  position: relative;
+  position: absolute;
+  top: 30vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: #fff;
-  border: 2px solid var(--main);
-  border-radius: 10px;
-  width: 80%;
-  height: 180px;
-  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
+  width: 94vw;
+  height: 46vh;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
 }
 
 #db {
   position: absolute;
-  bottom: 0;
+  bottom: -16vh;
 }
 #db-logo {
   position: relative;
@@ -102,171 +118,39 @@ button {
 
 #psys-logo {
   position: absolute;
-  bottom: 0;
   display: flex;
+  top: 9vh;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   align-content: center;
-  background-color: var(--sec-blue);
-  border: 2px solid var(--main);
-  border-radius: 10px;
-  height: 60px;
-  width: 80%;
-  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
+  width: 75vw;
+  height: 10vh;
 }
 
 #psys-logo-container {
   position: absolute;
-  background-color: #fff;
-  border: 2px solid var(--main);
-  border-radius: 50%;
-  height: 65px;
-  width: 200px;
-  filter: drop-shadow(2px 4px 6px black);
+  height: 10vh;
+  width: 78vw;
   z-index: 1;
+  -webkit-app-region: drag;
 }
 #psys-logo-container img {
-  position: relative;
-  bottom: 2px;
-  left: 24px;
-  height: 60px;
+  position: absolute;
+  left: 0;
+  top: -9vh;
+  height: 28vh;
   -webkit-user-drag: none;
+  -webkit-app-region: drag;
 }
 #psys-logo-container::after {
   position: absolute;
   content: 'Converter';
   font-family: Forelle;
-  font-size: 40px;
-  top: 9px;
-  right: 17px;
-}
-#logo {
-  position: absolute;
-  z-index: 2;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 215px;
-  height: 80px;
-  border: 2px solid var(--main);
-  border-bottom-right-radius: 10px;
-  border-bottom-left-radius: 10px;
-  border-top-right-radius: 50px;
-  border-top-left-radius: 50px;
-  top: -18px;
-  background-color: var(--sec-blue);
-  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
-}
-
-#logo img {
-  position: relative;
-  filter: drop-shadow(2px 4px 6px black);
-  width: 270px;
+  font-size: 20vw;
+  top: -5vh;
+  right: 0;
   -webkit-app-region: drag;
-}
-
-#version-info {
-  position: absolute;
-  top: 90px;
-  font-size: 15px;
-  background-color: var(--sec-blue);
-  border-radius: 5px;
-  width: 90%;
-  padding: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  align-content: center;
-  color: #fff;
-  font-weight: bold;
-}
-
-.about-screen footer {
-  font-size: 12px;
-  font-style: italic;
-  padding-top: 20px;
-  position: absolute;
-  bottom: 10px;
-}
-.text {
-  font-size: 11px;
-  font-weight: bolder;
-  text-align: center;
-  padding: 1vh 3vw;
-}
-.text::after {
-  content: attr(data-label);
-}
-
-/* ABOUT SCREEN */
-#h2 {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  top: -12px;
-  width: 100%;
-}
-#h2 img {
-  position: relative;
-  height: 105px;
-  top: 0;
-  right: 45px;
-  -webkit-user-drag: none;
-}
-
-#h2::after {
-  content: 'About';
-  font-family: Forelle;
-  font-size: 55px;
-  position: absolute;
-  right: 35px;
-  top: 30px;
-}
-
-.about-screen {
-  z-index: 2;
-  opacity: 0;
-  position: absolute;
-  flex-direction: column;
-  justify-content: start;
-  align-items: center;
-  height: 395px;
-  width: 275px;
-  align-content: center;
-  background-color: #fff;
-  border: 2px solid var(--main);
-  border-radius: 10px;
-  transition: visibility 0.3s 0.3s, opacity 0.3s 0.3s;
-  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
-}
-.paragraph {
-  position: relative;
-  top: 15px;
-  font-size: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-content: center;
-  margin: 0;
-  text-align: justify;
-  align-items: center;
-  padding-left: 15px;
-  padding-right: 15px;
-}
-
-#buttons {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  align-content: center;
-  position: absolute;
-  bottom: 40px;
-  height: 50px;
-  width: 235px;
 }
 
 /* BUTTONS */
@@ -282,46 +166,38 @@ button {
 
 #info {
   position: absolute;
-  transform: scale(1);
-  border-radius: 10px;
+  border-radius: 50%;
   border: 1px solid #fff;
   background-color: #fff;
-  width: 25px;
-  height: 25px;
-  top: 8px;
-  left: 8px;
-  transition: transform 0.3s;
+  width: 12vw;
+  height: 12vw;
+  bottom: -16vh;
+  right: 7vw;
 }
 #info-icon {
   position: relative;
   border-radius: 50%;
   fill: var(--main);
-  width: 15px;
-  height: 15px;
-  left: -2px;
-}
-
-#info:hover {
-  transform: scale(1.5);
+  width: 10vw;
 }
 
 #info:active {
-  animation: pulse 0.3s linear forwards;
+  transform: scale(0.9);
 }
 
 #minimize {
   position: absolute;
   transform: scale(1);
-  width: 15px;
+  width: 6vw;
   height: auto;
-  top: 10px;
-  right: 15px;
+  top: -31vh;
+  right: 5vw;
   outline: none;
   fill: var(--main);
   transition: transform 0.3s;
 }
 #minimize:hover {
-  transform: scale(1.5);
+  transform: scale(1.3);
 }
 
 #minimize:active {
@@ -330,113 +206,69 @@ button {
 
 @keyframes pulse {
   0% {
-    transform: scale(1.5);
+    transform: scale(1.3);
   }
   50% {
     transform: scale(0.4);
   }
   100% {
-    transform: scale(1.5);
+    transform: scale(1.3);
   }
 }
 
 .btn-full {
   position: absolute;
+  top: 7vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   align-content: center;
-  top: 40px;
-  border-radius: 10px;
   text-align: center;
-  padding: 7px 0;
+  padding: 1vh 0;
   font-weight: bolder;
   background-color: var(--button-green);
   color: #fff;
   border: 2px solid var(--button-green);
-  width: 120px;
-  font-size: 18px;
-  box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
-  transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
+  width: 65vw;
+  font-size: 8vw;
 }
 
 .btn-full:hover {
-  background-color: #fff;
-  color: var(--button-green);
-  box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+  background-color: var(--button-green-hover);
+  border: 2px solid var(--button-green-hover);
 }
+
 .btn-full:active {
   transform: scale(0.95);
-  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
 .btn-exit {
   position: absolute;
-  top: 95px;
+  top: 25vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   align-content: center;
-  border-radius: 10px;
   text-align: center;
+  padding: 1vh 0;
   font-weight: bolder;
   background-color: var(--button-red);
   color: #fff;
   border: 2px solid var(--button-red);
-  width: 120px;
-  padding: 7px 0;
-  font-size: 18px;
-  box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
-  transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
+  width: 65vw;
+  font-size: 8vw;
 }
 
 .btn-exit:hover {
-  background-color: #fff;
-  color: var(--button-red);
-  box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+  background-color: var(--button-red-hover);
+  border: 2px solid var(--button-red-hover);
 }
 .btn-exit:active {
   transform: scale(0.95);
-  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
-.mail,
-.btn-back,
-.settings-btn {
-  display: flex;
-  justify-content: center;
-  text-decoration: none;
-  padding: 10px 10px;
-  font-weight: bolder;
-  font-size: 12px;
-  background-color: var(--sec-blue);
-  border-radius: 200px;
-  margin-top: 20px;
-  color: #fff;
-  border: 2px solid var(--sec-blue);
-  box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
-
-  transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
-}
-.mail {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 50px;
-  height: 50px;
-  padding: 4px;
-}
-.btn-back {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  background-color: var(--button-red);
-  border: 2px solid var(--button-red);
-  height: 50px;
-  width: 50px;
-}
 .settings-btn {
   position: absolute;
   bottom: 0;
@@ -493,99 +325,30 @@ button {
 /* SYSTEM SETTINGS PAGE */
 
 .system-settings {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  align-content: center;
-  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
   z-index: 2;
   opacity: 0;
+  top: 0;
   position: absolute;
   flex-direction: column;
   justify-content: start;
   align-items: center;
-  height: 395px;
-  width: 275px;
+  height: 94vh;
+  width: 94vw;
   align-content: center;
   background-color: #fff;
-  border: 2px solid #111;
-  border-radius: 10px;
   transition: visibility 0.5s, opacity 0.3s;
-}
-#system-settings-header {
-  position: absolute;
-  top: -10px;
-  display: flex;
-  justify-content: space-between;
-  align-content: center;
-  align-items: center;
-  font-size: 30px;
-  width: 100%;
-  height: 100px;
-  border-radius: 200px;
-}
-#system-settings-header img {
-  position: relative;
-  height: 95px;
-  left: 35px;
-  top: 0;
-}
-
-#system-settings-header::after {
-  position: relative;
-  content: 'Settings';
-  font-size: 47px;
-  right: 35px;
-  top: 10px;
-  font-family: Forelle;
+  border-radius: 3px;
 }
 
 #system-settings-btn-container {
   display: flex;
-  top: 93px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  font-size: 15px;
   align-content: center;
   position: absolute;
-}
-#setup-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  align-items: center;
-  align-content: center;
-  position: relative;
-  font-size: 15px;
-  height: 75px;
-  width: 250px;
-  border: 2px solid var(--main);
-  border-radius: 10px;
-  background-color: var(--sec-blue);
-  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
-}
-#system-utils {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  align-items: center;
-  align-content: center;
-  position: relative;
-  margin-top: 10px;
-  height: 115px;
-  width: 250px;
-  border: 2px solid var(--main);
-  border-radius: 10px;
-  background-color: var(--sec-blue);
-  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
-}
-
-#config-label,
-#utils-label {
-  color: #fff;
-  font-weight: bolder;
+  width: 94vw;
+  height: 94vh;
 }
 
 /* BUTTONS */
@@ -594,42 +357,40 @@ button {
   justify-content: center;
   align-content: center;
   align-items: center;
-  border-radius: 200px;
   text-align: center;
-  background-color: #fff;
-  color: #000;
-  font-size: 14px;
+  font-size: 6vw;
+  width: 65vw;
+  height: 14vh;
   font-weight: normal;
-  width: 229px;
-  height: 30px;
-  border: 2px solid #000;
-  box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
-  transition: background-color 0.5s, border 0.5s, font-weight 0.5s, color 0.5s, box-shadow 0.5s;
+  margin-bottom: 4vh;
+  background-color: var(--main);
+  border: 2px solid var(--main);
+  color: #fff;
 }
 
 .system-btn:hover {
-  border: 2px solid #000;
-  font-weight: bolder;
-
-  box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
+  background-color: var(--main-hover);
+  border: 2px solid var(--main-hover);
 }
 
 #back-btn-system {
-  position: absolute;
-  bottom: -62px;
-  left: 105px;
+  background-color: var(--button-red);
+  border: 1px solid var(--button-red);
 }
+#back-btn-system:hover {
+  background-color: var(--button-red-hover);
+  border: 1px solid var(--button-red-hover);
+}
+
 #back-btn-system:active {
   transform: scale(0.95);
-  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
 .system-settings footer {
-  font-size: 12px;
+  font-size: 5vw;
   font-style: italic;
-  padding-top: 20px;
   position: absolute;
-  bottom: -88px;
+  bottom: 4vh;
 }
 
 #email-setup:active {
@@ -637,10 +398,6 @@ button {
   box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
 
-#config-view:active {
-  transform: scale(0.95);
-  box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
-}
 #clear-cached-emails:active {
   transform: scale(0.95);
   box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
@@ -653,15 +410,15 @@ button {
 /* PAUSE EMAILS BUTTON POPUP */
 #removepausedprices-popup {
   position: absolute;
-  bottom: 29vh;
+  bottom: 20vh;
   transform: scale(0);
   z-index: 3;
-  width: 235px;
-  height: 145px;
+  width: 88vw;
+  height: 60vh;
   text-align: justify;
-  font-size: 14px;
-  border-radius: 10px;
-  border: 2px solid var(--main);
+  font-size: 6vw;
+  border-radius: 3px;
+  border: 1px solid var(--main);
   filter: drop-shadow(2px 4px 6px black);
 }
 #removepausedprices-popup[open] {
@@ -669,21 +426,21 @@ button {
 }
 #removepausedprices-popup p {
   position: relative;
-  bottom: 25px;
+  bottom: 3vh;
 }
 #removepausedprices-popup h3 {
   position: relative;
-  top: -20px;
+  top: -3vh;
+  font-size: 6vw;
 }
 #removepausedprices-yes {
   position: absolute;
-  top: 5px;
-  right: 40px;
-  width: 25px;
-  height: 25px;
+  top: 5vh;
+  right: 20vw;
+  width: 10vw;
+  height: 10vw;
   border-radius: 50%;
   background-color: #fff;
-  transition: box-shadow 0.3s;
 }
 #removepausedprices-yes svg {
   width: 100%;
@@ -693,22 +450,17 @@ button {
 }
 
 #removepausedprices-yes:active {
-  box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
   transform: scale(0.9);
 }
 
-#removepausedprices-yes:hover {
-  box-shadow: 3px 3px 7px 0px rgba(50, 50, 50, 0.8);
-}
 #removepausedprices-no {
   position: absolute;
-  top: 5px;
-  width: 25px;
-  height: 25px;
-  right: 10px;
+  top: 5vh;
+  width: 10vw;
+  height: 10vw;
+  right: 5vw;
   border-radius: 50%;
   background-color: #fff;
-  transition: box-shadow 0.3s;
 }
 #removepausedprices-no svg {
   width: 100%;
@@ -718,11 +470,8 @@ button {
 }
 #removepausedprices-no:active {
   transform: scale(0.9);
-  box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
 }
-#removepausedprices-no:hover {
-  box-shadow: 3px 3px 7px 0px rgba(50, 50, 50, 0.8);
-}
+
 @keyframes popup-notify {
   0% {
     transform: scale(0);

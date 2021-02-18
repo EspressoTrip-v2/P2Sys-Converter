@@ -1,16 +1,27 @@
 /* Set main colors */
 :root {
-  --psys-blue: #09e1ff;
-  --psys-red: #fe1604;
-  --psys-green: #03c224;
-
   --main: #000;
+  --main-hover: rgb(46, 45, 45);
   --sec-blue: #05899c;
-  --button-red: #fe1604;
-  --button-green: #03c224;
+  --sec-blue-hover: #08d1ee;
+  --scrollbar-track: rgba(5, 136, 156, 0.1);
+
+  --button-red: #d63031;
+  --button-red-hover: #de5b5b;
+
+  --button-green: #00b894;
+  --button-green-hover: #00daaf;
   --button-gold: #fe7c04;
-  --hover-blue: rgba(5, 138, 158, 0.5);
+  --auto: rgba(254, 125, 4, 0.08);
+  --man: rgba(0, 184, 147, 0.08);
+
+  --button-gold-hover: #ce6301;
+
+  --hover-blue: rgba(5, 136, 156, 0.5);
+  --button-disabled: #b2bec3;
+  --text-color: #2d3436;
 }
+
 * {
   box-sizing: border-box;
   -webkit-user-select: none;

@@ -106,39 +106,3 @@ function sortDate(datesArr) {
     return el.toString().slice(2);
   });
 }
-
-/* FUNCTION OVERWRITE THE LOCAL DATABASES WITH UPDATED INFORMATION */
-exports.writeLocalDatabase = (filePath, writeFileObject) => {
-  const backUpDir = `${filePath}/P2SYS-DATABASE`;
-  if (!fs.existsSync(backUpDir)) {
-    fs.mkdirSync(backUpDir);
-  }
-  let backUpObject;
-  if (fs.existsSync(`${backUpDir}/databaseBackup.json`)) {
-    backUpObject = JSON.parse(fs.readFileSync(`${backUpDir}/databaseBackup.json`, 'utf8'));
-    let dateKeys = sortDate(Object.keys(backUpObject));
-    if (!dateKeys.includes(dateString) && dateKeys.length < 6) {
-      backUpObject[dateString] = writeFileObject;
-      fs.writeFile(`${backUpDir}/databaseBackup.json`, JSON.stringify(backUpObject), (err) => {
-        if (err) {
-          logfileFunc(err);
-        }
-      });
-    } else if (!dateKeys.includes(dateString) && dateKeys.length === 6) {
-      delete backUpObject[dateKeys[0]];
-      backUpObject[dateString] = writeFileObject;
-      fs.writeFile(`${backUpDir}/databaseBackup.json`, JSON.stringify(backUpObject), (err) => {
-        if (err) {
-          logfileFunc(err);
-        }
-      });
-    }
-  } else {
-    let newObject = JSON.stringify({ [dateString]: writeFileObject });
-    fs.writeFile(`${backUpDir}/databaseBackup.json`, newObject, (err) => {
-      if (err) {
-        logfileFunc(err);
-      }
-    });
-  }
-};

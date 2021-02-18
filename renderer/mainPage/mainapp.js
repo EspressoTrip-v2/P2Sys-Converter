@@ -53,26 +53,16 @@ if (!localStorage.getItem('notifications')) {
 let startBtn = document.getElementById('start'),
   exitbtn = document.getElementById('exit-btn'),
   aboutbtn = document.getElementById('info'),
-  backbtn = document.getElementById('back-btn'),
-  backBtnSettings = document.getElementById('back-btn-system'),
-  configView = document.getElementById('config-view'),
+  backbtn = document.getElementById('back-btn-system'),
   clearCachedEmailsBtnSettings = document.getElementById('clear-cached-emails'),
   clearPausedPricelistsBtnSettings = document.getElementById('clear-cached-pricelists'),
-  mailbtn = document.getElementById('mail-btn'),
-  systemSettingsBtn = document.getElementById('settings-button'),
   soundClick = document.getElementById('click'),
-  versionInfo = document.getElementById('version-info'),
   mainContainer = document.getElementById('container'),
   sentSound = document.getElementById('sent'),
   minimizeBtn = document.getElementById('minimize'),
   dbContainer = document.getElementById('db'),
   dbLogo = document.getElementById('db-logo'),
   soundPop = document.getElementById('pop');
-
-///////////////////////
-/* DOM MANIPULATIONS */
-///////////////////////
-versionInfo.innerText = `P2Sys-Converter (v${remote.app.getVersion()})`;
 
 /* MAIN PAGE EVENTS */
 /////////////////////
@@ -92,8 +82,6 @@ exitbtn.addEventListener('click', (e) => {
   ipcRenderer.send('close-main', null);
 });
 
-/* ABOUT PAGE EVENTS */
-//////////////////////
 minimizeBtn.addEventListener('click', (e) => {
   soundClick.play();
   setTimeout(() => {
@@ -104,38 +92,14 @@ minimizeBtn.addEventListener('click', (e) => {
 /* ABOUT BUTTON */
 aboutbtn.addEventListener('click', (e) => {
   soundClick.play();
-
-  document.querySelector('.about-screen').style.display = 'flex';
-  setTimeout(() => {
-    document.querySelector('.about-screen').style.visibility = 'visible';
-    document.querySelector('.about-screen').style.opacity = 1;
-  }, 200);
-});
-backbtn.addEventListener('click', (e) => {
-  soundClick.play();
-
-  document.querySelector('.about-screen').style.visibility = 'hidden';
-  document.querySelector('.about-screen').style.opacity = 0;
-});
-mailbtn.addEventListener('click', (e) => {
-  soundClick.play();
-
-  shell.openExternal('mailto:juanbo.jb@gmail.com?subject=P2Sys() Inquiry/ Bug report');
+  document.querySelector('.system-settings').style.display = 'flex';
+  document.querySelector('.system-settings').style.opacity = 1;
 });
 
-/* SYSTEM BUTTONS */
-backBtnSettings.addEventListener('click', (e) => {
+backbtn.addEventListener('click', () => {
   soundClick.play();
-
-  document.querySelector('.system-settings').style.visibility = 'hidden';
   document.querySelector('.system-settings').style.opacity = 0;
-});
-
-/* EMAIL SETUP BUTTON */
-configView.addEventListener('click', (e) => {
-  soundClick.play();
-
-  shell.openPath(`${process.cwd()}/.env`);
+  document.querySelector('.system-settings').style.display = 'none';
 });
 
 /* CLEAR LOCALSTORAGE FILES */
@@ -227,21 +191,6 @@ window.addEventListener('offline', (e) => {
       requireInteraction: true,
     });
   }
-});
-
-/* SYSTEM SETTINGS PAGE EVENTS */
-/////////////////////////////////
-systemSettingsBtn.addEventListener('click', (e) => {
-  soundClick.play();
-
-  document.querySelector('.about-screen').style.visibility = 'hidden';
-  document.querySelector('.about-screen').style.opacity = 0;
-
-  document.querySelector('.system-settings').style.display = 'flex';
-  setTimeout(() => {
-    document.querySelector('.system-settings').style.visibility = 'visible';
-    document.querySelector('.system-settings').style.opacity = 1;
-  }, 200);
 });
 
 /* IPC LISTENERS */
