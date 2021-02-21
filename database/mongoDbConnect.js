@@ -20,13 +20,9 @@ function logfileFunc(message) {
   let fileDir = `${appData}/error-log.txt`;
   /* CHECK IF EXISTS */
   if (fs.existsSync(fileDir)) {
-    fs.appendFileSync(fileDir, `${new Date()}: Database ${message}\n`, (err) =>
-      console.log(err)
-    );
+    fs.appendFileSync(fileDir, `${new Date()}: ${message}\n`, (err) => console.log(err));
   } else {
-    fs.writeFileSync(fileDir, `${new Date()}: Database ${message}\n`, (err) =>
-      console.log(err)
-    );
+    fs.writeFileSync(fileDir, `${new Date()}: ${message}\n`, (err) => console.log(err));
   }
 }
 
@@ -87,45 +83,115 @@ const customerBackUpModel = mongoose.model('Customer_BackUp', customerBackUpSche
 exports.customerBackUpModel = customerBackUpModel;
 
 /* QUERY FUNCTIONS EXPORT */
-// QUERY PRICE-LIST
-exports.queryPriceList = async function (customerNumber) {
+////////////////////////////
+
+// QUERY ALL CUSTOMER PRICE-LIST NUMBERS
+exports.queryAllPriceListNumbers = async function () {
+  let result = await customerPricesModel.find().distinct('_id').exec();
+  return result;
+};
+
+// QUERY A SINGLE PRICE-LIST
+exports.querySinglePriceList = async function (customerNumber) {
   try {
-    let priceList = await (await customerPricesModel.findById(customerNumber)).execPopulate();
+    let priceList = await customerPricesModel.findById(customerNumber).lean().exec();
     return priceList;
   } catch (err) {
     logfileFunc(err.stack);
   }
 };
 
-// QUERY ALL BACKUPS
-async function queryAllBackUps() {
+/* QUERY CUSTOMER PRICE-LIST EXISTS */
+exports.queryCustomerExists = async function (customerNumber) {
   try {
-    let backUps = await customerBackUpModel.find().distinct('_id').exec();
-    let pos = backUps.findIndex((el) => el === 'check');
-    backUps.splice(pos, 1);
-    removeBackups(backUps);
+    let result = customerPricesModel.exists({ _id: customerNumber });
+    return result;
   } catch (err) {
     logfileFunc(err.stack);
   }
-}
+};
 
+/* QUERY SINGLE PRICE-LIST NUMBER */
+exports.querySinglePricelistNumber = async function (customerNumber) {
+  try {
+    let result = customerPricelistNumberModel.findById(customerNumber).lean().exec();
+    return result;
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+/* GET THE LATEST EXMILL PRICE-LIST */
+exports.queryExmillPrice = async function () {
+  try {
+    let result = await customerPricesModel.findById('@EXMILL').lean().exec();
+    return result['price-list'];
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+// QUERY ALL SCHEDULE PRICES TODO: FINISH THE AUTO CREATION
+exports.queryAllScheduleDates = async function () {
+  try {
+    let result = await schedulePricesModel.find().distinct('_id').exec();
+    return result;
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+// QUERY ALL CUSTOMER NUMBERS ON FILE
+exports.queryAllCustomerNumbers = async function () {
+  try {
+    let result = await customerNumberNameModel.find().distinct('_id').lean().exec();
+    return result;
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+// GET CUSTOMER NAME
+exports.queryCustomerName = async function (customerNumber, allNames) {
+  let result;
+  if (allNames) {
+    try {
+      result = await customerNumberNameModel.find().lean().exec();
+      return result;
+    } catch (err) {
+      logfileFunc(err.stack);
+    }
+  } else {
+    try {
+      result = await customerNumberNameModel.findById(customerNumber).lean().exec();
+      return result;
+    } catch (err) {
+      logfileFunc(err.stack);
+    }
+  }
+};
+
+// QUERY THE LAST CLEANED DATE ON BACKUP DATABASE
 exports.queryBackUpDate = async function () {
   try {
-    let date = await customerBackUpModel.findById('check').exec();
-    let value = parseInt(date.toJSON().value);
+    let date = await customerBackUpModel.findById('check').lean().exec();
+    let value = parseInt(date.value);
+    console.log(value);
     if (value < new Date().getFullYear()) {
+      logfileFunc(`${new Date()}: Cleaned customer backups.`);
       queryAllBackUps();
+      return true;
     }
   } catch (err) {
     logfileFunc(err.stack);
   }
 };
 
-// QUERY ALL SCHEDULE PRICES
-exports.queryAllSchedules = async function () {
+// QUERY SINGLE CUSTOMER BACKUP
+exports.querySingleCustomerBackup = async function (customerNumber) {
   try {
-    let schedules = await schedulePricesModel.find().distinct('_id').exec();
-    console.log(schedules);
+    let result = await customerBackUpModel.findById(customerNumber).lean().exec();
+    return result;
   } catch (err) {
     logfileFunc(err.stack);
   }
@@ -137,7 +203,7 @@ async function removePriceLists(query) {
   let queryJson = query.toJSON();
   let dateKeys = Object.keys(queryJson);
 
-  /* Remove the _id */
+  /* Remove the _id from the array */
   let pos = dateKeys.findIndex((el) => el == '_id');
   dateKeys.splice(pos, 1);
 
@@ -194,6 +260,21 @@ async function removeBackups(customerNumbers) {
     try {
       let backup = await customerBackUpModel.findById(number).exec();
       removePriceLists(backup);
+    } catch (err) {
+      logfileFunc(err.stack);
+    }
+
+    try {
+      /* SET CHECK DATE TO CURRENT */
+      customerBackUpModel
+        .findOneAndReplace(
+          { _id: 'check' },
+          {
+            _id: 'check',
+            value: currentYear,
+          }
+        )
+        .exec();
     } catch (err) {
       logfileFunc(err.stack);
     }

@@ -41,7 +41,7 @@ if (!localStorage.getItem('notifications')) {
     roundall: true,
     copy: true,
     calculate: true,
-    pausedprices: true, //Not used in popup now maybe in future, still checks to see if set
+    muteflag: true,
   };
   localStorage.setItem('notifications', JSON.stringify(notObject));
 }
@@ -57,16 +57,47 @@ let startBtn = document.getElementById('start'),
   clearCachedEmailsBtnSettings = document.getElementById('clear-cached-emails'),
   clearPausedPricelistsBtnSettings = document.getElementById('clear-cached-pricelists'),
   soundClick = document.getElementById('click'),
-  mainContainer = document.getElementById('container'),
   sentSound = document.getElementById('sent'),
   minimizeBtn = document.getElementById('minimize'),
   dbContainer = document.getElementById('db'),
   dbLogo = document.getElementById('db-logo'),
-  soundPop = document.getElementById('pop');
+  muteBtn = document.getElementById('mute'),
+  muteLogo = document.getElementById('mute-logo'),
+  audioTag = Array.from(document.getElementsByTagName('audio'));
+
+/* FUNCTIONS */
+///////////////
+/* FUNCTION CHECK THE MUTE FLAG */
+let storage = JSON.parse(localStorage.getItem('notifications'));
+function checkMuteFlag() {
+  if (!storage.muteflag) {
+    /* SET FLAG TO FALSE AND TURN OFF ALL SOUND */
+    storage.muteflag = false;
+    localStorage.setItem('notifications', JSON.stringify(storage));
+    audioTag.forEach((el) => {
+      el.muted = true;
+    });
+    muteLogo.style.fill = 'var(--main)';
+    muteBtn.title = 'Sound Off';
+  } else {
+    /* SET THE FLAG TO TRUE AND TURN OFF ALL SOUND */
+    storage.muteflag = true;
+    localStorage.setItem('notifications', JSON.stringify(storage));
+    audioTag.forEach((el) => {
+      el.muted = false;
+    });
+    soundClick.play();
+    muteLogo.style.fill = 'darkgrey';
+    muteBtn.title = 'Sound On';
+  }
+}
+
+if (!storage.muteflag) {
+  checkMuteFlag();
+}
 
 /* MAIN PAGE EVENTS */
 /////////////////////
-
 /* START BUTTON */
 startBtn.addEventListener('click', (e) => {
   soundClick.play();
@@ -125,27 +156,6 @@ clearCachedEmailsBtnSettings.addEventListener('click', (e) => {
   }
 });
 
-/* PAUSED PRICES NOTIFICATION */
-let pausedPricesPop = document.getElementById('removepausedprices-popup'),
-  pausedPricesPopYes = document.getElementById('removepausedprices-yes'),
-  pausedPricesPopNo = document.getElementById('removepausedprices-no');
-function notificationPausePrices() {
-  notObject = JSON.parse(localStorage.getItem('notifications'));
-  if (notObject.pausedprices) {
-    soundPop.play();
-    pausedPricesPop.show();
-    pausedPricesPopYes.addEventListener('click', (e) => {
-      soundPop.play();
-      pausedPricesPop.close();
-      pausedPricesPress();
-    });
-    pausedPricesPopNo.addEventListener('click', (e) => {
-      soundPop.play();
-      pausedPricesPop.close();
-    });
-  }
-}
-
 /* PAUSED EMAIL BUTTON FUNCTION */
 function pausedPricesPress() {
   soundClick.play();
@@ -173,11 +183,6 @@ function pausedPricesPress() {
   }
 }
 
-/* CLEAR PAUSED PRICELISTS FILES */
-clearPausedPricelistsBtnSettings.addEventListener('click', (e) => {
-  notificationPausePrices();
-});
-
 /* ONLINE LISTENER */
 window.addEventListener('offline', (e) => {
   dbContainer.title = 'Connection Lost';
@@ -193,13 +198,23 @@ window.addEventListener('offline', (e) => {
   }
 });
 
+/* MUTE SOUNDS BUTTON */
+muteBtn.addEventListener('click', (e) => {
+  setTimeout(() => {
+    if (storage.muteflag) {
+      storage.muteflag = false;
+      localStorage.setItem('notifications', JSON.stringify(storage));
+      checkMuteFlag();
+    } else {
+      storage.muteflag = true;
+      localStorage.setItem('notifications', JSON.stringify(storage));
+      checkMuteFlag();
+    }
+  }, 300);
+});
+
 /* IPC LISTENERS */
 //////////////////
-
-/* SHOW WINDOW */
-ipcRenderer.on('show', (e, message) => {
-  mainContainer.style.opacity = '1';
-});
 
 /* DB CONNECTION */
 ipcRenderer.on('db', (e, message) => {

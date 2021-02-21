@@ -11,8 +11,6 @@ const {
 } = require('electron');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const windowStateKeeper = require('electron-window-state');
-const { queryAllBackUps } = require('./database/mongoDbConnect');
 require('dotenv').config();
 
 /* GET WORKING DIRECTORY */
@@ -46,10 +44,16 @@ if (process.platform === 'win32') {
 
 /* LOCAL MODULES */
 const {
-  customerPricelistNumberModel,
-  customerNumberNameModel,
   queryBackUpDate,
-  queryAllSchedules,
+  queryExmillPrice,
+  queryAllPriceListNumbers,
+  queryAllCustomerNumbers,
+  querySinglePriceList,
+  queryCustomerName,
+  queryCustomerExists,
+  querySinglePricelistNumber,
+  querySingleCustomerBackup,
+  queryAllScheduleDates, //TODO:  Finish schedule conversion
 } = require(`${dir}/database/mongoDbConnect.js`);
 const { updater } = require(`${dir}/updater.js`);
 
@@ -62,13 +66,14 @@ let homeWindow,
   updateWindow,
   emailWindow,
   progressWindow,
-  dbLoaderWindow,
+  // dbLoaderWindow,
   copySelectionWindow,
-  customerBackUp = null,
-  customerNumberName,
-  customerNameNumber,
-  customerPricelistNumber,
-  customerPrices = null,
+  customerNumberAllKeys,
+  customerNumberNameResult,
+  customerNumberNameJson,
+  customerNameNumberJson,
+  exmillPrice,
+  customerPricesNumbersArr,
   screenHeight,
   screenWidth,
   iconImage,
@@ -92,17 +97,6 @@ if (process.platform === 'win32') {
 /* FUNCTIONS */
 ////////////////
 
-/* FUNCTION TO CREATE REVERSE OBJECT FOR DOCK */
-function customerNameNumberFunc(data) {
-  newArr = {};
-  Object.entries(data).forEach((el) => {
-    newArr[el[1]] = el[0];
-  });
-  delete newArr['_id'];
-
-  return newArr;
-}
-
 /* FUNCTION TO CREATE TRAY MENU */
 function createTray() {
   tray = new Tray(iconImage);
@@ -115,14 +109,27 @@ function logfileFunc(message) {
   let fileDir = `${appData}/error-log.txt`;
   /* CHECK IF EXISTS */
   if (fs.existsSync(fileDir)) {
-    fs.appendFileSync(fileDir, `${new Date()}: Database ${message}\n`, (err) =>
-      console.log(err)
-    );
+    fs.appendFileSync(fileDir, `${new Date()}: ${message}\n`, (err) => console.log(err));
   } else {
-    fs.writeFileSync(fileDir, `${new Date()}: Database ${message}\n`, (err) =>
-      console.log(err)
-    );
+    fs.writeFileSync(fileDir, `${new Date()}: ${message}\n`, (err) => console.log(err));
   }
+}
+
+/* CREATE NAME NUMBER JSON FOR SEARCH WINDOW */
+function convertNumberName() {
+  let newObjA = {};
+  let newObjB = {};
+  // let dupes = [];
+  customerNumberNameResult.forEach((obj) => {
+    // if (newObjA[obj.name]) {
+    //   dupes.push(obj.name);
+    // }
+    newObjA[obj.name] = obj._id;
+    newObjB[obj._id] = obj.name;
+  });
+  customerNameNumberJson = newObjA;
+  customerNumberNameJson = newObjA;
+  // console.log(dupes);
 }
 
 //////////////////////
@@ -152,7 +159,7 @@ function mongooseConnect() {
     .catch((err) => {
       /* INITIAL ERROR CONNECTION */
       dialog
-        .showMessageBox(dbLoaderWindow, {
+        .showMessageBox(loadingWindow, {
           type: 'error',
           title: 'P2SYS ERROR',
           icon: `${dir}/renderer/icons/error.png`,
@@ -161,7 +168,7 @@ function mongooseConnect() {
           buttons: ['EXIT'],
         })
         .then(() => {
-          dbLoaderWindow.close();
+          loadingWindow.close();
         });
 
       let fileDir = `${appData}/error-log.txt`;
@@ -189,6 +196,14 @@ const db = mongoose.connection;
 
 /* DOWNLOAD DB ONCE CONNECTED */
 db.once('connected', async () => {
+  /* GET LATEST EXMILL PRICE */
+  try {
+    let result = await queryExmillPrice();
+    exmillPrice = result;
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+
   /* CHECK BACKUPS CLEAN DATE */
   try {
     queryBackUpDate();
@@ -196,31 +211,24 @@ db.once('connected', async () => {
     logfileFunc(err.stack);
   }
 
+  /* QUERY ALL NAMES */
   try {
-    dbLoaderWindow.webContents.send('db-download', {
-      database: 'Downloading CNN-Db',
-    });
-    customerNumberNameObj = await customerNumberNameModel
-      .findById('customerNumberName')
-      .exec();
-    customerNumberName = customerNumberNameObj._doc;
-    delete customerNumberName['_id'];
-
-    customerNameNumber = customerNameNumberFunc(customerNumberName);
+    customerNumberNameResult = await queryCustomerName(null, true);
   } catch (err) {
     logfileFunc(err.stack);
   }
 
+  /* FETCH PRICELIST INDEXES */
   try {
-    dbLoaderWindow.webContents.send('db-download', {
-      database: 'Downloading CPN-Db',
-    });
+    customerPricesNumbersArr = await queryAllPriceListNumbers();
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
 
-    let customerPricelistNumberObj = await customerPricelistNumberModel
-      .findById('customerPricelistNumber')
-      .exec();
-    customerPricelistNumber = customerPricelistNumberObj._doc;
-    delete customerPricelistNumber['_id'];
+  /* FETCH ALL CUSTOMER NAME INDEXES */
+  try {
+    customerNumberAllKeys = await queryAllCustomerNumbers();
+    /* SEND COMPLETE NOTIFICATION */
   } catch (err) {
     logfileFunc(err.stack);
   }
@@ -228,6 +236,7 @@ db.once('connected', async () => {
   /* TRAY MENU LAYOUT TEMPLATE */
   trayMenu = Menu.buildFromTemplate([{ label: `Converter v${version}` }]);
   createWindow();
+  convertNumberName();
 });
 
 db.on('disconnected', () => {
@@ -291,23 +300,6 @@ db.on('reconnected', () => {
 ////////////////////////////////
 /* WINDOW CREATION FUNCTIONS */
 //////////////////////////////
-
-/* WINDOW STATES FUNCTION */
-////////////////////////////
-function windowStates() {
-  mainWindowState = windowStateKeeper({
-    defaultWidth: 180,
-    defaultHeight: 200,
-    file: 'customerWindowState.json',
-  });
-
-  secWindowState = windowStateKeeper({
-    defaultWidth: 200,
-    defaultHeight: 255,
-    file: 'customerWindowState.json',
-  });
-}
-
 /* MAIN WINDOW CREATION */
 function createWindow() {
   createTray();
@@ -316,13 +308,16 @@ function createWindow() {
     removeBackups(customerBackUp);
   }
   homeWindow = new BrowserWindow({
-    width: mainWindowState.width,
-    height: mainWindowState.height,
-    x: mainWindowState.x,
-    y: mainWindowState.y,
-    resizable: false,
+    width: 180,
+    height: 200,
+    maxWidth: 300,
+    maxHeight: 300,
+    minHeight: 200,
+    minWidth: 180,
     spellCheck: false,
     center: true,
+    show: false,
+    maximizable: false,
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
     webPreferences: {
@@ -349,8 +344,8 @@ function createWindow() {
 
   // Only show on load completion
   homeWindow.webContents.on('did-finish-load', () => {
-    dbLoaderWindow.close();
-    homeWindow.webContents.send('show', null);
+    loadingWindow.close();
+    homeWindow.show();
     homeWindow.webContents.send('db', connectionName);
   });
 
@@ -364,15 +359,14 @@ function createWindow() {
 }
 
 /* SECWINDOW CREATION */
-function createSecWindow(message) {
+function createSecWindow() {
   secWindow = new BrowserWindow({
-    height: secWindowState.height,
-    width: secWindowState.width,
-    x: secWindowState.x,
-    y: secWindowState.y,
+    height: 270,
+    width: 200,
     autoHideMenuBar: true,
     center: true,
     frame: false,
+    alwaysOnTop: true,
     spellCheck: false,
     backgroundColor: '#00FFFFFF',
     transparent: true,
@@ -392,11 +386,11 @@ function createSecWindow(message) {
   secWindow.webContents.once('did-finish-load', () => {
     /* CREATE DATABASE OBJECT TO SEND TO WINDOW */
     let dbObj = {
-      customerPrices,
-      customerPricelistNumber,
-      customerNumberName,
-      customerBackUp,
-      customerNameNumber,
+      customerNumberAllKeys,
+      customerPricesNumbersArr,
+      customerNameNumberJson,
+      customerNumberNameJson,
+      exmillPrice,
     };
     secWindow.webContents.send('database-object', dbObj);
 
@@ -417,30 +411,28 @@ function createSecWindow(message) {
 
 /* CHILD WINDOW CREATION */
 function createChildWindow(message) {
-  if (message.emit === 'startPage') {
-    childWindow = new BrowserWindow({
-      parent: secWindow,
-      height: 500,
-      width: 300,
-      resizable: false,
-      x: message.dimensions[0] - 300,
-      y: message.dimensions[1],
-      autoHideMenuBar: true,
-      backgroundColor: '#00FFFFFF',
-      center: true,
-      skipTaskbar: true,
-      frame: false,
-      spellCheck: false,
-      transparent: true,
-      webPreferences: {
-        // devTools: false,
-        nodeIntegration: true,
-        enableRemoteModule: true,
-        contextIsolation: false,
-      },
-      icon: iconImage,
-    });
-  }
+  childWindow = new BrowserWindow({
+    parent: secWindow,
+    height: message.size[1],
+    width: message.size[0],
+    resizable: false,
+    x: message.dimensions[0] - message.size[0],
+    y: message.dimensions[1],
+    autoHideMenuBar: true,
+    backgroundColor: '#00FFFFFF',
+    center: true,
+    skipTaskbar: true,
+    frame: false,
+    spellCheck: false,
+    transparent: true,
+    webPreferences: {
+      // devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+      contextIsolation: false,
+    },
+    icon: iconImage,
+  });
 
   //   Load html page
   childWindow.loadFile(`${dir}/renderer/cusNameSearch/customerName.html`);
@@ -450,7 +442,11 @@ function createChildWindow(message) {
 
   // Only show on load completion
   childWindow.webContents.once('did-finish-load', () => {
-    childWindow.webContents.send('customer-name-number', customerNameNumber);
+    /* SEND NAME-NUMBER JSON AND PRICE-LIST NAMES */
+    childWindow.webContents.send('name-search', {
+      customerNameNumberJson,
+      customerPricesNumbersArr,
+    });
     if (loadingWindow) {
       loadingWindow.close();
     }
@@ -473,8 +469,8 @@ function createLoadingWindow() {
 
   loadingWindow = new BrowserWindow({
     parent: parentWin,
-    height: 280,
-    width: 280,
+    height: 100,
+    width: 100,
     autoHideMenuBar: true,
     backgroundColor: '#00FFFFFF',
     center: true,
@@ -587,45 +583,6 @@ function createProgressWindow() {
   });
 }
 
-/* DBLOADER WINDOW */
-function createDbLoaderWindow() {
-  dbLoaderWindow = new BrowserWindow({
-    height: 250,
-    width: 250,
-    spellCheck: false,
-    resizable: false,
-    backgroundColor: '#00FFFFFF',
-    autoHideMenuBar: true,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    center: true,
-    frame: false,
-    transparent: true,
-    webPreferences: {
-      // devTools: false,
-      nodeIntegration: true,
-      enableRemoteModule: true,
-      contextIsolation: false,
-    },
-    icon: iconImage,
-  });
-
-  //   LOAD HTML PAGE
-  dbLoaderWindow.loadFile(`${dir}/renderer/dbloader/dbloader.html`);
-
-  dbLoaderWindow.webContents.on('did-finish-load', () => {
-    dbLoaderWindow.moveTop();
-  });
-
-  //   LOAD DEV TOOLS
-  // dbLoaderWindow.webContents.openDevTools();
-
-  //   EVENT LISTENER FOR CLOSING
-  dbLoaderWindow.on('closed', () => {
-    dbLoaderWindow = null;
-  });
-}
-
 /* UPDATING WINDOW */
 function createUpdateWindow() {
   xPos = screenWidth / 2 - 115;
@@ -692,8 +649,8 @@ function createCopySelectionWindow() {
   // Only show on load completion
   copySelectionWindow.webContents.once('did-finish-load', () => {
     copySelectionWindow.webContents.send('copy-selection', {
-      customerPrices,
-      customerNameNumber,
+      // customerPricesNumbersArr,
+      // customerNameNumber,
     });
   });
 
@@ -722,10 +679,6 @@ app.on('ready', () => {
     app.setAppUserModelId('P2Sys-Converter');
     /* SET VERSION VARIABLE */
     version = app.getVersion();
-    console.log(version);
-
-    /* SET WINDOW STATES */
-    windowStates();
 
     /* GET SCREEN SIZE */
     let res = screen.getPrimaryDisplay().size;
@@ -735,7 +688,7 @@ app.on('ready', () => {
       /* CREATE CONNECTION */
       mongooseConnect();
       /* START LOADER */
-      createDbLoaderWindow();
+      createLoadingWindow();
     }, 300);
   }
 });
@@ -822,6 +775,9 @@ ipcMain.on('close-loader', (e, message) => {
 ipcMain.on('close-window-dock', (e, message) => {
   if (secWindow) {
     childWindow.webContents.send('close-window-dock', null);
+    setTimeout(() => {
+      childWindow.close();
+    }, 300);
   }
 });
 
@@ -867,85 +823,6 @@ ipcMain.on('remove-fade', (e, message) => {
   }
 });
 
-/* UPDATE THE DATABASE */
-ipcMain.on('update-database', async (e, message) => {
-  /* CREATE OBJECTS WITH _id FOR THE ONLINE DB */
-  let dbcustomerPrices = { ...message.customerPrices };
-
-  /* UPDATE THE LOCAL VARIABLE DATABASES */
-  customerPrices = message.customerPrices;
-  delete customerPrices['_id'];
-  customerPricelistNumber = message.customerPricelistNumber;
-  customerNumberName = message.customerNumberName;
-  customerBackUp = message.customerBackUp;
-  customerNameNumber = customerNameNumberFunc(message.customerNumberName);
-
-  await customerPricesModel.replaceOne(
-    { _id: 'customerPrices' },
-    dbcustomerPrices,
-    (err, res) => {
-      if (err) {
-        let notification = new Notification({
-          title: 'P2SYS CP-Db UPDATE ERROR',
-          body:
-            'There was an error in updating the database. Please check the logfile for details',
-          icon: `${dir}/renderer/icons/error.png`,
-        });
-        notification.show();
-        logfileFunc(err.stack);
-      }
-    }
-  );
-  await customerPricelistNumberModel.replaceOne(
-    { _id: 'customerPricelistNumber' },
-    customerPricelistNumber,
-    (err, res) => {
-      if (err) {
-        let notification = new Notification({
-          title: 'P2SYS CPN-Db UPDATE ERROR',
-          body:
-            'There was an error in updating the database. Please check the logfile for details',
-          icon: `${dir}/renderer/icons/error.png`,
-        });
-        notification.show();
-        logfileFunc(err.stack);
-      }
-    }
-  );
-  await customerNumberNameModel.replaceOne(
-    { _id: 'customerNumberName' },
-    customerNumberName,
-    (err, res) => {
-      if (err) {
-        let notification = new Notification({
-          title: 'P2SYS CNN-Db UPDATE ERROR',
-          body:
-            'There was an error in updating the database. Please check the logfile for details',
-          icon: `${dir}/renderer/icons/error.png`,
-        });
-        notification.show();
-        logfileFunc(err.stack);
-      }
-    }
-  );
-  await customerBackUpModel.replaceOne(
-    { _id: 'customerBackUp' },
-    customerBackUp,
-    (err, res) => {
-      if (err) {
-        let notification = new Notification({
-          title: 'P2SYS CB-Db UPDATE ERROR',
-          body:
-            'There was an error in updating the database. Please check the logfile for details',
-          icon: `${dir}/renderer/icons/error.png`,
-        });
-        notification.show();
-        logfileFunc(err.stack);
-      }
-    }
-  );
-});
-
 /* START UPDATE WINDOW */
 ipcMain.on('create-download-window', (e, message) => {
   createUpdateWindow();
@@ -985,4 +862,29 @@ ipcMain.on('close-main', (e, message) => {
       homeWindow.close();
     }, 200);
   }
+});
+
+/* QUERIES FOR DATABASE */
+ipcMain.handle('get-price-list', async (e, message) => {
+  let result = await querySinglePriceList(message);
+  console.log(result);
+  return result;
+});
+
+/* CHECK IF CUSTOMER PRICE-LIST EXISTS */
+ipcMain.handle('customer-exists', async (e, message) => {
+  let result = await queryCustomerExists(message);
+  return result;
+});
+
+/* GET THE PRICE-LIST NUMBER */
+ipcMain.handle('get-pricelist-number', async (e, message) => {
+  let result = await querySinglePricelistNumber(message);
+  return result;
+});
+
+/* GET THE CUSTOMER BACKUP DATA */
+ipcMain.handle('get-customer-backup', async (e, message) => {
+  let result = await querySingleCustomerBackup(message);
+  return result;
 });

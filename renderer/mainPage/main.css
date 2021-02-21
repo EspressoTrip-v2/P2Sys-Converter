@@ -3,19 +3,19 @@
   --main: #000;
   --main-hover: rgb(46, 45, 45);
   --sec-blue: #05899c;
-  --sec-blue-hover: #08d1ee;
+  --sec-blue-hover: #036b7a;
   --scrollbar-track: rgba(5, 136, 156, 0.1);
 
   --button-red: #d63031;
-  --button-red-hover: #de5b5b;
+  --button-red-hover: #a52626;
 
   --button-green: #00b894;
-  --button-green-hover: #00daaf;
+  --button-green-hover: #038369;
   --button-gold: #fe7c04;
   --auto: rgba(254, 125, 4, 0.08);
   --man: rgba(0, 184, 147, 0.08);
 
-  --button-gold-hover: #ce6301;
+  --button-gold-hover: #bd5d03;
 
   --hover-blue: rgba(5, 136, 156, 0.5);
   --button-disabled: #b2bec3;
@@ -61,7 +61,6 @@ button {
 
 #container {
   position: relative;
-  opacity: 0;
   display: flex;
   width: 100vw;
   height: 100vh;
@@ -71,8 +70,8 @@ button {
 }
 #round {
   position: relative;
-  width: 94vw;
-  height: 94vh;
+  width: 90vw;
+  height: 96vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -91,7 +90,7 @@ button {
   justify-content: center;
   align-items: center;
   background-color: #fff;
-  width: 94vw;
+  width: 90vw;
   height: 46vh;
   border-top: 1px solid;
   border-bottom: 1px solid;
@@ -160,7 +159,6 @@ button {
   border-radius: 200px;
   text-align: center;
   padding: 10px 20px;
-  font-weight: bolder;
   transition: background-color 0.5s, border 0.5s, color 0.5s, box-shadow 0.5s;
 }
 
@@ -204,6 +202,17 @@ button {
   animation: pulse 0.3s linear forwards;
 }
 
+#mute {
+  position: absolute;
+  width: 9vw;
+  height: auto;
+  bottom: -16vh;
+  left: 7vw;
+}
+#mute-logo {
+  position: relative;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(1.3);
@@ -216,6 +225,21 @@ button {
   }
 }
 
+#arrow {
+  position: absolute;
+  z-index: 0;
+  width: 6vw;
+  height: 6vw;
+  bottom: 0;
+  right: 0;
+}
+
+#arrow-logo {
+  position: absolute;
+  width: 6vw;
+  height: 6vw;
+}
+
 .btn-full {
   position: absolute;
   top: 7vh;
@@ -226,11 +250,10 @@ button {
   align-content: center;
   text-align: center;
   padding: 1vh 0;
-  font-weight: bolder;
   background-color: var(--button-green);
   color: #fff;
   border: 2px solid var(--button-green);
-  width: 65vw;
+  width: 89vw;
   font-size: 8vw;
 }
 
@@ -253,11 +276,10 @@ button {
   align-content: center;
   text-align: center;
   padding: 1vh 0;
-  font-weight: bolder;
   background-color: var(--button-red);
   color: #fff;
   border: 2px solid var(--button-red);
-  width: 65vw;
+  width: 89vw;
   font-size: 8vw;
 }
 
@@ -318,37 +340,29 @@ button {
   transform: scale(0.95);
   box-shadow: 3px 3px 18px 0px rgba(50, 50, 50, 0.75);
 }
-#back-icon:hover {
-  fill: var(--button-red);
-}
 
 /* SYSTEM SETTINGS PAGE */
 
 .system-settings {
   z-index: 2;
   opacity: 0;
-  top: 0;
   position: absolute;
   flex-direction: column;
   justify-content: start;
   align-items: center;
-  height: 94vh;
-  width: 94vw;
+  width: 90vw;
   align-content: center;
   background-color: #fff;
-  transition: visibility 0.5s, opacity 0.3s;
-  border-radius: 3px;
 }
 
 #system-settings-btn-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  justify-items: center;
   align-content: center;
-  position: absolute;
-  width: 94vw;
-  height: 94vh;
+  align-items: center;
+  position: relative;
 }
 
 /* BUTTONS */
@@ -359,38 +373,28 @@ button {
   align-items: center;
   text-align: center;
   font-size: 6vw;
-  width: 65vw;
-  height: 14vh;
-  font-weight: normal;
-  margin-bottom: 4vh;
-  background-color: var(--main);
-  border: 2px solid var(--main);
+  width: 89vw;
+  height: 13vh;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+  background-color: var(--button-gold);
+  border: 1px solid #fff;
   color: #fff;
 }
 
 .system-btn:hover {
-  background-color: var(--main-hover);
-  border: 2px solid var(--main-hover);
+  background-color: var(--button-gold-hover);
 }
 
 #back-btn-system {
   background-color: var(--button-red);
-  border: 1px solid var(--button-red);
 }
 #back-btn-system:hover {
   background-color: var(--button-red-hover);
-  border: 1px solid var(--button-red-hover);
 }
 
 #back-btn-system:active {
   transform: scale(0.95);
-}
-
-.system-settings footer {
-  font-size: 5vw;
-  font-style: italic;
-  position: absolute;
-  bottom: 4vh;
 }
 
 #email-setup:active {

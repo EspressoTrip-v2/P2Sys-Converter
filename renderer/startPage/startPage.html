@@ -19,18 +19,14 @@
   <!-- /////////////////// -->
   <div id="check-customer">
     <div id="p2s-logo"><img src="../icons/loader.png" alt="" /></div>
-
-    <div class="grab-search">
-      <svg viewBox="0 0 1000 1000">
-        <path
-          d="M814.2 675.4l-43.5-43.6 101.2-101H530.8V872l101-101.2 43.6 43.5L500 990 324.6 814.2l43.6-43.5 101 101.2V530.8H128l101.2 101 -43.5 43.6L10 500l175.8-175.4 43.5 43.6L128 469.2h341.2V128l-101 101.2 -43.6-43.5L500 10l175.4 175.8 -43.6 43.5L530.8 128v341.2H872l-101.2-101 43.5-43.6L990 500 814.2 675.4 814.2 675.4z" />
-      </svg>
-    </div>
     <a href="#" id="minimize-search">
-      <svg viewBox="0 0 56.8 34">
-        <path
-          d="M30.7 32.7L55.3 8.1c1.1-1.1 1.1-2.7 0-3.8L53.1 2 30.7 24.3c-1.1 1.1-2.8 1.1-3.9 0L4.5 2 2.2 4.3C1.1 5.4 1.1 7 2.2 8.1l24.6 24.6C27.9 33.7 29.7 33.7 30.7 32.7L30.7 32.7z"
-          fill="#3E3E3E" />
+      <svg fill="var(--text-color)" version="1.1" xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 1000 1000"
+        enable-background="new 0 0 1000 1000" xml:space="preserve">
+        <g>
+          <path
+            d="M990,500c0,46.5-37.7,84.2-84.2,84.2H94.2C47.7,584.2,10,546.5,10,500l0,0c0-46.5,37.7-84.2,84.2-84.2h811.6C952.3,415.8,990,453.5,990,500L990,500z" />
+        </g>
       </svg>
     </a>
     <div id="check-background">
@@ -39,85 +35,45 @@
       </div>
       <div id="customer-search-container">
         <form action="javascript:null;">
-          <img src="../icons/search.png" />
-          <input type="text" id="customer-search" placeholder="Customer #..." spellcheck="false" minlength="6"
+          <input type="text" id="customer-search" placeholder="ENTER NUMBER" spellcheck="false" minlength="6"
             maxlength="7" title="Customer number needs to be 6 digits long" autofocus />
           <input style="display: none" id="hidden-submit" type="submit" />
         </form>
       </div>
 
-      <div id="copy-container">
-        <label for="copy-select">
-          <p id="label-text">CREATE COPY</p>
-          <div id="tick"><svg id="tick-img" viewBox="0 0 63 64.5">
-              <path
-                d="M57.2 2.6c-1.5 0-3.3 0.2-5.6 0.5 -2.3 0.4-3.9 0.8-4.8 1.3 -1 0.5-2.4 1.8-4.4 3.9 -1.9 2-4.4 5.3-7.4 9.5 -3 4.3-5.6 8.4-7.8 12.4 -2 3.5-4 7.4-6 11.5 -1.4-1.8-2.9-3.2-4.4-4.3 -1.9-1.3-3.8-2-5.5-2 -1.7 0-3.7 0.8-5.7 2.3 -2.1 1.6-3.2 3.4-3.2 5.3 0 1.5 0.9 3.2 2.8 5.2 2.7 3 4.9 5.8 6.5 8.3 1.2 1.8 2 3 2.5 3.6 0.6 0.6 1.3 1.1 2.1 1.4 0.8 0.3 2.2 0.4 4.1 0.4 2.7 0 4.5-0.3 5.6-0.9 1.1-0.6 1.9-1.4 2.5-2.5 0.5-1 1.4-2.9 2.6-5.9 3-7.5 7.1-15.4 12.2-23.4 5.1-8 10-14.2 14.7-18.6 1.2-1 1.9-1.8 2.2-2.3C60.8 7.9 61 7.2 61 6.4c0-1-0.4-1.9-1.1-2.6C59.3 3 58.3 2.6 57.2 2.6z"
-                fill="#ffb004" />
-            </svg></div>
-        </label>
-        <input type="checkbox" id="copy-select" value="1">
-      </div>
-      <div id="button-container">
-        <button class="btn" id="check-cancel-btn" href="#">CANCEL</button>
-        <button class="btn" id="check-continue-btn" href="#">CONTINUE</button>
-        <span id="disabled" href="#">DISABLED</span>
-        <button class="btn" id="check-update-btn" href="#">UPDATE</button>
-        <button class="btn" id="resume-editing-btn" href="#">RESUME</button>
-        <button class="btn" id="copy-btn" href="#">COPY</button>
-      </div>
+    </div>
+    <div id="button-container">
+      <button class="btn" id="check-cancel-btn" href="#">CANCEL</button>
+      <!-- <button class="btn" id="check-continue-btn" href="#">CONTINUE</button> -->
+      <button id="disabled" href="#">DISABLED</button>
+      <button class="btn" id="check-update-btn" href="#">UPDATE</button>
+      <button class="btn" id="resume-editing-btn" href="#">RESUME</button>
     </div>
     <div id="assist-box">
-      <button class="btn" id="assist-btn" href="#" title="Search customer database">
-        <div id="logo-assist">
-          <svg viewBox="0 0 240.95 261.27">
-
-            <g transform="translate(222.44 11.563)" fill="#000">
-              <path
-                d="m-72.662 244.6c-14.288 2.2225-29.739 3.5454-44.741 3.5454-49.768 0-105.04-5.08-105.04-28.84v-16.933c0-21.881 33.47-42.095 69.903-49.107 0 0 11.007-5.8473 8.3344-16.933-11.562-13.97-13.996-28.787-13.996-28.787-1.9844-0.87312-4.8154-2.5664-6.5881-4.8948-4.0746-5.5298-7.8317-17.436-7.0115-25.77 0.84667-8.6254 3.175-5.8738 3.4396-7.276-7.329-18.68-3.8364-41.54 5.5562-58.288 18.785-33.602 59.108-23.707 65.564-11.086 38.576-7.1702 36.883 52.943 31.671 68.95 0 0 3.519 0.68792 2.7252 15.372-0.71438 14.737-13.176 24.527-13.176 24.527-0.39688 4.0217-5.3181 16.351-13.414 27.226-1.5346 3.2279-1.8785 5.8208-1.614 7.9904-7.276 11.642-11.536 25.321-11.536 40.005-0.0529 24.633 11.747 46.434 29.924 60.299z"
-                stroke-width=".26458" />
-              <path
-                d="m15.938 234.74-20.595-20.584c5.6402-8.094 8.9778-17.909 8.9778-28.515 0-27.561-22.34-49.889-49.889-49.889-27.561 0-49.889 22.34-49.889 49.889s22.34 49.889 49.889 49.889c10.606 0 20.421-3.3376 28.515-8.9778l20.584 20.584c3.4306 3.4306 8.9778 3.4306 12.408 0 3.4306-3.4074 3.4306-8.9662 0-12.397zm-61.507-13.455c-19.677 0-35.644-15.955-35.644-35.644 0-19.677 15.955-35.644 35.644-35.644 19.677 0 35.644 15.955 35.644 35.644s-15.955 35.644-35.644 35.644z"
-                stroke-width=".11629" />
-            </g>
-          </svg>
-        </div>
-
-
-      </button>
-      <button id="view-pause" title="Display only paused items">
-
-        <svg viewBox="0 0 1e3 1e3" id="view-pause-icon">
-          <g transform="translate(0 511) scale(.1 -.1)">
-            <path
-              d="m360.5 4976.4c-114.4-50.2-231.5-192.5-251-304-8.4-50.2-11.2-2136.6-8.4-4641.5 8.4-4546.6 8.4-4552.2 66.9-4627.5 30.7-41.8 92-103.2 133.9-133.9 75.3-58.6 100.4-58.6 2025.1-58.6s1949.8 0 2025.1 58.6c41.8 30.7 103.2 92.1 133.9 133.9l58.6 75.3v9255.1l-58.6 75.3c-30.7 41.8-92 103.2-133.9 133.9-75.3 58.6-106 58.6-1991.6 64.2-1551 5.5-1933.1-0.1-2e3 -30.8zm3305.3-4870.1v-4016.7h-2677.7v8033.4h2677.8v-4016.7z" />
-            <path
-              d="m5716 4976.4c-114.3-50.2-231.5-192.5-251-304-8.4-50.2-11.1-2136.6-8.4-4641.5 8.4-4546.6 8.4-4552.2 67-4627.5 30.7-41.8 92-103.2 133.9-133.9 75.3-58.6 100.4-58.6 2025.1-58.6 1924.6 0 1949.8 0 2025 58.6 41.8 30.7 103.2 92.1 133.9 133.9l58.6 75.3v9255.1l-58.6 75.3c-30.7 41.8-92.1 103.2-133.9 133.9-75.3 58.6-106 58.6-1991.6 64.2-1550.9 5.5-1933.1-0.1-2e3 -30.8zm3305.3-4870.1v-4016.7h-2677.7v8033.4h2677.8v-4016.7z" />
-          </g>
-        </svg>
-
-      </button>
+      <button class="btn" id="assist-btn" href="#" title="Search customer database">CUSTOMER</button>
+      <button class="btn" id="copy-btn" href="#">COPY</button>
+      <button id="view-pause">PAUSED</button>
     </div>
-    <!-- Copy popup -->
-    <dialog id="copy-popup">
-      <h3>IMPORTANT:</h3>
-      <p>
-        Create copy will create a copy of the internal pricing structure of the selected customer.
-        <br>
-        <br>
-        This will give you the option of selecting from the list of customers that do not have price-lists, or
-        alternatively create a new customer.
-      </p>
-      <a href="#" id="copy-yes" title="Continue">
-        <svg enable-background="new 0 0 1000 1000" viewBox="0 0 1e3 1e3" id="copy-yes-logo">
-          <path
-            d="m765.1 392.2-296.9 298.8c-7.3 7.4-17.5 12-28.7 12s-21.4-4.6-28.7-12l-161.7-148.5c-7.3-7.4-11.9-17.6-11.9-28.9 0-22.6 18.2-40.8 40.6-40.8 11.2 0 21.3 4.6 28.7 12l133 119.7 268.2-270c7.3-7.4 17.5-12 28.7-12 22.4 0 40.6 18.3 40.6 40.8 0 11.3-4.6 21.5-11.9 28.9z" />
-          <path
-            d="m500 10c-270.6 0-490 219.4-490 490s219.4 490 490 490 490-219.4 490-490-219.4-490-490-490zm0 909c-231.4 0-419-187.6-419-419s187.6-419 419-419 419 187.6 419 419-187.6 419-419 419z" />
-        </svg>
+    <div id="arrow">
 
-      </a>
-      <a href="#" class="never-show">NEVER SHOW AGAIN</a>
-    </dialog>
+      <svg id="arrow-logo" version="1.1" viewBox="0 0 23.335 23.335" xmlns="http://www.w3.org/2000/svg"
+        xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <metadata>
+          <rdf:RDF>
+            <cc:Work rdf:about="">
+              <dc:format>image/svg+xml</dc:format>
+              <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+              <dc:title />
+            </cc:Work>
+          </rdf:RDF>
+        </metadata>
+        <path d="m23.318 6.3477-6.3477-6.3477 0.016969 16.988-16.988-0.016969 6.3477 6.3477 16.987 0.01626z" />
+      </svg>
+
+
+
+    </div>
   </div>
 
   <!-- Main Table Form HTML -->
