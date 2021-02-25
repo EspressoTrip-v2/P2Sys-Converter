@@ -50,10 +50,15 @@ const {
   queryAllCustomerNumbers,
   querySinglePriceList,
   queryCustomerName,
-  queryCustomerExists,
   querySinglePricelistNumber,
   querySingleCustomerBackup,
   queryAllScheduleDates, //TODO:  Finish schedule conversion
+  createPausedPriceList,
+  queryAllPaused,
+  querySinglePaused,
+  removePausedItem,
+  removePausedItemSync,
+  updatePriceListDataBase,
 } = require(`${dir}/database/mongoDbConnect.js`);
 const { updater } = require(`${dir}/updater.js`);
 
@@ -79,9 +84,7 @@ let homeWindow,
   iconImage,
   backUpYear,
   version,
-  trayMenu,
-  secWindowState,
-  mainWindowState;
+  trayMenu;
 
 /* GET THE YEAR */
 const yearNow = new Date().getFullYear();
@@ -119,17 +122,12 @@ function logfileFunc(message) {
 function convertNumberName() {
   let newObjA = {};
   let newObjB = {};
-  // let dupes = [];
   customerNumberNameResult.forEach((obj) => {
-    // if (newObjA[obj.name]) {
-    //   dupes.push(obj.name);
-    // }
     newObjA[obj.name] = obj._id;
     newObjB[obj._id] = obj.name;
   });
   customerNameNumberJson = newObjA;
-  customerNumberNameJson = newObjA;
-  // console.log(dupes);
+  customerNumberNameJson = newObjB;
 }
 
 //////////////////////
@@ -530,6 +528,9 @@ function createEmailWindow(message) {
   emailWindow.loadFile(`${dir}/renderer/email/email.html`);
 
   emailWindow.webContents.once('did-finish-load', (e) => {
+    if (loadingWindow) {
+      loadingWindow.close();
+    }
     emailWindow.webContents.send('email-popup', message);
     emailWindow.moveTop();
   });
@@ -547,8 +548,8 @@ function createEmailWindow(message) {
 function createProgressWindow() {
   progressWindow = new BrowserWindow({
     parent: secWindow,
-    height: 250,
-    width: 250,
+    height: 100,
+    width: 100,
     spellCheck: false,
     resizable: false,
     backgroundColor: '#00FFFFFF',
@@ -649,8 +650,8 @@ function createCopySelectionWindow() {
   // Only show on load completion
   copySelectionWindow.webContents.once('did-finish-load', () => {
     copySelectionWindow.webContents.send('copy-selection', {
-      // customerPricesNumbersArr,
-      // customerNameNumber,
+      customerPricesNumbersArr,
+      customerNameNumberJson,
     });
   });
 
@@ -726,7 +727,7 @@ ipcMain.on('position', (e, message) => {
 });
 
 /* MESSAGE FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
-ipcMain.on('progress', (e, message) => {
+ipcMain.on('progress-create', (e, message) => {
   /* CREATE THE PROGRESS WINDOW */
   createProgressWindow();
   /* SEND THE FILE TO PYTHON SHELL TO GET CONVERTED */
@@ -735,11 +736,36 @@ ipcMain.on('progress', (e, message) => {
   });
 });
 
+/* MESSAGE FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
+ipcMain.on('progress-create-pause', (e, message) => {
+  /* CREATE THE PROGRESS WINDOW */
+  createProgressWindow();
+  /* SEND THE FILE TO PYTHON SHELL TO GET CONVERTED */
+  progressWindow.webContents.on('did-finish-load', (e) => {
+    progressWindow.webContents.send('convert-python', message);
+  });
+});
+
+/* MESSAGE FROM SCHEDULE BUTTON */
+ipcMain.on('progress-schedule', (e, message) => {
+  console.log(message.customerData);
+});
+
+/* MESSAGE FROM SCHEDULE PAUSE BUTTON */
+ipcMain.on('progress-schedule-pause', (e, message) => {
+  // Add code
+});
+
 /* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
 ipcMain.on('progress-end', (e, message) => {
   /* SEND MESSAGE TO CLOSE THE PROGRESS BAR */
   createLoadingWindow();
   secWindow.webContents.send('progress-end', message.filePaths);
+
+  /* CHECK TO SEE IF THE CONVERSION ORIGINATED FROM A PAUSED ITEM AND REMOVE IT */
+  if (message.pausedItem) {
+    removePausedItem(message.customerNumber);
+  }
 });
 
 /* SEND DB STATUS TO UPDATE OTHER DATABASE INDICATORS */
@@ -751,6 +777,7 @@ ipcMain.on('db-status', (event, message) => {
 
 /* MESSAGE TO CREATE EMAIL POPUP CHILD WINDOW */
 ipcMain.on('email-popup', (e, message) => {
+  createLoadingWindow();
   createEmailWindow(message);
 });
 
@@ -762,13 +789,6 @@ ipcMain.on('email-close', (e, message) => {
 /* SEND MESSAGE TO CLOSE TABLE WINDOW ON ERROR */
 ipcMain.on('reset-form', (e, message) => {
   secWindow.webContents.send('reset-form', null);
-});
-
-/* LOADER CLOSE MESSAGE */
-ipcMain.on('close-loader', (e, message) => {
-  if (loadingWindow) {
-    loadingWindow.close();
-  }
 });
 
 /* CLOSE DOCK WINDOW */
@@ -797,8 +817,8 @@ ipcMain.on('close-updatewindow', (e, message) => {
 
 /* RESTART SEC WINDOW */
 ipcMain.on('restart-sec', (e, message) => {
+  createLoadingWindow();
   setTimeout(() => {
-    createLoadingWindow();
     createSecWindow(message);
   }, 300);
 });
@@ -867,13 +887,6 @@ ipcMain.on('close-main', (e, message) => {
 /* QUERIES FOR DATABASE */
 ipcMain.handle('get-price-list', async (e, message) => {
   let result = await querySinglePriceList(message);
-  console.log(result);
-  return result;
-});
-
-/* CHECK IF CUSTOMER PRICE-LIST EXISTS */
-ipcMain.handle('customer-exists', async (e, message) => {
-  let result = await queryCustomerExists(message);
   return result;
 });
 
@@ -887,4 +900,31 @@ ipcMain.handle('get-pricelist-number', async (e, message) => {
 ipcMain.handle('get-customer-backup', async (e, message) => {
   let result = await querySingleCustomerBackup(message);
   return result;
+});
+
+/* SAVE PAUSED PRICE-LIST */
+ipcMain.on('save-paused-price-list', (e, message) => {
+  createPausedPriceList(message.pausedJson);
+});
+
+/* QUERY ALL PAUSED PRICE-LIST CUSTOMER NUMBERS */
+ipcMain.handle('get-all-paused', async (e, message) => {
+  let result = queryAllPaused();
+  return result;
+});
+
+/* QUERY SINGLE PAUSED PRICE-LIST CUSTOMER NUMBERS */
+ipcMain.handle('get-single-paused', async (e, message) => {
+  let result = querySinglePaused(message);
+  return result;
+});
+
+/* UPDATE PRICELIST DATABASE AND BACKUP DATABASE */
+ipcMain.on('update-price-list', (e, message) => {
+  updatePriceListDataBase(message);
+});
+
+/* REMOVE PAUSED ITEM */
+ipcMain.handle('remove-pause-item', async (e, message) => {
+  return await removePausedItemSync(message);
 });

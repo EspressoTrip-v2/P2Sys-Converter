@@ -1,6 +1,6 @@
 {
   "name": "P2Sys-Converter",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "Price-List conversion program",
   "main": "main.js",
   "scripts": {
@@ -21,6 +21,7 @@
     "electron-log": "^4.3.1",
     "electron-updater": "^4.3.5",
     "mongoose": "^5.11.16",
+    "node-notifier": "^9.0.0",
     "nodemailer": "^6.4.18",
     "python-shell": "^2.0.3"
   },

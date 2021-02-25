@@ -1,5 +1,6 @@
 /* MODULES */
 ////////////
+const { ELOOP } = require('constants');
 const { remote, ipcRenderer } = require('electron');
 const fs = require('fs');
 
@@ -52,7 +53,6 @@ let secWindow = remote.getCurrentWindow();
 
 // GLOBAL VARIABLES FOR USAGE ON NECESSARY CODE
 let searchValue,
-  target,
   jsonFile,
   htmlContent,
   customerData,
@@ -82,7 +82,10 @@ let searchValue,
 //////////////////
 let backBtn = document.getElementById('back-to-main-btn'),
   createBtn = document.getElementById('create-btn'),
+  createBtnPause = document.getElementById('create-btn-pause'),
   pauseBtn = document.getElementById('pause-btn'),
+  scheduleBtn = document.getElementById('schedule-button'),
+  scheduleBtnPause = document.getElementById('schedule-button-pause'),
   customerName = document.getElementById('customer-name'),
   overflow = document.getElementById('overflow'),
   customerPriceList = document.getElementById('pricelist'),
@@ -124,8 +127,14 @@ let backBtn = document.getElementById('back-to-main-btn'),
   treatedColumns = document.getElementById('treated'),
   /* PROGRESS FADE DOM */
   //////////////////////
-  progressFade = document.getElementById('progress-fade');
-
+  progressFade = document.getElementById('progress-fade'),
+  dateSelectionBox = document.getElementById('date-select'),
+  dateSelectionMonth = document.getElementById('month'),
+  dateSelectionYear = document.getElementById('year'),
+  dateSelectionCancelBtn = document.getElementById('date-cancel-btn'),
+  dateSelectionSelectBtn = document.getElementById('date-select-btn'),
+  contextDeleteBtn = document.getElementsByClassName('context-delete'),
+  contextCancelBtn = document.getElementsByClassName('context-cancel');
 /* CUSTOMER SEARCH DOM */
 /////////////////////////
 let checkCustomer = document.getElementById('check-customer'),
@@ -133,11 +142,12 @@ let checkCustomer = document.getElementById('check-customer'),
   customerNumberList = document.getElementById('customer-list'),
   checkUpdateBtn = document.getElementById('check-update-btn'),
   checkCancelbtn = document.getElementById('check-cancel-btn'),
+  checkResetBtn = document.getElementById('view-reset'),
   disabledBtn = document.getElementById('disabled'),
+  loadingContainer = document.getElementsByClassName('loading-container')[0],
+  searchDisabledBox = document.getElementById('search-disabled'),
   maxWindow = document.getElementsByClassName('max'),
-  checkContinueBtn = document.getElementById('check-continue-btn'),
   customerFindBtn = document.getElementById('assist-btn'),
-  hider = document.getElementById('hider'),
   checkResumeEditingBtn = document.getElementById('resume-editing-btn'),
   checkCopyBtn = document.getElementById('copy-btn'),
   minimizeCheckBtn = document.getElementById('minimize-search'),
@@ -149,6 +159,64 @@ let checkCustomer = document.getElementById('check-customer'),
 //////////////
 /*FUNCTIONS*/
 ////////////
+/* POPULATE YEAR SELECTION */
+function addYears() {
+  let date = new Date();
+  let year = date.getFullYear();
+  let html = `
+  <option value="${year}">${year}</option>
+  <option value="${year + 1}">${year + 1}</option>
+  <option value="${year + 2}">${year + 2}</option>
+  `;
+  dateSelectionYear.insertAdjacentHTML('beforeend', html);
+}
+
+/* RESET BUTTON FUNCTIONS */
+function resetButtonsStart() {
+  searchDisabledBox.style.display = 'none';
+  disabledBtn.style.display = 'flex';
+  viewPauseBtn.style.display = 'flex';
+  checkResumeEditingBtn.style.display = 'none';
+  customerFindBtn.style.display = 'flex';
+  checkResetBtn.style.display = 'none';
+  checkUpdateBtn.style.display = 'none';
+  checkCopyBtn.style.display = 'none';
+}
+
+function resetButtonsClicked() {
+  searchDisabledBox.style.display = 'none';
+  disabledBtn.style.display = 'none';
+  viewPauseBtn.style.display = 'none';
+  checkResumeEditingBtn.style.display = 'none';
+  customerFindBtn.style.display = 'none';
+  checkResetBtn.style.display = 'flex';
+  checkUpdateBtn.style.display = 'flex';
+  checkCopyBtn.style.display = 'flex';
+}
+
+function resetButtonsPaused() {
+  customerSearch.value = '';
+  searchDisabledBox.style.display = 'flex';
+  disabledBtn.style.display = 'flex';
+  checkResumeEditingBtn.style.display = 'none';
+  viewPauseBtn.style.display = 'flex';
+  customerFindBtn.style.display = 'none';
+  checkResetBtn.style.display = 'flex';
+  checkUpdateBtn.style.display = 'none';
+  checkCopyBtn.style.display = 'none';
+}
+
+function resetButtonsPausedClicked() {
+  searchDisabledBox.style.display = 'flex';
+  disabledBtn.style.display = 'none';
+  checkResumeEditingBtn.style.display = 'flex';
+  viewPauseBtn.style.display = 'flex';
+  customerFindBtn.style.display = 'none';
+  checkResetBtn.style.display = 'flex';
+  checkUpdateBtn.style.display = 'none';
+  checkCopyBtn.style.display = 'none';
+}
+
 /* FUNCTION CHECK THE MUTE FLAG */
 let storage = JSON.parse(localStorage.getItem('notifications'));
 function checkMuteFlag() {
@@ -189,112 +257,105 @@ function paddingAddPricelistNum(value) {
 
 /* CHECK IF CUSTOMER EXISTS */
 function checkExistingCustomer() {
-  /* CUSTOMER NUMBER KEYUP EVENTS FOR COPIED PRICELIST */
-  customerNumberValue.addEventListener('keyup', async (e) => {
-    if (customerNumberValue.value.length < 6) {
-      customerNumberSubmit.click();
-    }
-    // USE REGEX TO REMOVE ANY UNWANTED CHAR
-    let pattern = /\w+|\s+/g;
-    if (customerNumberValue.value.length > 0) {
-      let match = customerNumberValue.value.match(pattern).join('');
-      priceListNumber = match.toUpperCase().replace(' ', '');
-
-      /* REGEX TO FIX SYNTAX OF CUSTOMER NUMBER TO PRICELISTNUMBER */
-      priceListNumber = paddingAddPricelistNum(priceListNumber);
-
-      /* ENTER THE PRICELIST NUMBER THAT HAS BEEN GENERATED */
-      customerPriceList.value = priceListNumber.toUpperCase();
-
-      /* CHECK TO SEE IF CUSTOMER NUMBER ALREADY IN USE */
-      let existsFlag = await ipcRenderer.invoke('customer-exists', customerNumberValue.value);
-      if (existsFlag) {
-        let answer = remote.dialog.showMessageBoxSync(secWindow, {
-          type: 'question',
-          icon: `${dir}/renderer/icons/error.png`,
-          buttons: ['TRY AGAIN', 'RETURN'],
-          message: 'CUSTOMER NUMBER NOT AVAILABLE:',
-          detail: `\nThis CUSTOMER NUMBER belongs to ${
-            customerNameValue[customerNumberValue.value.toUpperCase()]
-          }.\n\nWould you like to try a different CUSTOMER NUMBER or return to select the customer from the search window?`,
-        });
-        if (answer === 0) {
-          customerNumberValue.value = null;
-        } else {
-          resetForm();
-        }
-      }
-    }
-    if (customerNumberValue.value.length === 0) {
-      customerPriceList.value = null;
-    }
-  });
-
-  /* DISPLAY BOX FOR CUSTOMER SEARCH */
-  let customers = Object.keys(customerNameNumberJson);
-
-  /* GENERATE THE INTERNAL HTML */
-  (() => {
-    customers.forEach((el) => {
-      let html = `<div title="${
-        customerNameNumberJson[el.toLocaleUpperCase()]
-      }" class="customer-name-list">${el.toUpperCase()}</div>`;
-      customerDisplayBox.insertAdjacentHTML('beforeend', html);
-    });
-  })();
-
-  let customerNameLists = Array.from(document.getElementsByClassName('customer-name-list'));
-
-  /* EVENT LISTENER FOR CLICK */
-  customerNameLists.forEach((el) => {
-    el.addEventListener('click', (e) => {
-      let number = customerNameNumberJson[e.target.innerText],
-        name = e.target.innerText;
-      soundClick.play();
-      setTimeout(() => {
-        customerName.innerText = name;
-        customerName.contentEditable = false;
-        customerDisplayBoxContainer.style.visibility = 'hidden';
-        customerNumberValue.value = number;
-        customerNumberValue.disabled = true;
-        customerNumberValue.dispatchEvent(new Event('keyup'));
-      }, 300);
-    });
-  });
-
-  /* EVENTLISTENER FOR SUGGESTIONS */
-  customerName.addEventListener('keyup', (e) => {
-    let pattern = /[\s\W]+/g;
-    let temp, text;
-    let countA = 0;
-    temp = customerName.innerText.replace(pattern, '');
-    /* CHECK IF THE LENGTH OF ENTRY IS 3 OR GREATER TO SHOW BOX */
-    if (temp.length >= 3 && temp.length <= 8) {
-      customerDisplayBoxContainer.style.visibility = 'visible';
-    } else {
-      customerDisplayBoxContainer.style.visibility = 'hidden';
-    }
-    /* ASSIGN DISPLAY NONE OR BLOCK FOR ELEMENTS IF MATCHED */
-    customerNameLists.forEach((el) => {
-      if (customerPricesNumbersArr.includes(el.title)) {
-        el.style.display = 'none';
-      } else {
-        text = el.innerText.replace(pattern, '');
-        /* REMOVE ELEMENTS THAT HAVE PRICELISTS */
-        let elMatch = text.includes(temp);
-        if (elMatch) {
-          el.style.display = 'block';
-          countA++;
-        } else {
-          el.style.display = 'none';
-        }
-      }
-    });
-    if (countA === 0) {
-      /* IF ALL ELEMENTS ARE HIDDEN HIDE BOX */
-      customerDisplayBoxContainer.style.visibility = 'hidden';
-    }
-  });
+  //TODO: REWRITE
+  // /* CUSTOMER NUMBER KEYUP EVENTS FOR COPIED PRICELIST */
+  // customerNumberValue.addEventListener('keyup', async (e) => {
+  //   if (customerNumberValue.value.length < 6) {
+  //     customerNumberSubmit.click();
+  //   }
+  //   // USE REGEX TO REMOVE ANY UNWANTED CHAR
+  //   let pattern = /\w+|\s+/g;
+  //   if (customerNumberValue.value.length > 0) {
+  //     let match = customerNumberValue.value.match(pattern).join('');
+  //     priceListNumber = match.toUpperCase().replace(' ', '');
+  //     /* REGEX TO FIX SYNTAX OF CUSTOMER NUMBER TO PRICELISTNUMBER */
+  //     priceListNumber = paddingAddPricelistNum(priceListNumber);
+  //     /* ENTER THE PRICELIST NUMBER THAT HAS BEEN GENERATED */
+  //     customerPriceList.value = priceListNumber.toUpperCase();
+  //     /* CHECK TO SEE IF CUSTOMER NUMBER ALREADY IN USE */
+  //     let existsFlag = await ipcRenderer.invoke('customer-exists', customerNumberValue.value);
+  //     if (existsFlag) {
+  //       let answer = remote.dialog.showMessageBoxSync(secWindow, {
+  //         type: 'question',
+  //         icon: `${dir}/renderer/icons/error.png`,
+  //         buttons: ['TRY AGAIN', 'RETURN'],
+  //         message: 'CUSTOMER NUMBER NOT AVAILABLE:',
+  //         detail: `\nThis CUSTOMER NUMBER belongs to ${
+  //           customerNameValue[customerNumberValue.value.toUpperCase()]
+  //         }.\n\nWould you like to try a different CUSTOMER NUMBER or return to select the customer from the search window?`,
+  //       });
+  //       if (answer === 0) {
+  //         customerNumberValue.value = null;
+  //       } else {
+  //         resetForm();
+  //       }
+  //     }
+  //   }
+  //   if (customerNumberValue.value.length === 0) {
+  //     customerPriceList.value = null;
+  //   }
+  // });
+  // /* DISPLAY BOX FOR CUSTOMER SEARCH */
+  // let customers = Object.keys(customerNameNumberJson);
+  // /* GENERATE THE INTERNAL HTML */
+  // (() => {
+  //   customers.forEach((el) => {
+  //     let html = `<div title="${
+  //       customerNameNumberJson[el.toLocaleUpperCase()]
+  //     }" class="customer-name-list">${el.toUpperCase()}</div>`;
+  //     customerDisplayBox.insertAdjacentHTML('beforeend', html);
+  //   });
+  // })();
+  // let customerNameLists = Array.from(document.getElementsByClassName('customer-name-list'));
+  // /* EVENT LISTENER FOR CLICK */
+  // customerNameLists.forEach((el) => {
+  //   el.addEventListener('click', (e) => {
+  //     let number = customerNameNumberJson[e.target.innerText],
+  //       name = e.target.innerText;
+  //     soundClick.play();
+  //     setTimeout(() => {
+  //       customerName.innerText = name;
+  //       customerName.contentEditable = false;
+  //       customerDisplayBoxContainer.style.visibility = 'hidden';
+  //       customerNumberValue.value = number;
+  //       customerNumberValue.disabled = true;
+  //       customerNumberValue.dispatchEvent(new Event('keyup'));
+  //     }, 300);
+  //   });
+  // });
+  // /* EVENTLISTENER FOR SUGGESTIONS */
+  // customerName.addEventListener('keyup', (e) => {
+  //   let pattern = /[\s\W]+/g;
+  //   let temp, text;
+  //   let countA = 0;
+  //   temp = customerName.innerText.replace(pattern, '');
+  //   /* CHECK IF THE LENGTH OF ENTRY IS 3 OR GREATER TO SHOW BOX */
+  //   if (temp.length >= 3 && temp.length <= 8) {
+  //     customerDisplayBoxContainer.style.visibility = 'visible';
+  //   } else {
+  //     customerDisplayBoxContainer.style.visibility = 'hidden';
+  //   }
+  //   /* ASSIGN DISPLAY NONE OR BLOCK FOR ELEMENTS IF MATCHED */
+  //   customerNameLists.forEach((el) => {
+  //     if (customerPricesNumbersArr.includes(el.title)) {
+  //       el.style.display = 'none';
+  //     } else {
+  //       text = el.innerText.replace(pattern, '');
+  //       /* REMOVE ELEMENTS THAT HAVE PRICELISTS */
+  //       let elMatch = text.includes(temp);
+  //       if (elMatch) {
+  //         el.style.display = 'block';
+  //         countA++;
+  //       } else {
+  //         el.style.display = 'none';
+  //       }
+  //     }
+  //   });
+  //   if (countA === 0) {
+  //     /* IF ALL ELEMENTS ARE HIDDEN HIDE BOX */
+  //     customerDisplayBoxContainer.style.visibility = 'hidden';
+  //   }
+  // });
 }
 
 /* CCA AUTO/MAN FUNCTION CONTROL FOR KEYUP IN CELLS */
@@ -309,10 +370,11 @@ function ccaAutoMan() {
 }
 
 /* CREATE THE JSON OBJECT FROM HTML TABLE DATA */
-const createObjectFromHtml = () => {
+function createObjectFromHtml(flag) {
   /* SET VARIABLES */
-  let tableRows, columns, tableData, jsonObject, customerNum;
+  let tableRows, columns, tableData, jsonObject, customerNum, cutomerPriceListNum;
   customerNum = customerNumberValue.value.toUpperCase();
+  cutomerPriceListNum = customerPriceList.value;
   /* RETRIEVE ALL INFO AND CREATE JSON OBJECT FROM TABLE */
   jsonObject = {};
   jsonObjectData = {};
@@ -333,19 +395,25 @@ const createObjectFromHtml = () => {
       parseInt(document.getElementById(`TSER${i}`).value),
     ];
   }
+  jsonObject['_id'] = customerNum;
+  jsonObject['price-list'] = jsonObjectData;
+  jsonObject['price-list']['COLUMNS'] = columns.map((el) => el.innerText);
+  jsonObject['price-list']['CCA'] = parseInt(ccaPrice.value);
+  jsonObject['price-list']['EMAIL'] = '';
+  jsonObject['price-list']['TEL'] = '';
 
-  jsonObject[customerNum] = jsonObjectData;
-  jsonObject[customerNum]['COLUMNS'] = columns.map((el) => el.innerText);
-  jsonObject[customerNum]['CCA'] = parseInt(ccaPrice.value);
-  jsonObject[customerNum]['EMAIL'] = '';
-  jsonObject[customerNum]['TEL'] = '';
-  jsonObject['PRICELIST'] = customerPriceList.value;
-  jsonObject['HEADER'] = {
-    customerName: customerName.innerText,
-  };
-
-  return jsonObject;
-};
+  /* SET THE CORRECT VARIABLES IN OBJECT AND WRITE TO DATABASE IF ITS CREATED */
+  switch (flag) {
+    case 'python':
+      ipcRenderer.send('update-price-list', jsonObject);
+      delete jsonObject['_id'];
+      jsonObject['price-list']['customerNumber'] = customerNum;
+      jsonObject['price-list']['priceListNumber'] = cutomerPriceListNum;
+      return jsonObject;
+    default:
+      return jsonObject;
+  }
+}
 
 const resetForm = () => {
   /* RESTART SECWINDOW */
@@ -362,20 +430,62 @@ async function getPriceList(customerNumber) {
   // Get the price list from the db
   let priceListResult = await ipcRenderer.invoke('get-price-list', customerNumber);
   jsonFile = priceListResult['price-list'];
-  searchValue = jsonFile._id;
+  searchValue = priceListResult._id;
 
   // Get the backup db for the customer
-  let customerBackUpJson = await ipcRenderer.invoke('get-customer-backup', customerNumber);
+  customerBackUpJson = await ipcRenderer.invoke('get-customer-backup', customerNumber);
   delete customerBackUpJson['_id'];
-  console.log(customerBackUpJson);
 
   // Get the name from db
   customerNameValue = customerNumberNameJson[customerNumber];
+
+  // ONLY SHOW UPDATE BUTTON ONCE ALL DATA IS AVAILABLE
+  loadingContainer.style.visibility = 'hidden';
+  resetButtonsClicked();
 }
 
-////////////////////////////////////
-/* HTML TABLE FORM PAGE FUNCTION */
-//////////////////////////////////
+/* GET PAUSED PRICE-LIST FROM DATABASE */
+async function getPausedPriceList(customerNumber) {
+  // Get the price list number
+  let pricelistNumberResult = await ipcRenderer.invoke('get-pricelist-number', customerNumber);
+  priceListNumber = pricelistNumberResult.number;
+
+  // Get the price list from the db
+  let priceListResult = await ipcRenderer.invoke('get-single-paused', customerNumber);
+  jsonFile = priceListResult['price-list'];
+  searchValue = priceListResult._id;
+
+  // Get the backup db for the customer
+  customerBackUpJson = await ipcRenderer.invoke('get-customer-backup', customerNumber);
+  delete customerBackUpJson['_id'];
+
+  // Get the name from db
+  customerNameValue = customerNumberNameJson[customerNumber];
+
+  // ONLY SHOW UPDATE BUTTON ONCE ALL DATA IS AVAILABLE
+  loadingContainer.style.visibility = 'hidden';
+  resetButtonsPausedClicked();
+}
+
+/* BLUR TABLE */
+function blurTable() {
+  progressFade.style.visibility = 'visible';
+  progressFade.style.backdropFilter = 'blur(3px)';
+}
+/* UNBLUR TABLE */
+function unBlurTable() {
+  progressFade.style.visibility = 'hidden';
+  progressFade.style.backdropFilter = 'none';
+}
+
+/* DATE SECLECTOR FUNCTION FOR SCHEDULES */
+function showDateSelector() {
+  /* BLUR BACKGROUND */
+  blurTable();
+  addYears();
+  dateSelectionBox.style.visibility = 'visible';
+  dateSelectionBox.style.opacity = 1;
+}
 
 /* SORT DATES FUNCTION */
 function sortDate(datesArr) {
@@ -388,12 +498,12 @@ function sortDate(datesArr) {
     return el.toString().slice(2);
   });
 }
-// TODO: START HERE 2/21/2021
+
 /* CREATE THE POPUP DATA FOR PREVIOUS PRICELISTS */
-function getBackupDateStrings(customernumber, cumenu, ctmenu) {
-  if (customerBackUpJson[customernumber]) {
+function getBackupDateStrings(cumenu, ctmenu) {
+  if (customerBackUpJson) {
     /* GET THE PRICELIST DATES FROM DATAFRAME */
-    let datesArray = Array.from(Object.keys(customerBackUpJson[customernumber])),
+    let datesArray = Array.from(Object.keys(customerBackUpJson)),
       cudateList,
       priceListDates,
       ctdatelist;
@@ -411,8 +521,7 @@ function getBackupDateStrings(customernumber, cumenu, ctmenu) {
       for (i = 0; i < cumenu.length; i++) {
         cudateList = '';
         priceListDates.forEach((el) => {
-          let val = customerBackUpJson[customernumber][el][i][3];
-          // console.log(val);
+          let val = customerBackUpJson[el][i][3];
           cudateList += ` ${el}: ${val}`;
         });
         cumenu[i].setAttribute('data-label', cudateList);
@@ -422,7 +531,7 @@ function getBackupDateStrings(customernumber, cumenu, ctmenu) {
       for (i = 0; i < ctmenu.length; i++) {
         ctdatelist = '';
         priceListDates.forEach((el) => {
-          let val = customerBackUpJson[customernumber][el][i][4];
+          let val = customerBackUpJson[el][i][4];
           // console.log(val);
           ctdatelist += ` ${el}: ${val}`;
         });
@@ -434,7 +543,7 @@ function getBackupDateStrings(customernumber, cumenu, ctmenu) {
 }
 
 /* INNER TABLE HTM FUNCTION */
-const htmlInnerFill = (customernumber, html) => {
+const htmlInnerFill = (customerNumber, html) => {
   let innerTableColumns = html.htmlColumns,
     innerTable = html.htmlInner;
 
@@ -456,30 +565,43 @@ const htmlInnerFill = (customernumber, html) => {
       el.value = el.value.toUpperCase();
     });
   });
-
   // POPUP MENUS FOR THE BACKUP PRICES
-  getBackupDateStrings(customernumber, cuMenu, ctMenu);
+  getBackupDateStrings(cuMenu, ctMenu);
 };
 
 /* ACTIVATE EXMILL BUTTON FUNCTION */
 function activateExmillBtn() {
-  if (ccaPrice.value.length > 0) {
-    /* ACTIVATE THE EXMILL BUTTON */
-    if (customerPricesNumbersArr.includes('@EXMILL')) {
-      exmillBtn.style.display = 'block';
-      exmillBtnDisabled.style.display = 'none';
-    } else {
-      setTimeout(() => {
-        soundPop.play();
-        exmillPop.show();
-      }, 2000);
-    }
+  /* ACTIVATE THE EXMILL BUTTON */
+  if (customerPricesNumbersArr.includes('@EXMILL')) {
+    exmillBtn.style.display = 'block';
+    exmillBtnDisabled.style.display = 'none';
+  } else {
+    setTimeout(() => {
+      soundPop.play();
+      exmillPop.show();
+    }, 2000);
   }
 }
 
 /* FUNCTION TO FILL THE TABLE PAGE IF UPDATE OR COPY IS SELECTED */
-function tablePageCreate(type) {
-  if (type) {
+/* TYPE CREATION -> true for existing/ false for new */
+/* RESUME OR UPDATE -> true for resume/ false for update */
+function tablePageCreate(typeCreation, resumeOrUpdate) {
+  /* SHOW THE CORRECT CREAT BUTTON FOR PAUSE OR UPDATE */
+  if (resumeOrUpdate) {
+    /* RESUME VERSION */
+    createBtn.style.display = 'none';
+    createBtnPause.style.display = 'flex';
+    scheduleBtn.style.display = 'none';
+    scheduleBtnPause.style.display = 'flex';
+  } else {
+    /* UPDATE VERSION */
+    createBtn.style.display = 'flex';
+    createBtnPause.style.display = 'none';
+    scheduleBtn.style.display = 'flex';
+    scheduleBtnPause.style.display = 'none';
+  }
+  if (typeCreation) {
     if (priceListNumber) {
       customerPriceList.value = priceListNumber;
       customerPriceList.disabled = true;
@@ -488,6 +610,8 @@ function tablePageCreate(type) {
     }
     // FILL TABLE INFO
     customerNumberValue.value = searchValue;
+    customerNumberValue.disabled = true;
+
     customerName.innerText = customerNameValue;
     customerName.contentEditable = false;
   } else {
@@ -510,14 +634,7 @@ function tablePageCreate(type) {
   setTimeout(() => {
     html.style.backgroundColor = '#fff';
   }, 300);
-  if (secWindow.getChildWindows().length > 0) {
-    secWindow.getChildWindows()[0].close();
-    setTimeout(() => {
-      hider.style.display = 'flex';
-      secWindow.maximize();
-      secWindow.setMinimumSize(950, 700);
-    }, 300);
-  }
+
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
@@ -548,29 +665,10 @@ const btnReset = () => {
   }
 };
 
-//////////////////////
-/* EVENT LISTENERS */
-////////////////////
-
-/* HTML TABLE EVENTS */
-//////////////////////
-
-/* TO MAIN BUTTON */
-backBtn.addEventListener('click', () => {
-  soundClick.play();
-  /* RESET THE TABLE FORM TO ZERO DATA */
-  setTimeout(() => {
-    resetForm();
-  }, 200);
-});
-
-/* CREATE BUTTON */
-createBtn.addEventListener('click', (e) => {
+/* CREATE PRICELIST OBJECT FROM HTML */
+function createPriceListFromHtml(flag) {
   /* MAKE SURE BUNDLE SIZES ARE NOT SHOWING EXMILL */
   repopulateBundleSize();
-
-  soundClick.play();
-
   /* CHECK ALL VALUE ENTRIES AND WARN IF MISSING */
   let treatedMissingBool = [],
     untreatedMissingBool = [];
@@ -591,8 +689,12 @@ createBtn.addEventListener('click', (e) => {
     }
   });
 
-  /* CHECK THE LENGTHS OF THOSE ARRAY AND HIGHLIGHT THE MISSING INPUTS */
+  /* SET CCA PRICE TO ZERO IF NO ENTRY */
+  if (ccaPrice.value.length < 1) {
+    ccaPrice.VALUE = 0;
+  }
   if (treatedMissingBool.length > 0 || untreatedMissingBool.length > 0) {
+    /* CHECK THE LENGTHS OF THOSE ARRAY AND HIGHLIGHT THE MISSING INPUTS */
     treatedMissingBool.forEach((el) => {
       el.style.backgroundColor = '#ffa60079';
       el.style.border = '1px solid #ffa500';
@@ -614,14 +716,9 @@ createBtn.addEventListener('click', (e) => {
       message: 'MISSING VALUES:',
       detail: 'Please complete the highlighted fields.',
     });
-    /* CHECK IF ALL TOP REQUIRED FIELDS HAVE BEEN ENTERED */
     return;
   }
-  if (
-    customerName.innerText.length === 0 ||
-    customerNumberValue.value.length < 6 ||
-    ccaPrice.value.length === 0
-  ) {
+  if (customerName.innerText.length === 0 || customerNumberValue.value.length < 6) {
     /* HIGHLIGHT THE FIELDS THAT ARE MISSING */
     if (customerName.innerText.length === 0) {
       customerName.style.fontWeight = 'bolder';
@@ -639,18 +736,6 @@ createBtn.addEventListener('click', (e) => {
       overflow.style.backgroundColor = '#fff';
       overflow.style.border = '1px solid #fff';
     }
-    if (ccaPrice.value.trim().length == 0) {
-      ccaPrice.style.fontWeight = 'bolder';
-      ccaPrice.style.animation = 'cca-flash .5s linear 4';
-      setTimeout(() => {
-        ccaPrice.style.fontWeight = 'normal';
-        ccaPrice.style.animation = 'none';
-      }, 2050);
-      return;
-    } else {
-      ccaPrice.style.backgroundColor = '#fff';
-      ccaPrice.style.border = '1px solid #fff';
-    }
     if (customerNumberValue.value.length < 6) {
       customerNumberValue.style.fontWeight = 'bolder';
       customerNumberValue.style.animation = 'cca-flash .5s linear 4';
@@ -664,38 +749,83 @@ createBtn.addEventListener('click', (e) => {
       customerNumberValue.style.border = '1px solid #fff';
     }
   } else {
-    /* CREATE THE CUSTOMER PRICELIST OBJECT TO SEND TO PYTHON */
-    customerData = createObjectFromHtml();
+    /* CHECK FLAG */
+    switch (flag) {
+      case 'schedule-pause':
+        customerData = createObjectFromHtml();
+        showDateSelector();
+        ipcRenderer.send('progress-schedule-pause', { customerData, flag: true });
+        break;
+      case 'schedule':
+        customerData = createObjectFromHtml();
+        showDateSelector();
 
-    if (!jsonFile) {
-      jsonFile = customerData[Object.keys(customerData)[0]];
+        ipcRenderer.send('progress-schedule', { customerData, flag: false });
+        break;
+      case 'create-pause':
+        customerData = createObjectFromHtml('python');
+        ipcRenderer.send('progress-create-pause', { customerData, flag: true });
+        secWindow.hide();
+        break;
+      default:
+        customerData = createObjectFromHtml('python');
+        ipcRenderer.send('progress-create', { customerData, flag: false });
+        secWindow.hide();
+        break;
     }
-
-    /* FADE THE BACKGROUND AND MESSAGE FOR PROGRESS BAR */
-    progressFade.style.visibility = 'visible';
-    progressFade.style.backdropFilter = 'blur(4px) grayscale(1)';
-    ipcRenderer.send('progress', customerData);
   }
+}
 
-  secWindow.hide();
+//////////////////////
+/* EVENT LISTENERS */
+////////////////////
+
+/* HTML TABLE EVENTS */
+//////////////////////
+
+/* TO MAIN BUTTON */
+backBtn.addEventListener('click', () => {
+  soundClick.play();
+  /* RESET THE TABLE FORM TO ZERO DATA */
+  setTimeout(() => {
+    resetForm();
+  }, 200);
+});
+
+/* SCHEDULE BUTTON */
+scheduleBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  createPriceListFromHtml('schedule');
+});
+
+/* SCHEDULE PAUSE BUTTON */
+scheduleBtnPause.addEventListener('click', (e) => {
+  soundClick.play();
+  createPriceListFromHtml('schedule-pause');
+});
+
+/* CREATE BUTTON */
+createBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  createPriceListFromHtml('create');
+});
+
+/* CREATE PAUSE BUTTON */
+createBtnPause.addEventListener('click', (e) => {
+  soundClick.play();
+  createPriceListFromHtml('create-pause');
 });
 
 /* PAUSE BUTTON TO SAVE TO DATABASE */
 pauseBtn.addEventListener('click', () => {
   repopulateBundleSize();
   soundClick.play();
+
   if (customerName.innerText.length !== 0) {
     /* CREATE THE STORAGE OBJECT */
-    let localStorageJson = createObjectFromHtml(),
-      number = customerNumberValue.value.toUpperCase();
-
-    /* STRINGIFY FOR LOCALSTORAGE */
-    localStorageJson = JSON.stringify(localStorageJson);
-    /* SET ITEM */
-    localStorage.setItem(number, localStorageJson);
-    setTimeout(() => {
-      resetForm();
-    }, 200);
+    let pausedJson = createObjectFromHtml();
+    ipcRenderer.send('save-paused-price-list', { pausedJson });
+    resetForm();
   } else {
     remote.dialog.showMessageBoxSync(secWindow, {
       type: 'error',
@@ -953,7 +1083,7 @@ function exmillKeyUp() {
 function compareExmill() {
   /* SET THE COLOR AND HEADING */
   bundleSizeHeading.innerText = 'EX-MILL %';
-  bundleSizeHeading.style.backgroundColor = 'var(--main-hover';
+  bundleSizeHeading.style.backgroundColor = 'var(--sec-blue';
   bundleSizeColumn.setAttribute('class', 'exm');
 
   let brInput, ctInputValue, element, exmillValue;
@@ -1078,12 +1208,6 @@ exmillApplyBtn.addEventListener('click', (e) => {
   }, 200);
 });
 
-/* exmillApplyBtn
-exmillTransportValue */
-/////////////////////////////////
-/* CUSTOMER NUMBER SEARCH BOX */
-///////////////////////////////
-
 /* CUSTOMER NUMBER SEARCH BOX EVENTS */
 //////////////////////////////////////
 
@@ -1093,15 +1217,41 @@ exmillTransportValue */
 /* CLEAR CURRENT LIST OF CLICKS FUNCTION */
 /* SET A FLAG FOR THE PUSE VIEW BUTTON */
 
-function clearList() {
-  customerNumbersSearchList.forEach((el) => {
-    el.setAttribute('class', 'cusnum');
-  });
+function clearList(flag) {
+  if (flag) {
+    customerNumbersSearchList.forEach((el) => {
+      el.setAttribute('class', 'cusnum');
+      resetButtonsStart();
+    });
+  } else {
+    customerNumbersSearchList.forEach((el) => {
+      el.setAttribute('class', 'context-container');
+      resetButtonsPaused();
+    });
+  }
 }
 
 /* SHOW ONLY PAUSED ITEMS FUNCTION */
-function showPausedItems() {
-  // Retrieve customer number in the paused database
+async function showPausedItems() {
+  let pausedList = await ipcRenderer.invoke('get-all-paused', null);
+  if (pausedList.length > 0) {
+    customerNumberList.innerHTML = '';
+    pausedList.forEach((el) => {
+      let html = `
+      <div id="${el}" class="context-container"><button id="${el}-delete" class="context-delete">DELETE</button>${el}<button id="${el}-cancel" class="context-cancel" >CANCEL</button></div>
+        `;
+      customerNumberList.insertAdjacentHTML('beforeend', html);
+    });
+    resetButtonsPaused();
+    addPausedListListeners();
+  } else {
+    customerNumberList.innerHTML = '';
+    let html = `
+    <div class="no-paused">NO PAUSED PRICE-LISTS</div>
+    `;
+    customerNumberList.insertAdjacentHTML('beforeend', html);
+    resetButtonsPaused();
+  }
 }
 
 /* ADD EVENT LISTENERS TO LIST FUNCTION */
@@ -1112,29 +1262,95 @@ function addListListeners() {
   customerNumbersSearchList.forEach((el) => {
     el.addEventListener('click', (e) => {
       soundClick.play();
-      // // RESET ALL THE BUTTONS TO DEFAULT
-      // checkUpdateBtn.style.display = 'none';
-      // checkResumeEditingBtn.style.display = 'none';
-      // disabledBtn.style.display = 'flex';
-
-      // SET THE ELEMENT CLICKED TO A GLOBAL VARIABLE
-      // target = e.target;
-      // searchValue = target.id;
       // CLEAR ANY EXISTING CLICKED ELEMENTS THAT WERE PREVIOUSLY CLICKED
-      clearList();
+      clearList(true);
       // SET THE CLICKED CLASS ON THE SELECTED ELEMENT
       el.setAttribute('class', 'cusnum-clicked');
       customerSearch.value = el.textContent;
+      cusNum = customerSearch.value;
 
-      // SHOW THE UPDATE BUTTON
-      jsonFile = getPriceList(customerSearch.value);
-      checkUpdateBtn.style.display = 'flex';
-      checkResumeEditingBtn.style.display = 'none';
-      disabledBtn.style.display = 'none';
-      viewPauseBtn.style.display = 'none';
-      checkCopyBtn.style.display = 'flex';
-
+      /* POPULATE VARIABLES RELATING TO THE PRICELIST */
+      loadingContainer.style.visibility = 'visible';
+      getPriceList(cusNum);
       customerSearch.dispatchEvent(new Event('keyup'));
+    });
+  });
+}
+
+/* CONTEXT DELETE EVENT */
+async function deleteEvent(e) {
+  let customerNumber = e.target.parentNode.id;
+  loadingContainer.style.visibility = 'visible';
+  let result = ipcRenderer.invoke('remove-pause-item', customerNumber);
+  if (result) {
+    showPausedItems();
+    setTimeout(() => {
+      loadingContainer.style.visibility = 'hidden';
+    }, 300);
+  }
+}
+
+/* CONTEXT CANCEL EVENT */
+function cancelEvent(e) {
+  let parent = e.target.parentNode;
+  let buttons = parent.children;
+  /* HIDE ALL THE BUTTONS */
+  buttons[0].style.visibility = 'hidden';
+  buttons[1].style.visibility = 'hidden';
+
+  buttons[0].removeEventListener('click', deleteEvent);
+  buttons[1].removeEventListener('click', this);
+
+  /* RESET PAUSED EVENTS AND LIST */
+  showPausedItems();
+}
+
+/* PAUSED CONTEXT MENU FUNCTION */
+function showPausedContextMenu(e) {
+  let el = e.target;
+  /* REMOVE THE EVENT LISTENER */
+  el.removeEventListener('click', pausedEvent);
+  let customerNumber = el.innerText;
+  let cancelBtnId = `${customerNumber}-cancel`;
+  let deleteBtnId = `${customerNumber}-delete`;
+
+  let tempBtnCancel = document.getElementById(cancelBtnId);
+  let tempBtnDelete = document.getElementById(deleteBtnId);
+
+  /* SHOW THE BUTTONS */
+  tempBtnCancel.style.visibility = 'visible';
+  tempBtnDelete.style.visibility = 'visible';
+
+  /* ADD EVENT LISTENERS */
+  tempBtnDelete.addEventListener('click', deleteEvent);
+  tempBtnCancel.addEventListener('click', cancelEvent);
+}
+
+/* EVENT LISTENER FOR PAUSED LIST */
+function pausedEvent(e) {
+  let el = e.target;
+  soundClick.play();
+  clearList(false);
+  // SET THE CLICKED CLASS ON THE SELECTED ELEMENT
+  el.setAttribute('class', 'context-container-clicked');
+  customerSearch.value = el.innerText;
+  cusNum = customerSearch.value;
+  /* POPULATE VARIABLES RELATING TO THE PRICELIST */
+  loadingContainer.style.visibility = 'visible';
+  getPausedPriceList(cusNum);
+  customerSearch.dispatchEvent(new Event('keyup'));
+}
+
+/* ADD EVENT LISTENERS TO PAUSED LIST ITEMS */
+function addPausedListListeners() {
+  /* CLICK EVENTS ON CUSTOMER NUMBER SEARCH BOX */
+  customerNumbersSearchList = Array.from(customerNumberList.children);
+  // CLICK EVENT ON CUSTOMER LIST ITEM
+  customerNumbersSearchList.forEach((el) => {
+    el.addEventListener('click', pausedEvent);
+
+    el.addEventListener('contextmenu', (e) => {
+      showPausedContextMenu(e);
     });
   });
 }
@@ -1148,26 +1364,23 @@ function populateList() {
       `;
     customerNumberList.insertAdjacentHTML('beforeend', html);
   });
+
+  /* RESET THE BUTTONS */
+  resetButtonsStart();
   addListListeners();
 }
 
 /* REMOVE ITEMS IN THE LIST THAT DOES NOT MATCH SEARCH */
 customerSearch.addEventListener('keyup', (e) => {
   // USE REGEX TO REMOVE ANY UNWANTED CHAR
-  let pattern = /\w+|\s+/g,
-    matchStop = /[.]/g;
+  let matchStop = /[.]/g;
   customerSearch.value = customerSearch.value.replace(matchStop, '');
 
   // REHIDE THE UPDATE BUTTON AND RESUME IF SEARCH CHANGES
   if (customerSearch.value.length < 6) {
     // REMOVE ANY MOUSE CLICKED ITEMS
-    clearList();
-    // SHOW THE DISABLED BUTTON AND HIDE OTHERS
-    checkUpdateBtn.style.display = 'none';
-    checkCopyBtn.style.display = 'none';
-    viewPauseBtn.style.display = 'flex';
-    checkResumeEditingBtn.style.display = 'none';
-    disabledBtn.style.display = 'flex';
+    clearList(true);
+    resetButtonsStart();
     target = null;
   }
 
@@ -1175,63 +1388,37 @@ customerSearch.addEventListener('keyup', (e) => {
   customerNumbersSearchList.forEach((el) => {
     // CHECK TO SEE IF THE ELEMENT CONTAINS THE SEARCH VALUE
     let hasMatch = el.innerText.includes(customerSearch.value.toUpperCase());
-    el.style.display = hasMatch ? 'block' : 'none';
+    el.style.display = hasMatch ? 'flex' : 'none';
   });
 });
 
-/* SEARCH BOX BUTTON EVENTS */
-/////////////////////////////
+/* PAUSED CONTEXT MENU NO BUTTON */
+// pausedContextBtnNo.addEventListener('click', (e) => {
+//   pausedContextBtnYes.removeEventListener('click', contextYesBtnClick);
+//   pausedContextMenu.style.opacity = 0;
+//   unBlurTable();
+//   setTimeout((e) => {
+//     pausedContextMenu.close();
+//   }, 300);
+// });
+
+/* RESET BUTTON */
+checkResetBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  customerSearch.value = '';
+  populateList();
+});
 
 /* UPDATE BUTTON */
 checkUpdateBtn.addEventListener('click', (e) => {
   soundClick.play();
-  tablePageCreate(true);
+  tablePageCreate(true, false);
 });
 
 /* RESUME BUTTON */
 checkResumeEditingBtn.addEventListener('click', (e) => {
   soundClick.play();
-
-  // POPULATE HTML TABLE
-  htmlContent = tablePopulate(localStorageObject[searchValue]);
-  htmlInnerFill(searchValue, htmlContent);
-
-  // HIDE SEARCH BOX
-  checkCustomer.style.visibility = 'hidden';
-  checkCustomer.style.opacity = '0';
-  // FILL TABLE INFO
-  customerNumberValue.value = searchValue;
-  customerNumberValue.disabled = true;
-  customerName.innerText = customerNameValue[searchValue]
-    ? customerNameValue[searchValue]
-    : localStorageObject['HEADER']['customerName'];
-  customerName.contentEditable = false;
-  /* LOOK TO SEE IF PRICELIST ONFILE */
-  customerPriceList.value = priceListNumber ? priceListNumber : searchValue;
-  customerPriceList.disabled = true;
-  ccaPrice.value = localStorageObject[searchValue]['CCA'];
-
-  // ADD BACKGROUND TO HTML ELEMENT
-  setTimeout(() => {
-    html.style.backgroundColor = '#fff';
-  }, 300);
-
-  if (secWindow.getChildWindows().length > 0) {
-    secWindow.getChildWindows()[0].close();
-    setTimeout(() => {
-      hider.style.display = 'flex';
-      secWindow.maximize();
-      secWindow.setMinimumSize(950, 700);
-    }, 300);
-  }
-  setTimeout(() => {
-    hider.style.display = 'flex';
-    secWindow.maximize();
-    secWindow.setMinimumSize(950, 700);
-  }, 300);
-
-  /* ACTIVATE EXMILL BUTTON */
-  activateExmillBtn();
+  tablePageCreate(true, true);
 });
 
 /* CANCEL BUTTON */
@@ -1251,8 +1438,13 @@ checkCancelbtn.addEventListener('click', () => {
   }, 650);
 });
 
-/* CUSTOMER FIND DOCK BUTTON */
+/* VIEW PAUSED BUTTON */
+viewPauseBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  showPausedItems();
+});
 
+/* CUSTOMER FIND DOCK BUTTON */
 customerFindBtn.addEventListener('click', (e) => {
   soundClick.play();
   // Get window posiiton to send to main process
@@ -1329,9 +1521,8 @@ function notificationBubbleCopy() {
 /* COPY BUTTON EVENTS */
 checkCopyBtn.addEventListener('click', (e) => {
   soundClick.play();
-  tablePageCreate(false);
-  progressFade.style.visibility = 'visible';
-  progressFade.style.backdropFilter = 'blur(3px)';
+  tablePageCreate(false, false);
+  blurTable();
   ipcRenderer.send('open-copySelection', 'open');
 });
 
@@ -1371,7 +1562,7 @@ minimizeTableBtn.addEventListener('click', () => {
 
 /* CHANGE OPACITY AFTER LOAD */
 secWindow.webContents.on('did-finish-load', () => {
-  clearList();
+  clearList(true);
   checkCustomer.style.opacity = '1';
 });
 
@@ -1586,8 +1777,7 @@ function calculateButtonPress() {
   CCAAutoSwitch();
   /* SHOW PERCENTAGE CALCULATOR*/
   setTimeout(() => {
-    progressFade.style.visibility = 'visible';
-    progressFade.style.backdropFilter = 'blur(3px)';
+    blurTable();
     percentageContainer.style.transform = 'scale(1)';
   }, 300);
 }
@@ -1778,90 +1968,33 @@ ipcRenderer.once('database-object', (e, message) => {
 
 /* COMMUNICATION FOR CUSTOMER DOCK */
 ipcRenderer.on('dock-sec', (event, message) => {
+  loadingContainer.style.visibility = 'visible';
+
   /* FILL SEARCH BOX WITH CUSTOMER NUMBER */
   customerSearch.value = message;
   customerSearch.dispatchEvent(new Event('keyup'));
 
-  /* GET THE PRICELIST FROM HE DATABASE */
+  /* GET THE PRICELIST FROM THE DATABASE */
   getPriceList(message);
 
   secWindow.focus();
   customerSearch.focus();
-  if (customerPricesNumbersArr.includes(message)) {
-    /* SEND THE NUMBER TO THE CUSTOMER SEARCH MAKE THE ITEM CLICKED AND SHOW UPDATE BUTTON */
-    let item = document.getElementById(message);
-    item.setAttribute('class', 'cusnum-clicked');
-    checkUpdateBtn.style.display = 'flex';
-    disabledBtn.style.display = 'none';
 
-    /* KEYUP EVENT TO FORCE SORT ALGORITHM  */
-    customerSearch.dispatchEvent(new Event('keyup'));
-    /* DISPLAY THE ITEM AS CLICKED */
-    item.style.display = 'block';
-  } else {
-    customerSearch.dispatchEvent(new Event('keyup'));
-    customerSearch.dispatchEvent(new Event('keyup'));
-  }
+  /* SEND THE NUMBER TO THE CUSTOMER SEARCH MAKE THE ITEM CLICKED AND SHOW UPDATE BUTTON */
+  let item = document.getElementById(message);
+  item.setAttribute('class', 'cusnum-clicked');
+
+  /* KEYUP EVENT TO FORCE SORT ALGORITHM  */
+  customerSearch.dispatchEvent(new Event('keyup'));
+  /* DISPLAY THE ITEM AS CLICKED */
+  item.style.display = 'flex';
 });
-
-/* //// LOCAL oBJECTS //// */
-/* customerPrices:         */
-/* customerPricelistNumber */
-/* customerNameValue      */
-/* customerBackUpJson          */
-/* /////////////////////// */
 
 /* COMMUNICATION FOR PROGRESS WINDOW END */
 ipcRenderer.on('progress-end', (event, message) => {
-  /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
-  searchValue = customerSearch.value.toUpperCase();
-  cusNum = customerNumberValue.value.toUpperCase();
-
-  /* CREATE THE DATE OBJECT TO INSERT IN CUSTOMER BACKUPS */
-  let dateJsonFile = {};
-  if (jsonFile[0].length > 3) {
-    if (customerBackUpJson[cusNum]) {
-      dateJsonFile = jsonFile;
-      customerBackUpJson[cusNum][dateString] = dateJsonFile;
-    } else {
-      dateJsonFile[dateString] = jsonFile;
-      customerBackUpJson[cusNum] = dateJsonFile;
-    }
-  } else {
-    dateJsonFile[dateString] = customerData[cusNum];
-    customerBackUpJson[cusNum] = dateJsonFile;
-  }
-
-  /* UPDATE ALL THE DATA OBJECTS AND SEND TO GET WRITTEN LOCALLY  */
-  customerPricelistNumber[cusNum] = customerPriceList.value;
-  customerNameValue[cusNum] = customerName.innerText;
-  customerPrices[cusNum] = customerData[cusNum];
-
-  /* ADD BACK THE _id FOR ONLINE UPDATE */
-  customerBackUpJson['_id'] = 'customerBackUpJson';
-  customerBackUpJson['check'] = new Date().getFullYear();
-  customerPricelistNumber['_id'] = 'customerPricelistNumber';
-  customerNameValue['_id'] = 'customerNameValue';
-  customerPrices['_id'] = 'customerPrices';
-
-  /* CREATE THE WRITE FILE OBJECT */
-  let databaseObj = {
-    customerBackUpJson,
-    customerPrices,
-    customerNameValue,
-    customerPricelistNumber,
-  };
-
-  /* UPDATE DB */
-  ipcRenderer.send('update-database', databaseObj);
-
-  /* REMOVE ITEM FROM LOCALSTORAGE */
-  localStorage.removeItem(cusNum);
-
   /* SEND MESSAGE WITH FILE PATHS TO MAIN TO OPEN EMAIL CHILDWINDOW */
-  /* ADD CUSTOMER NUMBER FOE EASIER FILENAME DESCRIPTION */
   let newMessage = {
-    name: customerName.innerText,
+    name: customerNameValue,
     number: cusNum,
     filePaths: message,
   };

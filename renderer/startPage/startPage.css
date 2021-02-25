@@ -79,7 +79,7 @@ body {
 .BR {
   position: relative;
   text-align: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   width: 7vw;
 }
 
@@ -89,7 +89,7 @@ body {
 }
 
 .exm {
-  background-color: rgba(46, 45, 45, 0.493);
+  background-color: var(--sec-blue);
 }
 
 input[type='text'][disabled] {
@@ -203,13 +203,11 @@ span[role='textbox'] {
   font-weight: bolder;
   right: 80%;
   top: 0;
-  padding: 0 2vh;
-  border-radius: 5px;
-  /* border: 1px solid #000; */
+  padding: 0.5vh 0.5vw;
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  box-shadow: 1px 1px 3px 0px rgba(50, 50, 50, 0.5);
   z-index: 2;
 }
 
@@ -305,12 +303,11 @@ span[role='textbox'] {
   font-weight: bolder;
   right: 80%;
   top: 0;
-  padding: 0 2vh;
-  border-radius: 5px;
+  padding: 0.5vh 0.5vw;
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  box-shadow: 1px 1px 3px 0px rgba(50, 50, 50, 0.5);
   z-index: 2;
 }
 
@@ -406,12 +403,11 @@ span[role='textbox'] {
   font-weight: bolder;
   right: 80%;
   top: 0;
-  padding: 0 2vh;
-  border-radius: 5px;
+  padding: 0.5vh 0.5vw;
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  box-shadow: 1px 1px 3px 0px rgba(50, 50, 50, 0.5);
   z-index: 2;
 }
 
@@ -509,12 +505,11 @@ span[role='textbox'] {
   font-weight: bolder;
   right: 80%;
   top: 0;
-  padding: 0 2vh;
-  border-radius: 5px;
+  padding: 0.5vh 0.5vw;
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  box-shadow: 1px 1px 3px 0px rgba(50, 50, 50, 0.5);
   z-index: 2;
 }
 
@@ -612,12 +607,11 @@ span[role='textbox'] {
   font-weight: bolder;
   right: 80%;
   top: 0;
-  padding: 0 2vh;
-  border-radius: 5px;
+  padding: 0.5vh 0.5vw;
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  box-shadow: 1px 1px 3px 0px rgba(50, 50, 50, 0.5);
   z-index: 2;
 }
 #CT1::after,
@@ -714,12 +708,11 @@ span[role='textbox'] {
   font-weight: bolder;
   right: 80%;
   top: 0;
-  padding: 0 2vh;
-  border-radius: 5px;
+  padding: 0.5vh 0.5vw;
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.3s;
-  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+  box-shadow: 1px 1px 3px 0px rgba(50, 50, 50, 0.5);
   z-index: 2;
 }
 
@@ -780,7 +773,7 @@ th {
   top: 0;
   z-index: 2;
   color: #fff;
-  font-size: 1vw;
+  font-size: 0.85vw;
   padding: 1vh 0;
   background-color: var(--main);
 }
@@ -814,7 +807,7 @@ tr {
   justify-content: space-evenly;
   justify-items: center;
   align-items: center;
-  height: 6vh;
+  height: 5vh;
 }
 
 #customer-displaybox-container {
@@ -909,12 +902,11 @@ tr {
   position: relative;
   display: flex;
   flex-direction: row;
-  height: 5vh;
+  height: 100%;
   width: 30vw;
   justify-content: center;
   justify-items: center;
   align-items: center;
-  border: 1px solid lightgray;
 }
 .customer-region-item-b,
 .price-list-item-a {
@@ -924,14 +916,20 @@ tr {
   justify-content: space-around;
   justify-items: center;
   align-items: center;
-  height: 5vh;
+  height: 100%;
   width: 25vw;
   max-width: 25vw;
   margin-left: 0.2vw;
+  border-left: 1px solid lightgray;
 }
 
 .customer-region-item-b form {
   width: 100%;
+}
+
+.header-form {
+  height: 100%;
+  border-left: 1px solid lightgray;
 }
 
 #label-customer-number,
@@ -943,7 +941,7 @@ tr {
   justify-content: center;
   align-content: center;
   align-items: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   text-align: center;
   padding: 0 10px;
   height: auto;
@@ -958,7 +956,7 @@ tr {
   justify-content: center;
   align-content: center;
   align-items: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   text-align: center;
   padding-left: 10px;
   height: auto;
@@ -972,15 +970,16 @@ tr {
   justify-content: space-evenly;
   justify-items: center;
   align-items: center;
-  height: 5vh;
+  height: 100%;
   margin-left: 0.2vw;
+  border-left: 1px solid lightgray;
 }
 
 #pricelist {
-  font-size: 1vw;
+  font-size: 0.85vw;
   position: relative;
   right: 0;
-  border: 1px solid lightgray;
+  border: none;
   text-align: center;
   text-transform: uppercase;
   height: 4vh;
@@ -989,10 +988,10 @@ tr {
 }
 
 #customer-number {
-  font-size: 1vw;
+  font-size: 0.85vw;
   position: absolute;
   right: 4px;
-  border: 1px solid lightgray;
+  border: none;
   text-align: center;
   text-transform: uppercase;
   height: 4vh;
@@ -1006,9 +1005,9 @@ tr {
 }
 
 #cca-price {
-  font-size: 1vw;
+  font-size: 0.85vw;
   position: relative;
-  border: 1px solid lightgray;
+  border: none;
   text-align: center;
   text-transform: uppercase;
   height: 4vh;
@@ -1037,7 +1036,7 @@ tr {
   align-content: center;
   position: relative;
   background-color: #fff;
-  height: 90%;
+  height: 95%;
   width: 99%;
   max-width: 99%;
   padding: 0px 1px;
@@ -1047,11 +1046,10 @@ tr {
   display: block;
   position: relative;
   background-color: #fff;
-  font-size: 1vw;
+  font-size: 0.85vw;
   text-align: center;
   border-radius: 5px;
   padding: 4px 0px;
-  overflow-y: auto;
   text-transform: uppercase;
   width: 26vw;
   max-width: 26vw;
@@ -1096,16 +1094,15 @@ tr {
   position: relative;
   text-align: center;
   background-color: #ffff;
-  border: 1px solid lightgray;
-  width: 98vw;
-  height: 85vh;
+  width: 99vw;
+  height: 87.5vh;
   overflow: hidden;
 }
 /* Inner container to seperate border and scrollbar */
 #container {
   position: relative;
   overflow: auto;
-  max-height: 85vh;
+  max-height: 87vh;
   padding-bottom: 8vh;
 }
 
@@ -1133,22 +1130,22 @@ tr {
   position: relative;
   border-collapse: collapse;
   width: 100%;
-  font-size: 1vw;
+  font-size: 0.85vw;
 }
 /* text entries for prices in table */
 .table-entries {
   text-align: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   width: 15vw;
 }
 .price-entries-treated {
   text-align: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   width: 45%;
 }
 .price-entries-untreated {
   text-align: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   width: 45%;
 }
 
@@ -1159,9 +1156,8 @@ tr {
   align-items: center;
   align-content: center;
   justify-content: space-around;
-  height: 4vh;
+  height: 100%;
   width: 100%;
-  margin-top: 1vh;
 }
 
 #len {
@@ -1200,7 +1196,7 @@ tr {
 #t-value {
   position: relative;
   width: fit-content;
-  font-size: 1vw;
+  font-size: 0.85vw;
   font-weight: bold;
   margin-left: 10px;
   background-color: #fff;
@@ -1232,12 +1228,12 @@ tr {
   align-content: center;
   transform-origin: bottom left;
   transform: scale(0);
-  width: 20vw;
-  height: 90%;
+  width: 15vw;
+  height: 75%;
   background-color: #fff;
-  filter: drop-shadow(2px 4px 6px black);
   border-radius: 3px;
   transition: transform 0.3s;
+  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
 }
 #percentage-container {
   position: relative;
@@ -1248,23 +1244,23 @@ tr {
   align-items: center;
   align-content: center;
   width: 100%;
-  height: 62vh;
   background-color: #fff;
 }
 
 .percentage-label {
   position: relative;
-  right: 7vw;
+  right: 4.8vw;
   top: 2vh;
   font-weight: bolder;
-  font-size: 1vw;
+  font-size: 0.8vw;
+  width: 25%;
 }
 .range {
   width: 90%;
 }
 .value {
   position: relative;
-  font-size: 1vw;
+  font-size: 0.8vw;
   font-weight: bold;
   left: 0.5vw;
 }
@@ -1273,14 +1269,14 @@ tr {
   position: absolute;
   bottom: 8vh;
   width: 100%;
+  height: 6vh;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   align-content: center;
   background-color: #fff;
   border-top: 1px solid;
-  border-bottom: 1px solid;
-  padding-bottom: 2vh;
+  padding-bottom: 1vh;
 }
 
 #all-label {
@@ -1291,6 +1287,96 @@ tr {
   left: 1.3vw;
 }
 
+/* ////////////////////////// */
+/* DATE SELECTOR FOR SCHEDULE */
+/* ////////////////////////// */
+#date-select {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  justify-items: center;
+  align-content: center;
+  align-items: center;
+  background-color: #fff;
+  z-index: 4;
+  visibility: hidden;
+  opacity: 0;
+  width: 13vw;
+  height: 12vh;
+  transition: opacity 0.3s;
+  box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
+}
+
+#date-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  justify-items: center;
+  align-content: center;
+  align-items: center;
+  width: 100%;
+  font-size: 0.85vw;
+  padding: 0 1vw;
+}
+
+#date-text-span {
+  padding: 0.3vw;
+}
+
+#date-select-text {
+  position: absolute;
+  top: 0;
+  text-align: center;
+  padding: 0.5vh;
+  width: 100%;
+  font-size: 0.85vw;
+  font-weight: bold;
+  border-bottom: 1px solid lightgray;
+}
+#date-button-container {
+  display: flex;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  justify-content: space-around;
+  justify-items: center;
+  align-content: center;
+  height: 3.5vh;
+}
+
+#date-select-btn {
+  background: var(--button-green);
+  width: 50%;
+  border: 1px solid #fff;
+  font-size: 0.85vw;
+}
+
+#date-select-btn:hover {
+  background-color: var(--button-green-hover);
+}
+#date-select-btn:active {
+  transform: scale(0.95);
+}
+
+#date-cancel-btn {
+  background: var(--button-red);
+  width: 50%;
+  border: 1px solid #fff;
+  font-size: 0.85vw;
+}
+
+#date-cancel-btn:hover {
+  background-color: var(--button-red-hover);
+}
+
+#date-cancel-btn:active {
+  transform: scale(0.95);
+}
+
+select {
+  font-size: 0.85vw;
+}
 /* /////////////////// */
 /* TABLE FORM BUTTONS */
 /* ///////////////// */
@@ -1303,15 +1389,15 @@ tr {
   background-color: var(--button-gold);
   color: #fff;
   border: 2px solid var(--button-gold);
-  font-size: 1vw;
+  font-size: 0.85vw;
   text-align: center;
   height: 100%;
 }
 
 .schedule-button {
   position: absolute;
-  background-color: var(--button-gold);
-  border: 2px solid var(--button-gold);
+  background-color: var(--sec-blue);
+  border: 2px solid var(--sec-blue);
   right: 13vw;
   color: #fff;
   width: 12vw;
@@ -1319,11 +1405,30 @@ tr {
 }
 
 .schedule-button:hover {
-  background-color: var(--button-gold-hover);
-  border: 2px solid var(--button-gold-hover);
+  background-color: var(--sec-blue-hover);
+  border: 2px solid var(--sec-blue-hover);
   text-align: center;
 }
 .schedule-button:active {
+  transform: scale(0.95);
+}
+
+.schedule-button-pause {
+  position: absolute;
+  background-color: var(--sec-blue);
+  border: 2px solid var(--sec-blue);
+  right: 13vw;
+  color: #fff;
+  width: 12vw;
+  height: 100%;
+}
+
+.schedule-button-pause:hover {
+  background-color: var(--sec-blue-hover);
+  border: 2px solid var(--sec-blue-hover);
+  text-align: center;
+}
+.schedule-button-pause:active {
   transform: scale(0.95);
 }
 
@@ -1352,7 +1457,7 @@ tr {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   text-align: center;
   padding: 7px 0;
   background-color: var(--button-green);
@@ -1369,6 +1474,26 @@ tr {
 }
 
 .create-btn:active {
+  transform: scale(0.95);
+}
+
+.create-btn-pause {
+  position: absolute;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.85vw;
+  text-align: center;
+  padding: 7px 0;
+  background-color: #fff;
+  color: #fff;
+  border: 2px solid #fff;
+  width: 12vw;
+  height: 100%;
+}
+
+.create-btn-pause:active {
   transform: scale(0.95);
 }
 
@@ -1408,14 +1533,13 @@ tr {
 
 #applyBtn {
   position: absolute;
-  bottom: 0.7vh;
-  right: 12vw;
+  bottom: 0;
+  right: 0;
   background-color: var(--button-green);
   color: #fff;
-  border: 2px solid var(--button-green);
-  width: 3vw;
-  height: 3vw;
-  padding: 1vh 0px;
+  border: 1px solid #fff;
+  width: 50%;
+  height: 4vh;
 }
 
 #applyBtn:hover {
@@ -1443,14 +1567,13 @@ tr {
 
 #cancelBtn {
   position: absolute;
-  bottom: 0.7vh;
-  left: 1vw;
+  bottom: 0;
+  left: 0;
   background-color: var(--button-red);
   color: #fff;
-  border: 2px solid var(--button-red);
-  width: 3vw;
-  height: 3vw;
-  padding: 1vh 0px;
+  border: 1px solid #fff;
+  width: 50%;
+  height: 4vh;
 }
 
 #cancelBtn:hover {
@@ -1499,13 +1622,12 @@ tr {
 }
 
 .exmill-disabled {
-  position: relative;
-  position: relative;
-  right: 30vw;
+  position: absolute;
+  right: 35vw;
   background-color: grey;
   color: #fff;
   border: 2px solid grey;
-  width: 45px;
+  width: 8vw;
   height: 100%;
 }
 
@@ -1541,7 +1663,7 @@ tr {
   align-content: center;
   height: 100%;
   width: 12vw;
-  background-color: #000;
+  background-color: var(--sec-blue);
   border-left: 1px solid #fff;
   border-right: 1px solid #fff;
   padding: 0 10px;
@@ -1551,7 +1673,7 @@ tr {
 #exmill-label {
   position: absolute;
   top: 1.2vh;
-  font-size: 1vw;
+  font-size: 0.85vw;
   color: #fff;
   font-weight: bold;
 }
@@ -1561,7 +1683,7 @@ tr {
   bottom: 30vh;
   padding: 2px 0;
   text-align: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   width: 85%;
 }
 
@@ -1573,11 +1695,11 @@ tr {
   align-items: center;
   align-content: center;
   text-align: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   bottom: 24vh;
   background-color: var(--button-green);
   color: #fff;
-  border: 2px solid var(--button-green);
+  border: 1px solid #fff;
   width: 85%;
 }
 
@@ -1589,17 +1711,16 @@ tr {
   align-items: center;
   align-content: center;
   text-align: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   bottom: 24vh;
-  background-color: grey;
+  background-color: lightgrey;
   color: #fff;
-  border: 2px solid grey;
+  border: 1px solid #fff;
   width: 85%;
 }
 
 .exmill-enabled-apply:hover {
   background-color: var(--button-green-hover);
-  border: 2px solid var(--button-green-hover);
 }
 
 .exmill-enabled-apply:active {
@@ -1614,10 +1735,9 @@ tr {
 
 #round-all-container {
   position: absolute;
-  bottom: 0px;
-  width: 7vw;
-  right: 0;
-  height: 3vw;
+  bottom: 6.5vh;
+  height: 3vh;
+  width: 100%;
 }
 
 #round-all-select {
@@ -1626,16 +1746,17 @@ tr {
 }
 
 #round-all-text {
-  position: absolute;
-  bottom: 2vh;
+  position: relative;
+  top: 1vh;
   font-weight: bold;
-  font-size: 1vw;
+  font-size: 0.85vw;
+  left: 2vw;
 }
 
 #round-all-tick {
   position: absolute;
-  right: 3.5vw;
-  bottom: 1.5vh;
+  top: 1.3vw;
+  left: 12vw;
   width: 1vw;
   height: 1vw;
   background-color: #fff;
@@ -1665,7 +1786,7 @@ tr {
   border: 2px solid var(--button-gold);
   font-size: 0.8vw;
   width: 3vw;
-  height: 85%;
+  height: 60%;
   padding: 5px 20px;
   margin-left: 0.5vw;
   text-align: center;
@@ -1684,7 +1805,7 @@ tr {
   border: 2px solid var(--button-gold);
   font-size: 0.8vw;
   width: 3vw;
-  height: 85%;
+  height: 60%;
   padding: 5px 20px;
   margin-left: 0.5vw;
   margin-right: 0.5vw;
@@ -1704,7 +1825,7 @@ tr {
   border: 2px solid var(--button-green);
   font-size: 0.8vw;
   width: 3vw;
-  height: 85%;
+  height: 60%;
 
   padding: 5px 20px;
   margin-left: 0.5vw;
@@ -1726,7 +1847,7 @@ tr {
   border: 2px solid var(--button-green);
   font-size: 0.8vw;
   width: 3vw;
-  height: 85%;
+  height: 60%;
 
   padding: 5px 20px;
   margin-left: 0.5vw;
@@ -1737,80 +1858,80 @@ tr {
 
 .lock-in {
   position: absolute;
-  left: 26vw;
+  left: 28vw;
   z-index: 2;
   top: 5vh;
-  background-color: var(--button-gold-hover);
+  background-color: var(--button-gold);
   color: #fff;
-  border: 2px solid var(--button-gold-hover);
-  width: 40px;
-  height: 30px;
+  border: 2px solid var(--button-gold);
+  width: 2vw;
+  height: 2vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-content: center;
   align-items: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   box-shadow: 1px 1px 3px 0px rgba(50, 50, 50, 0.8);
   transition: background-color 0.5s, border 0.5s, box-shadow 0.5s;
 }
 
 .lock-out {
-  left: 26vw;
+  left: 28vw;
   z-index: 3;
   top: 5vh;
   background-color: #fff;
   color: var(--button-gold);
   border: 2px solid var(--button-gold);
   position: absolute;
-  width: 40px;
-  height: 30px;
+  width: 2vw;
+  height: 2vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-content: center;
   align-items: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
   transition: background-color 0.5s, border 0.5s, box-shadow 0.5s;
 }
 
 .unlock-out {
-  left: 26vw;
+  left: 28vw;
   top: 10vh;
   z-index: 2;
   background-color: #fff;
   border: 2px solid var(--button-green);
   color: var(--button-green);
   position: absolute;
-  width: 40px;
-  height: 30px;
+  width: 2vw;
+  height: 2vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-content: center;
   align-items: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   box-shadow: 14px 14px 18px 0px rgba(50, 50, 50, 0.75);
   transition: background-color 0.5s, border 0.5s, box-shadow 0.5s;
 }
 
 .unlock-in {
-  left: 26vw;
+  left: 28vw;
   top: 10vh;
   z-index: 2;
   background-color: var(--button-green-hover);
   border: 2px solid var(--button-green-hover);
   color: #fff;
   position: absolute;
-  width: 40px;
-  height: 30px;
+  width: 2vw;
+  height: 2vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-content: center;
   align-items: center;
-  font-size: 1vw;
+  font-size: 0.85vw;
   box-shadow: 1px 1px 3px 0px rgba(50, 50, 50, 0.8);
   transition: background-color 0.5s, border 0.5s, box-shadow 0.5s;
 }
@@ -1840,7 +1961,7 @@ tr {
   justify-content: center;
   align-self: center;
   align-items: center;
-  height: 125vw;
+  height: 92vh;
   width: 92vw;
   border-radius: 3px;
   background-color: #fff;
@@ -1852,7 +1973,6 @@ tr {
   display: flex;
   position: relative;
   width: 92vw;
-  height: 72vw;
   bottom: 5vw;
   flex-direction: column;
   justify-content: center;
@@ -1861,17 +1981,35 @@ tr {
 
 #customer-search-container {
   position: relative;
-  top: 2vw;
+  top: 1.5vh;
   display: flex;
   flex-direction: column;
   align-content: center;
   justify-content: center;
   justify-items: center;
-  height: 15vw;
+  height: 11vh;
+}
+
+#search-disabled {
+  position: absolute;
+  z-index: 4;
+  top: 1.5vh;
+  display: none;
+  text-align: center;
+  background-color: lightgray;
+  font-size: 6vw;
+  border: 1px solid #fff;
+  color: #fff;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  justify-items: center;
+  height: 8vh;
+  width: 100%;
 }
 #button-container {
   position: absolute;
-  bottom: 18vw;
+  bottom: 14vh;
   display: inline-flex;
   flex-direction: row;
   align-content: center;
@@ -1879,7 +2017,7 @@ tr {
   justify-items: center;
   padding: 0 1vw;
   width: 92vw;
-  height: 14vw;
+  height: 10vh;
 }
 
 #copy-container {
@@ -1965,7 +2103,7 @@ tr {
   width: 90vw;
   text-align: center;
   color: var(--text-color);
-  height: 11vw;
+  height: 9vh;
   transition: box-shadow 0.5s;
 }
 
@@ -1989,12 +2127,11 @@ tr {
   width: 90vw;
   background-color: #fff;
   border: 1px solid var(--button-disabled);
-  height: 50%;
 }
 
 #customer-list {
   width: 100%;
-  height: 48vw;
+  height: 35vh;
   overflow: auto;
   background-position: center;
   background-size: contain;
@@ -2006,11 +2143,11 @@ tr {
   justify-items: center;
 }
 #customer-list::-webkit-scrollbar {
-  width: 2px;
+  width: 2.5vw;
   background-color: lightgrey;
 }
 #customer-list::-webkit-scrollbar-thumb {
-  height: 3px;
+  height: 4vh;
   background-color: grey;
 }
 
@@ -2019,6 +2156,10 @@ tr {
 /* ///////////////// */
 
 .cusnum {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
   text-align: center;
   font-size: 6vw;
   background-color: #fff;
@@ -2033,7 +2174,22 @@ tr {
   background-color: var(--sec-blue-hover);
 }
 
+.no-paused {
+  text-align: center;
+  font-size: 6vw;
+  background-color: #fff;
+  border: 1px solid var(--button-gold);
+  color: var(--button-gold);
+  margin: 0;
+  margin-top: 1vw;
+  padding: 2vw 0;
+}
+
 .cusnum-clicked {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
   background-color: var(--sec-blue);
   color: #fff;
   border: 1px solid var(--sec-blue);
@@ -2045,12 +2201,15 @@ tr {
   margin-top: 1vw;
 }
 
-.cusnum-resume {
-  position: relative;
+.context-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
   background-color: #fff;
-  color: #d9793b;
+  color: var(--button-gold);
   border: 1px solid #fff;
-  text-align: center;
+  align-content: center;
+  align-items: center;
   font-size: 6vw;
   font-weight: bold;
   padding: 2vw 0;
@@ -2058,21 +2217,74 @@ tr {
   margin-top: 1vw;
 }
 
-.cusnum-resume::after {
-  position: absolute;
-  font-weight: bolder;
-  right: 3vw;
-  content: '✔';
-  color: #d9793b;
-}
-.cusnum-resume:hover {
-  background-color: #d97a3ba1;
+.context-container-clicked {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-content: center;
+  align-items: center;
+  background-color: var(--button-gold);
   color: #fff;
+  border: 1px solid #fff;
+  padding: 2vw 0;
+  font-size: 6vw;
+  font-weight: bold;
+  margin: 0;
+  margin-top: 1vw;
+}
+
+.context-container:hover {
+  background-color: var(--button-gold-hover);
+  color: #fff;
+}
+
+.context-cancel {
+  position: relative;
+  width: 20vw;
+  height: 5vh;
+  font-size: 3vw;
+  border: 1px solid #fff;
+  background-color: var(--button-gold);
+  border-radius: 4vw;
+  color: #fff;
+  visibility: hidden;
+}
+
+.context-cancel:hover {
+  background-color: #fff;
+  border: 1px solid var(--button-gold);
+  color: var(--button-gold);
+}
+
+.context-cancel:active {
+  transform: scale(0.95);
+}
+
+.context-delete {
+  position: relative;
+  width: 20vw;
+  height: 5vh;
+  font-size: 3vw;
+  background-color: var(--button-gold);
+  border: 1px solid #fff;
+  border-radius: 4vw;
+  color: #fff;
+  visibility: hidden;
+}
+
+.context-delete:hover {
+  background-color: #fff;
+  border: 1px solid var(--button-gold);
+  color: var(--button-gold);
+}
+
+.context-delete:active {
+  transform: scale(0.95);
 }
 
 #p2s-logo {
   position: absolute;
-  bottom: 100vw;
+  bottom: 73vh;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -2083,11 +2295,11 @@ tr {
 #p2s-logo img {
   position: relative;
   left: 0;
-  height: 26vw;
+  height: 20vh;
 }
 #p2s-logo::after {
   content: 'Converter';
-  top: 0.4vw;
+  top: 0.4vh;
   right: 0;
   position: relative;
   font-family: Forelle;
@@ -2202,12 +2414,81 @@ tr {
   right: 0;
   width: 50%;
   color: #fff;
-  background-color: rgb(233, 233, 233);
+  background-color: lightgrey;
   border: 1px solid #fff;
 }
 
+.loading-container {
+  display: flex;
+  top: 1vh;
+  flex-direction: column;
+  justify-content: center;
+  justify-items: center;
+  align-content: center;
+  align-items: center;
+  visibility: hidden;
+  position: absolute;
+  z-index: 2;
+  font-size: 6vw;
+  font-weight: bolder;
+  width: 89vw;
+  background-color: #fff;
+  border-radius: 3px;
+  height: 34vh;
+}
+
+.spinner {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 15vw;
+  height: 15vw;
+  border-radius: 50%;
+}
+
+#logo {
+  position: relative;
+  top: 2px;
+  width: 35px;
+  height: auto;
+}
+
+.spinner-sector {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 5px solid transparent;
+  mix-blend-mode: overlay;
+}
+
+.spinner-color-a {
+  border-top: 5px solid var(--sec-blue);
+  animation: rotate 2s linear infinite;
+}
+
+.spinner-color-b {
+  border-left: 5px solid var(--button-red);
+  animation: rotate 2.5s linear infinite;
+}
+.spinner-color-c {
+  border-right: 5px solid var(--button-green);
+  animation: rotate 1.5s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 #assist-box {
-  bottom: 3vw;
+  bottom: 2vh;
   position: absolute;
   display: flex;
   flex-direction: row;
@@ -2215,7 +2496,7 @@ tr {
   justify-items: center;
   padding: 0 1vw;
   width: 92vw;
-  height: 14vw;
+  height: 10vh;
 }
 
 #assist-btn {
@@ -2258,6 +2539,26 @@ tr {
 #view-pause:active {
   transform: scale(0.95);
 }
+#view-reset {
+  position: relative;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+  font-size: 6vw;
+  background-color: var(--button-green);
+  border: 1px solid #fff;
+  width: 50%;
+  height: 100%;
+}
+#view-reset:hover {
+  background-color: var(--button-green-hover);
+}
+
+#view-reset:active {
+  transform: scale(0.95);
+}
 
 /* //////////////////// */
 /* WINDOW CONTROLS CSS */
@@ -2267,10 +2568,10 @@ tr {
 .max {
   position: absolute;
   transform: scale(1);
-  width: 18px;
+  width: 1vw;
   height: auto;
-  right: -10px;
-  top: -21px;
+  right: -0.5vw;
+  top: -2.3vh;
   transition: transform 0.3s;
   outline: none;
 }
@@ -2295,27 +2596,35 @@ tr {
   }
 }
 
-.grab {
-  display: block;
-  top: -20px;
-  left: -12px;
-  width: 22px;
+#topbar {
   position: absolute;
+  top: 0;
+  width: 100%;
+  border-bottom: 1px solid lightgrey;
+}
+
+#grab {
+  position: absolute;
+  left: -1vw;
+  height: 2.5vh;
+  width: 96vw;
+  bottom: 100%;
   -webkit-app-region: drag;
 }
+
 #minimize-table {
   position: absolute;
   transform: scale(1);
-  right: 20px;
-  top: -20px;
-  width: 15px;
-  height: auto;
+  top: -2.2vh;
+  right: 1vw;
+  width: 1vw;
+  height: 2vh;
   outline: none;
   fill: var(--main);
   transition: transform 0.3s;
 }
 #minimize-table:hover {
-  transform: scale(1.5);
+  transform: scale(1.2);
 }
 
 #minimize-table:active {
@@ -2364,7 +2673,7 @@ tr {
   height: 150%;
   backdrop-filter: none;
   z-index: 4;
-  transition: backdrop-filter 0.8s linear;
+  transition: backdrop-filter 0.2s linear;
 }
 
 /* NOTIFICATION POPUPS */
@@ -2861,43 +3170,8 @@ tr {
 /* MEDIA CSS */
 /* //////// */
 @media screen and (max-width: 1280px) {
-  .table-container {
-    max-height: 84.5vh;
-  }
-  html {
-    font-size: 12px;
-  }
-  #container {
-    font-size: 12px;
-  }
   th {
     height: 10%;
-  }
-
-  #label-customer-number,
-  #label-pricelist {
-    font-size: 12px;
-  }
-  #label-cca {
-    font-size: 12px;
-  }
-
-  #customer-name {
-    font-size: 12px;
-  }
-
-  #customer-number,
-  #pricelist {
-    font-size: 12px;
-    width: 13.5vw;
-    right: 4px;
-  }
-
-  #cca-price {
-    font-size: 12px;
-
-    width: 6vw;
-    text-align: right;
   }
 
   #border {
@@ -2906,42 +3180,17 @@ tr {
     margin-left: 0;
     margin-right: 0;
   }
-  .grab {
-    width: 19px;
-    top: -15px;
-    left: -10px;
-  }
-  .max {
-    width: 14px;
-    top: -15px;
-    right: -9px;
-  }
+  /*  
   #minimize-table {
     right: 15px;
     top: -15px;
     width: 12px;
-  }
-
-  .cca-auto-out,
-  .cca-auto-in,
-  .cca-man-out,
-  .cca-man-in,
-  .info-btn,
-  .email-now {
-    transform: scale(0.9);
-  }
+  } */
 
   #customer-contact-container > span {
     width: 98%;
     height: 95%;
     padding-bottom: 10px;
-  }
-
-  #unlock {
-    transform: scale(0.8);
-  }
-  #lock {
-    transform: scale(0.8);
   }
 
   /* UNTREATED COLUMNS */
@@ -3103,16 +3352,7 @@ tr {
   #customer-displaybox-container {
     width: 20vw;
   }
-  #display-box-label {
-    font-size: 12px;
-  }
-  #customer-displaybox {
-    font-size: 12px;
-  }
-  #footer-logo {
-    transform: scale(0.8);
-    bottom: -10px;
-  }
+
   #CCA-popup {
     top: 2vh;
     left: -5vw;

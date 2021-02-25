@@ -27,8 +27,6 @@ if (!process.env.NODE_ENV) {
   }
 }
 
-const { sendFailedMail } = require(`${dir}/renderer/email/failedMail.js`);
-
 /* GLOBAL VARIABLES */
 /////////////////////
 let homeWindow = remote.getCurrentWindow();
@@ -230,11 +228,4 @@ ipcRenderer.on('create-download-window', (e, message) => {
 /* MESSAGE TO SEND PERCENTAGE DOWNLOADED */
 ipcRenderer.on('update-progress', (e, message) => {
   ipcRenderer.send('update-progress', message);
-});
-
-/* RESEND EMAILS */
-homeWindow.webContents.on('did-finish-load', () => {
-  if (localStorage['failedEmail']) {
-    sendFailedMail(sentSound);
-  }
 });

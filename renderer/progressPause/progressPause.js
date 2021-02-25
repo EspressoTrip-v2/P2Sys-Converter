@@ -36,9 +36,6 @@ if (process.platform === 'win32') {
 let progressWindow = remote.getCurrentWindow();
 secWindow = progressWindow.getParentWindow();
 
-/* GLOBAL VARIABLES */
-let pausedItem, customerNumber;
-
 /* FUNCTIONS */
 //////////////
 
@@ -57,10 +54,8 @@ function logfileFunc(error) {
   }
 }
 
-ipcRenderer.on('convert-python', (event, message) => {
-  let file = message.customerData;
-  pausedItem = message.flag;
-  customerNumber = file['price-list']['customerNumber'];
+ipcRenderer.on(`convert-python`, (event, message) => {
+  let file = message;
   let data = JSON.stringify(file);
 
   /* PYTHON PROCESSING FUNCTION */
@@ -99,8 +94,6 @@ ipcRenderer.on('convert-python', (event, message) => {
         channel: 'progress-end',
         filePaths,
         destination: 'sec',
-        pausedItem,
-        customerNumber,
       };
       ipcRenderer.send('progress-end', message);
       progressWindow.close();

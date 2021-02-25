@@ -1,12 +1,13 @@
 # MODULES
-import pandas as pd
-import numpy as np
 import json
-import sys
 import os
 import platform
+import sys
 import warnings
 from datetime import datetime
+
+import numpy as np
+import pandas as pd
 
 time = str(datetime.now())[:10]
 
@@ -28,26 +29,23 @@ workdir = os.getcwd()
 
 # READ IN JSON FILE FROM ARGV #
 # /////////////////////////// #
-json_pricelist = dict(json.loads(sys.argv[1:][0]))
+json_pricelist = dict(json.loads(sys.argv[1:][0]))["price-list"]
 
 # GET CUSTOMER NUMBER FROM FILE
-customer_number = list(json_pricelist.keys())[0]
+customer_number = json_pricelist["customerNumber"]
 # GET PRICELIST NUMBER
-pricelist_number = json_pricelist["PRICELIST"]
+pricelist_number = json_pricelist["priceListNumber"]
 
-# EXTRACT INDEX NUMBERS REMOVE LAST THREE ENTRIES
-idx = list(json_pricelist[customer_number].keys())[:-4]
+# EXTRACT INDEX NUMBERS REMOVE LAST SIX ENTRIES
+idx = list(json_pricelist.keys())[:-6]
 
 # EXTRACT COLUMNS
-columns = json_pricelist[customer_number]["COLUMNS"]
+columns = json_pricelist["COLUMNS"]
 
 running_cols = ["UNT_RUNNING", "TR_RUNNING"]
 
 # EXTRACT VALUES
-values = list(json_pricelist[customer_number].values())[:-4]
-
-# PERCENTAGE STDOUT
-print(10)
+values = list(json_pricelist.values())[:-6]
 
 # BUILD THE DATAFRAME #
 # ////////////////// #
@@ -89,11 +87,6 @@ df["DIMENSIONS"] = df["DIMENSIONS"].str.join(" x ")
 
 # FUNCTION TO CALCULATE RUNNING METER #
 # /////////////////////////////////// #
-
-# PERCENTAGE STDOUT
-print(20)
-
-
 def factor(col):
     for i in range(len(col)):
         col[i] = float(col[i])
@@ -116,10 +109,6 @@ df["R_FACTOR"] = df["R_FACTOR"].apply(factor)
 # ADD ODD EVEN COLUMN TO SHOW WHICH ITEMS NEED SEPERATION ODDS AND EVENS #
 # ///////////////////////////////////////////////////////////////////////#
 df["ODD_EVEN"] = ""
-
-# PERCENTAGE STDOUT
-print(30)
-
 
 # ODD EVEN TAG FUNCTION TO #
 # //////////////////////////#
@@ -144,9 +133,6 @@ def length(col):
     col = col
     return col
 
-
-# PERCENTAGE STDOUT
-print(40)
 
 # CREATE A DICTIONARY OF INCL AND ECL INDEX VALUES
 inc_excl = {}
@@ -190,9 +176,6 @@ def remove_dup():
 
 remove_dup()
 
-# PERCENTAGE STDOUT
-print(50)
-
 
 # CREATE THE RANGE OF SIZES IN LENGTH COLUMN
 def dim(col):
@@ -226,9 +209,6 @@ def odd_even(col):
 
 df = df.apply(odd_even, axis=1)
 
-# PERCENTAGE STDOUT
-print(60)
-
 
 # REMOVE THE EXCLUDED AND ADD INCLUDED LENGTHS #
 # //////////////////////////////////////////// #
@@ -246,10 +226,6 @@ def excl_incl():
 
 excl_incl()
 
-# PERCENTAGE STDOUT
-print(70)
-
-
 # FUNCTION TO MATCH SYSTEM CODES TO THE DESCRIPTIONS IN DATAFRAME #
 # /////////////////////////////////////////////////////////////// #
 def s5_product(col):
@@ -257,12 +233,6 @@ def s5_product(col):
     # //////////////////////////////////////////////////// #
     # READ IN OTHER JSON FILES REQUIRED FOR THE CONVERSION #
     # //////////////////////////////////////////////////// #
-
-    ########################################################
-    # TODO: THIS WILL BE A HIDDEN FEATURE REQUIRING AN     #
-    # ADMINISTRATIVE CODE TO CONVERT THE ACCPAC EXCEL FILE #
-    # TO USABLE JSON IN THE FUTURE DEVELOPEMENT OF THE APP #
-    ########################################################
     with open(f"{workdir}/python/templates/s5_all_products.json", "r") as json_file:
         s5_json = json.load(json_file)
 
@@ -329,9 +299,6 @@ def s5_product(col):
     return col
 
 
-# PERCENTAGE STDOUT
-print(80)
-
 # CREATE ITEM CODES COLUMNS
 df["IC_UNTREATED"] = ""
 df["IC_TREATED"] = ""
@@ -380,9 +347,6 @@ else:
 
 # SEND FOR REFORM
 reform_file = reform.reformat_layman(pricelist_number, customer_number, df)
-
-# PERCENTAGE STDOUT
-print(90)
 
 # SEND TO S5
 s5_ordersheet.create_s5_ordersheet(

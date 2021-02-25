@@ -213,9 +213,9 @@ body {
 
 #failed-container {
   position: absolute;
-  width: 65px;
-  height: 65px;
-  padding: 8px;
+  width: 38px;
+  height: 38px;
+  padding: 4px;
   opacity: 1;
   transform: scale(0);
   display: flex;
@@ -245,9 +245,9 @@ body {
   position: absolute;
   transform: scale(0);
   opacity: 1;
-  width: 65px;
-  height: 65px;
-  padding: 8px;
+  width: 38px;
+  height: 38px;
+  padding: 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -278,9 +278,9 @@ body {
 #sending-container {
   position: absolute;
   transform: scale(0);
-  width: 65px;
-  height: 65px;
-  padding: 8px;
+  width: 38px;
+  height: 38px;
+  padding: 4px;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -148,9 +148,6 @@ function verifyConnect(message) {
         body: 'There was a mail server error.\nPlease contact your administrator.',
       });
 
-      /* SEND MESSAGE TO CLOSE THE ACTIVE LOADER */
-      ipcRenderer.send('close-loader', null);
-
       /* GET THE REPLY FOR DIALOG */
       dialogReply = remote.dialog.showMessageBoxSync(emailWindow, {
         type: 'question',
@@ -198,10 +195,10 @@ function sendEmail() {
   setTimeout(() => {
     ipcRenderer.send('email-close', null);
     emailWindow.setBounds({
-      width: 90,
-      height: 90,
-      x: screenWidth - 100,
-      y: screenHeight - 135,
+      width: 50,
+      height: 50,
+      x: screenWidth - 60,
+      y: screenHeight - 100,
     });
     setTimeout(() => {
       sendingMail.style.transform = 'scale(1)';

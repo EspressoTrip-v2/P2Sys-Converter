@@ -2,6 +2,8 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
 
+const notifier = require('node-notifier');
+
 /* GET APPDATA DIR */
 let appData;
 if (process.platform === 'win32') {
@@ -14,6 +16,27 @@ if (process.platform === 'win32') {
 const currentYear = new Date().getFullYear();
 const yearLimit = currentYear - 3;
 
+/* GET WORKING DIRECTORY */
+let dir;
+function envFileChange() {
+  let fileName = `${process.cwd()}/resources/app.asar`;
+  /* LOCAL MODULES */
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = fileName.replace(pattern, '/');
+  } else dir = fileName;
+}
+if (!process.env.NODE_ENV) {
+  envFileChange();
+} else {
+  dir = process.cwd();
+
+  if (process.platform === 'win32') {
+    let pattern = /[\\]+/g;
+    dir = dir.replace(pattern, '/');
+  }
+}
+
 /* LOGFILE CREATION FUNCTION */
 //////////////////////////////
 function logfileFunc(message) {
@@ -25,6 +48,16 @@ function logfileFunc(message) {
     fs.writeFileSync(fileDir, `${new Date()}: ${message}\n`, (err) => console.log(err));
   }
 }
+
+/* PAUSED PRICELIST SCHEMA */
+/* SCHEMA */
+const pausedPricesSchema = new mongoose.Schema(
+  {},
+  { strict: false, _id: false, versionKey: false }
+);
+/* MODEL */
+const pausedPricesModel = mongoose.model('Paused_Prices', pausedPricesSchema);
+exports.pausedPricesModel = pausedPricesModel;
 
 /* SCHEDULE PRICELIST SCHEMA */
 /* SCHEMA */
@@ -85,6 +118,59 @@ exports.customerBackUpModel = customerBackUpModel;
 /* QUERY FUNCTIONS EXPORT */
 ////////////////////////////
 
+// CREATE A PAUSED PRICE-LIST
+exports.createPausedPriceList = async function (priceList) {
+  try {
+    let result = await pausedPricesModel.exists({ _id: priceList._id });
+    if (result) {
+      await pausedPricesModel.findOneAndReplace({ _id: priceList._id }, priceList).exec();
+    } else {
+      await pausedPricesModel.create(priceList);
+    }
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+// QUERY ALL CUSTOMER NUMBERS IN PAUSED PRICELISTS
+exports.queryAllPaused = async function () {
+  try {
+    let result = pausedPricesModel.find().distinct('_id').lean().exec();
+    return result;
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+// QUERY SINGLE PAUSED PRICE-LIST
+exports.querySinglePaused = async function (customerNumber) {
+  try {
+    let result = pausedPricesModel.findById(customerNumber).lean().exec();
+    return result;
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+exports.removePausedItem = async function (customerNumber) {
+  try {
+    pausedPricesModel.findByIdAndDelete(customerNumber).exec();
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+exports.removePausedItemSync = async function (customerNumber) {
+  try {
+    let result = await pausedPricesModel.findByIdAndDelete(customerNumber).exec();
+    if (result != null) {
+      return true;
+    }
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
 // QUERY ALL CUSTOMER PRICE-LIST NUMBERS
 exports.queryAllPriceListNumbers = async function () {
   let result = await customerPricesModel.find().distinct('_id').exec();
@@ -102,10 +188,42 @@ exports.querySinglePriceList = async function (customerNumber) {
 };
 
 /* QUERY CUSTOMER PRICE-LIST EXISTS */
-exports.queryCustomerExists = async function (customerNumber) {
+async function queryCustomerExists(customerNumber) {
   try {
-    let result = customerPricesModel.exists({ _id: customerNumber });
+    let result = await customerPricesModel.exists({ _id: customerNumber });
     return result;
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+}
+
+/* SAVE PRICE-LIST TO DATABASE */
+exports.updatePriceListDataBase = async function (priceList) {
+  let date = new Date();
+  let month = date.getMonth() + 1;
+  let year = date.getFullYear();
+  let dateString = `${month}/${year}`;
+  let customerNumber = priceList._id;
+  try {
+    /* Check if customer price-list exists */
+    let existsFlagPriceList = await queryCustomerExists(customerNumber);
+    /* Get the backup of the customer */
+    let backupJson = await customerBackUpModel.findById(customerNumber).lean().exec();
+
+    if (backupJson[dateString]) {
+      customerBackUpModel
+        .findByIdAndUpdate(customerNumber, {
+          [dateString]: priceList['price-list'],
+        })
+        .exec();
+    } else {
+      customerBackUpModel
+        .updateOne({ _id: customerNumber }, { [dateString]: priceList['price-list'] })
+        .exec();
+    }
+    if (existsFlagPriceList) {
+      customerPricesModel.findOneAndReplace({ _id: customerNumber }, priceList).exec();
+    }
   } catch (err) {
     logfileFunc(err.stack);
   }
@@ -171,22 +289,6 @@ exports.queryCustomerName = async function (customerNumber, allNames) {
   }
 };
 
-// QUERY THE LAST CLEANED DATE ON BACKUP DATABASE
-exports.queryBackUpDate = async function () {
-  try {
-    let date = await customerBackUpModel.findById('check').lean().exec();
-    let value = parseInt(date.value);
-    console.log(value);
-    if (value < new Date().getFullYear()) {
-      logfileFunc(`${new Date()}: Cleaned customer backups.`);
-      queryAllBackUps();
-      return true;
-    }
-  } catch (err) {
-    logfileFunc(err.stack);
-  }
-};
-
 // QUERY SINGLE CUSTOMER BACKUP
 exports.querySingleCustomerBackup = async function (customerNumber) {
   try {
@@ -196,6 +298,34 @@ exports.querySingleCustomerBackup = async function (customerNumber) {
     logfileFunc(err.stack);
   }
 };
+
+// QUERY THE LAST CLEANED DATE ON BACKUP DATABASE
+exports.queryBackUpDate = async function () {
+  try {
+    let date = await customerBackUpModel.findById('check').lean().exec();
+    let value = parseInt(date.value);
+    if (value < new Date().getFullYear()) {
+      notifier.notify({
+        title: 'CLEANING BACKUP DATABASE',
+        message: 'Redundant backups are being removed please do not close the application.',
+        icon: `${dir}/renderer/icons/info.png`,
+      });
+      updateBackups();
+    }
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+// QUERY THE LAST CLEANED DATE ON BACKUP DATABASE
+async function updateBackups() {
+  try {
+    let backUpCustomerNumbers = await customerBackUpModel.find().distinct('_id').lean().exec();
+    removeBackups(backUpCustomerNumbers);
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+}
 
 /* REMOVE BACKUP FUNCTION */
 async function removePriceLists(query) {
@@ -248,7 +378,7 @@ async function removePriceLists(query) {
   });
 
   try {
-    let result = await customerBackUpModel.findOneAndReplace({ _id: id }, newObj).exec();
+    customerBackUpModel.findOneAndReplace({ _id: id }, newObj).exec();
   } catch (err) {
     logfileFunc(err.stack);
   }
