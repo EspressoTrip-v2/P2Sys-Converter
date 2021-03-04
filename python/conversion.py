@@ -330,27 +330,25 @@ strip_number = customer_number.strip()
 # GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
 
 # GLOBAL PATHS
-server_filepath = ""
-mydocuments_folder = ""
+server_filepath = sys.argv[1:][1]
 if schedule_flag == "false":
-    mydocuments_folder = (
-        f'{os.environ["HOMEPATH"]}/Documents/P2SYS-CONVERSIONS/{strip_number}/{time}/'
-    )
-    os.makedirs(mydocuments_folder, exist_ok=True)
-
     # GET THE SERVER FILE PATH FROM ARGV
-
-    server_filepath = f"{sys.argv[1:][1]}/GENERATED_PRICE-LISTS/{strip_number}/{time}/"
-    try:
-        os.makedirs(server_filepath, exist_ok=True)
-    except:
-        pass
+    if server_filepath != "none":
+        server_filepath = (
+            f"{server_filepath}/GENERATED_PRICE-LISTS/{strip_number}/{time}/"
+        )
+        try:
+            os.makedirs(server_filepath, exist_ok=True)
+        except:
+            pass
 else:
     server_filepath = "none"
-    mydocuments_folder = (
-        f'{os.environ["HOMEPATH"]}/Documents/P2SYS-SCHEDULED/{strip_number}/{time}/'
-    )
-    os.makedirs(mydocuments_folder, exist_ok=True)
+
+
+mydocuments_folder = (
+    f'{os.environ["HOMEPATH"]}/Documents/P2SYS-SCHEDULED/{strip_number}/{time}/'
+)
+os.makedirs(mydocuments_folder, exist_ok=True)
 
 # print(mydocuments_folder)
 

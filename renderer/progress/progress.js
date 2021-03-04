@@ -95,6 +95,7 @@ ipcRenderer.on('convert-python', (event, message) => {
   let filePaths;
 
   pyshell.on('message', (message) => {
+    // console.log(message);
     /* SEPARATE THE PATHS INTO USABLE ARRAY */
     let value = parseInt(message);
     if (isNaN(value)) {
