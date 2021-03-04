@@ -31,6 +31,19 @@ workdir = os.getcwd()
 # /////////////////////////// #
 json_pricelist = dict(json.loads(sys.argv[1:][0]))["price-list"]
 
+# ASSIGN THE FLAGS FOR CORRECT PYTHON CONVERSION
+schedule_flag = sys.argv[1:][2]
+schedule_date = sys.argv[1:][3]
+python_schedule_date = 0
+
+# CONVERT JAVASCRIPT STRING TO A USABLE PYTHON DATE
+if schedule_date != "null":
+    dateString = schedule_date.split("/")
+    python_schedule_date = datetime(int(dateString[1]), int(dateString[0]), 1).strftime(
+        "%d-%m-%Y"
+    )
+
+# print(sys.argv[1:])
 # GET CUSTOMER NUMBER FROM FILE
 customer_number = json_pricelist["customerNumber"]
 # GET PRICELIST NUMBER
@@ -311,36 +324,35 @@ system_os = platform.platform(terse=True).split("-")[0]
 
 # STRIP WHITESPACE FOR FILENAME
 strip_number = customer_number.strip()
-if system_os == "Windows":
-    # CREATE THE FOLDER TO STORE ITEMS INSERT #
-    ###########################################
-    # GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
+
+# CREATE THE FOLDER TO STORE ITEMS INSERT #
+###########################################
+# GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
+
+# GLOBAL PATHS
+server_filepath = ""
+mydocuments_folder = ""
+if schedule_flag == "false":
     mydocuments_folder = (
         f'{os.environ["HOMEPATH"]}/Documents/P2SYS-CONVERSIONS/{strip_number}/{time}/'
     )
     os.makedirs(mydocuments_folder, exist_ok=True)
 
     # GET THE SERVER FILE PATH FROM ARGV
-    if sys.argv[1:][1] == "none":
-        server_filepath = "none"
-    else:
-        server_filepath = (
-            f"{sys.argv[1:][1]}/GENERATED_PRICE-LISTS/{strip_number}/{time}/"
-        )
-        try:
-            os.makedirs(server_filepath, exist_ok=True)
-        except:
-            pass
 
+    server_filepath = f"{sys.argv[1:][1]}/GENERATED_PRICE-LISTS/{strip_number}/{time}/"
+    try:
+        os.makedirs(server_filepath, exist_ok=True)
+    except:
+        pass
 else:
-    # CREATE THE FOLDER TO STORE ITEMS INSERT #
-    ###########################################
-    # GET THE OS TYPE AND GET PATH TO DOCUMENTS AND CREATE FOLDER TO SAVE FILES #
+    server_filepath = "none"
     mydocuments_folder = (
-        f'{os.environ["HOME"]}/Documents/P2SYS-CONVERSIONS/{strip_number}/{time}/'
+        f'{os.environ["HOMEPATH"]}/Documents/P2SYS-SCHEDULED/{strip_number}/{time}/'
     )
     os.makedirs(mydocuments_folder, exist_ok=True)
-    server_filepath = sys.argv[1:][1]
+
+# print(mydocuments_folder)
 
 # PASS TO SHEET CREATOR CODE #
 ##############################
@@ -354,14 +366,16 @@ s5_ordersheet.create_s5_ordersheet(
     reform_file["customer_number"],
     reform_file["customer_pricelist"],
     server_filepath,
+    python_schedule_date,
 )
 
-system_template.system_template_fn(
-    mydocuments_folder,
-    reform_file["customer_number"],
-    reform_file["customer_pricelist"],
-    server_filepath,
-)
+if schedule_flag == "false":
+    system_template.system_template_fn(
+        mydocuments_folder,
+        reform_file["customer_number"],
+        reform_file["customer_pricelist"],
+        server_filepath,
+    )
 
 # PASS FILE PATHS FOR EMAIL
 path_arr = list(os.listdir(mydocuments_folder))

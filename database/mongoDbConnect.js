@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 
 const notifier = require('node-notifier');
+const { exec } = require('child_process');
 
 /* GET APPDATA DIR */
 let appData;
@@ -162,8 +163,8 @@ exports.removePausedItem = async function (customerNumber) {
 
 exports.removePausedItemSync = async function (customerNumber) {
   try {
-    let result = await pausedPricesModel.findByIdAndDelete(customerNumber).exec();
-    if (result != null) {
+    let result = await pausedPricesModel.findByIdAndDelete(customerNumber).lean().exec();
+    if (result._id === customerNumber) {
       return true;
     }
   } catch (err) {
@@ -230,10 +231,14 @@ exports.updatePriceListDataBase = async function (priceList) {
 };
 
 /* QUERY SINGLE PRICE-LIST NUMBER */
-exports.querySinglePricelistNumber = async function (customerNumber) {
+exports.querySinglePriceListNumber = async function (customerNumber) {
   try {
-    let result = customerPricelistNumberModel.findById(customerNumber).lean().exec();
-    return result;
+    let result = await customerPricelistNumberModel.findById(customerNumber).lean().exec();
+    if (result != null) {
+      return result.number;
+    } else {
+      return null;
+    }
   } catch (err) {
     logfileFunc(err.stack);
   }
@@ -249,11 +254,78 @@ exports.queryExmillPrice = async function () {
   }
 };
 
-// QUERY ALL SCHEDULE PRICES TODO: FINISH THE AUTO CREATION
 exports.queryAllScheduleDates = async function () {
   try {
-    let result = await schedulePricesModel.find().distinct('_id').exec();
+    let result = await schedulePricesModel.find().distinct('_id').lean().exec();
     return result;
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+exports.querySingleSchedule = async function (date) {
+  try {
+    let result = await schedulePricesModel.find({ _id: date }).lean().exec();
+    let arr = Object.keys(result[0]);
+    let idx = arr.indexOf('_id');
+    arr.splice(idx, 1);
+    return arr;
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+exports.createScheduleItem = async function (message, date) {
+  let result;
+  try {
+    let existsFlag = await schedulePricesModel.exists({ _id: date });
+    if (existsFlag) {
+      result = await schedulePricesModel.updateOne({ _id: date }, message).exec();
+      if (result.n > 0) {
+        return true;
+      }
+    } else {
+      message['_id'] = date;
+      result = await schedulePricesModel.create(message);
+      if (result != null) {
+        return true;
+      }
+    }
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+exports.removeScheduleItems = async function (message) {
+  try {
+    let result = await schedulePricesModel.findById(message.dateValue).lean().exec();
+    let keys = Object.keys(result).length;
+    if (keys <= 2) {
+      await schedulePricesModel.findByIdAndDelete(message.dateValue);
+      return true;
+    } else {
+      delete result[message.customerNumber];
+      let update = await schedulePricesModel
+        .findOneAndReplace({ _id: message.dateValue }, result)
+        .lean()
+        .exec();
+      if (update._id == message.dateValue) {
+        return true;
+      }
+    }
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+};
+
+exports.editSingleScheduledPriceList = async function (dateNumberObj) {
+  try {
+    let scheduleObj = await schedulePricesModel
+      .findById(dateNumberObj.dateValue)
+      .lean()
+      .exec();
+    let priceList = scheduleObj[dateNumberObj.customerNumber];
+    return priceList;
   } catch (err) {
     logfileFunc(err.stack);
   }
@@ -293,7 +365,12 @@ exports.queryCustomerName = async function (customerNumber, allNames) {
 exports.querySingleCustomerBackup = async function (customerNumber) {
   try {
     let result = await customerBackUpModel.findById(customerNumber).lean().exec();
-    return result;
+    if (result != null) {
+      delete result['_id'];
+      return result;
+    } else {
+      return [];
+    }
   } catch (err) {
     logfileFunc(err.stack);
   }

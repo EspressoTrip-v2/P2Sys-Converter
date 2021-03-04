@@ -52,16 +52,23 @@ let startBtn = document.getElementById('start'),
   exitbtn = document.getElementById('exit-btn'),
   aboutbtn = document.getElementById('info'),
   backbtn = document.getElementById('back-btn-system'),
-  clearCachedEmailsBtnSettings = document.getElementById('clear-cached-emails'),
-  clearPausedPricelistsBtnSettings = document.getElementById('clear-cached-pricelists'),
+  showSchedulesBtn = document.getElementById('show-schedules'),
   soundClick = document.getElementById('click'),
-  sentSound = document.getElementById('sent'),
   minimizeBtn = document.getElementById('minimize'),
-  dbContainer = document.getElementById('db'),
-  dbLogo = document.getElementById('db-logo'),
   muteBtn = document.getElementById('mute'),
   muteLogo = document.getElementById('mute-logo'),
-  audioTag = Array.from(document.getElementsByTagName('audio'));
+  audioTag = Array.from(document.getElementsByTagName('audio')),
+  scheduleDatesSelector = document.getElementById('schedule-dates'),
+  customerList = document.getElementById('customer-list'),
+  scheduleDatesBackBtn = document.getElementById('schedule-exit-btn'),
+  scheduleContainer = document.getElementById('schedule-container'),
+  scheduleDates = document.getElementById('schedule-dates'),
+  loadingContainer = document.getElementsByClassName('loading-container')[0],
+  loadingDateBox = document.getElementById('loading-dates'),
+  systemSettingsMenu = document.getElementsByClassName('system-settings')[0];
+
+/* GLOBAL VARIABLES */
+let scheduleDatesArr, customerScheduleList, customerNumbersScheduleList, dateValue;
 
 /* FUNCTIONS */
 ///////////////
@@ -93,14 +100,195 @@ function checkMuteFlag() {
 if (!storage.muteflag) {
   checkMuteFlag();
 }
+/* HIDE LOADER */
+function hideLoader() {
+  loadingContainer.style.visibility = 'hidden';
+  loadingDateBox.style.visibility = 'hidden';
+}
+
+/* HIDE LOADER */
+function showLoader() {
+  loadingContainer.style.visibility = 'visible';
+  loadingDateBox.style.visibility = 'visible';
+}
+
+/* CLEAR CURRENT LIST OF CLICKS FUNCTION */
+function clearList() {
+  if (customerNumbersScheduleList != null) {
+    customerNumbersScheduleList.forEach((el) => {
+      el.setAttribute('class', 'context-container');
+    });
+  }
+  resetListenersContext();
+}
+
+/* EVENT LISTENER FOR SCHEDULE LIST */
+function scheduleEvent() {
+  clearList();
+}
+
+/* CONTEXT CANCEL EVENT */
+async function editEvent(e) {
+  let parent = e.target.parentNode;
+  let buttons = parent.children;
+  /* HIDE ALL THE BUTTONS */
+  buttons[0].style.visibility = 'hidden';
+  buttons[1].style.visibility = 'hidden';
+
+  buttons[0].removeEventListener('click', deleteEvent);
+  buttons[1].removeEventListener('click', this);
+
+  /* SET CLICKED COLOR */
+  parent.setAttribute('class', 'context-container');
+
+  let scheduleObj = {
+    dateValue,
+    customerNumber: parent.id,
+  };
+
+  showLoader();
+  let schedulePriceList = await ipcRenderer.invoke('edit-schedule-price-list', scheduleObj);
+  ipcRenderer.send('start', { schedulePriceList, flag: 'edit' });
+  setTimeout(() => {
+    hideLoader();
+    scheduleContainer.style.visibility = 'hidden';
+    systemSettingsMenu.style.visibility = 'hidden';
+  }, 500);
+}
+
+/* CONTEXT DELETE EVENT */
+async function deleteEvent(e) {
+  let customerNumber = e.target.parentNode.id;
+  showLoader();
+  let updateObj = {
+    dateValue,
+    customerNumber,
+  };
+  let result = await ipcRenderer.invoke('update-scheduled-items', updateObj);
+  if (result) {
+    getScheduleDates();
+  }
+}
+
+/* RESET LISTENERS ON CONTEXT MENU */
+function resetListenersContext() {
+  let allContextContainers = Array.from(document.getElementsByClassName('context-container'));
+  allContextContainers.forEach((el) => {
+    /* RESET ALL CONTEXT */
+    try {
+      el.removeEventListener('click', scheduleEvent);
+    } catch (err) {
+      console.log(err);
+    }
+    el.addEventListener('click', scheduleEvent);
+
+    let buttons = el.children;
+    buttons[0].style.visibility = 'hidden';
+    buttons[0].removeEventListener('click', deleteEvent);
+    buttons[1].style.visibility = 'hidden';
+    buttons[1].removeEventListener('click', editEvent);
+  });
+}
+
+/* PAUSED CONTEXT MENU FUNCTION */
+function showScheduleContextMenu(e) {
+  scheduleEvent();
+  resetListenersContext();
+
+  let el = e.target;
+  /* REMOVE THE EVENT LISTENER */
+  el.removeEventListener('click', scheduleEvent);
+  let customerNumber = el.innerText;
+  let cancelBtnId = `${customerNumber}-edit`;
+  let deleteBtnId = `${customerNumber}-delete`;
+
+  let tempBtnCancel = document.getElementById(cancelBtnId);
+  let tempBtnDelete = document.getElementById(deleteBtnId);
+
+  /* SHOW THE BUTTONS */
+  tempBtnCancel.style.visibility = 'visible';
+  tempBtnDelete.style.visibility = 'visible';
+
+  /* ADD EVENT LISTENERS */
+  tempBtnDelete.addEventListener('click', deleteEvent);
+  tempBtnCancel.addEventListener('click', editEvent);
+
+  /* SET CLICKED COLOR */
+  el.setAttribute('class', 'context-container-clicked');
+}
+
+/* ADD EVENT LISTENERS TO PAUSED LIST ITEMS */
+function addScheduleListListeners() {
+  /* CLICK EVENTS ON CUSTOMER NUMBER SEARCH BOX */
+  customerNumbersScheduleList = Array.from(customerList.children);
+  // CLICK EVENT ON CUSTOMER LIST ITEM
+  customerNumbersScheduleList.forEach((el) => {
+    el.addEventListener('click', scheduleEvent);
+    el.addEventListener('contextmenu', (e) => {
+      showScheduleContextMenu(e);
+    });
+  });
+  hideLoader();
+}
+
+/* POPULATE THE CUSTOMER NUMBERS IN LIST */
+function populateCustomerList() {
+  customerList.innerHTML = '';
+  customerScheduleList.forEach((el) => {
+    let html = `
+    <div id="${el}" class="context-container"><button id="${el}-delete" class="context-delete" >DELETE</button>${el}<button id="${el}-edit" class="context-edit" >EDIT</button></div>
+      `;
+    customerList.insertAdjacentHTML('beforeend', html);
+    addScheduleListListeners();
+  });
+}
+
+/* POPULATE THE DATES IN THE SCHEDULES SELECTOR */
+async function getScheduledCustomers(date) {
+  let schedule = await ipcRenderer.invoke('show-single-customer-schedule', date);
+  customerScheduleList = schedule;
+  populateCustomerList();
+}
+
+/* POPULATE THE CUSTOMER-LIST AND ADD CORRECT CLASSES */
+function populateDateOptions() {
+  scheduleDates.innerHTML = '';
+  customerList.innerHTML = '';
+
+  if (scheduleDatesArr.length < 1) {
+    let html = '<div id="no-schedules">NO SCHEDULES</div>';
+    customerList.insertAdjacentHTML('beforeend', html);
+    loadingDateBox.style.visibility = 'visible';
+    loadingContainer.style.visibility = 'hidden';
+  } else {
+    scheduleDatesArr.forEach((el) => {
+      let html = `
+      <option value="${el}">${el}</option>
+        `;
+      scheduleDates.insertAdjacentHTML('beforeend', html);
+    });
+    dateValue = scheduleDatesArr[0];
+    getScheduledCustomers(dateValue);
+  }
+}
+
+/* GET SCHEDULE DATES AND SORT */
+async function getScheduleDates() {
+  scheduleDatesArr = await ipcRenderer.invoke('get-schedule-dates-update', null);
+  scheduleDatesArr.sort((dateA, dateB) => {
+    return new Date(`1/${dateA}`) - new Date(`1/${dateB}`);
+  });
+  populateDateOptions();
+}
 
 /* MAIN PAGE EVENTS */
 /////////////////////
+
 /* START BUTTON */
 startBtn.addEventListener('click', (e) => {
   soundClick.play();
   setTimeout(() => {
-    ipcRenderer.send('start', 'startPage');
+    ipcRenderer.send('start', null);
   }, 200);
 });
 
@@ -121,72 +309,16 @@ minimizeBtn.addEventListener('click', (e) => {
 /* ABOUT BUTTON */
 aboutbtn.addEventListener('click', (e) => {
   soundClick.play();
-  document.querySelector('.system-settings').style.display = 'flex';
-  document.querySelector('.system-settings').style.opacity = 1;
+  systemSettingsMenu.style.visibility = 'visible';
 });
 
 backbtn.addEventListener('click', () => {
   soundClick.play();
-  document.querySelector('.system-settings').style.opacity = 0;
-  document.querySelector('.system-settings').style.display = 'none';
+  systemSettingsMenu.style.visibility = 'hidden';
 });
-
-/* CLEAR LOCALSTORAGE FILES */
-clearCachedEmailsBtnSettings.addEventListener('click', (e) => {
-  soundClick.play();
-
-  /* CHECK TO SEE I THERE ARE EMAILS TO REMOVE */
-  if (localStorage.getItem('failedEmail')) {
-    localStorage.removeItem('failedEmail');
-    if (!localStorage.getItem('failedEmail')) {
-      new Notification('Emails Cleared', {
-        icon: `${dir}/renderer/icons/mailDeleteTemplate.png`,
-        body: 'All unsent emails removed',
-        requireInteraction: true,
-      });
-    }
-  } else {
-    new Notification('Emails Cleared', {
-      icon: `${dir}/renderer/icons/info.png`,
-      body: 'No emails to remove',
-      requireInteraction: true,
-    });
-  }
-});
-
-/* PAUSED EMAIL BUTTON FUNCTION */
-function pausedPricesPress() {
-  soundClick.play();
-  /* GET THE LOCAL STORAGE KEYS */
-  let localStorageKeys = Object.keys(localStorage);
-  let numbers = '';
-
-  localStorageKeys.forEach((el) => {
-    if (el !== 'notifications' && el !== 'failedEmail') {
-      numbers += ` ${el},`;
-      localStorage.removeItem(el);
-    }
-  });
-
-  if (numbers.length > 1) {
-    new Notification('PRICE-LISTS REMOVED', {
-      body: `Paused price-lists ${numbers} have been removed`,
-      icon: `${dir}/renderer/icons/info.png`,
-    });
-  } else {
-    new Notification('PRICE-LISTS REMOVED', {
-      body: 'There are no pricelists to remove.',
-      icon: `${dir}/renderer/icons/info.png`,
-    });
-  }
-}
 
 /* ONLINE LISTENER */
 window.addEventListener('offline', (e) => {
-  dbContainer.title = 'Connection Lost';
-  dbLogo.style.fill = 'var(--button-red';
-  dbLogo.style.animation = 'none';
-
   if (homeWindow.isVisible()) {
     new Notification('P2SYS OFFLINE', {
       icon: `${dir}/renderer/icons/error.png`,
@@ -211,15 +343,31 @@ muteBtn.addEventListener('click', (e) => {
   }, 300);
 });
 
-/* IPC LISTENERS */
-//////////////////
-
-/* DB CONNECTION */
-ipcRenderer.on('db', (e, message) => {
-  dbContainer.title = message;
-  dbLogo.style.animation = 'connect 0.1s linear infinite alternate';
+showSchedulesBtn.addEventListener('click', async (e) => {
+  soundClick.play();
+  showLoader();
+  scheduleContainer.style.visibility = 'visible';
+  getScheduleDates();
 });
 
+/* SCHEDULE DATES BACK BUTTON */
+scheduleDatesBackBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  clearList();
+  hideLoader();
+  scheduleContainer.style.visibility = 'hidden';
+  systemSettingsMenu.style.visibility = 'hidden';
+});
+
+/* SCHEDULE SELECTOR EVENT LISTENER */
+scheduleDatesSelector.addEventListener('change', (e) => {
+  dateValue = scheduleDates.value;
+  showLoader();
+  getScheduledCustomers(dateValue);
+});
+
+/* IPC LISTENERS */
+//////////////////
 /* MESSAGE TO CREATE DOWNLOAD WINDOW */
 ipcRenderer.on('create-download-window', (e, message) => {
   ipcRenderer.send('create-download-window', null);

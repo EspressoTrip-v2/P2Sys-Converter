@@ -2,6 +2,7 @@
 :root {
   --main: #000;
   --main-hover: rgb(46, 45, 45);
+  --main-light: rgba(46, 45, 45, 0.08);
   --sec-blue: #05899c;
   --sec-blue-hover: #036b7a;
   --scrollbar-track: rgba(5, 136, 156, 0.1);
@@ -18,8 +19,10 @@
   --button-gold-hover: #bd5d03;
 
   --hover-blue: rgba(5, 136, 156, 0.5);
+  --hover-gold: rgb(254, 124, 4, 0.5);
   --button-disabled: #b2bec3;
   --text-color: #2d3436;
+  --dark-green: rgb(3, 146, 3);
 }
 
 /* Fonts */
@@ -89,7 +92,7 @@ body {
 }
 
 .exm {
-  background-color: var(--sec-blue);
+  background-color: var(--main-light);
 }
 
 input[type='text'][disabled] {
@@ -1251,7 +1254,6 @@ tr {
   position: relative;
   right: 4.8vw;
   top: 2vh;
-  font-weight: bolder;
   font-size: 0.8vw;
   width: 25%;
 }
@@ -1261,7 +1263,6 @@ tr {
 .value {
   position: relative;
   font-size: 0.8vw;
-  font-weight: bold;
   left: 0.5vw;
 }
 #all-container {
@@ -1302,7 +1303,7 @@ tr {
   z-index: 4;
   visibility: hidden;
   opacity: 0;
-  width: 13vw;
+  width: 22vw;
   height: 12vh;
   transition: opacity 0.3s;
   box-shadow: 1px 1px 5px 0px rgba(50, 50, 50, 0.5);
@@ -1311,7 +1312,7 @@ tr {
 #date-container {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-around;
   justify-items: center;
   align-content: center;
   align-items: center;
@@ -1322,6 +1323,7 @@ tr {
 
 #date-text-span {
   padding: 0.3vw;
+  font-size: 1.5vw;
 }
 
 #date-select-text {
@@ -1331,7 +1333,6 @@ tr {
   padding: 0.5vh;
   width: 100%;
   font-size: 0.85vw;
-  font-weight: bold;
   border-bottom: 1px solid lightgray;
 }
 #date-button-container {
@@ -1345,37 +1346,86 @@ tr {
   height: 3.5vh;
 }
 
-#date-select-btn {
+#date-select-standard-btn {
+  display: none;
   background: var(--button-green);
   width: 50%;
   border: 1px solid #fff;
   font-size: 0.85vw;
 }
 
-#date-select-btn:hover {
+#date-select-standard-btn:hover {
   background-color: var(--button-green-hover);
 }
-#date-select-btn:active {
+#date-select-standard-btn:active {
   transform: scale(0.95);
 }
 
-#date-cancel-btn {
+#date-select-paused-btn {
+  display: none;
+  background: var(--button-green);
+  width: 50%;
+  border: 1px solid #fff;
+  font-size: 0.85vw;
+}
+
+#date-select-paused-btn:hover {
+  background-color: var(--button-green-hover);
+}
+#date-select-paused-btn:active {
+  transform: scale(0.95);
+}
+#date-select-paused-btn::after {
+  content: 'PAUSED';
+  position: absolute;
+  right: 0.2vw;
+  bottom: 0;
+  font-size: 0.5vw;
+}
+
+#date-select-edit-btn {
+  display: none;
+  background: var(--button-green);
+  width: 50%;
+  border: 1px solid #fff;
+  font-size: 0.85vw;
+}
+
+#date-select-edit-btn:hover {
+  background-color: var(--button-green-hover);
+}
+#date-select-edit-btn:active {
+  transform: scale(0.95);
+}
+#date-select-edit-btn::after {
+  content: 'EDIT';
+  position: absolute;
+  right: 0.2vw;
+  bottom: 0;
+  font-size: 0.5vw;
+}
+
+#date-cancel-standard-btn {
+  display: none;
   background: var(--button-red);
   width: 50%;
   border: 1px solid #fff;
   font-size: 0.85vw;
 }
 
-#date-cancel-btn:hover {
+#date-cancel-standard-btn:hover {
   background-color: var(--button-red-hover);
 }
 
-#date-cancel-btn:active {
+#date-cancel-standard-btn:active {
   transform: scale(0.95);
 }
 
 select {
   font-size: 0.85vw;
+  border: 1px solid #fff;
+  outline: none;
+  text-align-last: center;
 }
 /* /////////////////// */
 /* TABLE FORM BUTTONS */
@@ -1385,10 +1435,10 @@ select {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 7px 0;
+  padding: 1vh 0;
   background-color: var(--button-gold);
   color: #fff;
-  border: 2px solid var(--button-gold);
+  border: 1px solid #fff;
   font-size: 0.85vw;
   text-align: center;
   height: 100%;
@@ -1397,7 +1447,6 @@ select {
 .schedule-button {
   position: absolute;
   background-color: var(--sec-blue);
-  border: 2px solid var(--sec-blue);
   right: 13vw;
   color: #fff;
   width: 12vw;
@@ -1406,30 +1455,42 @@ select {
 
 .schedule-button:hover {
   background-color: var(--sec-blue-hover);
-  border: 2px solid var(--sec-blue-hover);
   text-align: center;
 }
 .schedule-button:active {
   transform: scale(0.95);
 }
 
-.schedule-button-pause {
+#schedule-button-pause::after {
+  content: 'PAUSED';
   position: absolute;
-  background-color: var(--sec-blue);
-  border: 2px solid var(--sec-blue);
-  right: 13vw;
-  color: #fff;
-  width: 12vw;
-  height: 100%;
+  right: 0.2vw;
+  bottom: 0;
+  font-size: 0.5vw;
 }
 
-.schedule-button-pause:hover {
-  background-color: var(--sec-blue-hover);
-  border: 2px solid var(--sec-blue-hover);
-  text-align: center;
+#schedule-button-edit::after {
+  content: 'EDIT';
+  position: absolute;
+  right: 0.2vw;
+  bottom: 0;
+  font-size: 0.5vw;
 }
-.schedule-button-pause:active {
-  transform: scale(0.95);
+
+#create-btn-pause::after {
+  content: 'PAUSED';
+  position: absolute;
+  right: 0.2vw;
+  bottom: 0;
+  font-size: 0.5vw;
+}
+
+#create-btn-edit::after {
+  content: 'EDIT';
+  position: absolute;
+  right: 0.2vw;
+  bottom: 0;
+  font-size: 0.5vw;
 }
 
 .back-to-main-btn {
@@ -1437,14 +1498,11 @@ select {
   left: 0;
   background-color: var(--button-red);
   color: #fff;
-  border: 2px solid var(--button-red);
   width: 12vw;
 }
 
 .back-to-main-btn:hover {
   background-color: var(--button-red-hover);
-  border: 2px solid var(--button-red-hover);
-
   text-align: center;
 }
 .back-to-main-btn:active {
@@ -1461,15 +1519,14 @@ select {
   text-align: center;
   padding: 7px 0;
   background-color: var(--button-green);
+  border: 1px solid #fff;
   color: #fff;
-  border: 2px solid var(--button-green);
   width: 12vw;
   height: 100%;
 }
 
 .create-btn:hover {
   background-color: var(--button-green-hover);
-  border: 2px solid var(--button-green-hover);
   text-align: center;
 }
 
@@ -1517,13 +1574,11 @@ select {
   left: 13vw;
   background-color: var(--button-gold);
   color: #fff;
-  border: 2px solid var(--button-gold);
   width: 12vw;
 }
 
 .pause-btn:hover {
   background-color: var(--button-gold-hover);
-  border: 2px solid var(--button-gold-hover);
   text-align: center;
 }
 
@@ -1539,7 +1594,7 @@ select {
   color: #fff;
   border: 1px solid #fff;
   width: 50%;
-  height: 4vh;
+  height: 3.5vh;
 }
 
 #applyBtn:hover {
@@ -1573,7 +1628,7 @@ select {
   color: #fff;
   border: 1px solid #fff;
   width: 50%;
-  height: 4vh;
+  height: 3.5vh;
 }
 
 #cancelBtn:hover {
@@ -1590,14 +1645,12 @@ select {
   left: 35vw;
   background-color: var(--main);
   color: #fff;
-  border: 2px solid var(--main);
   width: 8vw;
   height: 100%;
 }
 
 #calculate:hover {
   background-color: var(--main-hover);
-  border: 2px solid var(--main-hover);
   text-align: center;
 }
 
@@ -1616,7 +1669,6 @@ select {
   right: 35vw;
   background-color: var(--main);
   color: #fff;
-  border: 2px solid var(--main);
   width: 8vw;
   height: 100%;
 }
@@ -1626,14 +1678,12 @@ select {
   right: 35vw;
   background-color: grey;
   color: #fff;
-  border: 2px solid grey;
   width: 8vw;
   height: 100%;
 }
 
 .exmill:hover {
   background-color: var(--main-hover);
-  border: 2px solid var(--main-hover);
   text-align: center;
 }
 
@@ -1661,11 +1711,12 @@ select {
   justify-content: center;
   align-items: center;
   align-content: center;
-  height: 100%;
-  width: 12vw;
-  background-color: var(--sec-blue);
+  height: 87vh;
+  width: 14vw;
+  background-color: #fff;
   border-left: 1px solid #fff;
-  border-right: 1px solid #fff;
+  border-right: 1px solid #000;
+  border-top: 1px solid #000;
   padding: 0 10px;
   transition: transform 0.3s;
 }
@@ -1674,7 +1725,6 @@ select {
   position: absolute;
   top: 1.2vh;
   font-size: 0.85vw;
-  color: #fff;
   font-weight: bold;
 }
 
@@ -1698,6 +1748,7 @@ select {
   font-size: 0.85vw;
   bottom: 24vh;
   background-color: var(--button-green);
+  height: 3.5vh;
   color: #fff;
   border: 1px solid #fff;
   width: 85%;
@@ -1716,6 +1767,7 @@ select {
   background-color: lightgrey;
   color: #fff;
   border: 1px solid #fff;
+  height: 3.5vh;
   width: 85%;
 }
 
@@ -1735,8 +1787,8 @@ select {
 
 #round-all-container {
   position: absolute;
-  bottom: 6.5vh;
-  height: 3vh;
+  bottom: 2.5vh;
+  height: 7vh;
   width: 100%;
 }
 
@@ -2068,21 +2120,6 @@ select {
   animation: none;
 }
 
-#arrow {
-  position: absolute;
-  z-index: 0;
-  width: 6vw;
-  height: 6vw;
-  bottom: -4vw;
-  right: -4vw;
-}
-
-#arrow-logo {
-  position: absolute;
-  width: 6vw;
-  height: 6vw;
-}
-
 @keyframes check {
   0% {
     transform: scale(0);
@@ -2160,26 +2197,28 @@ select {
   justify-content: center;
   align-content: center;
   align-items: center;
-  text-align: center;
-  font-size: 6vw;
   background-color: #fff;
   border: 1px solid #fff;
+  text-align: center;
+  padding: 2vh 0;
+  height: 10vh;
+  font-size: 6vw;
+  /* font-weight: bold; */
   margin: 0;
-  margin-top: 1vw;
-  padding: 2vw 0;
+  margin-top: 1vh;
 }
 
 .cusnum:hover {
   color: #fff;
-  background-color: var(--sec-blue-hover);
+  background-color: var(--hover-blue);
 }
 
 .no-paused {
   text-align: center;
   font-size: 6vw;
-  background-color: #fff;
-  border: 1px solid var(--button-gold);
-  color: var(--button-gold);
+  background-color: var(--button-gold);
+  border: 1px solid #fff;
+  color: #fff;
   margin: 0;
   margin-top: 1vw;
   padding: 2vw 0;
@@ -2194,11 +2233,12 @@ select {
   color: #fff;
   border: 1px solid var(--sec-blue);
   text-align: center;
-  padding: 2vw 0;
+  padding: 1vh 0;
+  height: 10vh;
   font-size: 6vw;
-  font-weight: bold;
+  /* font-weight: bold; */
   margin: 0;
-  margin-top: 1vw;
+  margin-top: 1vh;
 }
 
 .context-container {
@@ -2212,7 +2252,8 @@ select {
   align-items: center;
   font-size: 6vw;
   font-weight: bold;
-  padding: 2vw 0;
+  height: 10vh;
+  padding: 1vh 0;
   margin: 0;
   margin-top: 1vw;
 }
@@ -2226,26 +2267,27 @@ select {
   background-color: var(--button-gold);
   color: #fff;
   border: 1px solid #fff;
-  padding: 2vw 0;
+  padding: 1vh 0;
   font-size: 6vw;
   font-weight: bold;
+  height: 10vh;
   margin: 0;
   margin-top: 1vw;
 }
 
 .context-container:hover {
-  background-color: var(--button-gold-hover);
+  background-color: var(--hover-gold);
   color: #fff;
 }
 
 .context-cancel {
   position: relative;
   width: 20vw;
-  height: 5vh;
-  font-size: 3vw;
+  height: 7vh;
+  font-size: 3.5vw;
   border: 1px solid #fff;
   background-color: var(--button-gold);
-  border-radius: 4vw;
+  border-radius: 2vw;
   color: #fff;
   visibility: hidden;
 }
@@ -2263,11 +2305,11 @@ select {
 .context-delete {
   position: relative;
   width: 20vw;
-  height: 5vh;
-  font-size: 3vw;
+  height: 7vh;
+  font-size: 3.5vw;
   background-color: var(--button-gold);
   border: 1px solid #fff;
-  border-radius: 4vw;
+  border-radius: 2vw;
   color: #fff;
   visibility: hidden;
 }

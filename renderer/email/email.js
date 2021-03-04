@@ -44,7 +44,7 @@ screenHeight = res.height;
 /* DOM ELEMENTS */
 //////////////////
 
-let emailRecipients = document.getElementById('email-entry'),
+let newEmailInput = document.getElementById('email-entry'),
   emailMessageArea = document.getElementById('email-message'),
   sendBtn = document.getElementById('send'),
   borderBox = document.getElementById('border'),
@@ -53,52 +53,122 @@ let emailRecipients = document.getElementById('email-entry'),
   soundClick = document.getElementById('click'),
   sendingMail = document.getElementById('sending-container'),
   failedMail = document.getElementById('failed-container'),
-  sentMail = document.getElementById('sent-container');
-
-/* CREATE EMAIL TEXT FOR MESSAGE AND INITIAL ADDRESSES */
-emailRecipients.value = process.env.EMAIL_TO;
+  sentMail = document.getElementById('sent-container'),
+  recipientContainer = document.getElementById('added-recipients'),
+  subjectInput = document.getElementById('subject-input'),
+  addEmailRecipientBtn = document.getElementById('add-recipient'),
+  audioTag = Array.from(document.getElementsByTagName('audio'));
 
 /* GLOBAL VARIABLES */
-let customerNumber, filePaths, fileNameB, fileNameA, html, dialogReply, failedMessageobj;
+let customerNumber,
+  filePaths,
+  fileNameB,
+  fileNameA,
+  pausedFlag,
+  scheduleDate,
+  text,
+  recipientArr,
+  headingText;
+
+/* CREATE EMAIL TEXT FOR MESSAGE AND INITIAL ADDRESSES */
+recipientArr = process.env.EMAIL_TO.split(',');
 
 ///////////////
 /* FUNCTIONS */
 ///////////////
 
-/* LOCAL STORAGE APPEND FUNCTION INCASE FAILED EMAIL ALREADY EXISTS */
-function localStorageAppend(obj) {
-  let localFile;
-  if (localStorage.getItem('failedEmail')) {
-    localFile = JSON.parse(localStorage.getItem('failedEmail'));
-    localFile.push(obj);
-    localStorage.setItem('failedEmail', JSON.stringify(localFile));
+/* FUNCTION CHECK THE MUTE FLAG */
+let storage = JSON.parse(localStorage.getItem('notifications'));
+function checkMuteFlag() {
+  if (!storage.muteflag) {
+    /* SET FLAG TO FALSE AND TURN OFF ALL SOUND */
+    storage.muteflag = false;
+    localStorage.setItem('notifications', JSON.stringify(storage));
+    audioTag.forEach((el) => {
+      el.muted = true;
+    });
   } else {
-    localFile = [];
-    localFile.push(obj);
-    localStorage.setItem('failedEmail', JSON.stringify(localFile));
+    /* SET THE FLAG TO TRUE AND TURN OFF ALL SOUND */
+    storage.muteflag = true;
+    localStorage.setItem('notifications', JSON.stringify(storage));
+    audioTag.forEach((el) => {
+      el.muted = false;
+    });
   }
+}
+
+if (!storage.muteflag) {
+  checkMuteFlag();
+}
+
+/* REMOVE RECIPIENT */
+function removeMailRecipient(e) {
+  let parent = e.target.parentNode;
+  let recipientString = parent.id;
+  parent.style.display = 'none';
+  this.removeEventListener('click', removeMailRecipient);
+
+  let idx = recipientArr.indexOf(recipientString);
+  recipientArr.splice(idx, 1);
+}
+
+/* ADD LISTENERS TO RECIPIENTS */
+function addListenersToRecipients() {
+  let recipients = Array.from(recipientContainer.children);
+  recipients.forEach((el) => {
+    let button = `${el.id}-delete`;
+    document.getElementById(button).addEventListener('click', removeMailRecipient);
+  });
+}
+
+/* POPULATE RECIPIENT HTML */
+function populateRecipientHtml() {
+  recipientArr.forEach((el) => {
+    let html = `<div class="recipient-list" id="${el}">${el}<button id="${el}-delete" class="delete-recipient">X</button></div>`;
+    recipientContainer.insertAdjacentHTML('beforeend', html);
+  });
+  addListenersToRecipients();
 }
 
 /* FUNCTION TO GENERATE THE MESSAGE TEST FOR EMAIL MESSAGE*/
 function getText(message) {
+  populateRecipientHtml();
   /* SPLIT MESSAGE INTO USABLE PARTS */
   customerName = message.name;
-  customerNumber = message.number;
+  customerNumber = message.customerNumber;
   filePaths = message.filePaths;
+  pausedFlag = message.pauseFlag;
+  scheduleDate = message.scheduleDate;
 
-  if (filePaths[0].includes('S5')) {
-    /* DISPLAY FILE NAMES */
-    fileNameA = `S5_${customerNumber.trim()}.xlsx`;
-    fileNameB = `${customerNumber.trim()}_system.xlsx`;
+  /* GENERATE THE HEADING */
+  if (scheduleDate != null) {
+    headingText = `Price change notification for ${customerNumber.trim()}`;
   } else {
-    fileNameB = `S5_${customerNumber.trim()}.xlsx`;
-    fileNameA = `${customerNumber.trim()}_system.xlsx`;
+    headingText = `Emailing updates for ${customerNumber.trim()}`;
+  }
+  subjectInput.value = headingText;
+
+  if (filePaths.length === 2) {
+    if (filePaths[0].includes('S5')) {
+      /* DISPLAY FILE NAMES */
+      fileNameA = `S5_${customerNumber.trim()}.xlsx`;
+      fileNameB = `${customerNumber.trim()}_system.xlsx`;
+    } else {
+      fileNameB = `S5_${customerNumber.trim()}.xlsx`;
+      fileNameA = `${customerNumber.trim()}_system.xlsx`;
+    }
+  } else {
+    fileNameA = `S5_sample_${customerNumber.trim()}.xlsx`;
   }
 
   /* CREATE THE TRANSPORT MESSAGE */
   /* TEXT OF MESSAGE */
-  let textInitial = process.env.EMAIL_TEXT.replace('{NAME}', customerName),
-    text = textInitial.replace('{NUMBER}', customerNumber.trim());
+  if (scheduleDate === null) {
+    text = `Please find the attached files for immediate update and distribution.\n\nCustomer Name:\n${customerName}\n\nCustomer Number:\n${customerNumber}\n\nKind Regards,\nManagement`;
+  } else {
+    text = `Dear: \n${customerName},\n\nThe attached file is a sample order form with price changes that will affect your account.\n\nThe changes will take effect on 1/${scheduleDate}. Please do not place orders on this sample form, an official order form will be sent to you on or soon after 1/${scheduleDate}.\n\nIf you have any queries please contact the sales department on +27 42 281 1713.\n\nKind Regards,\nA.C. Whitcher`;
+  }
+
   /* INSERT THE MESSAGE IN THE TEXT AREA */
   emailMessageArea.value = text;
 
@@ -106,19 +176,38 @@ function getText(message) {
 }
 
 /* FUNCTION TO CREATE MESSAGE OBJECT TO SEND AS EMAIL */
-function getMessage(text) {
-  let transportMessage = {
-    from: process.env.EMAIL_FROM,
-    to: emailRecipients.value,
-    subject: `Emailing ${customerNumber.trim()}`,
-    text: emailMessageArea.value,
-    attachments: [
-      { filename: fileNameA, path: filePaths[0] },
-      { filename: fileNameB, path: filePaths[1] },
-    ],
-  };
+function getMessage() {
+  if (recipientArr.length < 1) {
+    /* CREATE MESSAGE POPUP */
+    remote.dialog.showMessageBoxSync(emailWindow, {
+      type: 'warning',
+      icon: `${dir}/renderer/icons/error.png`,
+      buttons: ['OK'],
+      message: 'MISSING EMAIL',
+      detail: 'Please add an email address.',
+    });
+  } else {
+    let attachments;
+    if (scheduleDate != null) {
+      attachments = [{ filename: fileNameA, path: filePaths[0] }];
+    } else {
+      attachments = [
+        { filename: fileNameA, path: filePaths[0] },
+        { filename: fileNameB, path: filePaths[1] },
+      ];
+    }
 
-  return transportMessage;
+    let transportMessage = {
+      from: process.env.EMAIL_FROM,
+      to: recipientArr,
+      subject: subjectInput.value,
+      text: emailMessageArea.value,
+      attachments,
+    };
+
+    return transportMessage;
+  }
+  return null;
 }
 
 //////////////////////////////
@@ -147,27 +236,6 @@ function verifyConnect(message) {
         icon: `${dir}/renderer/icons/trayTemplate.png`,
         body: 'There was a mail server error.\nPlease contact your administrator.',
       });
-
-      /* GET THE REPLY FOR DIALOG */
-      dialogReply = remote.dialog.showMessageBoxSync(emailWindow, {
-        type: 'question',
-        icon: `${dir}/renderer/icons/error.png`,
-        title: 'P2SYS EMAIL ERROR',
-        buttons: ['CONTINUE', 'CLOSE'],
-        message: 'THE EMAIL SERVER COULD NOT BE REACHED:',
-        detail:
-          'Choose CONTINUE to try send anyway.\nElse CLOSE to return to the customer search box.\n\nWe will resend the email on the next restart',
-      });
-      if (dialogReply === 0) {
-        /* GET THE MESSAGE OBJECT TO SAVE FOR RETRY ON RELOAD */
-        populateEmail(message);
-      } else {
-        /* SEND FAILED OBJECT TO LOCALSTORAGE FUNCTION */
-        failedMessageobj = getMessage(getText(message));
-        localStorageAppend(failedMessageobj);
-        ipcRenderer.send('email-close', null);
-        emailWindow.close();
-      }
     } else {
       populateEmail(message);
     }
@@ -192,11 +260,11 @@ function logfileFunc(error) {
 /* EMAIL SENT FUNCTION */
 function sendEmail() {
   borderBox.style.opacity = '0';
+  ipcRenderer.send('email-close', null);
   setTimeout(() => {
-    ipcRenderer.send('email-close', null);
     emailWindow.setBounds({
-      width: 50,
-      height: 50,
+      width: Math.floor(screenWidth * 0.03),
+      height: Math.floor(screenWidth * 0.03),
       x: screenWidth - 60,
       y: screenHeight - 100,
     });
@@ -209,63 +277,94 @@ function sendEmail() {
 /* EXCEL BOX AND MAIL SEND FUNCTION */
 function populateEmail(message) {
   /* GET THE MESSAGE TEXT */
-  let text = getText(message);
+  text = getText(message);
 
   /* EVENT LISTENERS */
 
   /////////////////////
 
+  /* NEW EMAIL EVENT */
+  function addNewEmailEvent(address) {
+    let buttonId = `${address}-delete`;
+    document.getElementById(buttonId).addEventListener('click', removeMailRecipient);
+  }
+
+  /* ADD EMAIL RECIPIENT BUTTON */
+  addEmailRecipientBtn.addEventListener('click', (e) => {
+    soundClick.play();
+    emailAddress = newEmailInput.value;
+
+    if (
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(emailAddress)
+    ) {
+      let html = `<div class="recipient-list" id="${emailAddress}">${emailAddress}<button id="${emailAddress}-delete" class="delete-recipient">X</button></div>`;
+      recipientContainer.insertAdjacentHTML('beforeend', html);
+
+      /* ADD TO RECIPIENT ARR */
+      recipientArr.push(emailAddress);
+      addNewEmailEvent(emailAddress);
+
+      newEmailInput.value = '';
+    }
+  });
+
   /* SEND BUTTON */
   sendBtn.addEventListener('click', (e) => {
-    soundClick.play();
-    let message = getMessage(text);
-    setTimeout(() => {
-      sendEmail();
-      mailTransport.sendMail(message, (err, info) => {
-        /* HIDE SENDING ICON */
-        sendingMail.style.display = 'none';
-        if (err) {
+    let message = getMessage();
+    if (message != null) {
+      soundClick.play();
+      setTimeout(() => {
+        sendEmail();
+        mailTransport.sendMail(message, (err, info) => {
           /* HIDE SENDING ICON */
-
           sendingMail.style.display = 'none';
+          if (err) {
+            /* HIDE SENDING ICON */
 
-          /* LOG ERROR */
-          logfileFunc(err.stack);
+            sendingMail.style.display = 'none';
 
-          /* SEND TO LOCAL STORAGE */
-          localStorageAppend(message);
+            /* LOG ERROR */
+            logfileFunc(err.stack);
 
-          /* CREATE NOTIFICATION */
-          new Notification('P2SYS MAIL SEND ERROR', {
-            icon: `${dir}/renderer/icons/mailFailTemplate.png`,
-            body: 'There was a problem sending the message',
-          });
+            /* CREATE NOTIFICATION */
+            new Notification('P2SYS MAIL SEND ERROR', {
+              icon: `${dir}/renderer/icons/mailFailTemplate.png`,
+              body: 'There was a problem sending the message',
+            });
 
-          setTimeout(() => {
-            /* SHOW FAILED ICON */
-            errorNotification.play();
-            failedMail.style.animation = 'shake 0.2s 0.3s linear infinite alternate';
-            failedMail.style.opacity = '0';
-          }, 500);
+            setTimeout(() => {
+              /* SHOW FAILED ICON */
+              errorNotification.play();
+              failedMail.style.animation = 'shake 0.2s 0.3s linear infinite alternate';
+              failedMail.style.opacity = '0';
+            }, 500);
 
-          setTimeout(() => {
-            emailWindow.close();
-          }, 15000);
-        } else {
-          /* SHOW SENT ICON */
-          sentNotification.play();
-          sentMail.style.animation = 'pop 0.3s 0.3s linear 1 forwards';
-          sentMail.style.opacity = '0';
-          setTimeout(() => {
-            emailWindow.close();
-          }, 7000);
-        }
-      });
-    }, 200);
+            setTimeout(() => {
+              emailWindow.close();
+            }, 1500);
+          } else {
+            /* SHOW SENT ICON */
+            sentNotification.play();
+            sentMail.style.animation = 'pop 0.3s 0.3s linear 1 forwards';
+            sentMail.style.opacity = '0';
+
+            let mailObj = {
+              customerNumber,
+              pausedFlag,
+              scheduleDate,
+            };
+            if (info.rejected.length === 0) {
+              setTimeout(() => {
+                ipcRenderer.send('close-email-window', mailObj);
+              }, 1500);
+            }
+          }
+        });
+      }, 200);
+    }
   });
 
   borderBox.style.opacity = '1';
-  ipcRenderer.send('loader-close', null);
 }
 
 /* ///////////// */

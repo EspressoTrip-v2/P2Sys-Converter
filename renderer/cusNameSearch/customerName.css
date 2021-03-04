@@ -37,7 +37,6 @@ html {
   padding: 0;
   height: 100%;
   width: 100%;
-  font-size: 18px;
   background-color: transparent;
 }
 
@@ -165,7 +164,6 @@ footer {
 }
 #container-background::-webkit-scrollbar-thumb {
   height: 3px;
-  background-color: var(--sec-blue);
 }
 
 #customer-search-container {
@@ -213,22 +211,4 @@ footer {
   justify-content: center;
   align-content: center;
   background-color: #fff;
-}
-
-/* loader icon */
-#loader {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  justify-items: center;
-  align-items: center;
-  background-color: #fff;
-  width: 270px;
-  height: 563px;
-  top: 21px;
-  margin: 5rem auto;
-  align-self: center;
-  border: 2px solid var(--main);
-  border-radius: 8px;
 }

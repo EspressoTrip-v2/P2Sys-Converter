@@ -52,7 +52,7 @@
 
     </div>
     <div id="button-container">
-      <button class="btn" id="check-cancel-btn" href="#">CANCEL</button>
+      <button class="btn" id="check-cancel-btn" href="#">BACK</button>
       <!-- <button class="btn" id="check-continue-btn" href="#">CONTINUE</button> -->
       <button id="disabled" href="#">DISABLED</button>
       <button class="btn" id="check-update-btn" href="#">UPDATE</button>
@@ -63,26 +63,6 @@
       <button id="view-reset">RESET</button>
       <button class="btn" id="copy-btn" href="#">COPY</button>
       <button id="view-pause">PAUSED</button>
-    </div>
-    <div id="arrow">
-
-      <svg id="arrow-logo" version="1.1" viewBox="0 0 23.335 23.335" xmlns="http://www.w3.org/2000/svg"
-        xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"
-        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-        <metadata>
-          <rdf:RDF>
-            <cc:Work rdf:about="">
-              <dc:format>image/svg+xml</dc:format>
-              <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-              <dc:title />
-            </cc:Work>
-          </rdf:RDF>
-        </metadata>
-        <path d="m23.318 6.3477-6.3477-6.3477 0.016969 16.988-16.988-0.016969 6.3477 6.3477 16.987 0.01626z" />
-      </svg>
-
-
-
     </div>
   </div>
 
@@ -202,7 +182,7 @@
 
 
 
-              <svg id='truck' fill="#fff" x="0px" y="0px" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000"
+              <svg id='truck' fill="#000" x="0px" y="0px" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000"
                 xml:space="preserve">
                 <g>
                   <path
@@ -298,11 +278,12 @@
         </button>
 
         <button id="schedule-button" class="btn schedule-button">SCHEDULE</button>
-        <button id="schedule-button-pause" class="btn schedule-button" title="Paused item will be removed">SCHEDULE
-          *</button>
+        <button id="schedule-button-pause" class="btn schedule-button">SCHEDULE</button>
+        <button id="schedule-button-edit" class="btn schedule-button">SCHEDULE</button>
 
         <button href="#" id="create-btn" class="create-btn">CREATE</button>
-        <button href="#" id="create-btn-pause" class="create-btn" title="Paused item will be removed">CREATE *</button>
+        <button href="#" id="create-btn-pause" class="create-btn">CREATE</button>
+        <button href="#" id="create-btn-edit" class="create-btn">CREATE</button>
         <button id="calculate">
           <svg viewBox="0 0 1000 1000" id="calculate-logo" fill="#fff">
 
@@ -561,8 +542,10 @@
       </select>
     </div>
     <div id="date-button-container">
-      <button class="btn" id="date-cancel-btn">CANCEL</button>
-      <button class="btn" id="date-select-btn">SELECT</button>
+      <button class="btn" id="date-cancel-standard-btn">CANCEL</button>
+      <button class="btn" id="date-select-standard-btn">SELECT</button>
+      <button class="btn" id="date-select-paused-btn">SELECT</button>
+      <button class="btn" id="date-select-edit-btn">SELECT</button>
     </div>
   </div>
 

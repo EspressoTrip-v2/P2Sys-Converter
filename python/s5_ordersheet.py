@@ -1,4 +1,5 @@
 import collections as c
+import os
 import shutil
 import warnings
 from datetime import datetime
@@ -7,14 +8,22 @@ import numpy as np
 import pandas as pd
 import xlsxwriter
 
-time = str(datetime.now())[:10]
+time = datetime.now().strftime("%d-%m-%Y")
 
-warnings.filterwarnings("ignore", "This pattern has match grouserver_filepathps")
+workdir = os.getcwd()
+order_sheet_notice_image = f"{workdir}/python/templates/notice.png"
+order_sheet_official_image = f"{workdir}/python/templates/official.png"
+order_sheet_notice_summary_image = f"{workdir}/python/templates/notice_summary.png"
+order_sheet_official_summary_image = f"{workdir}/python/templates/official_summary.png"
+
+warnings.filterwarnings("ignore", "This pattern has match server_filepaths")
 warnings.filterwarnings("ignore", "divide by zero encountered in true_divide")
 warnings.filterwarnings("ignore", "invalid value encountered in multiply")
 
 
-def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_path):
+def create_s5_ordersheet(
+    directory, customer_number, customer_pricelist, server_path, schedule_date
+):
 
     # CREATE THE COLUMNS TO BE USED IN THE ORDERSHEET #
     ###################################################
@@ -516,10 +525,14 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
     # ROW LENGTH
     _076U_rownum = _076U.shape[0]
 
+    file_path_string = ""
+    if schedule_date == 0:
+        file_path_string = f"{directory}/S5_{customer_number.strip()}.xlsx"
+    else:
+        file_path_string = f"{directory}/S5_sample_{customer_number.strip()}.xlsx"
+
     # CREATE XLSX WRITER
-    with pd.ExcelWriter(
-        f"{directory}/S5_{customer_number.strip()}.xlsx", engine="xlsxwriter"
-    ) as writer:
+    with pd.ExcelWriter(file_path_string, engine="xlsxwriter") as writer:
 
         # GET THE WRITER WORKBOOK
         workbook = writer.book
@@ -598,10 +611,10 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
         # COLOR FORMAT UNLOCKED
         color_format_unlocked = workbook.add_format()
-        color_format_unlocked.set_bg_color("black")
+        color_format_unlocked.set_bg_color("#0f61b0")
         color_format_unlocked.set_font_color("white")
         color_format_unlocked.set_bold()
-        color_format_unlocked.set_border()
+        # color_format_unlocked.set_border()
         color_format_unlocked.set_locked(False)
         color_format_unlocked.set_align("center")
         color_format_unlocked.set_align("vcenter")
@@ -609,32 +622,31 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
         # COLOR FORMAT LOCKED
         color_format_locked = workbook.add_format()
-        color_format_locked.set_bg_color("black")
+        color_format_locked.set_bg_color("#0f61b0")
         color_format_locked.set_font_color("white")
         color_format_locked.set_hidden()
         color_format_locked.set_bold()
-        color_format_locked.set_border()
+        # color_format_locked.set_border()
         color_format_locked.set_align("center")
         color_format_locked.set_align("vcenter")
 
         # ORDER NUMBER FORMAT AND ALIGN
         order_format = workbook.add_format()
-        order_format.set_bg_color("black")
+        order_format.set_bg_color("#0f61b0")
         order_format.set_font_color("white")
         order_format.set_bold()
-        order_format.set_border()
-        order_format.set_locked(False)
+        # order_format.set_border()
+        order_format.set_locked(True)
         order_format.set_align("right")
         order_format.set_align("vcenter")
 
         # SET FORMATTING FOR THE MERGED CELLS AC WHITCHER
         merge_formatA = workbook.add_format(
             {
-                "bold": 0.5,
                 "font_name": "Monotype Corsiva",
                 "align": "center",
                 "valign": "vcenter",
-                "font_size": 15,
+                "bg_color": "white",
             }
         )
         # SET FORMATTING FOR THE MERGED CELLS ESTABLISHED 1902
@@ -644,7 +656,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
                 "font_name": "Times New Roman",
                 "align": "center",
                 "valign": "vcenter",
-                "font_size": 10,
+                "bg_color": "white",
             }
         )
 
@@ -656,7 +668,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
                 "align": "center",
                 "valign": "vcenter",
                 "font_size": 11,
-                "bg_color": "black",
+                "bg_color": "#0f61b0",
                 "color": "white",
             }
         )
@@ -800,13 +812,62 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
             worksheet7.write_formula(f"H{i}:H{i}", formula, formula_format)
 
         # MERGE CELLS AND ENTER WRITING
-        worksheet1.merge_range("A1:E1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet2.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet3.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet4.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet5.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet6.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet7.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
+        worksheet1.merge_range("A1:E2", "", merge_formatA)
+        worksheet2.merge_range("C1:H2", "", merge_formatA)
+        worksheet3.merge_range("C1:H2", "", merge_formatA)
+        worksheet4.merge_range("C1:H2", "", merge_formatA)
+        worksheet5.merge_range("C1:H2", "", merge_formatA)
+        worksheet6.merge_range("C1:H2", "", merge_formatA)
+        worksheet7.merge_range("C1:H2", "", merge_formatA)
+
+        if schedule_date == 0:
+            worksheet1.insert_image(
+                "A1",
+                order_sheet_official_summary_image,
+                {"object_position": 3},
+            )
+            worksheet2.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+            worksheet3.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+            worksheet4.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+            worksheet5.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+            worksheet6.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+            worksheet7.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+        else:
+            worksheet1.insert_image(
+                "A1",
+                order_sheet_notice_summary_image,
+                {"object_position": 3},
+            )
+            worksheet2.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
+            worksheet3.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
+            worksheet4.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
+            worksheet5.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
+            worksheet6.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
+            worksheet7.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
 
         worksheet2.merge_range("A1:B1", " ", merge_formatA)
         worksheet3.merge_range("A1:B1", " ", merge_formatA)
@@ -815,70 +876,55 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
         worksheet6.merge_range("A1:B1", " ", merge_formatA)
         worksheet7.merge_range("A1:B1", " ", merge_formatA)
 
-        worksheet2.merge_range("G1:H1", " ", merge_formatA)
-        worksheet3.merge_range("G1:H1", " ", merge_formatA)
-        worksheet4.merge_range("G1:H1", " ", merge_formatA)
-        worksheet5.merge_range("G1:H1", " ", merge_formatA)
-        worksheet6.merge_range("G1:H1", " ", merge_formatA)
-        worksheet7.merge_range("G1:H1", " ", merge_formatA)
+        worksheet2.merge_range("C3:F3", "", color_format_locked)
+        worksheet3.merge_range("C3:F3", "", color_format_locked)
+        worksheet4.merge_range("C3:F3", "", color_format_locked)
+        worksheet5.merge_range("C3:F3", "", color_format_locked)
+        worksheet6.merge_range("C3:F3", "", color_format_locked)
+        worksheet7.merge_range("C3:F3", "", color_format_locked)
 
-        worksheet2.merge_range("C3:F3", "", color_format_unlocked)
-        worksheet3.merge_range("C3:F3", "", color_format_unlocked)
-        worksheet4.merge_range("C3:F3", "", color_format_unlocked)
-        worksheet5.merge_range("C3:F3", "", color_format_unlocked)
-        worksheet6.merge_range("C3:F3", "", color_format_unlocked)
-        worksheet7.merge_range("C3:F3", "", color_format_unlocked)
+        if schedule_date == 0:
+            worksheet2.write_string(2, 6, "ORDER NO:", order_format)
+            worksheet3.write_string(2, 6, "ORDER NO:", order_format)
+            worksheet4.write_string(2, 6, "ORDER NO:", order_format)
+            worksheet5.write_string(2, 6, "ORDER NO:", order_format)
+            worksheet6.write_string(2, 6, "ORDER NO:", order_format)
+            worksheet7.write_string(2, 6, "ORDER NO:", order_format)
+        else:
+            worksheet2.write_string(2, 6, "PRICES VALID FROM:", order_format)
+            worksheet3.write_string(2, 6, "PRICES VALID FROM:", order_format)
+            worksheet4.write_string(2, 6, "PRICES VALID FROM:", order_format)
+            worksheet5.write_string(2, 6, "PRICES VALID FROM:", order_format)
+            worksheet6.write_string(2, 6, "PRICES VALID FROM:", order_format)
+            worksheet7.write_string(2, 6, "PRICES VALID FROM:", order_format)
 
-        worksheet2.write_string(2, 6, "ORDER NO:", order_format)
-        worksheet3.write_string(2, 6, "ORDER NO:", order_format)
-        worksheet4.write_string(2, 6, "ORDER NO:", order_format)
-        worksheet5.write_string(2, 6, "ORDER NO:", order_format)
-        worksheet6.write_string(2, 6, "ORDER NO:", order_format)
-        worksheet7.write_string(2, 6, "ORDER NO:", order_format)
+        worksheet2.write_string(2, 0, "CUSTOMER:", color_format_locked)
+        worksheet3.write_string(2, 0, "CUSTOMER:", color_format_locked)
+        worksheet4.write_string(2, 0, "CUSTOMER:", color_format_locked)
+        worksheet5.write_string(2, 0, "CUSTOMER:", color_format_locked)
+        worksheet6.write_string(2, 0, "CUSTOMER:", color_format_locked)
+        worksheet7.write_string(2, 0, "CUSTOMER:", color_format_locked)
 
-        worksheet2.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-        worksheet3.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-        worksheet4.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-        worksheet5.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-        worksheet6.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-        worksheet7.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-
-        worksheet2.write_string(2, 1, customer_number, color_format_unlocked)
-        worksheet3.write_string(2, 1, customer_number, color_format_unlocked)
-        worksheet4.write_string(2, 1, customer_number, color_format_unlocked)
-        worksheet5.write_string(2, 1, customer_number, color_format_unlocked)
-        worksheet6.write_string(2, 1, customer_number, color_format_unlocked)
-        worksheet7.write_string(2, 1, customer_number, color_format_unlocked)
-
-        worksheet1.merge_range("B2:D2", "ESTABLISHED 1902", merge_formatB)
-        worksheet2.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
-        worksheet3.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
-        worksheet4.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
-        worksheet5.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
-        worksheet6.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
-        worksheet7.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
+        worksheet2.write_string(2, 1, customer_number, color_format_locked)
+        worksheet3.write_string(2, 1, customer_number, color_format_locked)
+        worksheet4.write_string(2, 1, customer_number, color_format_locked)
+        worksheet5.write_string(2, 1, customer_number, color_format_locked)
+        worksheet6.write_string(2, 1, customer_number, color_format_locked)
+        worksheet7.write_string(2, 1, customer_number, color_format_locked)
 
         # ADD GENEARTED DATE
         # DATE FORMAT
         date_format = workbook.add_format()
         date_format.set_align("left")
         date_format.set_align("vcenter")
+        date_format.set_bg_color("white")
 
-        worksheet1.write_string("A2", f"Date created:  {time}", date_format)
         worksheet2.merge_range("A2:B2", f"Date created:  {time}", date_format)
         worksheet3.merge_range("A2:B2", f"Date created:  {time}", date_format)
         worksheet4.merge_range("A2:B2", f"Date created:  {time}", date_format)
         worksheet5.merge_range("A2:B2", f"Date created:  {time}", date_format)
         worksheet6.merge_range("A2:B2", f"Date created:  {time}", date_format)
         worksheet7.merge_range("A2:B2", f"Date created:  {time}", date_format)
-
-        worksheet1.merge_range("G2:H2", " ", merge_formatB)
-        worksheet2.merge_range("G2:H2", " ", merge_formatB)
-        worksheet3.merge_range("G2:H2", " ", merge_formatB)
-        worksheet4.merge_range("G2:H2", " ", merge_formatB)
-        worksheet5.merge_range("G2:H2", " ", merge_formatB)
-        worksheet6.merge_range("G2:H2", " ", merge_formatB)
-        worksheet7.merge_range("G2:H2", " ", merge_formatB)
 
         # USE ROW NUM TO ADD 7 11% TEXT
         t38_row = _038T_rownum + 5
@@ -980,6 +1026,10 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
         for i in range(len(columns_summary)):
             worksheet1.write_string(3, i, columns_summary[i], header_format)
 
+        # HIDE SUMMARY SHEET IF SCHEDULED PRICE LIST
+        if schedule_date != 0:
+            worksheet1.hide()
+
         # WORKSHEET PROTECTION
         worksheet1.protect("acwhitcher1234")
         worksheet2.protect("acwhitcher1234")
@@ -1003,26 +1053,32 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
         }
 
         # ADD FORMULA FOR CUSTOMER NUMBER IN PRODUCT SHEETS
-        order_number_formula = (
-            '=IF(summary!E3="-- Enter number here --", "- - - - - - - -", summary!E3)'
-        )
-        worksheet2.write(2, 7, order_number_formula, color_format_locked)
-        worksheet2.write_comment("H3", message, message_options)
+        if schedule_date == 0:
+            order_number_formula = '=IF(summary!E3="-- Enter number here --", "- - - - - - - -", summary!E3)'
+            worksheet2.write(2, 7, order_number_formula, color_format_locked)
+            worksheet2.write_comment("H3", message, message_options)
 
-        worksheet3.write(2, 7, order_number_formula, color_format_locked)
-        worksheet3.write_comment("H3", message, message_options)
+            worksheet3.write(2, 7, order_number_formula, color_format_locked)
+            worksheet3.write_comment("H3", message, message_options)
 
-        worksheet4.write(2, 7, order_number_formula, color_format_locked)
-        worksheet4.write_comment("H3", message, message_options)
+            worksheet4.write(2, 7, order_number_formula, color_format_locked)
+            worksheet4.write_comment("H3", message, message_options)
 
-        worksheet5.write(2, 7, order_number_formula, color_format_locked)
-        worksheet5.write_comment("H3", message, message_options)
+            worksheet5.write(2, 7, order_number_formula, color_format_locked)
+            worksheet5.write_comment("H3", message, message_options)
 
-        worksheet6.write(2, 7, order_number_formula, color_format_locked)
-        worksheet6.write_comment("H3", message, message_options)
+            worksheet6.write(2, 7, order_number_formula, color_format_locked)
+            worksheet6.write_comment("H3", message, message_options)
 
-        worksheet7.write(2, 7, order_number_formula, color_format_locked)
-        worksheet7.write_comment("H3", message, message_options)
+            worksheet7.write(2, 7, order_number_formula, color_format_locked)
+            worksheet7.write_comment("H3", message, message_options)
+        else:
+            worksheet2.write_string("H3", f"{schedule_date}", color_format_locked)
+            worksheet3.write_string("H3", f"{schedule_date}", color_format_locked)
+            worksheet4.write_string("H3", f"{schedule_date}", color_format_locked)
+            worksheet5.write_string("H3", f"{schedule_date}", color_format_locked)
+            worksheet6.write_string("H3", f"{schedule_date}", color_format_locked)
+            worksheet7.write_string("H3", f"{schedule_date}", color_format_locked)
 
         len_38T = np.arange(5, _038T_rownum + 5)
         for i in len_38T:

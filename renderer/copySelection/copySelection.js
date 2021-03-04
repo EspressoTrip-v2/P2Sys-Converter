@@ -27,7 +27,15 @@ let copySelectionWindow = remote.getCurrentWindow();
 
 /* GLOBAL VARIABLES */
 /////////////////////
-let customerNameNumber, customerPrices, customerName, customerNumber;
+let customerNameNumberJson,
+  customerPricesNumbersArr,
+  customerName,
+  customerNumber,
+  priceListTemplate,
+  priceListNumberValue,
+  customerBackUpJson,
+  customerNumberNameJson,
+  customerNameLists;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -40,209 +48,188 @@ let customerListContainer = document.getElementById('customer-list-container'),
   buttonSelectSearch = document.getElementById('select'),
   buttonDisabledSearch = document.getElementById('disabled'),
   buttonBackSearch = document.getElementById('back'),
-  buttonSelectOption = document.getElementById('select-start'),
   buttonSelectCancel = document.getElementById('select-back'),
-  existingCheckBox = document.getElementById('existing-customer-select'),
-  existingCheckMark = document.getElementById('existing-customer-tick-img'),
-  existingCheckMarkBox = document.getElementById('existing-customer-tick'),
-  newCheckBox = document.getElementById('new-select'),
-  newCheckMark = document.getElementById('new-tick-img'),
-  newCheckMarkBox = document.getElementById('new-tick');
+  audioTag = Array.from(document.getElementsByTagName('audio')),
+  existingCustomerBtn = document.getElementById('existing-customer-btn'),
+  searchDock = document.getElementById('customer-search'),
+  loadingContainer = document.getElementsByClassName('loading-container')[0];
+
+/* COPY TYPE SELECTION BOX CONTROLS */
+function showSelector() {
+  userAsk.style.visibility = 'visible';
+}
+function hideSelector() {
+  userAsk.style.visibility = 'hidden';
+}
+
+function showSearch() {
+  border.style.visibility = 'visible';
+}
+
+function hideSearch() {
+  border.style.visibility = 'hidden';
+}
+
+/* BUTTON DISPLAY CONTROLS */
+function hideSelectBtn() {
+  buttonSelectSearch.style.display = 'none';
+  buttonDisabledSearch.style.display = 'flex';
+}
+
+function showSelectBtn() {
+  buttonDisabledSearch.style.display = 'none';
+  buttonSelectSearch.style.display = 'flex';
+}
+/* LOADING CONTAINER CONTROLS */
+function showLoading() {
+  loadingContainer.style.visibility = 'visible';
+}
+function hideLoading() {
+  loadingContainer.style.visibility = 'hidden';
+}
+
+/* FUNCTION CHECK THE MUTE FLAG */
+let storage = JSON.parse(localStorage.getItem('notifications'));
+function checkMuteFlag() {
+  if (!storage.muteflag) {
+    /* SET FLAG TO FALSE AND TURN OFF ALL SOUND */
+    storage.muteflag = false;
+    localStorage.setItem('notifications', JSON.stringify(storage));
+    audioTag.forEach((el) => {
+      el.muted = true;
+    });
+  } else {
+    /* SET THE FLAG TO TRUE AND TURN OFF ALL SOUND */
+    storage.muteflag = true;
+    localStorage.setItem('notifications', JSON.stringify(storage));
+    audioTag.forEach((el) => {
+      el.muted = false;
+    });
+  }
+}
+
+if (!storage.muteflag) {
+  checkMuteFlag();
+}
+
+/* FUNCTION TO CREATE OBJECT TO POPULATE THE PRICE LIST TABLE */
+async function populatePriceListObject(priceListTemplate) {
+  priceListNumberValue = await ipcRenderer.invoke('get-pricelist-number', customerNumber);
+  customerBackUpJson = await ipcRenderer.invoke('get-customer-backup', customerNumber);
+  let priceListObj = { ...priceListTemplate };
+  priceListObj.customerNameValue = customerName;
+  priceListObj.customerBackUpJson = customerBackUpJson;
+  priceListObj.priceListNumber = priceListNumberValue;
+  priceListObj.customerNumber = customerNumber;
+
+  return priceListObj;
+}
+
+//////////////////////
+/* EVENT LISTENERS */
+////////////////////
+function clearClickedCustomers() {
+  // CLEAR ANY EXISTING HIGHLIGHTED NUMBER IN CASE OF RE-CLICK
+  customerNameLists.forEach((el) => {
+    el.setAttribute('class', 'customer-name');
+  });
+}
+
+function addEventListeners(flag) {
+  customerNameLists = Array.from(document.getElementsByClassName('customer-name'));
+
+  if (flag === 'existing') {
+    customerNameLists.forEach((el) => {
+      el.addEventListener('click', (e) => {
+        soundClick.play();
+        showSelectBtn();
+        /* ASSIGN NUMBERS AND NAME */
+        customerNumber = customerNameNumberJson[e.target.innerText];
+        customerName = e.target.innerText;
+        clearClickedCustomers();
+        // SET THE HIGHLIGHT ON CURRENT CLICKED ITEM
+        el.setAttribute('class', 'customer-name-clicked');
+        if (window.getComputedStyle(buttonDisabledSearch).display === 'flex') {
+          hideSelectBtn();
+        }
+      });
+    });
+
+    hideSelector();
+    hideLoading();
+    showSearch();
+    searchDock.focus();
+  } else if (flag === 'multi') {
+    // ADD CODE
+  }
+}
+
 /* POPULATE LIST OF CUSTOMERS */
 ///////////////////////////////
 
 function populateCustomerNames() {
-  let customers = Object.keys(customerNameNumber),
-    customerPricesKeys = Object.keys(customerPrices);
-
+  let customersNames = Object.keys(customerNameNumberJson);
   (() => {
-    customers.forEach((el) => {
-      if (!customerPricesKeys.includes(customerNameNumber[el])) {
-        let html = `<div title="${
-          customerNameNumber[el.toLocaleUpperCase()]
-        }" class="customer-name">${el.toUpperCase()}</div>`;
-        customerListContainer.insertAdjacentHTML('beforeend', html);
-      }
+    customersNames.forEach((el) => {
+      let html = `<div title="${
+        customerNameNumberJson[el.toLocaleUpperCase()]
+      }" class="customer-name">${el.toUpperCase()}</div>`;
+      customerListContainer.insertAdjacentHTML('beforeend', html);
     });
+    addEventListeners('existing');
   })();
-
-  /* EXISTING CHECKBOX SELECT FUNCTION */
-  function existingCheck(target, origin) {
-    if (target && origin) {
-      soundClick.play();
-      existingCheckMarkBox.style.border = '2px solid var(--main)';
-      existingCheckMark.style.animation = 'check 0.2s linear forwards';
-    } else if (!target && origin) {
-      soundClick.play();
-      existingCheckMarkBox.style.border = '2px solid var(--sec-blue)';
-      existingCheckMark.style.animation = 'none';
-    } else if (!target && !origin && newCheckBox.checked) {
-      existingCheckMarkBox.style.border = '2px solid var(--sec-blue)';
-      existingCheckMark.style.animation = 'none';
-      existingCheckBox.checked = false;
-    } else if (!target && !origin && !newCheckBox.checked) {
-      existingCheckMarkBox.style.border = '2px solid var(--main)';
-      existingCheckMark.style.animation = 'check 0.2s linear forwards';
-      existingCheckBox.checked = true;
-    }
-  }
-  /* NEW CHECKBOX SELECT FUNCTION */
-  function newCheck(target, origin) {
-    if (target && origin) {
-      soundClick.play();
-      newCheckMarkBox.style.border = '2px solid var(--main)';
-      newCheckMark.style.animation = 'check 0.2s linear forwards';
-    } else if (!target && origin) {
-      soundClick.play();
-      newCheckMarkBox.style.border = '2px solid var(--sec-blue)';
-      newCheckMark.style.animation = 'none';
-    } else if (!target && !origin && newCheckBox.checked) {
-      newCheckMarkBox.style.border = '2px solid var(--sec-blue)';
-      newCheckMark.style.animation = 'none';
-      newCheckBox.checked = false;
-    } else if (!target && !origin && !newCheckBox.checked) {
-      newCheckMarkBox.style.border = '2px solid var(--main)';
-      newCheckMark.style.animation = 'check 0.2s linear forwards';
-      newCheckBox.checked = true;
-    }
-  }
-
-  ////////////////////////////////////////
-  /* DOM ELEMENTS AFTER GENERATED HTML */
-  //////////////////////////////////////
-
-  let customerNameLists = Array.from(document.getElementsByClassName('customer-name')),
-    searchDock = document.getElementById('customer-search');
-
-  //////////////////////
-  /* EVENT LISTENERS */
-  ////////////////////
-
-  customerNameLists.forEach((el) => {
-    el.addEventListener('click', (e) => {
-      soundClick.play();
-      buttonDisabledSearch.style.display = 'none';
-      buttonDisabledSearch.style.display = 'flex';
-      /* ASSIGN NUMBERS AND NAME */
-      customerNumber = customerNameNumber[e.target.innerText];
-      customerName = e.target.innerText;
-
-      // CLEAR ANY EXISTING HIGHLIGHTED NUMBER IN CASE OF RECLICK
-      customerNameLists.forEach((el) => {
-        el.setAttribute('class', 'customer-name');
-      });
-
-      // SET THE HIGHLIGHT ON CURRENT CLICKED ITEM
-      el.setAttribute('class', 'customer-name-clicked');
-
-      if (window.getComputedStyle(buttonDisabledSearch).display === 'flex') {
-        buttonDisabledSearch.style.display = 'none';
-        buttonSelectSearch.style.display = 'flex';
-      }
-    });
-  });
-
-  /* SELECT BUTTON SEARCH */
-  buttonSelectSearch.addEventListener('click', (e) => {
-    soundClick.play();
-    setTimeout(() => {
-      border.style.opacity = '0';
-      /* SEND CUSTOMER NUMBER AND NAME TO SECWINDOW */
-      setTimeout(() => {
-        ipcRenderer.send('form-contents', { customerName, customerNumber });
-        /* ADD FALSE MESSAGE SO IT DOES NOT START EVENT LISTENER FOR CUSTOMER NUMBER BOX */
-        ipcRenderer.send('remove-fade', false);
-        copySelectionWindow.close();
-      }, 500);
-    }, 300);
-  });
-
-  /* BACK BUTTON SEARCH */
-  buttonBackSearch.addEventListener('click', (e) => {
-    soundClick.play();
-    setTimeout(() => {
-      border.style.opacity = '0';
-      setTimeout(() => {
-        userAsk.style.transform = 'scale(1)';
-      }, 600);
-    }, 300);
-  });
-
-  /* CHECKBOXES */
-  newCheckBox.addEventListener('change', (e) => {
-    newCheck(e.target.checked, true);
-    existingCheck(false, false);
-  });
-
-  existingCheckBox.addEventListener('change', (e) => {
-    existingCheck(e.target.checked, true);
-    newCheck(false, false);
-  });
-
-  /* SELECT BUTTON SELECTION BOX */
-  buttonSelectOption.addEventListener('click', (e) => {
-    soundClick.play();
-    /* CHECK WHICH BOX IS SELECTED AND ACT APPROPRIATELY */
-    if (newCheckBox.checked) {
-      setTimeout(() => {
-        userAsk.style.transform = 'scale(0)';
-        setTimeout(() => {
-          /* REMOVE SECWINDOW FADE AND CLOSE WINDOW AFTER SCALE */
-          /* MESSAGE TRUE TO START CUSTOMER NUMBER AND CUSTOMER NAME EVENTLISTENERS */
-          ipcRenderer.send('remove-fade', true);
-          copySelectionWindow.close();
-        }, 300);
-      }, 300);
-    } else if (existingCheckBox.checked) {
-      setTimeout(() => {
-        userAsk.style.transform = 'scale(0)';
-        setTimeout(() => {
-          border.style.opacity = '1';
-          searchDock.focus();
-        }, 400);
-      }, 300);
-    }
-  });
-
-  /* CANCEL BUTTON SELECTION BOX */
-  buttonSelectCancel.addEventListener('click', () => {
-    soundClick.play();
-    setTimeout(() => {
-      userAsk.style.transform = 'scale(0)';
-      setTimeout(() => {
-        ipcRenderer.send('reset-form', null);
-      }, 400);
-    }, 300);
-  });
-
-  //////////////////
-  /* SEARCH CODE */
-  ////////////////
-
-  searchDock.addEventListener('keyup', (e) => {
-    let pattern = /[\s\W]+/g,
-      temp,
-      text;
-    searchDock.value = searchDock.value.toUpperCase();
-    temp = searchDock.value.replace(pattern, '');
-    customerNameLists.forEach((el) => {
-      text = el.innerText.replace(pattern, '');
-      let elMatch = text.includes(temp);
-      if (elMatch) {
-        el.style.display = 'block';
-      } else {
-        el.style.display = 'none';
-      }
-    });
-  });
-
-  /* SET NEW CHECKBOX ON LOAD */
-  newCheck(false, false);
-  setTimeout(() => {
-    /* SHOW WINDOW ON LOAD */
-    userAsk.style.transform = 'scale(1)';
-  }, 300);
 }
+
+/* SELECT BUTTON SEARCH */
+buttonSelectSearch.addEventListener('click', async (e) => {
+  soundClick.play();
+  /* ADD LOADER HERE */
+  let copyPriceList = await populatePriceListObject(priceListTemplate);
+  border.style.opacity = '0';
+  /* SEND THE OBJECT TO RENDER IN TABLE */
+  ipcRenderer.send('start', { copyPriceList, flag: 'copy' });
+  copySelectionWindow.close();
+});
+
+/* BACK BUTTON SEARCH */
+buttonBackSearch.addEventListener('click', (e) => {
+  soundClick.play();
+  setTimeout(() => {
+    hideSearch();
+    searchDock.value = null;
+    clearClickedCustomers();
+    hideSelectBtn();
+    showSelector();
+  }, 200);
+});
+
+/* CANCEL BUTTON SELECTION BOX */
+buttonSelectCancel.addEventListener('click', () => {
+  soundClick.play();
+  setTimeout(() => {
+    hideSelector();
+    ipcRenderer.send('start', null);
+    copySelectionWindow.close();
+  }, 300);
+});
+
+/* EXISTING CUSTOMER BUTTON */
+existingCustomerBtn.addEventListener('click', () => {
+  showLoading();
+  soundClick.play();
+  populateCustomerNames();
+});
+
+//////////////////
+/* SEARCH CODE */
+////////////////
+searchDock.addEventListener('keyup', (e) => {
+  searchDock.value = searchDock.value.toUpperCase();
+  customerNameLists.forEach((el) => {
+    let elMatch = el.innerText.includes(searchDock.value);
+    el.style.display = elMatch ? 'flex' : 'none';
+  });
+});
 
 ////////////////////////
 /* MESSAGE LISTENERS */
@@ -250,7 +237,9 @@ function populateCustomerNames() {
 
 /* GET CUSTOMER OBJECT */
 ipcRenderer.on('copy-selection', (e, message) => {
-  customerNameNumber = message.customerNameNumber;
-  customerPrices = message.customerPrices;
-  populateCustomerNames();
+  customerNameNumberJson = message.customerNameNumberJson;
+  customerPricesNumbersArr = message.customerPricesNumbersArr;
+  priceListTemplate = message.template;
+  customerNumberNameJson = message.customerNumberNameJson;
+  showSelector();
 });

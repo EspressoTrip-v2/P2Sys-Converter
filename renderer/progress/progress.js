@@ -37,7 +37,7 @@ let progressWindow = remote.getCurrentWindow();
 secWindow = progressWindow.getParentWindow();
 
 /* GLOBAL VARIABLES */
-let pausedItem, customerNumber;
+let pauseFlag, scheduleFlag, customerNumber, scheduleDate, oldDate, customerData, editFlag;
 
 /* FUNCTIONS */
 //////////////
@@ -58,17 +58,24 @@ function logfileFunc(error) {
 }
 
 ipcRenderer.on('convert-python', (event, message) => {
-  let file = message.customerData;
-  pausedItem = message.flag;
-  customerNumber = file['price-list']['customerNumber'];
-  let data = JSON.stringify(file);
+  customerData = message.customerData;
+  pauseFlag = message.pauseFlag;
+  editFlag = message.editFlag;
+  scheduleFlag = message.scheduleFlag;
+  scheduleDate = message.scheduleDate;
+  oldDate = message.oldDate;
+  customerNumber = customerData['price-list']['customerNumber'];
+  let data = JSON.stringify(customerData);
 
   /* PYTHON PROCESSING FUNCTION */
   ///////////////////////////////
-
   let serverPath;
-  if (fs.existsSync(process.env.SERVER_PATH)) {
-    serverPath = process.env.SERVER_PATH;
+  if (scheduleDate === null) {
+    if (fs.existsSync(process.env.SERVER_PATH)) {
+      serverPath = process.env.SERVER_PATH;
+    } else {
+      serverPath = 'none';
+    }
   } else {
     serverPath = 'none';
   }
@@ -78,7 +85,7 @@ ipcRenderer.on('convert-python', (event, message) => {
     mode: 'text',
     pythonOptions: ['-u'],
     scriptPath: `${process.cwd()}/python/`,
-    args: [data, serverPath],
+    args: [data, serverPath, scheduleFlag, scheduleDate],
   };
 
   /* CREATE PYSHELL  */
@@ -88,7 +95,6 @@ ipcRenderer.on('convert-python', (event, message) => {
   let filePaths;
 
   pyshell.on('message', (message) => {
-    // console.log(message);
     /* SEPARATE THE PATHS INTO USABLE ARRAY */
     let value = parseInt(message);
     if (isNaN(value)) {
@@ -96,11 +102,14 @@ ipcRenderer.on('convert-python', (event, message) => {
     }
     if (value === 100) {
       let message = {
-        channel: 'progress-end',
+        customerData,
         filePaths,
-        destination: 'sec',
-        pausedItem,
+        pauseFlag,
+        editFlag,
+        scheduleFlag,
+        scheduleDate,
         customerNumber,
+        oldDate,
       };
       ipcRenderer.send('progress-end', message);
       progressWindow.close();

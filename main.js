@@ -13,6 +13,9 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 require('dotenv').config();
 
+/* DISABLE GPU RENDERING FOR APP */
+app.disableHardwareAcceleration();
+
 /* GET WORKING DIRECTORY */
 let dir;
 function envFileChange() {
@@ -50,9 +53,13 @@ const {
   queryAllCustomerNumbers,
   querySinglePriceList,
   queryCustomerName,
-  querySinglePricelistNumber,
+  querySinglePriceListNumber,
   querySingleCustomerBackup,
   queryAllScheduleDates, //TODO:  Finish schedule conversion
+  querySingleSchedule,
+  createScheduleItem,
+  removeScheduleItems,
+  editSingleScheduledPriceList,
   createPausedPriceList,
   queryAllPaused,
   querySinglePaused,
@@ -71,13 +78,13 @@ let homeWindow,
   updateWindow,
   emailWindow,
   progressWindow,
-  // dbLoaderWindow,
   copySelectionWindow,
   customerNumberAllKeys,
   customerNumberNameResult,
   customerNumberNameJson,
   customerNameNumberJson,
   exmillPrice,
+  scheduleDates,
   customerPricesNumbersArr,
   screenHeight,
   screenWidth,
@@ -231,6 +238,12 @@ db.once('connected', async () => {
     logfileFunc(err.stack);
   }
 
+  try {
+    scheduleDates = await queryAllScheduleDates();
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+
   /* TRAY MENU LAYOUT TEMPLATE */
   trayMenu = Menu.buildFromTemplate([{ label: `Converter v${version}` }]);
   createWindow();
@@ -306,15 +319,14 @@ function createWindow() {
     removeBackups(customerBackUp);
   }
   homeWindow = new BrowserWindow({
-    width: 180,
-    height: 200,
-    maxWidth: 300,
-    maxHeight: 300,
-    minHeight: 200,
-    minWidth: 180,
+    width: Math.floor(screenWidth * 0.13),
+    height: Math.floor(screenWidth * 0.18),
+    maxWidth: Math.floor(screenWidth * 0.2),
+    maxHeight: Math.floor(screenWidth * 0.24),
+    minHeight: Math.floor(screenWidth * 0.18),
+    minWidth: Math.floor(screenWidth * 0.13),
     spellCheck: false,
     center: true,
-    show: false,
     maximizable: false,
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
@@ -343,8 +355,6 @@ function createWindow() {
   // Only show on load completion
   homeWindow.webContents.on('did-finish-load', () => {
     loadingWindow.close();
-    homeWindow.show();
-    homeWindow.webContents.send('db', connectionName);
   });
 
   //   Event listener for closing
@@ -357,10 +367,10 @@ function createWindow() {
 }
 
 /* SECWINDOW CREATION */
-function createSecWindow() {
+function createSecWindow(message) {
   secWindow = new BrowserWindow({
-    height: 270,
-    width: 200,
+    width: Math.floor(screenWidth * 0.13),
+    height: Math.floor(screenWidth * 0.18),
     autoHideMenuBar: true,
     center: true,
     frame: false,
@@ -382,6 +392,7 @@ function createSecWindow() {
 
   // Only show on load completion
   secWindow.webContents.once('did-finish-load', () => {
+    secWindow.moveTop();
     /* CREATE DATABASE OBJECT TO SEND TO WINDOW */
     let dbObj = {
       customerNumberAllKeys,
@@ -391,11 +402,24 @@ function createSecWindow() {
       exmillPrice,
     };
     secWindow.webContents.send('database-object', dbObj);
+    if (message === null) {
+      if (loadingWindow) {
+        loadingWindow.close();
+      }
+    } else if (message.flag === 'edit') {
+      /* SEND ITEMS FROM SCHEDULED PRICE LIST TO UPDATE */
+      secWindow.webContents.send('edit-schedule-price-list', message.schedulePriceList);
 
-    if (loadingWindow) {
-      loadingWindow.close();
+      if (loadingWindow) {
+        loadingWindow.close();
+      }
+    } else if (message.flag === 'copy') {
+      /* SEND ITEMS FROM COPY PRICE LIST TO UPDATE */
+      secWindow.webContents.send('copy-price-list', message.copyPriceList);
+      if (loadingWindow) {
+        loadingWindow.close();
+      }
     }
-    secWindow.focus();
   });
 
   //   Load dev tools
@@ -467,13 +491,14 @@ function createLoadingWindow() {
 
   loadingWindow = new BrowserWindow({
     parent: parentWin,
-    height: 100,
-    width: 100,
+    width: Math.floor(screenWidth * 0.052),
+    height: Math.floor(screenWidth * 0.052),
     autoHideMenuBar: true,
     backgroundColor: '#00FFFFFF',
     center: true,
     frame: false,
     skipTaskbar: true,
+    resizable: false,
     spellCheck: false,
     transparent: true,
     alwaysOnTop: true,
@@ -505,8 +530,10 @@ function createLoadingWindow() {
 /* EMAIL POPUP WINDOW */
 function createEmailWindow(message) {
   emailWindow = new BrowserWindow({
-    height: 355,
-    width: 285,
+    width: Math.floor(screenWidth * 0.29),
+    height: Math.floor(screenWidth * 0.36),
+    maxWidth: Math.floor(screenWidth * 0.39),
+    maxHeight: Math.floor(screenWidth * 0.45),
     autoHideMenuBar: true,
     center: true,
     backgroundColor: '#00FFFFFF',
@@ -548,14 +575,15 @@ function createEmailWindow(message) {
 function createProgressWindow() {
   progressWindow = new BrowserWindow({
     parent: secWindow,
-    height: 100,
-    width: 100,
+    width: Math.floor(screenWidth * 0.052),
+    height: Math.floor(screenWidth * 0.052),
     spellCheck: false,
     resizable: false,
     backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
     center: true,
     skipTaskbar: true,
+    resizable: false,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -622,16 +650,17 @@ function createUpdateWindow() {
 }
 
 /* COPY SELECTION WINDOW */
-function createCopySelectionWindow() {
+function createCopySelectionWindow(message) {
   copySelectionWindow = new BrowserWindow({
-    parent: secWindow,
-    height: 480,
-    width: 300,
+    width: Math.floor(screenWidth * 0.13),
+    height: Math.floor(screenWidth * 0.18),
+    maxWidth: Math.floor(screenWidth * 0.2),
+    maxHeight: Math.floor(screenWidth * 0.24),
+    minHeight: Math.floor(screenWidth * 0.18),
+    minWidth: Math.floor(screenWidth * 0.13),
     spellCheck: false,
-    resizable: false,
     backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
-    skipTaskbar: true,
     alwaysOnTop: true,
     center: true,
     frame: false,
@@ -649,9 +678,14 @@ function createCopySelectionWindow() {
 
   // Only show on load completion
   copySelectionWindow.webContents.once('did-finish-load', () => {
+    if (loadingWindow) {
+      loadingWindow.close();
+    }
     copySelectionWindow.webContents.send('copy-selection', {
       customerPricesNumbersArr,
       customerNameNumberJson,
+      template: message,
+      customerNumberNameJson,
     });
   });
 
@@ -705,7 +739,8 @@ app.on('window-all-closed', () => {
 
 /* OPEN COPY SELECTION WINDOW */
 ipcMain.on('open-copySelection', (e, message) => {
-  createCopySelectionWindow();
+  createLoadingWindow();
+  createCopySelectionWindow(message);
 });
 
 /* MESSENGER SERVICE BETWEEN RENDERERS */
@@ -718,7 +753,7 @@ ipcMain.on('dock-sec', (e, message) => {
 ipcMain.on('start', (e, message) => {
   homeWindow.hide();
   createLoadingWindow();
-  setTimeout(() => createSecWindow(message), 200);
+  createSecWindow(message);
 });
 
 /* POSITION OF SECWINDOW TO GENERATE DOCK NEXT TO IT */
@@ -726,18 +761,8 @@ ipcMain.on('position', (e, message) => {
   createChildWindow(message);
 });
 
-/* MESSAGE FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
+/* MESSAGES FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
 ipcMain.on('progress-create', (e, message) => {
-  /* CREATE THE PROGRESS WINDOW */
-  createProgressWindow();
-  /* SEND THE FILE TO PYTHON SHELL TO GET CONVERTED */
-  progressWindow.webContents.on('did-finish-load', (e) => {
-    progressWindow.webContents.send('convert-python', message);
-  });
-});
-
-/* MESSAGE FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
-ipcMain.on('progress-create-pause', (e, message) => {
   /* CREATE THE PROGRESS WINDOW */
   createProgressWindow();
   /* SEND THE FILE TO PYTHON SHELL TO GET CONVERTED */
@@ -748,30 +773,43 @@ ipcMain.on('progress-create-pause', (e, message) => {
 
 /* MESSAGE FROM SCHEDULE BUTTON */
 ipcMain.on('progress-schedule', (e, message) => {
-  console.log(message.customerData);
-});
-
-/* MESSAGE FROM SCHEDULE PAUSE BUTTON */
-ipcMain.on('progress-schedule-pause', (e, message) => {
-  // Add code
+  let scheduleData = {
+    [message.customerData._id]: message.customerData['price-list'],
+  };
+  createScheduleItem(scheduleData, message.date);
 });
 
 /* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
-ipcMain.on('progress-end', (e, message) => {
+ipcMain.on('progress-end', async (e, message) => {
   /* SEND MESSAGE TO CLOSE THE PROGRESS BAR */
-  createLoadingWindow();
-  secWindow.webContents.send('progress-end', message.filePaths);
+  secWindow.webContents.send('progress-end', message);
 
-  /* CHECK TO SEE IF THE CONVERSION ORIGINATED FROM A PAUSED ITEM AND REMOVE IT */
-  if (message.pausedItem) {
-    removePausedItem(message.customerNumber);
+  let customerNumber = message.customerNumber;
+  let pauseFlag = message.pauseFlag;
+  let scheduleDate = message.scheduleDate;
+  let oldDate = message.oldDate;
+  let priceList = message.customerData['price-list'];
+
+  /* REMOVE PAUSED ITEM FROM DB IF TRUE */
+  if (pauseFlag) {
+    removePausedItem(customerNumber);
   }
-});
 
-/* SEND DB STATUS TO UPDATE OTHER DATABASE INDICATORS */
-ipcMain.on('db-status', (event, message) => {
-  if (secWindow) {
-    secWindow.webContents.send('db-status', message);
+  /* REMOVE OLD SCHEDULE AND CREATE NEW SCHEDULE FROM UPDATE */
+  if (message.scheduleFlag) {
+    let message = {
+      [customerNumber]: priceList,
+    };
+    let result = removeScheduleItems({ dateValue: oldDate, customerNumber });
+    if (result) {
+      createScheduleItem(message, scheduleDate);
+    }
+  }
+  /* REMOVED SCHEDULED ITEM FROM DB IF TRUE */
+  if (message.editFlag) {
+    if (oldDate != null) {
+      removeScheduleItems({ dateValue: oldDate, customerNumber });
+    }
   }
 });
 
@@ -793,7 +831,7 @@ ipcMain.on('reset-form', (e, message) => {
 
 /* CLOSE DOCK WINDOW */
 ipcMain.on('close-window-dock', (e, message) => {
-  if (secWindow) {
+  if (childWindow) {
     childWindow.webContents.send('close-window-dock', null);
     setTimeout(() => {
       childWindow.close();
@@ -818,9 +856,13 @@ ipcMain.on('close-updatewindow', (e, message) => {
 /* RESTART SEC WINDOW */
 ipcMain.on('restart-sec', (e, message) => {
   createLoadingWindow();
-  setTimeout(() => {
-    createSecWindow(message);
-  }, 300);
+  if (secWindow) {
+    secWindow.hide();
+    secWindow.close();
+    setTimeout(() => {
+      createSecWindow(message);
+    }, 500);
+  }
 });
 
 /* SHOW HOME WINDOW */
@@ -837,9 +879,9 @@ ipcMain.on('form-contents', (e, message) => {
 });
 
 /* REMOVE FADE FROM SECWINDOW */
-ipcMain.on('remove-fade', (e, message) => {
+ipcMain.on('show-sec-window', (e, message) => {
   if (secWindow) {
-    secWindow.webContents.send('remove-fade', message);
+    secWindow.setFullScreen(true);
   }
 });
 
@@ -892,7 +934,7 @@ ipcMain.handle('get-price-list', async (e, message) => {
 
 /* GET THE PRICE-LIST NUMBER */
 ipcMain.handle('get-pricelist-number', async (e, message) => {
-  let result = await querySinglePricelistNumber(message);
+  let result = await querySinglePriceListNumber(message);
   return result;
 });
 
@@ -925,6 +967,45 @@ ipcMain.on('update-price-list', (e, message) => {
 });
 
 /* REMOVE PAUSED ITEM */
-ipcMain.handle('remove-pause-item', async (e, message) => {
+ipcMain.handle('remove-pause-item-sync', async (e, message) => {
   return await removePausedItemSync(message);
+});
+
+/* QUERY ALL SCHEDULED PRICE-LISTS */
+ipcMain.handle('get-schedule-dates-update', async (e, message) => {
+  return await queryAllScheduleDates();
+});
+
+/* QUERY SINGLE SCHEDULED PRICE-LISTS */
+ipcMain.handle('show-single-customer-schedule', async (e, message) => {
+  return await querySingleSchedule(message);
+});
+
+ipcMain.handle('update-scheduled-items', async (e, message) => {
+  return await removeScheduleItems(message);
+});
+
+ipcMain.handle('edit-schedule-price-list', async (e, message) => {
+  let priceList = await editSingleScheduledPriceList(message);
+  let priceListNumber = await querySinglePriceListNumber(message.customerNumber);
+  let customerBackUpJson = await querySingleCustomerBackup(message.customerNumber);
+  let customerNumber = message.customerNumber;
+  let customerNameValue = customerNumberNameJson[message.customerNumber];
+
+  let schedulePriceListObj = {
+    oldDate: message.dateValue,
+    priceList,
+    priceListNumber,
+    customerNumber,
+    customerNameValue,
+    customerBackUpJson,
+  };
+
+  return schedulePriceListObj;
+});
+
+ipcMain.on('close-email-window', (e, message) => {
+  if (emailWindow) {
+    emailWindow.close();
+  }
 });
