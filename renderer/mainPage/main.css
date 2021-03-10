@@ -26,6 +26,7 @@
 *::after {
   box-sizing: border-box;
   -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 
 /* Fonts */
@@ -69,6 +70,16 @@ button {
   align-items: center;
   transition: opacity 0.5s;
 }
+
+#grab {
+  position: absolute;
+  width: 96vw;
+  height: 7vh;
+  top: 0;
+  -webkit-app-region: drag;
+  z-index: 3;
+}
+
 #round {
   position: relative;
   width: 96vw;
@@ -100,21 +111,23 @@ button {
 #psys-logo {
   position: absolute;
   display: flex;
-  top: 9vh;
+  top: 0;
+  left: 0;
+  height: 7vh;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   align-content: center;
-  width: 75vw;
+  width: 84vw;
 }
 
 #psys-logo-container {
-  top: 7vh;
+  top: 18vh;
+  left: 10vw;
   position: absolute;
   height: 1vh;
   width: 78vw;
   z-index: 1;
-  -webkit-app-region: drag;
 }
 #psys-logo-container img {
   position: absolute;
@@ -122,16 +135,14 @@ button {
   top: -15vh;
   height: 20vh;
   -webkit-user-drag: none;
-  -webkit-app-region: drag;
 }
 #psys-logo-container::after {
   position: absolute;
   content: 'Converter';
   font-family: Forelle;
-  font-size: 19vw;
+  font-size: 20vw;
   top: -13vh;
-  right: 2vw;
-  -webkit-app-region: drag;
+  right: 1vw;
 }
 
 #info {
@@ -241,6 +252,23 @@ button {
 }
 .btn-exit:active {
   transform: scale(0.95);
+}
+
+.btn-exit-disabled {
+  position: relative;
+  height: 10vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  padding: 5vh 0;
+  background-color: lightgray;
+  color: #fff;
+  border: 1px solid #fff;
+  width: 89vw;
+  font-size: 6vw;
 }
 
 .settings-btn {
@@ -423,8 +451,8 @@ button {
 #check-background {
   position: absolute;
   width: 94vw;
-  height: 68vh;
-  bottom: 10vw;
+  height: 80vh;
+  bottom: 9vw;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -435,12 +463,12 @@ button {
   width: 94vw;
   background-color: #fff;
   border: 1px solid lightgray;
-  height: 46vh;
+  height: 60vh;
 }
 
 #customer-list {
   width: 100%;
-  height: 45vh;
+  height: 60vh;
   overflow: auto;
   background-position: center;
   background-size: contain;
@@ -500,34 +528,25 @@ button {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: fit-content;
+  width: 96vw;
+  height: 7vh;
 }
 
 #p2s-logo img {
   position: relative;
-  height: 20vh;
-}
-#p2s-logo::after {
-  content: 'Schedule';
-  top: 0.4vw;
-  right: 0vw;
-  position: relative;
-  font-family: Forelle;
-  font-size: 14vh;
-  color: var(--text-color);
+  height: 8vh;
 }
 
 #button-container {
   position: absolute;
-  left: 0;
-  bottom: 4vh;
+  bottom: 1vh;
   display: inline-flex;
   flex-direction: row;
   align-content: center;
   justify-content: center;
   justify-items: center;
   align-items: center;
-  width: 94vw;
+  width: 96vw;
   height: 10vh;
   padding: 0vw 1vw;
 }
@@ -552,7 +571,7 @@ button {
 
 #dates {
   position: absolute;
-  bottom: 17vh;
+  bottom: 14vh;
   display: inline-flex;
   flex-direction: row;
   align-content: center;
@@ -579,7 +598,7 @@ button {
   font-weight: bolder;
   width: 94vw;
   background-color: #fff;
-  height: 46vh;
+  height: 60vh;
 }
 
 .spinner {
@@ -723,7 +742,7 @@ button {
   position: relative;
   width: 20vw;
   height: 7vh;
-  font-size: 3.5vw;
+  font-size: 4vw;
   border: 1px solid #fff;
   background-color: var(--sec-blue);
   border-radius: 2vw;
@@ -750,7 +769,7 @@ button {
   position: relative;
   width: 20vw;
   height: 7vh;
-  font-size: 3.5vw;
+  font-size: 4vw;
   background-color: var(--sec-blue);
   border: 1px solid #fff;
   border-radius: 2vw;
@@ -771,4 +790,63 @@ button {
 
 .context-delete:active {
   transform: scale(0.95);
+}
+
+#connection-container {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+  backdrop-filter: blur(2px);
+}
+
+#connection-logo {
+  width: 50vw;
+  position: absolute;
+  top: 15vh;
+}
+#connection-internal {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  background-color: #fff;
+  border-radius: 3px;
+  height: 70vh;
+  width: 85vw;
+  box-shadow: 1px 1px 4px 0px rgba(50, 50, 50, 0.5);
+}
+
+#connection-close {
+  position: absolute;
+  bottom: 19vh;
+  height: 10vh;
+  background-color: var(--button-red);
+  width: 80vw;
+}
+
+#connection-close:hover {
+  background-color: var(--button-red-hover);
+}
+
+#connection-info {
+  position: absolute;
+  top: 52vh;
+  font-size: 4.5vw;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  text-align: center;
+  line-height: 1.5em;
+  height: 10vh;
+  width: 90vw;
 }

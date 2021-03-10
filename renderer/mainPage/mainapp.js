@@ -1,10 +1,9 @@
 /* MODULES */
 ////////////
 
-const { remote, ipcRenderer, shell } = require('electron');
+const { remote, ipcRenderer } = require('electron');
 const mongoose = require('mongoose');
 mongoose.set('bufferCommands', false);
-const fs = require('fs');
 
 /* GET WORKING DIRECTORY */
 let dir;
@@ -34,11 +33,6 @@ let homeWindow = remote.getCurrentWindow();
 /* CHECK TO SEE IF FIRST TIME DISPLAY NOTIFICATIONS HAVE BEEN INITIATED */
 if (!localStorage.getItem('notifications')) {
   let notObject = {
-    lockbutton: true,
-    autocca: true,
-    roundall: true,
-    copy: true,
-    calculate: true,
     muteflag: true,
   };
   localStorage.setItem('notifications', JSON.stringify(notObject));
@@ -65,7 +59,9 @@ let startBtn = document.getElementById('start'),
   scheduleDates = document.getElementById('schedule-dates'),
   loadingContainer = document.getElementsByClassName('loading-container')[0],
   loadingDateBox = document.getElementById('loading-dates'),
-  systemSettingsMenu = document.getElementsByClassName('system-settings')[0];
+  systemSettingsMenu = document.getElementsByClassName('system-settings')[0],
+  onlineWarning = document.getElementById('connection-container'),
+  closeAppBtn = document.getElementById('connection-close');
 
 /* GLOBAL VARIABLES */
 let scheduleDatesArr, customerScheduleList, customerNumbersScheduleList, dateValue;
@@ -114,12 +110,12 @@ function showLoader() {
 
 /* CLEAR CURRENT LIST OF CLICKS FUNCTION */
 function clearList() {
-  if (customerNumbersScheduleList != null) {
+  if (customerNumbersScheduleList) {
     customerNumbersScheduleList.forEach((el) => {
       el.setAttribute('class', 'context-container');
     });
+    resetListenersContext();
   }
-  resetListenersContext();
 }
 
 /* EVENT LISTENER FOR SCHEDULE LIST */
@@ -236,7 +232,7 @@ function populateCustomerList() {
   customerList.innerHTML = '';
   customerScheduleList.forEach((el) => {
     let html = `
-    <div id="${el}" class="context-container"><button id="${el}-delete" class="context-delete" >DELETE</button>${el}<button id="${el}-edit" class="context-edit" >EDIT</button></div>
+    <div id="${el}" class="context-container"><button id="${el}-delete" class="context-delete" >Delete</button>${el}<button id="${el}-edit" class="context-edit" >Edit</button></div>
       `;
     customerList.insertAdjacentHTML('beforeend', html);
     addScheduleListListeners();
@@ -256,7 +252,7 @@ function populateDateOptions() {
   customerList.innerHTML = '';
 
   if (scheduleDatesArr.length < 1) {
-    let html = '<div id="no-schedules">NO SCHEDULES</div>';
+    let html = '<div id="no-schedules">No scheduled items</div>';
     customerList.insertAdjacentHTML('beforeend', html);
     loadingDateBox.style.visibility = 'visible';
     loadingContainer.style.visibility = 'hidden';
@@ -266,9 +262,9 @@ function populateDateOptions() {
       <option value="${el}">${el}</option>
         `;
       scheduleDates.insertAdjacentHTML('beforeend', html);
+      dateValue = scheduleDatesArr[0];
+      getScheduledCustomers(dateValue);
     });
-    dateValue = scheduleDatesArr[0];
-    getScheduledCustomers(dateValue);
   }
 }
 
@@ -283,6 +279,12 @@ async function getScheduleDates() {
 
 /* MAIN PAGE EVENTS */
 /////////////////////
+closeAppBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  setTimeout(() => {
+    ipcRenderer.send('close-app', null);
+  }, 300);
+});
 
 /* START BUTTON */
 startBtn.addEventListener('click', (e) => {
@@ -295,8 +297,9 @@ startBtn.addEventListener('click', (e) => {
 /* EXIT BUTTON */
 exitbtn.addEventListener('click', (e) => {
   soundClick.play();
-
-  ipcRenderer.send('close-main', null);
+  setTimeout(() => {
+    ipcRenderer.send('close-main', null);
+  }, 300);
 });
 
 minimizeBtn.addEventListener('click', (e) => {
@@ -315,17 +318,6 @@ aboutbtn.addEventListener('click', (e) => {
 backbtn.addEventListener('click', () => {
   soundClick.play();
   systemSettingsMenu.style.visibility = 'hidden';
-});
-
-/* ONLINE LISTENER */
-window.addEventListener('offline', (e) => {
-  if (homeWindow.isVisible()) {
-    new Notification('P2SYS OFFLINE', {
-      icon: `${dir}/renderer/icons/error.png`,
-      body: 'There is no available internet connection.',
-      requireInteraction: true,
-    });
-  }
 });
 
 /* MUTE SOUNDS BUTTON */
@@ -376,4 +368,12 @@ ipcRenderer.on('create-download-window', (e, message) => {
 /* MESSAGE TO SEND PERCENTAGE DOWNLOADED */
 ipcRenderer.on('update-progress', (e, message) => {
   ipcRenderer.send('update-progress', message);
+});
+
+/* CONNECTION MONITORING */
+ipcRenderer.on('connection-lost', (e) => {
+  onlineWarning.style.visibility = 'visible';
+});
+ipcRenderer.on('connection-found', (e) => {
+  onlineWarning.style.visibility = 'hidden';
 });

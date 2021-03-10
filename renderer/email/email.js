@@ -65,7 +65,7 @@ let customerNumber,
   fileNameB,
   fileNameA,
   pausedFlag,
-  scheduleDate,
+  newScheduleDate,
   text,
   recipientArr,
   headingText;
@@ -134,14 +134,14 @@ function populateRecipientHtml() {
 function getText(message) {
   populateRecipientHtml();
   /* SPLIT MESSAGE INTO USABLE PARTS */
-  customerName = message.name;
+  customerName = message.custDetail.customerName;
   customerNumber = message.customerNumber;
   filePaths = message.filePaths;
   pausedFlag = message.pauseFlag;
-  scheduleDate = message.scheduleDate;
+  newScheduleDate = message.newScheduleDate;
 
   /* GENERATE THE HEADING */
-  if (scheduleDate != null) {
+  if (newScheduleDate !== null) {
     headingText = `Price change notification for ${customerNumber.trim()}`;
   } else {
     headingText = `Emailing updates for ${customerNumber.trim()}`;
@@ -163,10 +163,10 @@ function getText(message) {
 
   /* CREATE THE TRANSPORT MESSAGE */
   /* TEXT OF MESSAGE */
-  if (scheduleDate === null) {
+  if (newScheduleDate === null) {
     text = `Please find the attached files for immediate update and distribution.\n\nCustomer Name:\n${customerName}\n\nCustomer Number:\n${customerNumber}\n\nKind Regards,\nManagement`;
   } else {
-    text = `Dear: \n${customerName},\n\nThe attached file is a sample order form with price changes that will affect your account.\n\nThe changes will take effect on 1/${scheduleDate}. Please do not place orders on this sample form, an official order form will be sent to you on or soon after 1/${scheduleDate}.\n\nIf you have any queries please contact the sales department on +27 42 281 1713.\n\nKind Regards,\nA.C. Whitcher`;
+    text = `Dear: \n${customerName},\n\nThe attached file is a sample order form with price changes that will affect your account.\n\nThe changes will take effect on 1/${newScheduleDate}. Please do not place orders on this sample form, an official order form will be sent to you on or soon after 1/${newScheduleDate}.\n\nIf you have any queries please contact the sales department on +27 42 281 1713.\n\nKind Regards,\nA.C. Whitcher`;
   }
 
   /* INSERT THE MESSAGE IN THE TEXT AREA */
@@ -181,14 +181,14 @@ function getMessage() {
     /* CREATE MESSAGE POPUP */
     remote.dialog.showMessageBoxSync(emailWindow, {
       type: 'warning',
-      icon: `${dir}/renderer/icons/error.png`,
+      icon: `${dir}/renderer/icons/converter-logo.png`,
       buttons: ['OK'],
       message: 'MISSING EMAIL',
       detail: 'Please add an email address.',
     });
   } else {
     let attachments;
-    if (scheduleDate != null) {
+    if (newScheduleDate !== null) {
       attachments = [{ filename: fileNameA, path: filePaths[0] }];
     } else {
       attachments = [
@@ -233,7 +233,7 @@ function verifyConnect(message) {
       /* LOG THE ERROR */
       logfileFunc(err.stack);
       new Notification('P2SYS MAIL SERVER ERROR', {
-        icon: `${dir}/renderer/icons/trayTemplate.png`,
+        icon: `${dir}/renderer/icons/converter-logo.png`,
         body: 'There was a mail server error.\nPlease contact your administrator.',
       });
     } else {
@@ -311,7 +311,7 @@ function populateEmail(message) {
   /* SEND BUTTON */
   sendBtn.addEventListener('click', (e) => {
     let message = getMessage();
-    if (message != null) {
+    if (message !== null) {
       soundClick.play();
       setTimeout(() => {
         sendEmail();
@@ -351,7 +351,7 @@ function populateEmail(message) {
             let mailObj = {
               customerNumber,
               pausedFlag,
-              scheduleDate,
+              newScheduleDate,
             };
             if (info.rejected.length === 0) {
               setTimeout(() => {

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'" />
+    <link rel="stylesheet" href="multi.css" />
+    <script defer src="./multi.js"></script>
+    <title>Customer Name Search</title>
+</head>
+
+<body>
+    <audio src="../sounds/click.wav" id="click" style="display: none"></audio>
+
+
+    <div id="container">
+        <div class="loading-container">
+            <div class="spinner">
+                <div class="spinner-sector spinner-color-a"></div>
+                <div class="spinner-sector spinner-color-b"></div>
+                <div class="spinner-sector spinner-color-c"></div>
+            </div>
+
+        </div>
+        <div id="header">Selected</div>
+        <div id="container-background">
+
+            <div id="customer-list"></div>
+        </div>
+        <div id="button-container">
+
+            <button class="btn" id="clear-list-btn">Clear All</button>
+        </div>
+    </div>
+
+</body>
+
+</html>

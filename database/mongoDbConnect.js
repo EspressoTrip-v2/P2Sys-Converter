@@ -2,9 +2,6 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
 
-const notifier = require('node-notifier');
-const { exec } = require('child_process');
-
 /* GET APPDATA DIR */
 let appData;
 if (process.platform === 'win32') {
@@ -198,33 +195,86 @@ async function queryCustomerExists(customerNumber) {
   }
 }
 
+/* ADD PRICE LIST NUMBER */
+async function addPriceListNumber(customerNumber, priceListNumber) {
+  console.log(`addPriceListNumber(): Name: ${customerNumber}, Number: ${priceListNumber}`);
+  try {
+    let existsFlag = await customerPricelistNumberModel.exists({ _id: customerNumber });
+    if (!existsFlag) {
+      await customerPricelistNumberModel.create({
+        _id: customerNumber,
+        number: priceListNumber,
+      });
+    }
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+}
+
+async function addCustomerName(customerName, customerNumber) {
+  console.log(`addCustomer(): Name: ${customerName}, Number: ${customerNumber}`);
+  try {
+    let existsFlag = await customerNumberNameModel.exists({ _id: customerNumber });
+    if (!existsFlag) {
+      await customerNumberNameModel.create({ _id: customerNumber, name: customerName });
+    }
+  } catch (err) {
+    logfileFunc(err.stack);
+  }
+}
+
 /* SAVE PRICE-LIST TO DATABASE */
-exports.updatePriceListDataBase = async function (priceList) {
+exports.updatePriceListDataBase = async function (customerData) {
   let date = new Date();
   let month = date.getMonth() + 1;
   let year = date.getFullYear();
   let dateString = `${month}/${year}`;
-  let customerNumber = priceList._id;
+  let customerNumber = customerData.customerNumber;
+  let priceList = customerData['price-list'];
+  let custDetail = customerData.custDetail;
+
   try {
     /* Check if customer price-list exists */
     let existsFlagPriceList = await queryCustomerExists(customerNumber);
     /* Get the backup of the customer */
     let backupJson = await customerBackUpModel.findById(customerNumber).lean().exec();
 
-    if (backupJson[dateString]) {
-      customerBackUpModel
-        .findByIdAndUpdate(customerNumber, {
-          [dateString]: priceList['price-list'],
-        })
+    /* UPDATE NAME AND PRICE-LIST NUMBER DATABASE */
+    if (custDetail !== null) {
+      let priceListNumber = custDetail.priceListNumber;
+      let customerName = custDetail.customerName;
+
+      await addPriceListNumber(customerNumber, priceListNumber);
+      await addCustomerName(customerName, customerNumber);
+    }
+    /* CREATE NEW BACKUP IF IT DOES NOT EXIST */
+    if (backupJson !== null) {
+      if (backupJson[dateString]) {
+        await customerBackUpModel
+          .findByIdAndUpdate(customerNumber, {
+            [dateString]: priceList,
+          })
+          .exec();
+      }
+    } else {
+      await customerBackUpModel.create({
+        _id: customerNumber,
+        [dateString]: priceList,
+      });
+    }
+
+    /* CREATE NEW PRICE LIST IF IT DOES NOT EXISTS */
+    if (existsFlagPriceList) {
+      await customerPricesModel
+        .findOneAndReplace(
+          { _id: customerNumber },
+          { _id: customerNumber, 'price-list': priceList }
+        )
         .exec();
     } else {
-      customerBackUpModel
-        .updateOne({ _id: customerNumber }, { [dateString]: priceList['price-list'] })
-        .exec();
+      await customerPricesModel.create({ _id: customerNumber, 'price-list': priceList });
     }
-    if (existsFlagPriceList) {
-      customerPricesModel.findOneAndReplace({ _id: customerNumber }, priceList).exec();
-    }
+    return true;
   } catch (err) {
     logfileFunc(err.stack);
   }
@@ -234,7 +284,7 @@ exports.updatePriceListDataBase = async function (priceList) {
 exports.querySinglePriceListNumber = async function (customerNumber) {
   try {
     let result = await customerPricelistNumberModel.findById(customerNumber).lean().exec();
-    if (result != null) {
+    if (result !== null) {
       return result.number;
     } else {
       return null;
@@ -287,7 +337,7 @@ exports.createScheduleItem = async function (message, date) {
     } else {
       message['_id'] = date;
       result = await schedulePricesModel.create(message);
-      if (result != null) {
+      if (result !== null) {
         return true;
       }
     }
@@ -297,20 +347,24 @@ exports.createScheduleItem = async function (message, date) {
 };
 
 exports.removeScheduleItems = async function (message) {
+  let keys;
   try {
     let result = await schedulePricesModel.findById(message.dateValue).lean().exec();
-    let keys = Object.keys(result).length;
-    if (keys <= 2) {
-      await schedulePricesModel.findByIdAndDelete(message.dateValue);
-      return true;
-    } else {
-      delete result[message.customerNumber];
-      let update = await schedulePricesModel
-        .findOneAndReplace({ _id: message.dateValue }, result)
-        .lean()
-        .exec();
-      if (update._id == message.dateValue) {
+
+    if (result !== null) {
+      keys = Object.keys(result).length;
+      if (keys <= 2) {
+        await schedulePricesModel.findByIdAndDelete(message.dateValue);
         return true;
+      } else {
+        delete result[message.customerNumber];
+        let update = await schedulePricesModel
+          .findOneAndReplace({ _id: message.dateValue }, result)
+          .lean()
+          .exec();
+        if (update._id == message.dateValue) {
+          return true;
+        }
       }
     }
   } catch (err) {
@@ -365,11 +419,11 @@ exports.queryCustomerName = async function (customerNumber, allNames) {
 exports.querySingleCustomerBackup = async function (customerNumber) {
   try {
     let result = await customerBackUpModel.findById(customerNumber).lean().exec();
-    if (result != null) {
+    if (result != null && Object.keys(result).length >= 2) {
       delete result['_id'];
       return result;
-    } else {
-      return [];
+    } else if (result === null) {
+      return result;
     }
   } catch (err) {
     logfileFunc(err.stack);
@@ -382,12 +436,10 @@ exports.queryBackUpDate = async function () {
     let date = await customerBackUpModel.findById('check').lean().exec();
     let value = parseInt(date.value);
     if (value < new Date().getFullYear()) {
-      notifier.notify({
-        title: 'CLEANING BACKUP DATABASE',
-        message: 'Redundant backups are being removed please do not close the application.',
-        icon: `${dir}/renderer/icons/info.png`,
-      });
       updateBackups();
+      return true;
+    } else {
+      return false;
     }
   } catch (err) {
     logfileFunc(err.stack);

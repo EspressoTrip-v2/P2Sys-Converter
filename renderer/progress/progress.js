@@ -37,7 +37,19 @@ let progressWindow = remote.getCurrentWindow();
 secWindow = progressWindow.getParentWindow();
 
 /* GLOBAL VARIABLES */
-let pauseFlag, scheduleFlag, customerNumber, scheduleDate, oldDate, customerData, editFlag;
+let pauseFlag,
+  createNewScheduleFlag,
+  customerNumber,
+  newScheduleDate,
+  OldScheduleDate,
+  customerData,
+  removeOldScheduleFlag,
+  newFlag,
+  custDetail,
+  priceListNumber,
+  priceList,
+  createExcelSchedule,
+  updateDbFlag;
 
 /* FUNCTIONS */
 //////////////
@@ -60,17 +72,32 @@ function logfileFunc(error) {
 ipcRenderer.on('convert-python', (event, message) => {
   customerData = message.customerData;
   pauseFlag = message.pauseFlag;
-  editFlag = message.editFlag;
-  scheduleFlag = message.scheduleFlag;
-  scheduleDate = message.scheduleDate;
-  oldDate = message.oldDate;
-  customerNumber = customerData['price-list']['customerNumber'];
-  let data = JSON.stringify(customerData);
+  removeOldScheduleFlag = message.removeOldScheduleFlag;
+  createNewScheduleFlag = message.createNewScheduleFlag;
+  newScheduleDate = message.newScheduleDate;
+  OldScheduleDate = message.OldScheduleDate;
+  newFlag = message.newFlag;
+  customerNumber = message.custDetail.customerNumber;
+  custDetail = message.custDetail;
+  priceListNumber = message.custDetail.priceListNumber;
+  priceList = customerData['price-list'];
+  updateDbFlag = message.updateDbFlag;
+  let createExcelSchedule = message.createExcelSchedule;
 
+  /* CREATE A PRICING OBJECT TO CONVERT IN PYTHON */
+  let pythonPricingObj = {
+    'price-list': {
+      ...priceList,
+      customerNumber,
+      priceListNumber,
+    },
+  };
+
+  let data = JSON.stringify(pythonPricingObj);
   /* PYTHON PROCESSING FUNCTION */
   ///////////////////////////////
   let serverPath;
-  if (scheduleDate === null) {
+  if (newScheduleDate === null) {
     if (fs.existsSync(process.env.SERVER_PATH)) {
       serverPath = process.env.SERVER_PATH;
     } else {
@@ -85,7 +112,7 @@ ipcRenderer.on('convert-python', (event, message) => {
     mode: 'text',
     pythonOptions: ['-u'],
     scriptPath: `${process.cwd()}/python/`,
-    args: [data, serverPath, scheduleFlag, scheduleDate],
+    args: [data, serverPath, createExcelSchedule, newScheduleDate],
   };
 
   /* CREATE PYSHELL  */
@@ -106,11 +133,14 @@ ipcRenderer.on('convert-python', (event, message) => {
         customerData,
         filePaths,
         pauseFlag,
-        editFlag,
-        scheduleFlag,
-        scheduleDate,
+        removeOldScheduleFlag,
+        createNewScheduleFlag,
+        newScheduleDate,
         customerNumber,
-        oldDate,
+        OldScheduleDate,
+        newFlag,
+        updateDbFlag,
+        custDetail,
       };
       ipcRenderer.send('progress-end', message);
       progressWindow.close();
@@ -123,13 +153,13 @@ ipcRenderer.on('convert-python', (event, message) => {
       progressWindow.hide();
       remote.dialog.showMessageBoxSync(secWindow, {
         type: 'warning',
-        icon: `${dir}/renderer/icons/error.png`,
+        icon: `${dir}/renderer/icons/converter-logo.png`,
         buttons: ['OK'],
         message: 'P2SYS CONVERSION ERROR:',
         detail:
           'There was an problem during the file conversion.\nPlease contact your developer.',
       });
-      ipcRenderer.send('reset-form', null);
+      ipcRenderer.send('reset-form', false);
       progressWindow.close();
     }
   });

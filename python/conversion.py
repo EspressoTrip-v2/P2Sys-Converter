@@ -32,12 +32,12 @@ workdir = os.getcwd()
 json_pricelist = dict(json.loads(sys.argv[1:][0]))["price-list"]
 
 # ASSIGN THE FLAGS FOR CORRECT PYTHON CONVERSION
-schedule_flag = sys.argv[1:][2]
+create_schedule_flag = sys.argv[1:][2]
 schedule_date = sys.argv[1:][3]
 python_schedule_date = 0
 
 # CONVERT JAVASCRIPT STRING TO A USABLE PYTHON DATE
-if schedule_date != "null":
+if create_schedule_flag == "true":
     dateString = schedule_date.split("/")
     python_schedule_date = datetime(int(dateString[1]), int(dateString[0]), 1).strftime(
         "%d-%m-%Y"
@@ -331,7 +331,18 @@ strip_number = customer_number.strip()
 
 # GLOBAL PATHS
 server_filepath = sys.argv[1:][1]
-if schedule_flag == "false":
+if create_schedule_flag == "true":
+    server_filepath = "none"
+    mydocuments_folder = (
+        f'{os.environ["HOMEPATH"]}/Documents/P2SYS-SCHEDULED/{strip_number}/{time}/'
+    )
+    os.makedirs(mydocuments_folder, exist_ok=True)
+
+else:
+    mydocuments_folder = (
+        f'{os.environ["HOMEPATH"]}/Documents/P2SYS-CONVERSIONS/{strip_number}/{time}/'
+    )
+    os.makedirs(mydocuments_folder, exist_ok=True)
     # GET THE SERVER FILE PATH FROM ARGV
     if server_filepath != "none":
         server_filepath = (
@@ -341,14 +352,6 @@ if schedule_flag == "false":
             os.makedirs(server_filepath, exist_ok=True)
         except:
             pass
-else:
-    server_filepath = "none"
-
-
-mydocuments_folder = (
-    f'{os.environ["HOMEPATH"]}/Documents/P2SYS-SCHEDULED/{strip_number}/{time}/'
-)
-os.makedirs(mydocuments_folder, exist_ok=True)
 
 # print(mydocuments_folder)
 
@@ -367,7 +370,7 @@ s5_ordersheet.create_s5_ordersheet(
     python_schedule_date,
 )
 
-if schedule_flag == "false":
+if create_schedule_flag == "false":
     system_template.system_template_fn(
         mydocuments_folder,
         reform_file["customer_number"],

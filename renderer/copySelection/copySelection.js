@@ -46,13 +46,19 @@ let customerListContainer = document.getElementById('customer-list-container'),
   border = document.getElementById('border'),
   userAsk = document.getElementById('ask-user'),
   buttonSelectSearch = document.getElementById('select'),
+  buttonCreateMultiSearch = document.getElementById('create'),
   buttonDisabledSearch = document.getElementById('disabled'),
   buttonBackSearch = document.getElementById('back'),
   buttonSelectCancel = document.getElementById('select-back'),
   audioTag = Array.from(document.getElementsByTagName('audio')),
   existingCustomerBtn = document.getElementById('existing-customer-btn'),
+  multipleCustomerBtn = document.getElementById('copy-to-multiple'),
+  newCustomerBtn = document.getElementById('new-customer-btn'),
   searchDock = document.getElementById('customer-search'),
-  loadingContainer = document.getElementsByClassName('loading-container')[0];
+  loadingAsk = document.getElementById('loader-ask'),
+  loadingSearch = document.getElementById('loader-customer-search'),
+  onlineWarning = document.getElementById('connection-container'),
+  closeAppBtn = document.getElementById('connection-close');
 
 /* COPY TYPE SELECTION BOX CONTROLS */
 function showSelector() {
@@ -80,12 +86,40 @@ function showSelectBtn() {
   buttonDisabledSearch.style.display = 'none';
   buttonSelectSearch.style.display = 'flex';
 }
-/* LOADING CONTAINER CONTROLS */
-function showLoading() {
-  loadingContainer.style.visibility = 'visible';
+
+function hideCreateBtn() {
+  buttonSelectSearch.style.display = 'none';
+  buttonCreateMultiSearch.style.display = 'none';
+  buttonDisabledSearch.style.display = 'flex';
 }
-function hideLoading() {
-  loadingContainer.style.visibility = 'hidden';
+
+function showCreateBtn() {
+  buttonDisabledSearch.style.display = 'none';
+  buttonSelectSearch.style.display = 'none';
+  buttonCreateMultiSearch.style.display = 'flex';
+}
+
+function hideBackBtn() {
+  buttonBackSearch.style.display = 'none';
+}
+
+function showBackBtn() {
+  buttonBackSearch.style.display = 'flex';
+}
+
+/* LOADING CONTAINER CONTROLS */
+function showLoadingAsk() {
+  loadingAsk.style.visibility = 'visible';
+}
+function hideLoadingAsk() {
+  loadingAsk.style.visibility = 'hidden';
+}
+function showLoadingSearch() {
+  loadingSearch.style.visibility = 'visible';
+}
+
+function clearCustomerList() {
+  customerListContainer.innerHTML = '';
 }
 
 /* FUNCTION CHECK THE MUTE FLAG */
@@ -113,16 +147,20 @@ if (!storage.muteflag) {
 }
 
 /* FUNCTION TO CREATE OBJECT TO POPULATE THE PRICE LIST TABLE */
-async function populatePriceListObject(priceListTemplate) {
-  priceListNumberValue = await ipcRenderer.invoke('get-pricelist-number', customerNumber);
-  customerBackUpJson = await ipcRenderer.invoke('get-customer-backup', customerNumber);
-  let priceListObj = { ...priceListTemplate };
-  priceListObj.customerNameValue = customerName;
-  priceListObj.customerBackUpJson = customerBackUpJson;
-  priceListObj.priceListNumber = priceListNumberValue;
-  priceListObj.customerNumber = customerNumber;
-
-  return priceListObj;
+async function populatePriceListObject(priceListTemplate, detailsFlag) {
+  if (detailsFlag) {
+    priceListNumberValue = await ipcRenderer.invoke('get-pricelist-number', customerNumber);
+    customerBackUpJson = await ipcRenderer.invoke('get-customer-backup', customerNumber);
+    console.log(customerBackUpJson);
+    let priceListObj = { ...priceListTemplate };
+    priceListObj.customerNameValue = customerName;
+    priceListObj.customerBackUpJson = customerBackUpJson;
+    priceListObj.priceListNumber = priceListNumberValue;
+    priceListObj.customerNumber = customerNumber;
+    return priceListObj;
+  } else {
+    return priceListTemplate;
+  }
 }
 
 //////////////////////
@@ -135,56 +173,96 @@ function clearClickedCustomers() {
   });
 }
 
+function existsEvent(e) {
+  soundClick.play();
+  showSelectBtn();
+  /* ASSIGN NUMBERS AND NAME */
+  customerNumber = customerNameNumberJson[e.target.innerText];
+  customerName = e.target.innerText;
+  clearClickedCustomers();
+  // SET THE HIGHLIGHT ON CURRENT CLICKED ITEM
+  e.target.setAttribute('class', 'customer-name-clicked');
+}
+
+function getDimensions(e) {
+  let dimensions = copySelectionWindow.getPosition(),
+    size = copySelectionWindow.getSize();
+  let messageObj = {
+    dimensions,
+    size,
+    customerNumber: e.target.id,
+  };
+  return messageObj;
+}
+
+function multiEvent(e) {
+  let messageObj = getDimensions(e);
+  soundClick.play();
+  e.target.setAttribute('class', 'customer-name-clicked');
+  ipcRenderer.send('ask-window-multi', messageObj);
+}
+
 function addEventListeners(flag) {
   customerNameLists = Array.from(document.getElementsByClassName('customer-name'));
 
   if (flag === 'existing') {
     customerNameLists.forEach((el) => {
-      el.addEventListener('click', (e) => {
-        soundClick.play();
-        showSelectBtn();
-        /* ASSIGN NUMBERS AND NAME */
-        customerNumber = customerNameNumberJson[e.target.innerText];
-        customerName = e.target.innerText;
-        clearClickedCustomers();
-        // SET THE HIGHLIGHT ON CURRENT CLICKED ITEM
-        el.setAttribute('class', 'customer-name-clicked');
-        if (window.getComputedStyle(buttonDisabledSearch).display === 'flex') {
-          hideSelectBtn();
-        }
-      });
+      el.addEventListener('click', existsEvent);
     });
-
+    showBackBtn();
     hideSelector();
-    hideLoading();
+    hideLoadingAsk();
     showSearch();
     searchDock.focus();
   } else if (flag === 'multi') {
-    // ADD CODE
+    customerNameLists.forEach((el) => {
+      el.addEventListener('click', multiEvent);
+    });
+    showBackBtn();
+    hideSelector();
+    hideLoadingAsk();
+    showSearch();
+    showCreateBtn();
   }
+}
+
+function closeMultiWindow() {
+  ipcRenderer.send('close-multi-window', null);
 }
 
 /* POPULATE LIST OF CUSTOMERS */
 ///////////////////////////////
 
-function populateCustomerNames() {
+function populateCustomerNames(flag) {
   let customersNames = Object.keys(customerNameNumberJson);
-  (() => {
-    customersNames.forEach((el) => {
-      let html = `<div title="${
-        customerNameNumberJson[el.toLocaleUpperCase()]
-      }" class="customer-name">${el.toUpperCase()}</div>`;
-      customerListContainer.insertAdjacentHTML('beforeend', html);
-    });
+
+  customersNames.forEach((el) => {
+    let html = `<div title="${customerNameNumberJson[el.toLocaleUpperCase()]}" id="${
+      customerNameNumberJson[el.toLocaleUpperCase()]
+    }" class="customer-name">${el.toUpperCase()}</div>`;
+    customerListContainer.insertAdjacentHTML('beforeend', html);
+  });
+  /* CHANGE EVENT LISTENERS IF MULTI BUTTON CLICKED */
+  if (flag === 'existing') {
     addEventListeners('existing');
-  })();
+  } else if (flag === 'multi') {
+    addEventListeners('multi');
+  }
 }
+
+/* CLOSE APP BUTTON */
+closeAppBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  setTimeout(() => {
+    ipcRenderer.send('close-app', null);
+  }, 300);
+});
 
 /* SELECT BUTTON SEARCH */
 buttonSelectSearch.addEventListener('click', async (e) => {
   soundClick.play();
-  /* ADD LOADER HERE */
-  let copyPriceList = await populatePriceListObject(priceListTemplate);
+  showLoadingSearch();
+  let copyPriceList = await populatePriceListObject(priceListTemplate, true);
   border.style.opacity = '0';
   /* SEND THE OBJECT TO RENDER IN TABLE */
   ipcRenderer.send('start', { copyPriceList, flag: 'copy' });
@@ -193,14 +271,23 @@ buttonSelectSearch.addEventListener('click', async (e) => {
 
 /* BACK BUTTON SEARCH */
 buttonBackSearch.addEventListener('click', (e) => {
+  closeMultiWindow();
+  hideSearch();
+  clearCustomerList();
   soundClick.play();
   setTimeout(() => {
-    hideSearch();
     searchDock.value = null;
-    clearClickedCustomers();
     hideSelectBtn();
+    hideCreateBtn();
     showSelector();
   }, 200);
+});
+
+/* CREATE MUTLI SEARCH */
+buttonCreateMultiSearch.addEventListener('click', () => {
+  soundClick.play();
+
+  // ADD CODE
 });
 
 /* CANCEL BUTTON SELECTION BOX */
@@ -215,9 +302,28 @@ buttonSelectCancel.addEventListener('click', () => {
 
 /* EXISTING CUSTOMER BUTTON */
 existingCustomerBtn.addEventListener('click', () => {
-  showLoading();
+  showLoadingAsk();
   soundClick.play();
-  populateCustomerNames();
+  populateCustomerNames('existing');
+});
+
+/* MULTIPLE CUSTOMER BUTTON */
+multipleCustomerBtn.addEventListener('click', () => {
+  showLoadingAsk();
+  soundClick.play();
+  populateCustomerNames('multi');
+});
+
+/* NEW CUSTOMER BUTTON */
+newCustomerBtn.addEventListener('click', async () => {
+  soundClick.play();
+  let copyPriceList = await populatePriceListObject(priceListTemplate, false);
+  setTimeout(() => {
+    border.style.opacity = '0';
+    /* SEND THE OBJECT TO RENDER IN TABLE */
+    ipcRenderer.send('start', { copyPriceList, flag: 'new' });
+    copySelectionWindow.close();
+  }, 300);
 });
 
 //////////////////
@@ -242,4 +348,22 @@ ipcRenderer.on('copy-selection', (e, message) => {
   priceListTemplate = message.template;
   customerNumberNameJson = message.customerNumberNameJson;
   showSelector();
+});
+
+ipcRenderer.on('clear-copy-selection-click', (e, message) => {
+  clearClickedCustomers();
+});
+
+ipcRenderer.on('unselect-item-copy-selection', (e, message) => {
+  document.getElementById(message).setAttribute('class', 'customer-name');
+});
+
+/* CONNECTION MONITORING */
+ipcRenderer.on('connection-lost', (e) => {
+  clearClickedCustomers();
+  closeMultiWindow();
+  onlineWarning.style.visibility = 'visible';
+});
+ipcRenderer.on('connection-found', (e) => {
+  onlineWarning.style.visibility = 'hidden';
 });

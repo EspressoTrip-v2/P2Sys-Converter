@@ -57,6 +57,11 @@ function fillcustomerNameNumberJson() {
       }
     });
   })();
+
+  function closeWindow() {
+    border.style.visibility = 'hidden';
+  }
+
   ////////////////////////////////////////
   /* DOM ELEMENTS AFTER GENERATED HTML */
   //////////////////////////////////////
@@ -69,10 +74,12 @@ function fillcustomerNameNumberJson() {
   customerNameLists.forEach((el) => {
     el.addEventListener('click', (e) => {
       soundClick.play();
-      let number = customerNameNumberJson[e.target.innerText];
-      // send ipc
-      ipcRenderer.send('dock-sec', number);
-      ipcRenderer.send('close-window-dock', null);
+      setTimeout(() => {
+        let number = customerNameNumberJson[e.target.innerText];
+        // send ipc
+        ipcRenderer.send('dock-sec', number);
+        ipcRenderer.send('close-window-dock', null);
+      }, 300);
     });
   });
 
@@ -87,7 +94,7 @@ function fillcustomerNameNumberJson() {
       el.style.display = elMatch ? 'block' : 'none';
     });
   });
-  border.style.opacity = '1';
+  border.style.visibility = 'visible';
 }
 
 ////////////////////////
@@ -103,5 +110,5 @@ ipcRenderer.on('name-search', (event, message) => {
 
 /* MESSAGE TO RETRACT WINDOW BEFORE CLOSE */
 ipcRenderer.on('close-window-dock', (e, message) => {
-  border.style.opacity = '0';
+  closeWindow();
 });

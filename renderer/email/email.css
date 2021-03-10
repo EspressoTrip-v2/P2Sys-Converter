@@ -66,11 +66,6 @@ main {
   border-top-right-radius: 3px;
   border-top-left-radius: 3px;
 }
-/* #boundry {
-  position: relative;
-  border-radius: 10px;
-  box-shadow: 1px 1px 10px 0px rgba(50, 50, 50, 0.5);
-} */
 
 * {
   box-sizing: border-box;
@@ -81,16 +76,17 @@ main {
 }
 #logo-background {
   display: flex;
+  display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   width: 98vw;
   color: #fff;
-  font-size: 2.5vw;
-  background-color: var(--button-green);
+  font-size: 2.6vw;
+  background-color: var(--sec-blue);
   border-top-right-radius: 3px;
   border-top-left-radius: 3px;
-  height: 5vh;
+  height: 4vh;
   -webkit-app-region: drag;
 }
 
@@ -145,10 +141,10 @@ body {
 #add-recipient {
   position: absolute;
   top: 0.2vh;
-  right: 74vw;
-  font-size: 3vw;
-  height: 5vh;
-  width: 14vw;
+  right: 76vw;
+  font-size: 2.6vw;
+  height: 4.5vh;
+  width: 12vw;
   background-color: var(--button-green);
   border: 1px solid #fff;
   outline: none;
@@ -206,7 +202,7 @@ body {
   top: 4vh;
   flex-direction: row;
   justify-content: space-around;
-  font-size: 3vw;
+  font-size: 2.6vw;
   align-content: center;
   align-items: center;
   width: 100%;
@@ -215,7 +211,7 @@ body {
 #subject-label {
   position: absolute;
   color: #7c7b7b;
-  left: 3vw;
+  left: 4vw;
   height: 100%;
   display: flex;
   justify-content: center;
@@ -228,14 +224,14 @@ body {
   right: 5vw;
   bottom: 0;
   display: flex;
-  font-size: 3vw;
+  font-size: 2.6vw;
   flex-direction: row;
   justify-content: center;
   align-content: center;
   align-items: center;
   height: 5vh;
   border-bottom: 1px solid lightgray;
-  width: 74vw;
+  width: 75vw;
 }
 
 #subject-input {
@@ -244,7 +240,7 @@ body {
   width: 72vw;
   height: 100%;
   border: none;
-  font-size: 3vw;
+  font-size: 2.6vw;
   padding: 0.5vh 4vw;
   outline: none;
   background-color: transparent;
@@ -255,7 +251,7 @@ body {
   top: 12vh;
   flex-direction: row;
   justify-content: space-around;
-  font-size: 3vw;
+  font-size: 2.6vw;
   align-content: center;
   align-items: center;
   width: 100%;
@@ -268,7 +264,7 @@ body {
   position: absolute;
   flex-direction: row;
   justify-content: space-around;
-  font-size: 3vw;
+  font-size: 2.6vw;
   align-content: center;
   align-items: center;
   width: 100%;
@@ -281,7 +277,7 @@ body {
   height: 100%;
   padding: 0 0.5vw;
   border: none;
-  font-size: 3vw;
+  font-size: 2.6vw;
   resize: none;
   outline: none;
 }
@@ -291,13 +287,13 @@ body {
   right: 5vw;
   top: 3vh;
   display: flex;
-  font-size: 3vw;
+  font-size: 2.6vw;
   flex-direction: row;
   justify-content: center;
   align-content: center;
   align-items: center;
   height: 5vh;
-  width: 73vw;
+  width: 75vw;
   border-bottom: 1px solid lightgray;
 }
 
@@ -307,7 +303,7 @@ body {
   width: 72vw;
   height: 100%;
   border: none;
-  font-size: 3vw;
+  font-size: 2.6vw;
   padding: 0.5vh 4vw;
   outline: none;
   background-color: transparent;
@@ -355,17 +351,16 @@ body {
 #send {
   position: absolute;
   bottom: 1vh;
-  background-color: var(--button-green);
+  background-color: var(--sec-blue);
   border: 1px solid #fff;
-  font-size: 3vw;
+  font-size: 2.6vw;
   width: 20vw;
-  height: 5vh;
+  height: 4.5vh;
   outline: none;
   color: #fff;
 }
 #send:hover {
-  background-color: var(--button-green-hover);
-  border: 2px solid var(--button-green-hover);
+  background-color: var(--sec-blue-hover);
 }
 
 #send:active {
