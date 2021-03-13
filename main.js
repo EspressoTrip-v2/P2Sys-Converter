@@ -11,6 +11,8 @@ const {
 } = require('electron');
 const mongoose = require('mongoose');
 const fs = require('fs');
+const homedir = require('os').homedir();
+const os = require('os');
 require('dotenv').config();
 
 /* DISABLE GPU RENDERING FOR APP */
@@ -69,6 +71,8 @@ const {
 } = require(`${dir}/database/mongoDbConnect.js`);
 const { updater } = require(`${dir}/updater.js`);
 
+const { logFileFunc } = require(`${dir}/logFile.js`);
+
 /* GLOBAL VARIABLES */
 let homeWindow,
   secWindow,
@@ -97,6 +101,9 @@ let homeWindow,
 
 /* GET THE YEAR */
 const yearNow = new Date().getFullYear();
+/* GET TEMP FOLDER AND DESKTOP FOLDER */
+let desktopFolder = `${homedir}\\Desktop`;
+let tempPath = os.tmpdir();
 
 /* ICON FILE */
 let iconImage = `${dir}/renderer/icons/icon.ico`;
@@ -109,18 +116,6 @@ let iconImage = `${dir}/renderer/icons/icon.ico`;
 function createTray() {
   tray = new Tray(iconImage);
   tray.setContextMenu(trayMenu);
-}
-
-/* LOGFILE CREATION FUNCTION */
-//////////////////////////////
-function logfileFunc(message) {
-  let fileDir = `${appData}/error-log.txt`;
-  /* CHECK IF EXISTS */
-  if (fs.existsSync(fileDir)) {
-    fs.appendFileSync(fileDir, `${new Date()}: ${message}\n`, (err) => console.log(err));
-  } else {
-    fs.writeFileSync(fileDir, `${new Date()}: ${message}\n`, (err) => console.log(err));
-  }
 }
 
 /* CREATE NAME NUMBER JSON FOR SEARCH WINDOW */
@@ -202,7 +197,7 @@ db.once('connected', async () => {
     let result = await queryExmillPrice();
     exmillPrice = result;
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 
   /* CHECK BACKUPS CLEAN DATE */
@@ -217,40 +212,41 @@ db.once('connected', async () => {
       notification.show();
     }
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 
   /* QUERY ALL NAMES */
   try {
     customerNumberNameResult = await queryCustomerName(null, true);
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 
   /* FETCH PRICELIST INDEXES */
   try {
     customerPricesNumbersArr = await queryAllPriceListNumbers();
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 
   /* FETCH ALL CUSTOMER NAME INDEXES */
   try {
     customerNumberAllKeys = await queryAllCustomerNumbers();
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 
   try {
     scheduleDates = await queryAllScheduleDates();
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 
   /* TRAY MENU LAYOUT TEMPLATE */
   trayMenu = Menu.buildFromTemplate([{ label: `Converter v${version}` }]);
   createWindow();
   convertNumberName();
+  deleteUnusedFiles();
 });
 
 db.on('disconnected', () => {
@@ -272,9 +268,28 @@ db.on('disconnected', () => {
   }
 });
 
+db.on('error', () => {
+  if (secWindow && secWindow.isVisible()) {
+    secWindow.webContents.send('connection-lost', null);
+  } else if (homeWindow && homeWindow.isVisible()) {
+    homeWindow.webContents.send('connection-lost', null);
+  } else if (emailWindow && emailWindow.isVisible()) {
+    dialog.showMessageBoxSync(emailWindow, {
+      type: 'info',
+      title: 'P2SYS DATABASE CONNECTION LOST',
+      message: 'The connection to the database has been lost',
+      detail: 'The email will fail on send, you will have to resend it manually.',
+      icon: `${dir}/renderer/icons/converter-logo.png`,
+      buttons: ['OK'],
+    });
+  } else if (copySelectionWindow && copySelectionWindow.isVisible()) {
+    copySelectionWindow.webContents.send('connection-lost', null);
+  }
+});
+
 db.on('reconnected', () => {
   let notification = new Notification({
-    title: 'P2SYS DB CONNECTED',
+    title: 'P2Sys database info',
     body: 'Reconnected to the database',
     icon: `${dir}/renderer/icons/converter-logo.png`,
   });
@@ -825,6 +840,24 @@ function checkPassword() {
   }
 }
 
+function deleteUnusedFiles() {
+  let filesToDelete = [];
+  fs.readdir(tempPath, (err, files) => {
+    let psysFiles = files.forEach((el) => {
+      if (el.includes('P2Sys_conversion')) {
+        filesToDelete.push(el);
+      }
+    });
+    filesToDelete.forEach((el) => {
+      fs.rmdir(`${tempPath}\\${el}`, { recursive: true }, (err) => {
+        if (err) {
+          logFileFunc(err);
+        }
+      });
+    });
+  });
+}
+
 /* APP READY --> CREATE MAIN WINDOW */
 app.on('ready', () => {
   /* CHECK TO SEE IF APP ALREADY RUNNING */
@@ -910,10 +943,8 @@ function getNewScheduleItem(message) {
   return scheduleData;
 }
 
-/* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
-ipcMain.on('progress-end', async (e, message) => {
-  /* SEND MESSAGE TO CLOSE THE PROGRESS BAR */
-  secWindow.webContents.send('progress-end', message);
+/* DATABASE BACKUP */
+async function databaseBackupControl(message) {
   let customerNumber = message.customerNumber;
   let pauseFlag = message.pauseFlag;
   let newScheduleDate = message.newScheduleDate;
@@ -964,6 +995,18 @@ ipcMain.on('progress-end', async (e, message) => {
     });
     reloadData();
   }
+}
+
+/* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
+ipcMain.on('progress-end', (e, message) => {
+  /* SEND MESSAGE TO CLOSE THE PROGRESS BAR */
+  secWindow.webContents.send('progress-end', message);
+  databaseBackupControl(message);
+});
+
+/* MESSAGE FROM MULTI CONVERT PROGRESS */
+ipcMain.on('progress-end-multi', async (e, message) => {
+  databaseBackupControl(message);
 });
 
 /* MESSAGE TO CREATE EMAIL POPUP CHILD WINDOW */
@@ -974,7 +1017,12 @@ ipcMain.on('email-popup', (e, message) => {
 
 /* SEND MESSAGE SEND AND FORM CAN BE RESET MESSAGE FROM EMAIL POPUP */
 ipcMain.on('email-close', (e, message) => {
-  secWindow.webContents.send('email-close', null);
+  if (secWindow) {
+    secWindow.webContents.send('email-close', null);
+  } else {
+    createLoadingWindow();
+    createSecWindow(null);
+  }
 });
 
 /* SEND MESSAGE TO CLOSE TABLE WINDOW ON ERROR */
@@ -1192,4 +1240,14 @@ ipcMain.on('restart-app', (e, message) => {
 ipcMain.on('connect-to-database', (e, message) => {
   createLoadingWindow();
   mongooseConnect(message);
+});
+
+ipcMain.on('get-customer-selection-arr', (e, message) => {
+  if (multiWindow) {
+    multiWindow.webContents.send('get-customer-selection-arr', null);
+  }
+});
+
+ipcMain.on('return-customer-selection-arr', (e, message) => {
+  copySelectionWindow.webContents.send('get-customer-selection-arr', message);
 });

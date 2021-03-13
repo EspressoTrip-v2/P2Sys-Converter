@@ -38,22 +38,12 @@ if (process.platform === 'win32') {
   appData = process.cwd();
 }
 
-/* ERROR GENERATOR */
-function erorrFunc(err) {
-  let fileDir = `${appData}/update-log.txt`;
-  fs.existsSync(fileDir)
-    ? fs.appendFileSync(fileDir, `${new Date()} -> Update error: ${err}\n`, 'utf8', () =>
-        console.log('Logfile write')
-      )
-    : fs.writeFileSync(fileDir, `${new Date()} -> Update error: ${err}\n`, 'utf8', () =>
-        console.log('Logfile write')
-      );
-}
+const { logFileFunc } = require(`${dir}/logFile.js`);
 
 /*  CREATE HTML FOR THE PROGRESS WINDOW */
 exports.updater = (window) => {
   autoUpdater.checkForUpdates().catch((err) => {
-    erorrFunc(err.stack);
+    logFileFunc(err);
   });
 
   autoUpdater.on('update-available', (info) => {
@@ -106,6 +96,6 @@ exports.updater = (window) => {
   });
 
   autoUpdater.on('error', (err) => {
-    erorrFunc(err.stack);
+    logFileFunc(err);
   });
 };

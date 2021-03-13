@@ -50,7 +50,7 @@
 
                     </div>
                     <div id="connection-info">
-                        <p>Click -- Close Application --. Alternatively wait for reconnection..</p>
+                        <p>Close application or wait for reconnection.</p>
                     </div>
 
                     <button class="btn" id="connection-close">Close Application</button>
@@ -95,8 +95,55 @@
 
     </div>
     <div id="ask-user">
-        <div id="p2s-logo-ask"><img src="../icons/loader.png" alt="" /></div>
+
+        <div id="p2s-logo-ask">What do you want to copy?</div>
         <div id="ask-container">
+            <div id="convert-container">
+
+                <div id="excel">
+                    <svg id="excel-logo" enable-background="new 0 0 512 512" version="1.1" viewBox="0 0 512 512"
+                        xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+                        <g fill="var(--button-green)">
+                            <path
+                                d="m294.66 13.014c-2.531-2.056-5.863-2.842-9.045-2.133l-277.33 64c-4.881 1.122-8.325 5.488-8.278 10.496v362.67c2e-3 5.263 3.843 9.739 9.045 10.539l277.33 42.667c5.823 0.895 11.269-3.099 12.164-8.921 0.082-0.535 0.124-1.076 0.124-1.617v-469.34c0.01-3.253-1.467-6.332-4.01-8.363z" />
+                            <path
+                                d="m501.33 458.71h-213.33c-5.891 0-10.667-4.776-10.667-10.667s4.776-10.667 10.667-10.667h202.67v-362.67h-202.67c-5.891 0-10.667-4.776-10.667-10.667s4.776-10.666 10.667-10.666h213.33c5.891 0 10.667 4.776 10.667 10.667v384c0 5.891-4.775 10.666-10.666 10.666z" />
+                        </g>
+                        <g fill="#FAFAFA">
+                            <path
+                                d="m202.67 352.04c-3.678 0-7.096-1.895-9.045-5.013l-106.67-170.67c-3.279-4.894-1.969-11.52 2.925-14.799s11.52-1.969 14.799 2.925c0.129 0.192 0.251 0.388 0.367 0.588l106.67 170.67c3.11 5.003 1.576 11.58-3.427 14.691-1.687 1.048-3.633 1.605-5.619 1.608z" />
+                            <path
+                                d="m96 352.04c-5.891-0.012-10.657-4.797-10.645-10.688 4e-3 -1.992 0.566-3.943 1.621-5.632l106.67-170.67c2.954-5.097 9.481-6.834 14.577-3.88 5.097 2.954 6.834 9.481 3.88 14.577-0.116 0.2-0.238 0.396-0.367 0.588l-106.67 170.67c-1.948 3.133-5.377 5.038-9.067 5.035z" />
+                        </g>
+                        <g fill="var(--button-green)">
+                            <path
+                                d="m373.33 458.71c-5.891 0-10.667-4.776-10.667-10.667v-384c0-5.891 4.776-10.667 10.667-10.667s10.667 4.776 10.667 10.667v384c-1e-3 5.892-4.776 10.667-10.667 10.667z" />
+                            <path
+                                d="m501.33 394.71h-213.33c-5.891 0-10.667-4.776-10.667-10.667s4.776-10.667 10.667-10.667h213.33c5.891 0 10.667 4.776 10.667 10.667 0 5.892-4.775 10.667-10.666 10.667z" />
+                            <path
+                                d="m501.33 330.71h-213.33c-5.891 0-10.667-4.776-10.667-10.667s4.776-10.667 10.667-10.667h213.33c5.891 0 10.667 4.776 10.667 10.667 0 5.892-4.775 10.667-10.666 10.667z" />
+                            <path
+                                d="m501.33 266.71h-213.33c-5.891 0-10.667-4.776-10.667-10.667s4.776-10.667 10.667-10.667h213.33c5.891 0 10.667 4.776 10.667 10.667 0 5.892-4.775 10.667-10.666 10.667z" />
+                            <path
+                                d="m501.33 202.71h-213.33c-5.891 0-10.667-4.776-10.667-10.667s4.776-10.667 10.667-10.667h213.33c5.891 0 10.667 4.776 10.667 10.667s-4.775 10.667-10.666 10.667z" />
+                            <path
+                                d="m501.33 138.71h-213.33c-5.891 0-10.667-4.776-10.667-10.667s4.776-10.667 10.667-10.667h213.33c5.891 0 10.667 4.776 10.667 10.667 0 5.892-4.775 10.667-10.666 10.667z" />
+                        </g>
+                    </svg>
+
+                    <div id="success-label" success></div>
+
+                </div>
+
+                <div id="list-container">
+                    <!-- <div class="convert-item-busy">AFR002</div>
+                    <div class="convert-item">AHM001</div>
+                    <div class="convert-item">AFRICA01</div>
+                    <div class="convert-item">BUI007</div>
+                    <div class="convert-item">BUI002</div> -->
+                </div>
+            </div>
+
             <div id="loader-ask" class="loading-container">
                 <div class="spinner">
                     <div class="spinner-sector spinner-color-a"></div>
@@ -110,7 +157,9 @@
             <button class="btn" id="copy-to-multiple">Multi Select</button>
             <button class="btn" id="select-back">Back</button>
         </div>
-
+        <div id="p2s-logo-ask-footer">
+            <img src="../icons/loader.png" alt="" />
+        </div>
 
     </div>
 

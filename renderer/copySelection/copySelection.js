@@ -1,5 +1,10 @@
 // Import modules
 const { remote, ipcRenderer } = require('electron');
+const { PythonShell } = require('python-shell');
+const fs = require('fs');
+const os = require('os');
+const homedir = require('os').homedir();
+const archiver = require('archiver');
 
 /* GET WORKING DIRECTORY */
 let dir;
@@ -22,6 +27,7 @@ if (!process.env.NODE_ENV) {
   }
 }
 
+const { logFileFunc } = require(`${dir}/logFile.js`);
 /* GET WINDOW */
 let copySelectionWindow = remote.getCurrentWindow();
 
@@ -35,7 +41,17 @@ let customerNameNumberJson,
   priceListNumberValue,
   customerBackUpJson,
   customerNumberNameJson,
-  customerNameLists;
+  customerNameLists,
+  customerMultiArr,
+  listElements,
+  multiZipPath,
+  tempPath;
+
+/* ZIP VARIABLE REQUIREMENTS */
+let date = new Date();
+let zipDateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+
+tempPath = `${os.tmpdir()}\\P2Sys_conversion_${zipDateString}`;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -58,7 +74,12 @@ let customerListContainer = document.getElementById('customer-list-container'),
   loadingAsk = document.getElementById('loader-ask'),
   loadingSearch = document.getElementById('loader-customer-search'),
   onlineWarning = document.getElementById('connection-container'),
-  closeAppBtn = document.getElementById('connection-close');
+  closeAppBtn = document.getElementById('connection-close'),
+  convertContainer = document.getElementById('convert-container'),
+  convertListContainer = document.getElementById('list-container'),
+  askHeaderInnerText = document.getElementById('p2s-logo-ask'),
+  excelContainer = document.getElementById('excel'),
+  successLabel = document.getElementById('success-label');
 
 /* COPY TYPE SELECTION BOX CONTROLS */
 function showSelector() {
@@ -99,10 +120,6 @@ function showCreateBtn() {
   buttonCreateMultiSearch.style.display = 'flex';
 }
 
-function hideBackBtn() {
-  buttonBackSearch.style.display = 'none';
-}
-
 function showBackBtn() {
   buttonBackSearch.style.display = 'flex';
 }
@@ -120,6 +137,128 @@ function showLoadingSearch() {
 
 function clearCustomerList() {
   customerListContainer.innerHTML = '';
+}
+
+function showListContainer() {
+  askHeaderInnerText.innerText = 'Converting';
+  convertContainer.style.visibility = 'visible';
+}
+
+function hideListContainer() {
+  askHeaderInnerText.innerText = 'What do you want to copy?';
+  convertContainer.style.visibility = 'hidden';
+}
+
+function showExcelAnimation() {
+  excelContainer.style.top = '15vh';
+  setTimeout(() => {
+    successLabel.setAttribute('success', 'Success');
+    successLabel.style.opacity = '1';
+  }, 500);
+}
+
+function removeProcessedElement(element) {
+  element.style.transform = 'scaleY(0)';
+  element.style.opacity = '0';
+  setTimeout(() => {
+    if (listElements.length >= 1) {
+      element.className = element.className + ' convert-item-busy-hide';
+      setTimeout(() => {
+        element.remove();
+        listElements.splice(0, 1);
+        setElementToProcessing(listElements[0], false);
+      });
+    }
+  }, 600);
+}
+
+function buildMessage(element) {
+  /* MATCH THE OBJECT STRUCTURE OF NORMAL CREATION */
+  let customerData = {
+    'price-list': priceListTemplate.jsonFile,
+    _id: element.id,
+  };
+  /* BUILD THE OBJECT FOR PYTHON */
+  let message = {
+    customerData,
+    customerNumber: element.id,
+    priceListNumber: null,
+    multiZipPath,
+    newScheduleDate: null,
+    OldScheduleDate: null,
+    createExcelSchedule: false,
+    customerName: null,
+    custDetail: null,
+    removeOldScheduleFlag: false,
+    createNewScheduleFlag: false,
+    pauseFlag: false,
+    newFlag: false,
+    updateDbFlag: true,
+  };
+
+  convertPythonModule(message);
+}
+
+/* ZIP FUNCTION */
+function zipFileContents(directoryPath) {
+  let date = new Date();
+  let zipDateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  let desktopPath = `${homedir}\\Desktop\\P2Sys_conversion_${zipDateString}.zip`;
+  let output = fs.createWriteStream(desktopPath);
+  let archive = archiver('zip', { zlib: { level: 9 } });
+
+  archive.on('error', (err) => {
+    logFileFunc(err);
+  });
+  archive.on('end', () => {
+    hideListContainer();
+    ipcRenderer.send('email-popup', { multiZipPath: desktopPath });
+
+    copySelectionWindow.close();
+  });
+
+  archive.pipe(output);
+  archive.directory(directoryPath, false);
+  archive.finalize();
+}
+
+/* CHANGE ELEMENT TO PROCESSING */
+async function setElementToProcessing(element, startFlag) {
+  if (listElements.length >= 1) {
+    if (startFlag) {
+      multiZipPath = tempPath;
+      setTimeout(() => {
+        element.className = element.className + ' convert-item-hide';
+        hideLoadingAsk();
+        element.setAttribute('class', 'convert-item-busy');
+      }, 500);
+    } else {
+      element.className = element.className + ' convert-item-hide';
+
+      setTimeout(() => {
+        element.setAttribute('class', 'convert-item-busy');
+      }, 500);
+    }
+    buildMessage(element);
+  } else {
+    showExcelAnimation();
+    zipFileContents(multiZipPath);
+  }
+}
+
+function getListElements() {
+  listElements = Array.from(document.getElementsByClassName('convert-item'));
+  showListContainer();
+  setElementToProcessing(listElements[0], true);
+}
+
+/* CONVERSION LIST */
+function populateSelectionList() {
+  customerMultiArr.forEach((el) => {
+    let html = `<div class="convert-item" id="${el}">${el}</div>`;
+    convertListContainer.insertAdjacentHTML('beforeend', html);
+  });
+  getListElements();
 }
 
 /* FUNCTION CHECK THE MUTE FLAG */
@@ -269,25 +408,29 @@ buttonSelectSearch.addEventListener('click', async (e) => {
   copySelectionWindow.close();
 });
 
-/* BACK BUTTON SEARCH */
-buttonBackSearch.addEventListener('click', (e) => {
+/* BACK EVENT FOR BACK BUTTON */
+function backEventSearch() {
   closeMultiWindow();
   hideSearch();
   clearCustomerList();
-  soundClick.play();
   setTimeout(() => {
     searchDock.value = null;
     hideSelectBtn();
     hideCreateBtn();
     showSelector();
   }, 200);
+}
+
+/* BACK BUTTON SEARCH */
+buttonBackSearch.addEventListener('click', (e) => {
+  soundClick.play();
+  backEventSearch();
 });
 
 /* CREATE MUTLI SEARCH */
-buttonCreateMultiSearch.addEventListener('click', () => {
+buttonCreateMultiSearch.addEventListener('click', async () => {
   soundClick.play();
-
-  // ADD CODE
+  ipcRenderer.send('get-customer-selection-arr', null);
 });
 
 /* CANCEL BUTTON SELECTION BOX */
@@ -367,3 +510,101 @@ ipcRenderer.on('connection-lost', (e) => {
 ipcRenderer.on('connection-found', (e) => {
   onlineWarning.style.visibility = 'hidden';
 });
+
+ipcRenderer.on('get-customer-selection-arr', (e, message) => {
+  customerMultiArr = message;
+  backEventSearch();
+  setTimeout(() => {
+    showLoadingAsk();
+    populateSelectionList();
+  }, 200);
+});
+
+/* PYTHON CONVERSION MULTI */
+/////////////////////////////
+async function convertPythonModule(message) {
+  /* SET VARIABLES */
+  let pauseFlag = message.pauseFlag;
+  let createNewScheduleFlag = message.createNewScheduleFlag;
+  let customerNumber = message.customerNumber;
+  let newScheduleDate = message.newScheduleDate;
+  let OldScheduleDate = message.OldScheduleDate;
+  let customerData = message.customerData;
+  let removeOldScheduleFlag = message.removeOldScheduleFlag;
+  let newFlag = message.newFlag;
+  let custDetail = message.custDetail;
+  let priceListNumber = await ipcRenderer.invoke('get-pricelist-number', customerNumber);
+  let priceList = message.customerData['price-list'];
+  let createExcelSchedule = message.createExcelSchedule;
+  let updateDbFlag = message.updateDbFlag;
+  let multiZipPath = message.multiZipPath;
+
+  /* CREATE A PRICING OBJECT TO CONVERT IN PYTHON */
+  let pythonPricingObj = {
+    'price-list': {
+      ...priceList,
+      customerNumber,
+      priceListNumber,
+    },
+  };
+
+  let data = JSON.stringify(pythonPricingObj);
+  /* PYTHON PROCESSING FUNCTION */
+  ///////////////////////////////
+  let serverPath;
+  if (newScheduleDate === null) {
+    if (fs.existsSync(process.env.SERVER_PATH)) {
+      serverPath = process.env.SERVER_PATH;
+    } else {
+      serverPath = 'none';
+    }
+  } else {
+    serverPath = 'none';
+  }
+
+  /* CREATE OPTIONS OBJECT FOR PYSHELL */
+  let options = {
+    mode: 'text',
+    pythonOptions: ['-u'],
+    scriptPath: `${process.cwd()}/python/`,
+    args: [data, serverPath, createExcelSchedule, newScheduleDate, multiZipPath],
+  };
+
+  /* CREATE PYSHELL  */
+  let pyshell = new PythonShell('conversion.py', options);
+
+  /* CREATE THE PATHS VARIABLE */
+  let filePaths;
+
+  pyshell.on('message', (message) => {
+    /* SEPARATE THE PATHS INTO USABLE ARRAY */
+    let value = parseInt(message);
+    if (isNaN(value)) {
+      filePaths = message.split(',');
+    }
+    if (value === 100) {
+      let message = {
+        customerData,
+        filePaths,
+        pauseFlag,
+        removeOldScheduleFlag,
+        createNewScheduleFlag,
+        newScheduleDate,
+        customerNumber,
+        OldScheduleDate,
+        newFlag,
+        updateDbFlag,
+        custDetail,
+        multiZipPath,
+      };
+      ipcRenderer.send('progress-end-multi', message);
+      removeProcessedElement(listElements[0]);
+    }
+  });
+
+  pyshell.end(function (err, code, signal) {
+    if (err) {
+      logFileFunc(err);
+    }
+  });
+}

@@ -80,7 +80,7 @@ let dateString = `${mainDate.getMonth() + 1}/${mainDate.getFullYear()}`;
 /* //////// */
 
 /* LOGFILE CREATION FUNCTION */
-function logfileFunc(error) {
+function logFileFunc(error) {
   const fileDir = `${appData}/error-log.txt`;
   /* CHECK IF IT EXISTS */
   if (fs.existsSync(fileDir)) {

@@ -31,6 +31,8 @@ if (process.platform === 'win32') {
   appData = process.cwd();
 }
 
+const { logFileFunc } = require(`${dir}/logFile.js`);
+
 /* REMOTE WINDOWS */
 ///////////////////
 let progressWindow = remote.getCurrentWindow();
@@ -49,25 +51,11 @@ let pauseFlag,
   priceListNumber,
   priceList,
   createExcelSchedule,
-  updateDbFlag;
+  updateDbFlag,
+  multiZipPath;
 
 /* FUNCTIONS */
 //////////////
-
-/* LOGFILE CREATION FUNCTION */
-function logfileFunc(error) {
-  const fileDir = `${appData}/error-log.txt`;
-  /* CHECK IF IT EXISTS */
-  if (fs.existsSync(fileDir)) {
-    fs.appendFileSync(fileDir, `${new Date()}: Conversion Error -> [${error}]\n`, (err) =>
-      console.log(err)
-    );
-  } else {
-    fs.writeFileSync(fileDir, `${new Date()}: Conversion Error -> [${error}]\n`, (err) =>
-      console.log(err)
-    );
-  }
-}
 
 ipcRenderer.on('convert-python', (event, message) => {
   customerData = message.customerData;
@@ -82,6 +70,7 @@ ipcRenderer.on('convert-python', (event, message) => {
   priceListNumber = message.custDetail.priceListNumber;
   priceList = customerData['price-list'];
   updateDbFlag = message.updateDbFlag;
+  multiZipPath = message.multiZipPath;
   let createExcelSchedule = message.createExcelSchedule;
 
   /* CREATE A PRICING OBJECT TO CONVERT IN PYTHON */
@@ -112,7 +101,7 @@ ipcRenderer.on('convert-python', (event, message) => {
     mode: 'text',
     pythonOptions: ['-u'],
     scriptPath: `${process.cwd()}/python/`,
-    args: [data, serverPath, createExcelSchedule, newScheduleDate],
+    args: [data, serverPath, createExcelSchedule, newScheduleDate, multiZipPath],
   };
 
   /* CREATE PYSHELL  */
@@ -141,6 +130,7 @@ ipcRenderer.on('convert-python', (event, message) => {
         newFlag,
         updateDbFlag,
         custDetail,
+        multiZipPath,
       };
       ipcRenderer.send('progress-end', message);
       progressWindow.close();
@@ -149,13 +139,13 @@ ipcRenderer.on('convert-python', (event, message) => {
 
   pyshell.end(function (err, code, signal) {
     if (err) {
-      logfileFunc(err.stack);
+      logFileFunc(err);
       progressWindow.hide();
       remote.dialog.showMessageBoxSync(secWindow, {
         type: 'warning',
         icon: `${dir}/renderer/icons/converter-logo.png`,
         buttons: ['OK'],
-        message: 'P2SYS CONVERSION ERROR:',
+        message: 'P2Sys conversion error:',
         detail:
           'There was an problem during the file conversion.\nPlease contact your developer.',
       });

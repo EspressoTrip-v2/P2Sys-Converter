@@ -1,10 +1,10 @@
-import pandas as pd
-import numpy as np
-import xlsxwriter
-import shutil
 import json
-
+import shutil
 import warnings
+
+import numpy as np
+import pandas as pd
+import xlsxwriter
 
 warnings.filterwarnings("ignore", "This pattern has match groups")
 warnings.filterwarnings("ignore", "divide by zero encountered in true_divide")
@@ -48,7 +48,9 @@ columns_sample_pricing_details = [
 
 
 # TEMPLATE FUNCTION
-def system_template_fn(directory, customer_number, customer_pricelist, server_path):
+def system_template_fn(
+    directory, customer_number, customer_pricelist, server_path, multi_zip_path
+):
 
     file_directory = f"{directory}/{customer_number.strip()}_system.xlsx"
 
@@ -133,3 +135,8 @@ def system_template_fn(directory, customer_number, customer_pricelist, server_pa
             )
         except:
             pass
+    if multi_zip_path != "null":
+        shutil.copyfile(
+            f"{directory}\\{customer_number.strip()}_system.xlsx",
+            f"{multi_zip_path}\\{customer_number.strip()}_system.xlsx",
+        )

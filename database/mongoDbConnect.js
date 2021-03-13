@@ -35,17 +35,7 @@ if (!process.env.NODE_ENV) {
   }
 }
 
-/* LOGFILE CREATION FUNCTION */
-//////////////////////////////
-function logfileFunc(message) {
-  let fileDir = `${appData}/error-log.txt`;
-  /* CHECK IF EXISTS */
-  if (fs.existsSync(fileDir)) {
-    fs.appendFileSync(fileDir, `${new Date()}: ${message}\n`, (err) => console.log(err));
-  } else {
-    fs.writeFileSync(fileDir, `${new Date()}: ${message}\n`, (err) => console.log(err));
-  }
-}
+const { logFileFunc } = require(`${dir}/logFile.js`);
 
 /* PAUSED PRICELIST SCHEMA */
 /* SCHEMA */
@@ -126,7 +116,7 @@ exports.createPausedPriceList = async function (priceList) {
       await pausedPricesModel.create(priceList);
     }
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -136,7 +126,7 @@ exports.queryAllPaused = async function () {
     let result = pausedPricesModel.find().distinct('_id').lean().exec();
     return result;
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -146,7 +136,7 @@ exports.querySinglePaused = async function (customerNumber) {
     let result = pausedPricesModel.findById(customerNumber).lean().exec();
     return result;
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -154,7 +144,7 @@ exports.removePausedItem = async function (customerNumber) {
   try {
     pausedPricesModel.findByIdAndDelete(customerNumber).exec();
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -165,7 +155,7 @@ exports.removePausedItemSync = async function (customerNumber) {
       return true;
     }
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -181,7 +171,7 @@ exports.querySinglePriceList = async function (customerNumber) {
     let priceList = await customerPricesModel.findById(customerNumber).lean().exec();
     return priceList;
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -191,13 +181,12 @@ async function queryCustomerExists(customerNumber) {
     let result = await customerPricesModel.exists({ _id: customerNumber });
     return result;
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 }
 
 /* ADD PRICE LIST NUMBER */
 async function addPriceListNumber(customerNumber, priceListNumber) {
-  console.log(`addPriceListNumber(): Name: ${customerNumber}, Number: ${priceListNumber}`);
   try {
     let existsFlag = await customerPricelistNumberModel.exists({ _id: customerNumber });
     if (!existsFlag) {
@@ -207,7 +196,7 @@ async function addPriceListNumber(customerNumber, priceListNumber) {
       });
     }
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 }
 
@@ -219,7 +208,7 @@ async function addCustomerName(customerName, customerNumber) {
       await customerNumberNameModel.create({ _id: customerNumber, name: customerName });
     }
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 }
 
@@ -276,7 +265,7 @@ exports.updatePriceListDataBase = async function (customerData) {
     }
     return true;
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -290,7 +279,7 @@ exports.querySinglePriceListNumber = async function (customerNumber) {
       return null;
     }
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -300,7 +289,7 @@ exports.queryExmillPrice = async function () {
     let result = await customerPricesModel.findById('@EXMILL').lean().exec();
     return result['price-list'];
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -309,7 +298,7 @@ exports.queryAllScheduleDates = async function () {
     let result = await schedulePricesModel.find().distinct('_id').lean().exec();
     return result;
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -321,7 +310,7 @@ exports.querySingleSchedule = async function (date) {
     arr.splice(idx, 1);
     return arr;
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -342,7 +331,7 @@ exports.createScheduleItem = async function (message, date) {
       }
     }
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -368,7 +357,7 @@ exports.removeScheduleItems = async function (message) {
       }
     }
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -381,7 +370,7 @@ exports.editSingleScheduledPriceList = async function (dateNumberObj) {
     let priceList = scheduleObj[dateNumberObj.customerNumber];
     return priceList;
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -391,7 +380,7 @@ exports.queryAllCustomerNumbers = async function () {
     let result = await customerNumberNameModel.find().distinct('_id').lean().exec();
     return result;
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -403,14 +392,14 @@ exports.queryCustomerName = async function (customerNumber, allNames) {
       result = await customerNumberNameModel.find().lean().exec();
       return result;
     } catch (err) {
-      logfileFunc(err.stack);
+      logFileFunc(err);
     }
   } else {
     try {
       result = await customerNumberNameModel.findById(customerNumber).lean().exec();
       return result;
     } catch (err) {
-      logfileFunc(err.stack);
+      logFileFunc(err);
     }
   }
 };
@@ -426,7 +415,7 @@ exports.querySingleCustomerBackup = async function (customerNumber) {
       return result;
     }
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -442,7 +431,7 @@ exports.queryBackUpDate = async function () {
       return false;
     }
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 };
 
@@ -452,7 +441,7 @@ async function updateBackups() {
     let backUpCustomerNumbers = await customerBackUpModel.find().distinct('_id').lean().exec();
     removeBackups(backUpCustomerNumbers);
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 }
 
@@ -509,7 +498,7 @@ async function removePriceLists(query) {
   try {
     customerBackUpModel.findOneAndReplace({ _id: id }, newObj).exec();
   } catch (err) {
-    logfileFunc(err.stack);
+    logFileFunc(err);
   }
 }
 
@@ -520,7 +509,7 @@ async function removeBackups(customerNumbers) {
       let backup = await customerBackUpModel.findById(number).exec();
       removePriceLists(backup);
     } catch (err) {
-      logfileFunc(err.stack);
+      logFileFunc(err);
     }
 
     try {
@@ -535,7 +524,7 @@ async function removeBackups(customerNumbers) {
         )
         .exec();
     } catch (err) {
-      logfileFunc(err.stack);
+      logFileFunc(err);
     }
   });
 }

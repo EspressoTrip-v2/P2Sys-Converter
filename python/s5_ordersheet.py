@@ -22,7 +22,12 @@ warnings.filterwarnings("ignore", "invalid value encountered in multiply")
 
 
 def create_s5_ordersheet(
-    directory, customer_number, customer_pricelist, server_path, schedule_date
+    directory,
+    customer_number,
+    customer_pricelist,
+    server_path,
+    schedule_date,
+    multi_zip_path,
 ):
 
     # CREATE THE COLUMNS TO BE USED IN THE ORDERSHEET #
@@ -1111,8 +1116,13 @@ def create_s5_ordersheet(
     else:
         try:
             shutil.copyfile(
-                f"{directory}/S5_{customer_number.strip()}.xlsx",
-                f"{server_path}/S5_{customer_number.strip()}.xlsx",
+                f"{directory}\\S5_{customer_number.strip()}.xlsx",
+                f"{server_path}\\S5_{customer_number.strip()}.xlsx",
             )
         except:
             pass
+    if multi_zip_path != "null":
+        shutil.copyfile(
+            f"{directory}\\S5_{customer_number.strip()}.xlsx",
+            f"{multi_zip_path}\\S5_{customer_number.strip()}.xlsx",
+        )

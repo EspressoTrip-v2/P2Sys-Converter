@@ -5,6 +5,7 @@ import platform
 import sys
 import warnings
 from datetime import datetime
+from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
@@ -34,6 +35,7 @@ json_pricelist = dict(json.loads(sys.argv[1:][0]))["price-list"]
 # ASSIGN THE FLAGS FOR CORRECT PYTHON CONVERSION
 create_schedule_flag = sys.argv[1:][2]
 schedule_date = sys.argv[1:][3]
+multi_zip_path = sys.argv[1:][4]
 python_schedule_date = 0
 
 # CONVERT JAVASCRIPT STRING TO A USABLE PYTHON DATE
@@ -333,25 +335,24 @@ strip_number = customer_number.strip()
 server_filepath = sys.argv[1:][1]
 if create_schedule_flag == "true":
     server_filepath = "none"
-    mydocuments_folder = (
-        f'{os.environ["HOMEPATH"]}/Documents/P2SYS-SCHEDULED/{strip_number}/{time}/'
-    )
+    mydocuments_folder = f'{os.environ["HOMEPATH"]}\\Documents\\P2SYS-SCHEDULED\\{strip_number}\\{time}\\'
     os.makedirs(mydocuments_folder, exist_ok=True)
 
 else:
-    mydocuments_folder = (
-        f'{os.environ["HOMEPATH"]}/Documents/P2SYS-CONVERSIONS/{strip_number}/{time}/'
-    )
+    mydocuments_folder = f'{os.environ["HOMEPATH"]}\\Documents\\P2SYS-CONVERSIONS\\{strip_number}\\{time}\\'
     os.makedirs(mydocuments_folder, exist_ok=True)
     # GET THE SERVER FILE PATH FROM ARGV
     if server_filepath != "none":
         server_filepath = (
-            f"{server_filepath}/GENERATED_PRICE-LISTS/{strip_number}/{time}/"
+            f"{server_filepath}\\GENERATED_PRICE-LISTS\\{strip_number}\\{time}\\"
         )
         try:
             os.makedirs(server_filepath, exist_ok=True)
         except:
             pass
+    if multi_zip_path != "null":
+        multi_zip_path = f"{multi_zip_path}\\{strip_number}\\"
+        os.makedirs(f"{multi_zip_path}\\", exist_ok=True)
 
 # print(mydocuments_folder)
 
@@ -368,6 +369,7 @@ s5_ordersheet.create_s5_ordersheet(
     reform_file["customer_pricelist"],
     server_filepath,
     python_schedule_date,
+    multi_zip_path,
 )
 
 if create_schedule_flag == "false":
@@ -376,6 +378,7 @@ if create_schedule_flag == "false":
         reform_file["customer_number"],
         reform_file["customer_pricelist"],
         server_filepath,
+        multi_zip_path,
     )
 
 # PASS FILE PATHS FOR EMAIL

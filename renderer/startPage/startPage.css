@@ -1712,11 +1712,12 @@ select {
 
 #calculate {
   position: absolute;
+  font-size: 0.8vw;
   left: 35vw;
   background-color: var(--main);
   color: #fff;
   border: 1px solid #fff;
-  width: 8vw;
+  width: 12vw;
   height: 100%;
 }
 
@@ -1729,28 +1730,24 @@ select {
   transform: scale(0.95);
 }
 
-#calculate-logo {
-  position: relative;
-  padding: 2px;
-  height: 110%;
-}
-
 .exmill {
   position: absolute;
   right: 35vw;
+  font-size: 0.8vw;
   background-color: var(--main);
   color: #fff;
   border: 1px solid #fff;
-  width: 8vw;
+  width: 12vw;
   height: 100%;
 }
 
 .exmill-disabled {
   position: absolute;
+  font-size: 0.8vw;
   right: 35vw;
   background-color: grey;
   color: #fff;
-  width: 8vw;
+  width: 12vw;
   height: 100%;
 }
 
@@ -1761,16 +1758,6 @@ select {
 
 .exmill:active {
   transform: scale(0.95);
-}
-
-#exmill-logo {
-  position: relative;
-  height: 110%;
-}
-
-#exmill-disabled-logo {
-  position: relative;
-  height: 110%;
 }
 
 #exmill-transport-container {
@@ -2996,6 +2983,7 @@ select {
 #connection-info-customer {
   position: absolute;
   top: 39vh;
+  width: 80vw;
   font-size: 4.5vw;
   display: flex;
   justify-content: center;

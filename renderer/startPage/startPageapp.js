@@ -817,6 +817,7 @@ function createPriceListFromHtml(flag) {
           newFlag: false,
           updateDbFlag: true,
           custDetail: getCustomerDetail(),
+          multiZipPath: null,
         });
         secWindow.hide();
         break;
@@ -835,6 +836,7 @@ function createPriceListFromHtml(flag) {
           newFlag: false,
           updateDbFlag: true,
           custDetail: getCustomerDetail(),
+          multiZipPath: null,
         });
         secWindow.hide();
         break;
@@ -846,7 +848,6 @@ function createPriceListFromHtml(flag) {
           customerData,
           pauseFlag: false,
           removeOldScheduleFlag: false,
-          removeOldScheduleFlag: false,
           createNewScheduleFlag: false,
           createExcelSchedule: false,
           newScheduleDate: null,
@@ -854,6 +855,7 @@ function createPriceListFromHtml(flag) {
           newFlag: false,
           updateDbFlag: true,
           custDetail: getCustomerDetail(),
+          multiZipPath: null,
         });
         secWindow.hide();
         break;
@@ -864,7 +866,6 @@ function createPriceListFromHtml(flag) {
           customerData,
           pauseFlag: false,
           removeOldScheduleFlag: false,
-          removeOldScheduleFlag: false,
           createNewScheduleFlag: false,
           createExcelSchedule: false,
           newScheduleDate: null,
@@ -872,6 +873,7 @@ function createPriceListFromHtml(flag) {
           updateDbFlag: true,
           newFlag: true,
           custDetail: getCustomerDetail(),
+          multiZipPath: null,
         });
         secWindow.hide();
         break;
@@ -911,6 +913,7 @@ dateSelectPausedBtn.addEventListener('click', (e) => {
     newFlag: false,
     updateDbFlag: false,
     custDetail: getCustomerDetail(),
+    multiZipPath: null,
   });
   secWindow.hide();
 });
@@ -934,6 +937,7 @@ dateSelectEditBtn.addEventListener('click', (e) => {
     newFlag: false,
     updateDbFlag: false,
     custDetail: getCustomerDetail(),
+    multiZipPath: null,
   });
   secWindow.hide();
 });
@@ -958,6 +962,7 @@ dateSelectStandardBtn.addEventListener('click', (e) => {
     newFlag: false,
     updateDbFlag: false,
     custDetail: getCustomerDetail(),
+    multiZipPath: null,
   });
   secWindow.hide();
 });
@@ -1706,7 +1711,6 @@ checkCopyBtn.addEventListener('click', (e) => {
       customerBackUpJson: null,
       customerNameValue: null,
       priceListNumber: null,
-      OldScheduleDate: null,
     };
 
     closeCustomerDock();

@@ -134,3 +134,9 @@ clearAllBtn.addEventListener('click', () => {
 ipcRenderer.on('add-customer-number', (e, message) => {
   addListItem(message);
 });
+
+ipcRenderer.on('get-customer-selection-arr', (e, message) => {
+  ipcRenderer.send('return-customer-selection-arr', createCustomerArr);
+  ipcRenderer.send('clear-copy-selection-click', null);
+  multiWindow.close();
+});

@@ -31,6 +31,7 @@ if (process.platform === 'win32') {
 } else {
   appData = process.cwd();
 }
+const { logFileFunc } = require(`${dir}/logFile.js`);
 
 /* GET WINDOW */
 let emailWindow = remote.getCurrentWindow();
@@ -68,7 +69,8 @@ let customerNumber,
   newScheduleDate,
   text,
   recipientArr,
-  headingText;
+  headingText,
+  multiZipPath;
 
 /* CREATE EMAIL TEXT FOR MESSAGE AND INITIAL ADDRESSES */
 recipientArr = process.env.EMAIL_TO.split(',');
@@ -133,68 +135,86 @@ function populateRecipientHtml() {
 /* FUNCTION TO GENERATE THE MESSAGE TEST FOR EMAIL MESSAGE*/
 function getText(message) {
   populateRecipientHtml();
-  /* SPLIT MESSAGE INTO USABLE PARTS */
-  customerName = message.custDetail.customerName;
-  customerNumber = message.customerNumber;
-  filePaths = message.filePaths;
-  pausedFlag = message.pauseFlag;
-  newScheduleDate = message.newScheduleDate;
 
-  /* GENERATE THE HEADING */
-  if (newScheduleDate !== null) {
-    headingText = `Price change notification for ${customerNumber.trim()}`;
-  } else {
-    headingText = `Emailing updates for ${customerNumber.trim()}`;
-  }
-  subjectInput.value = headingText;
+  if (message.multiZipPath === null) {
+    /* SPLIT MESSAGE INTO USABLE PARTS */
+    customerName = message.custDetail.customerName;
+    customerNumber = message.customerNumber;
+    filePaths = message.filePaths;
+    pausedFlag = message.pauseFlag;
+    newScheduleDate = message.newScheduleDate;
+    multiZipPath = message.multiZipPath;
 
-  if (filePaths.length === 2) {
-    if (filePaths[0].includes('S5')) {
-      /* DISPLAY FILE NAMES */
-      fileNameA = `S5_${customerNumber.trim()}.xlsx`;
-      fileNameB = `${customerNumber.trim()}_system.xlsx`;
+    /* GENERATE THE HEADING */
+    if (newScheduleDate !== null) {
+      headingText = `Price change notification for ${customerNumber.trim()}`;
     } else {
-      fileNameB = `S5_${customerNumber.trim()}.xlsx`;
-      fileNameA = `${customerNumber.trim()}_system.xlsx`;
+      headingText = `Emailing updates for ${customerNumber.trim()}`;
     }
+    subjectInput.value = headingText;
+
+    if (filePaths.length === 2) {
+      if (filePaths[0].includes('S5')) {
+        /* DISPLAY FILE NAMES */
+        fileNameA = `S5_${customerNumber.trim()}.xlsx`;
+        fileNameB = `${customerNumber.trim()}_system.xlsx`;
+      } else {
+        fileNameB = `S5_${customerNumber.trim()}.xlsx`;
+        fileNameA = `${customerNumber.trim()}_system.xlsx`;
+      }
+    } else {
+      fileNameA = `S5_sample_${customerNumber.trim()}.xlsx`;
+    }
+
+    /* CREATE THE TRANSPORT MESSAGE */
+    /* TEXT OF MESSAGE */
+    if (newScheduleDate === null) {
+      text = `Please find the attached files for immediate update and distribution.\n\nCustomer Name:\n${customerName}\n\nCustomer Number:\n${customerNumber}\n\nKind Regards,\nA.C. Whitcher Management`;
+    } else {
+      text = `Dear: \n${customerName},\n\nThe attached file is a sample order form with price changes that will affect your account.\n\nThe changes will take effect on 1/${newScheduleDate}. Please do not place orders on this sample form, an official order form will be sent to you on or soon after 1/${newScheduleDate}.\n\nIf you have any queries please contact the sales department on +27 42 281 1713.\n\nKind Regards,\nA.C. Whitcher`;
+    }
+
+    /* INSERT THE MESSAGE IN THE TEXT AREA */
+    emailMessageArea.value = text;
+
+    return text;
   } else {
-    fileNameA = `S5_sample_${customerNumber.trim()}.xlsx`;
+    multiZipPath = message.multiZipPath;
+    subjectInput.value = 'Compressed file for distribution';
+    text = `The attached compressed file contain updates for multiple customers.\nPlease update and distribute all extracted files immediately.\n\nKind Regards,\nA.C. Whitcher Management`;
+    /* INSERT THE MESSAGE IN THE TEXT AREA */
+    emailMessageArea.value = text;
+    return text;
   }
-
-  /* CREATE THE TRANSPORT MESSAGE */
-  /* TEXT OF MESSAGE */
-  if (newScheduleDate === null) {
-    text = `Please find the attached files for immediate update and distribution.\n\nCustomer Name:\n${customerName}\n\nCustomer Number:\n${customerNumber}\n\nKind Regards,\nManagement`;
-  } else {
-    text = `Dear: \n${customerName},\n\nThe attached file is a sample order form with price changes that will affect your account.\n\nThe changes will take effect on 1/${newScheduleDate}. Please do not place orders on this sample form, an official order form will be sent to you on or soon after 1/${newScheduleDate}.\n\nIf you have any queries please contact the sales department on +27 42 281 1713.\n\nKind Regards,\nA.C. Whitcher`;
-  }
-
-  /* INSERT THE MESSAGE IN THE TEXT AREA */
-  emailMessageArea.value = text;
-
-  return text;
 }
 
 /* FUNCTION TO CREATE MESSAGE OBJECT TO SEND AS EMAIL */
 function getMessage() {
+  console.log(multiZipPath);
   if (recipientArr.length < 1) {
     /* CREATE MESSAGE POPUP */
     remote.dialog.showMessageBoxSync(emailWindow, {
       type: 'warning',
       icon: `${dir}/renderer/icons/converter-logo.png`,
       buttons: ['OK'],
-      message: 'MISSING EMAIL',
+      message: 'Missing email',
       detail: 'Please add an email address.',
     });
   } else {
     let attachments;
-    if (newScheduleDate !== null) {
-      attachments = [{ filename: fileNameA, path: filePaths[0] }];
-    } else {
-      attachments = [
-        { filename: fileNameA, path: filePaths[0] },
-        { filename: fileNameB, path: filePaths[1] },
-      ];
+    if (multiZipPath === null) {
+      if (newScheduleDate !== null) {
+        attachments = [{ filename: fileNameA, path: filePaths[0] }];
+      } else {
+        attachments = [
+          { filename: fileNameA, path: filePaths[0] },
+          { filename: fileNameB, path: filePaths[1] },
+        ];
+      }
+    } else if (multiZipPath !== null) {
+      let arr = multiZipPath.split('\\');
+      let fileName = arr[arr.length - 1];
+      attachments = [{ filename: fileName, path: multiZipPath }];
     }
 
     let transportMessage = {
@@ -231,8 +251,8 @@ function verifyConnect(message) {
   mailTransport.verify((err, success) => {
     if (err) {
       /* LOG THE ERROR */
-      logfileFunc(err.stack);
-      new Notification('P2SYS MAIL SERVER ERROR', {
+      logFileFunc(err);
+      new Notification('P2Sys mail server error', {
         icon: `${dir}/renderer/icons/converter-logo.png`,
         body: 'There was a mail server error.\nPlease contact your administrator.',
       });
@@ -240,21 +260,6 @@ function verifyConnect(message) {
       populateEmail(message);
     }
   });
-}
-
-/* LOGFILE CREATION FUNCTION */
-function logfileFunc(error) {
-  const fileDir = `${appData}/error-log.txt`;
-  /* CHECK IF IT EXISTS */
-  if (fs.existsSync(fileDir)) {
-    fs.appendFileSync(fileDir, `${new Date()}: Email Error -> ${error}\n`, (err) =>
-      console.log(err)
-    );
-  } else {
-    fs.writeFileSync(fileDir, `${new Date()}: Email Error -> ${error}\n`, (err) =>
-      console.log(err)
-    );
-  }
 }
 
 /* EMAIL SENT FUNCTION */
@@ -324,10 +329,10 @@ function populateEmail(message) {
             sendingMail.style.display = 'none';
 
             /* LOG ERROR */
-            logfileFunc(err.stack);
+            logFileFunc(err);
 
             /* CREATE NOTIFICATION */
-            new Notification('P2SYS MAIL SEND ERROR', {
+            new Notification('P2Sys mail send error', {
               icon: `${dir}/renderer/icons/mailFailTemplate.png`,
               body: 'There was a problem sending the message',
             });
