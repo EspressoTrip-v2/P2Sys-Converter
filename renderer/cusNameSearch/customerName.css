@@ -81,7 +81,7 @@ header {
 #whitcher-logo {
   position: relative;
   height: auto;
-  width: 70vw;
+  width: 90vw;
   -webkit-user-drag: none;
   -webkit-app-region: drag;
 }
@@ -200,7 +200,7 @@ footer {
   justify-content: center;
   justify-items: center;
   width: 90vw;
-  border: 1px solid var(--button-disabled);
+  border: 1px solid #d1d1d1;
 }
 
 #customer-list-container {

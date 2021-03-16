@@ -89,7 +89,6 @@ footer {
   position: absolute;
   top: 11vh;
   display: flex;
-  border: 1px solid lightgray;
   width: 94vw;
   height: 73vh;
   justify-content: flex-start;
@@ -110,7 +109,7 @@ footer {
 }
 #container-background::-webkit-scrollbar-thumb {
   height: 4vh;
-  background-color: lightgray;
+  background-color: #d1d1d1;
 }
 
 #button-container {

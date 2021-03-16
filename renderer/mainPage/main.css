@@ -104,8 +104,6 @@ button {
   background-color: #fff;
   width: 96vw;
   height: 60vh;
-  border-top: 1px solid lightgray;
-  border-bottom: 1px solid lightgray;
 }
 
 #psys-logo {
@@ -126,7 +124,7 @@ button {
   left: 10vw;
   position: absolute;
   height: 1vh;
-  width: 78vw;
+  width: 80vw;
   z-index: 1;
 }
 #psys-logo-container img {
@@ -183,14 +181,77 @@ button {
   animation: pulse 0.3s linear forwards;
 }
 
+#notifications{
+  display: flex;
+  position: absolute;
+  bottom: -12vh;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  width: 94vw;
+  height: 10vh;
+}
+
 #mute {
   position: absolute;
-  width: 9vw;
-  height: auto;
-  bottom: -11.5vh;
+  left: 4vw;
+  width: 10vw;
+  height: 10vw;
 }
 #mute-logo {
   position: relative;
+}
+
+
+
+#pause-notif {
+  position: absolute;
+  width: 10vw;
+  left: 43vw;
+  height: auto;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  align-content: center;
+  transition: left 1s ease-in;
+}
+#pause-logo {
+  position: relative;
+  height: 10vw;
+}
+
+#download-notif {
+  position: absolute;
+  visibility: hidden;
+  right: 28vw;
+  width: 12vw;
+  height: auto;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  align-content: center;
+}
+#download-logo {
+  position: relative;
+  height: 11vw;
+}
+
+
+
+#schedule-notif {
+  position: absolute;
+  right: 4vw;
+  width: 10vw;
+  height: auto;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  align-content: center;
+}
+#schedule-logo {
+  position: relative;
+  width: 9vw;
+  height: 9vw;
 }
 
 @keyframes pulse {
@@ -264,7 +325,7 @@ button {
   align-content: center;
   text-align: center;
   padding: 5vh 0;
-  background-color: lightgray;
+  background-color: #d1d1d1;
   color: #fff;
   border: 1px solid #fff;
   width: 89vw;
@@ -335,8 +396,6 @@ button {
   height: 60vh;
   align-content: center;
   background-color: #fff;
-  border-top: 1px solid lightgray;
-  border-bottom: 1px solid lightgray;
 }
 
 #system-settings-btn-container {
@@ -450,9 +509,9 @@ button {
 }
 #check-background {
   position: absolute;
-  width: 94vw;
-  height: 80vh;
-  bottom: 9vw;
+  width: 95vw;
+  height: 60vh;
+  bottom: 36vw;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -462,7 +521,7 @@ button {
   position: relative;
   width: 94vw;
   background-color: #fff;
-  border: 1px solid lightgray;
+  border-top: 1px solid #d1d1d1;
   height: 60vh;
 }
 
@@ -576,12 +635,32 @@ button {
   flex-direction: row;
   align-content: center;
   justify-content: space-around;
-  border: 1px solid lightgray;
+  border: 1px solid #d1d1d1;
   align-items: center;
   justify-items: center;
   width: 94vw;
   height: 10vh;
   padding: 0vw 1vw;
+}
+#loading-round {
+  height: 75vh;
+  border: none;
+}
+
+#p2s-logo-convert-footer {
+  display: flex;
+  bottom: 1vh;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  width: 94vw;
+  height: 8vh;
+}
+
+#p2s-logo-convert-footer img {
+  position: absolute;
+  height: 8vh;
 }
 
 .loading-container {
@@ -593,7 +672,7 @@ button {
   align-items: center;
   visibility: hidden;
   position: absolute;
-  border: 1px solid lightgray;
+  border: 1px solid #d1d1d1;
   z-index: 3;
   font-weight: bolder;
   width: 94vw;
@@ -658,7 +737,7 @@ button {
   width: 93vw;
   height: 100%;
   color: #fff;
-  background-color: lightgray;
+  background-color: #d1d1d1;
   border: 1px solid #fff;
   display: flex;
   justify-content: center;
@@ -849,4 +928,146 @@ button {
   line-height: 1.5em;
   height: 10vh;
   width: 80vw;
+}
+
+#convert-container {
+  display: flex;
+  z-index: 3;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  visibility: hidden;
+  position: absolute;
+  background-color: #fff;
+  height: 94vh;
+  width: 94vw;
+}
+
+#convert-container-header {
+  position: absolute;
+  top: -1vh;
+  background-color: #000;
+  width: 96vw;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  font-size: 6vw;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  height: 8vh;
+}
+
+#success-label {
+  position: relative;
+  font-size: 6vw;
+  padding: 1vh 4vw;
+  opacity: 0;
+  top: 2vh;
+  display: flex;
+  justify-content: center;
+  font-weight: bold;
+  align-items: center;
+  align-content: center;
+  border-radius: 3px;
+  transition: opacity 0.3s ease-in;
+}
+
+#excel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  position: absolute;
+  top: 10vh;
+  width: 94vw;
+  height: 30vh;
+  transition: top 0.5s ease-in;
+}
+
+#excel-logo {
+  position: relative;
+  width: 30vw;
+}
+
+#list-container {
+  width: 96vw;
+  max-height: 40vh;
+  position: absolute;
+  top: 40vh;
+  font-size: 6vw;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  align-content: center;
+}
+
+.convert-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 10vh;
+  transform: scaleY(1);
+  min-height: 10vh;
+  align-content: center;
+  border: 1px solid #d1d1d1;
+  color: #d1d1d1;
+  width: 50vw;
+  background-color: #fff;
+  margin-bottom: 1vh;
+  transition: all 0.5s ease-out;
+}
+
+.convert-item-hide {
+  transform: scaleY(0);
+}
+
+.convert-item-busy {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  align-content: flex-start;
+  color: #fff;
+  border: 1px solid #fff;
+  background-color: #000;
+  height: 13vh;
+  min-height: 13vh;
+  transform: scaleY(1);
+  opacity: 1;
+  width: 70vw;
+  padding: 0 5vw;
+  margin-bottom: 2vh;
+  transition: all 0.5s ease-out;
+}
+
+.convert-item-busy-hide {
+  transform: scaleY(0);
+  opacity: 0;
+}
+
+.convert-item-busy::after {
+  content: url(../icons/excel.svg);
+  position: absolute;
+  height: 7vh;
+  width: 7vh;
+  right: 4vw;
+  animation: spin linear infinite 2s;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

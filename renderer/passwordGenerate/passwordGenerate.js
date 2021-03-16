@@ -50,28 +50,6 @@ let userInput = document.getElementById('username'),
   passwordLabel = document.getElementById('password-label'),
   usernameLabel = document.getElementById('username-label'),
   passwordLabelRetype = document.getElementById('password-label-retype');
-/* FUNCTION CHECK THE MUTE FLAG */
-let storage = JSON.parse(localStorage.getItem('notifications'));
-function checkMuteFlag() {
-  if (!storage.muteflag) {
-    /* SET FLAG TO FALSE AND TURN OFF ALL SOUND */
-    storage.muteflag = false;
-    localStorage.setItem('notifications', JSON.stringify(storage));
-    audioTag.forEach((el) => {
-      el.muted = true;
-    });
-  } else {
-    /* SET THE FLAG TO TRUE AND TURN OFF ALL SOUND */
-    storage.muteflag = true;
-    localStorage.setItem('notifications', JSON.stringify(storage));
-    audioTag.forEach((el) => {
-      el.muted = false;
-    });
-  }
-}
-if (!storage.muteflag) {
-  checkMuteFlag();
-}
 
 function passwordMatch() {
   passwordLabel.style.color = 'var(--button-red)';

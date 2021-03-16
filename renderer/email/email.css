@@ -135,7 +135,7 @@ body {
   width: 0.8vw;
 }
 #email-message::-webkit-scrollbar-thumb {
-  background-color: lightgray;
+  background-color: #d1d1d1;
 }
 
 #add-recipient {
@@ -230,7 +230,7 @@ body {
   align-content: center;
   align-items: center;
   height: 5vh;
-  border-bottom: 1px solid lightgray;
+  border-bottom: 1px solid #d1d1d1;
   width: 75vw;
 }
 
@@ -294,7 +294,7 @@ body {
   align-items: center;
   height: 5vh;
   width: 75vw;
-  border-bottom: 1px solid lightgray;
+  border-bottom: 1px solid #d1d1d1;
 }
 
 #email-entry {
@@ -327,7 +327,7 @@ body {
 }
 #added-recipients::-webkit-scrollbar-thumb {
   height: 4vh;
-  background-color: lightgray;
+  background-color: #d1d1d1;
 }
 
 .label {

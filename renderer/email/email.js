@@ -70,7 +70,8 @@ let customerNumber,
   text,
   recipientArr,
   headingText,
-  multiZipPath;
+  multiZipPath,
+  unHideHomeWindowFlag = null;
 
 /* CREATE EMAIL TEXT FOR MESSAGE AND INITIAL ADDRESSES */
 recipientArr = process.env.EMAIL_TO.split(',');
@@ -180,8 +181,9 @@ function getText(message) {
     return text;
   } else {
     multiZipPath = message.multiZipPath;
+    unHideHomeWindowFlag = true;
     subjectInput.value = 'Compressed file for distribution';
-    text = `The attached compressed file contain updates for multiple customers.\nPlease update and distribute all extracted files immediately.\n\nKind Regards,\nA.C. Whitcher Management`;
+    text = `The attached file is an automated schedule or bulk conversion, it could contain updates for multiple customers.\nPlease extract all files and folders and update and distribute immediately.\n\nKind Regards,\nA.C. Whitcher Management`;
     /* INSERT THE MESSAGE IN THE TEXT AREA */
     emailMessageArea.value = text;
     return text;
@@ -190,7 +192,6 @@ function getText(message) {
 
 /* FUNCTION TO CREATE MESSAGE OBJECT TO SEND AS EMAIL */
 function getMessage() {
-  console.log(multiZipPath);
   if (recipientArr.length < 1) {
     /* CREATE MESSAGE POPUP */
     remote.dialog.showMessageBoxSync(emailWindow, {
@@ -264,8 +265,14 @@ function verifyConnect(message) {
 
 /* EMAIL SENT FUNCTION */
 function sendEmail() {
+  ipcRenderer.send('hide-updater', null);
   borderBox.style.opacity = '0';
-  ipcRenderer.send('email-close', null);
+  /* SHOW HOMEWINDOW IF CONVERTING SCHEDULE ITEMS */
+  if (unHideHomeWindowFlag != null) {
+    ipcRenderer.send('show-home', null);
+  } else {
+    ipcRenderer.send('email-close', null);
+  }
   setTimeout(() => {
     emailWindow.setBounds({
       width: Math.floor(screenWidth * 0.03),
@@ -345,6 +352,7 @@ function populateEmail(message) {
             }, 500);
 
             setTimeout(() => {
+              ipcRenderer.send('show-updater', null);
               emailWindow.close();
             }, 1500);
           } else {
@@ -353,19 +361,12 @@ function populateEmail(message) {
             sentMail.style.animation = 'pop 0.3s 0.3s linear 1 forwards';
             sentMail.style.opacity = '0';
 
-            let mailObj = {
-              customerNumber,
-              pausedFlag,
-              newScheduleDate,
-            };
-            if (info.rejected.length === 0) {
-              setTimeout(() => {
-                ipcRenderer.send('close-email-window', mailObj);
-              }, 1500);
-            }
+            setTimeout(() => {
+              ipcRenderer.send('close-email-window', null);
+            }, 1500);
           }
         });
-      }, 200);
+      }, 300);
     }
   });
 

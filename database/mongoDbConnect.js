@@ -107,7 +107,7 @@ exports.customerBackUpModel = customerBackUpModel;
 ////////////////////////////
 
 // CREATE A PAUSED PRICE-LIST
-exports.createPausedPriceList = async function (priceList) {
+exports.createPausedPriceList = async function (priceList, notifyMain) {
   try {
     let result = await pausedPricesModel.exists({ _id: priceList._id });
     if (result) {
@@ -117,38 +117,68 @@ exports.createPausedPriceList = async function (priceList) {
     }
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Create paused failed',
+      body: `Failed to create ${priceList._id} paused price list, please check the log file.`,
+    });
   }
 };
 
 // QUERY ALL CUSTOMER NUMBERS IN PAUSED PRICELISTS
-exports.queryAllPaused = async function () {
+exports.queryAllPaused = async function (notifyMain) {
   try {
-    let result = pausedPricesModel.find().distinct('_id').lean().exec();
+    let result = await pausedPricesModel.find().distinct('_id').lean().exec();
     return result;
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Query all paused failed',
+      body: 'Problem querying paused items, please check the log file.',
+    });
+  }
+};
+
+// QUERY ALL CUSTOMER NUMBERS IN PAUSED PRICELISTS
+exports.queryAllPausedQuantity = async function (notifyMain) {
+  try {
+    let result = await pausedPricesModel.find().distinct('_id').lean().exec();
+    return result.length;
+  } catch (err) {
+    logFileFunc(err);
+    notifyMain({
+      title: 'Query paused quantity failed',
+      body: 'Problem querying paused quantities, please check the log file.',
+    });
   }
 };
 
 // QUERY SINGLE PAUSED PRICE-LIST
-exports.querySinglePaused = async function (customerNumber) {
+exports.querySinglePaused = async function (customerNumber, notifyMain) {
   try {
-    let result = pausedPricesModel.findById(customerNumber).lean().exec();
+    let result = await pausedPricesModel.findById(customerNumber).lean().exec();
     return result;
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Query single paused item failed',
+      body: `Problem querying ${customerNumber} paused item, please check the log file.`,
+    });
   }
 };
 
-exports.removePausedItem = async function (customerNumber) {
+exports.removePausedItem = async function (customerNumber, notifyMain) {
   try {
     pausedPricesModel.findByIdAndDelete(customerNumber).exec();
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Removal of single paused item failed',
+      body: `Problem removing ${customerNumber} paused item, please check the log file.`,
+    });
   }
 };
 
-exports.removePausedItemSync = async function (customerNumber) {
+exports.removePausedItemSync = async function (customerNumber, notifyMain) {
   try {
     let result = await pausedPricesModel.findByIdAndDelete(customerNumber).lean().exec();
     if (result._id === customerNumber) {
@@ -156,22 +186,38 @@ exports.removePausedItemSync = async function (customerNumber) {
     }
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Removal of single paused item failed',
+      body: `Problem removing ${customerNumber} paused item, please check the log file.`,
+    });
   }
 };
 
 // QUERY ALL CUSTOMER PRICE-LIST NUMBERS
-exports.queryAllPriceListNumbers = async function () {
-  let result = await customerPricesModel.find().distinct('_id').exec();
-  return result;
+exports.queryAllPriceListNumbers = async function (notifyMain) {
+  try {
+    let result = await customerPricesModel.find().distinct('_id').exec();
+    return result;
+  } catch (err) {
+    logFileFunc(err);
+    notifyMain({
+      title: 'Query all price list numbers failed',
+      body: 'Problem querying all price list numbers, please check the log file.',
+    });
+  }
 };
 
 // QUERY A SINGLE PRICE-LIST
-exports.querySinglePriceList = async function (customerNumber) {
+exports.querySinglePriceList = async function (customerNumber, notifyMain) {
   try {
     let priceList = await customerPricesModel.findById(customerNumber).lean().exec();
     return priceList;
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Query single price failed',
+      body: `Problem querying ${customerNumber} price list, please check the log file.`,
+    });
   }
 };
 
@@ -186,7 +232,7 @@ async function queryCustomerExists(customerNumber) {
 }
 
 /* ADD PRICE LIST NUMBER */
-async function addPriceListNumber(customerNumber, priceListNumber) {
+async function addPriceListNumber(customerNumber, priceListNumber, notifyMain) {
   try {
     let existsFlag = await customerPricelistNumberModel.exists({ _id: customerNumber });
     if (!existsFlag) {
@@ -197,11 +243,14 @@ async function addPriceListNumber(customerNumber, priceListNumber) {
     }
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Adding price list number failed',
+      body: `Problem adding ${priceListNumber} for ${customerNumber}, please check the log file.`,
+    });
   }
 }
 
-async function addCustomerName(customerName, customerNumber) {
-  console.log(`addCustomer(): Name: ${customerName}, Number: ${customerNumber}`);
+async function addCustomerName(customerName, customerNumber, notifyMain) {
   try {
     let existsFlag = await customerNumberNameModel.exists({ _id: customerNumber });
     if (!existsFlag) {
@@ -209,11 +258,20 @@ async function addCustomerName(customerName, customerNumber) {
     }
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Adding customer name failed',
+      body: `Problem adding a name to ${customerNumber}, please check the log file.`,
+    });
   }
 }
 
+exports.addCustomerNameAndNumbers = async function (custDetail, notifyMain) {
+  await addCustomerName(custDetail.customerName, custDetail.customerNumber, notifyMain);
+  await addPriceListNumber(custDetail.customerNumber, custDetail.priceListNumber, notifyMain);
+};
+
 /* SAVE PRICE-LIST TO DATABASE */
-exports.updatePriceListDataBase = async function (customerData) {
+exports.updatePriceListDataBase = async function (customerData, notifyMain) {
   let date = new Date();
   let month = date.getMonth() + 1;
   let year = date.getFullYear();
@@ -266,11 +324,15 @@ exports.updatePriceListDataBase = async function (customerData) {
     return true;
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Updating price lists failed',
+      body: `Problem updating price list for ${customerNumber}, please check the log file.`,
+    });
   }
 };
 
 /* QUERY SINGLE PRICE-LIST NUMBER */
-exports.querySinglePriceListNumber = async function (customerNumber) {
+exports.querySinglePriceListNumber = async function (customerNumber, notifyMain) {
   try {
     let result = await customerPricelistNumberModel.findById(customerNumber).lean().exec();
     if (result !== null) {
@@ -280,29 +342,54 @@ exports.querySinglePriceListNumber = async function (customerNumber) {
     }
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Querying price list number failed',
+      body: `Problem querying ${customerNumber} price list, please check the log file.`,
+    });
   }
 };
 
 /* GET THE LATEST EXMILL PRICE-LIST */
-exports.queryExmillPrice = async function () {
+exports.queryExmillPrice = async function (notifyMain) {
   try {
     let result = await customerPricesModel.findById('@EXMILL').lean().exec();
     return result['price-list'];
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Querying ex-mill price list failed',
+      body: `Problem querying ex-mill price list, please check the log file.`,
+    });
   }
 };
 
-exports.queryAllScheduleDates = async function () {
+exports.queryAllScheduleDates = async function (notifyMain) {
   try {
     let result = await schedulePricesModel.find().distinct('_id').lean().exec();
     return result;
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Querying all schedules failed',
+      body: `Problem querying all scheduled items, please check the log file.`,
+    });
   }
 };
 
-exports.querySingleSchedule = async function (date) {
+exports.queryAllScheduleDatesQuantity = async function (notifyMain) {
+  try {
+    let result = await schedulePricesModel.find().distinct('_id').lean().exec();
+    return result.length;
+  } catch (err) {
+    logFileFunc(err);
+    notifyMain({
+      title: 'Querying all schedules dates failed',
+      body: `Problem querying all scheduled dates, please check the log file.`,
+    });
+  }
+};
+
+exports.querySingleSchedule = async function (date, notifyMain) {
   try {
     let result = await schedulePricesModel.find({ _id: date }).lean().exec();
     let arr = Object.keys(result[0]);
@@ -311,10 +398,14 @@ exports.querySingleSchedule = async function (date) {
     return arr;
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Querying single schedule date failed',
+      body: `Problem querying schedule date: ${date}, please check the log file.`,
+    });
   }
 };
 
-exports.createScheduleItem = async function (message, date) {
+exports.createScheduleItem = async function (message, date, notifyMain) {
   let result;
   try {
     let existsFlag = await schedulePricesModel.exists({ _id: date });
@@ -332,10 +423,14 @@ exports.createScheduleItem = async function (message, date) {
     }
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Creating schedule date failed',
+      body: `Problem creating schedule date: ${date}, please check the log file.`,
+    });
   }
 };
 
-exports.removeScheduleItems = async function (message) {
+exports.removeScheduleItems = async function (message, notifyMain) {
   let keys;
   try {
     let result = await schedulePricesModel.findById(message.dateValue).lean().exec();
@@ -358,10 +453,14 @@ exports.removeScheduleItems = async function (message) {
     }
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Removing schedule date failed',
+      body: `Problem removing schedule date: ${date}, please check the log file.`,
+    });
   }
 };
 
-exports.editSingleScheduledPriceList = async function (dateNumberObj) {
+exports.editSingleScheduledPriceList = async function (dateNumberObj, notifyMain) {
   try {
     let scheduleObj = await schedulePricesModel
       .findById(dateNumberObj.dateValue)
@@ -371,21 +470,29 @@ exports.editSingleScheduledPriceList = async function (dateNumberObj) {
     return priceList;
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Editing schedule date failed',
+      body: `Problem editing schedule date: ${date}, please check the log file.`,
+    });
   }
 };
 
 // QUERY ALL CUSTOMER NUMBERS ON FILE
-exports.queryAllCustomerNumbers = async function () {
+exports.queryAllCustomerNumbers = async function (notifyMain) {
   try {
     let result = await customerNumberNameModel.find().distinct('_id').lean().exec();
     return result;
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Querying all customer numbers failed',
+      body: `Problem querying all customer numbers, please check the log file.`,
+    });
   }
 };
 
 // GET CUSTOMER NAME
-exports.queryCustomerName = async function (customerNumber, allNames) {
+exports.queryCustomerName = async function (customerNumber, allNames, notifyMain) {
   let result;
   if (allNames) {
     try {
@@ -393,6 +500,10 @@ exports.queryCustomerName = async function (customerNumber, allNames) {
       return result;
     } catch (err) {
       logFileFunc(err);
+      notifyMain({
+        title: 'Querying all customer names failed',
+        body: `Problem querying all customer names, please check the log file.`,
+      });
     }
   } else {
     try {
@@ -400,12 +511,16 @@ exports.queryCustomerName = async function (customerNumber, allNames) {
       return result;
     } catch (err) {
       logFileFunc(err);
+      notifyMain({
+        title: 'Querying a customer name failed',
+        body: `Problem querying name for ${customerNumber}, please check the log file.`,
+      });
     }
   }
 };
 
 // QUERY SINGLE CUSTOMER BACKUP
-exports.querySingleCustomerBackup = async function (customerNumber) {
+exports.querySingleCustomerBackup = async function (customerNumber, notifyMain) {
   try {
     let result = await customerBackUpModel.findById(customerNumber).lean().exec();
     if (result != null && Object.keys(result).length >= 2) {
@@ -416,11 +531,15 @@ exports.querySingleCustomerBackup = async function (customerNumber) {
     }
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Querying a single backup failed',
+      body: `Problem querying backup for ${customerNumber}, please check the log file.`,
+    });
   }
 };
 
 // QUERY THE LAST CLEANED DATE ON BACKUP DATABASE
-exports.queryBackUpDate = async function () {
+exports.queryBackUpDate = async function (notifyMain) {
   try {
     let date = await customerBackUpModel.findById('check').lean().exec();
     let value = parseInt(date.value);
@@ -432,6 +551,10 @@ exports.queryBackUpDate = async function () {
     }
   } catch (err) {
     logFileFunc(err);
+    notifyMain({
+      title: 'Querying all backup dates failed',
+      body: `Problem querying all backup dates, please check the log file.`,
+    });
   }
 };
 

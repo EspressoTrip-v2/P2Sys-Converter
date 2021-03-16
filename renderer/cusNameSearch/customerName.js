@@ -42,7 +42,7 @@ if (!storage.muteflag) {
   checkMuteFlag();
 }
 
-function fillcustomerNameNumberJson() {
+function fillCustomerNameNumberJson() {
   /* POPULATE LIST OF CUSTOMERS */
   ///////////////////////////////
 
@@ -105,7 +105,10 @@ function fillcustomerNameNumberJson() {
 ipcRenderer.on('name-search', (event, message) => {
   customerNameNumberJson = message.customerNameNumberJson;
   customerPricesNumbersArr = message.customerPricesNumbersArr;
-  fillcustomerNameNumberJson();
+  fillCustomerNameNumberJson();
+  setTimeout(() => {
+    searchDock.focus();
+  }, 300);
 });
 
 /* MESSAGE TO RETRACT WINDOW BEFORE CLOSE */

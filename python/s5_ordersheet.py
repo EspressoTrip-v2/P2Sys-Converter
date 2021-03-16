@@ -226,6 +226,7 @@ def create_s5_ordersheet(
     desc_050 = ["(050 x 076)", "(050 x 114)", "(050 x 152)", "(050 x 228)"]
     desc_076 = ["(076 x 114)", "(076 x 152)", "(076 x 228)"]
     nan_row = ["", "", "", "", np.nan, np.nan, np.nan, np.nan]
+    # filter_row = ["", "", "", 0, np.nan, np.nan, np.nan, np.nan]
 
     # RESET THE INDEX
     customer_pricelist.reset_index(inplace=True)
@@ -268,7 +269,7 @@ def create_s5_ordersheet(
     ]
     _038T["ORDER QTY M3"] = np.nan
     _038T["AMOUNT R"] = np.nan
-    _038T = _038T[_038T["M3 TREATED"] > 0]
+    _038T = _038T[_038T["M3 TREATED"] >= 0]
 
     _038T.sort_values(by=["DESC"], inplace=True, axis=0)
     _038T["DESC"] = (
@@ -290,6 +291,23 @@ def create_s5_ordersheet(
 
             df2 = _038T.iloc[idx[-1] + 1 :, :].copy()
             _038T = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _038T_hidden_rows = []
+    for i in desc_038:
+        idx = list(_038T[_038T["DESC"].str.contains(i)].index)
+        if _038T.loc[idx, "M3 TREATED"].sum() == 0:
+            try:
+                if len(_038T_hidden_rows) == 0:
+                    _038T_hidden_rows = np.array(idx) + 4
+                    added_item = _038T_hidden_rows[-1] + 1
+                    _038T_hidden_rows = np.append(_038T_hidden_rows, added_item)
+                else:
+                    _038T_hidden_rows = np.append(_038T_hidden_rows, np.array(idx) + 4)
+                    added_item = _038T_hidden_rows[-1] + 1
+                    _038T_hidden_rows = np.append(_038T_hidden_rows, added_item)
+            except:
+                pass
 
     # ADD THE TREATED COLUMN NAMES
     _038T.columns = columnsT
@@ -313,7 +331,7 @@ def create_s5_ordersheet(
     ]
     _038U["ORDER QTY M3"] = np.nan
     _038U["AMOUNT R"] = np.nan
-    _038U = _038U[_038U["M3 UNTREATED"] > 0]
+    _038U = _038U[_038U["M3 UNTREATED"] >= 0]
     _038U.sort_values(by=["DESC"], inplace=True, axis=0)
 
     _038U.sort_values(by=["DESC"], inplace=True, axis=0)
@@ -336,6 +354,24 @@ def create_s5_ordersheet(
 
             df2 = _038U.iloc[idx[-1] + 1 :, :].copy()
             _038U = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _038U_hidden_rows = []
+    for i in desc_038:
+        idx = list(_038U[_038U["DESC"].str.contains(i)].index)
+        if _038U.loc[idx, "M3 UNTREATED"].sum() == 0:
+            try:
+                if len(_038U_hidden_rows) == 0:
+                    _038U_hidden_rows = np.array(idx) + 4
+                    added_item = _038U_hidden_rows[-1] + 1
+                    _038U_hidden_rows = np.append(_038U_hidden_rows, added_item)
+                else:
+                    _038U_hidden_rows = np.append(_038U_hidden_rows, np.array(idx) + 4)
+                    added_item = _038U_hidden_rows[-1] + 1
+                    _038U_hidden_rows = np.append(_038U_hidden_rows, added_item)
+            except:
+                pass
+
     # ADD UNTREATED COLUMN NAMES
     _038U.columns = columnsU
 
@@ -359,7 +395,7 @@ def create_s5_ordersheet(
     ]
     _050T["ORDER QTY M3"] = np.nan
     _050T["AMOUNT R"] = np.nan
-    _050T = _050T[_050T["M3 TREATED"] > 0]
+    _050T = _050T[_050T["M3 TREATED"] >= 0]
     _050T.sort_values(by=["DESC"], inplace=True, axis=0)
 
     _050T.sort_values(by=["DESC"], inplace=True, axis=0)
@@ -383,6 +419,24 @@ def create_s5_ordersheet(
             df2 = _050T.iloc[idx[-1] + 1 :, :].copy()
 
             _050T = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _050T_hidden_rows = []
+    for i in desc_050:
+        idx = list(_050T[_050T["DESC"].str.contains(i)].index)
+        if _050T.loc[idx, "M3 TREATED"].sum() == 0:
+            try:
+                if len(_050T_hidden_rows) == 0:
+                    _050T_hidden_rows = np.array(idx) + 4
+                    added_item = _050T_hidden_rows[-1] + 1
+                    _050T_hidden_rows = np.append(_050T_hidden_rows, added_item)
+                else:
+                    _050T_hidden_rows = np.append(_050T_hidden_rows, np.array(idx) + 4)
+                    added_item = _050T_hidden_rows[-1] + 1
+                    _050T_hidden_rows = np.append(_050T_hidden_rows, added_item)
+            except:
+                pass
+
     # ADD TREATED COLUMN NAMES
     _050T.columns = columnsT
 
@@ -405,7 +459,7 @@ def create_s5_ordersheet(
     ]
     _050U["ORDER QTY M3"] = np.nan
     _050U["AMOUNT R"] = np.nan
-    _050U = _050U[_050U["M3 UNTREATED"] > 0]
+    _050U = _050U[_050U["M3 UNTREATED"] >= 0]
     _050U.sort_values(by=["DESC"], inplace=True, axis=0)
 
     _050U.sort_values(by=["DESC"], inplace=True, axis=0)
@@ -429,6 +483,24 @@ def create_s5_ordersheet(
 
             df2 = _050U.iloc[idx[-1] + 1 :, :].copy()
             _050U = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _050U_hidden_rows = []
+    for i in desc_050:
+        idx = list(_050U[_050U["DESC"].str.contains(i)].index)
+        if _050U.loc[idx, "M3 UNTREATED"].sum() == 0:
+            try:
+                if len(_050U_hidden_rows) == 0:
+                    _050U_hidden_rows = np.array(idx) + 4
+                    added_item = _050U_hidden_rows[-1] + 1
+                    _050U_hidden_rows = np.append(_050U_hidden_rows, added_item)
+                else:
+                    _050U_hidden_rows = np.append(_050U_hidden_rows, np.array(idx) + 4)
+                    added_item = _050U_hidden_rows[-1] + 1
+                    _050U_hidden_rows = np.append(_050U_hidden_rows, added_item)
+            except:
+                pass
+
     # ADD UNTREATED COLUMN NAMES
     _050U.columns = columnsU
 
@@ -452,7 +524,7 @@ def create_s5_ordersheet(
     ]
     _076T["ORDER QTY M3"] = np.nan
     _076T["AMOUNT R"] = np.nan
-    _076T = _076T[_076T["M3 TREATED"] > 0]
+    _076T = _076T[_076T["M3 TREATED"] >= 0]
     _076T.sort_values(by=["DESC"], inplace=True, axis=0)
 
     _076T.sort_values(by=["DESC"], inplace=True, axis=0)
@@ -477,6 +549,24 @@ def create_s5_ordersheet(
             df2 = _076T.iloc[idx[-1] + 1 :, :].copy()
 
             _076T = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _076T_hidden_rows = []
+    for i in desc_076:
+        idx = list(_076T[_076T["DESC"].str.contains(i)].index)
+        if _076T.loc[idx, "M3 TREATED"].sum() == 0:
+            try:
+                if len(_076T_hidden_rows) == 0:
+                    _076T_hidden_rows = np.array(idx) + 4
+                    added_item = _076T_hidden_rows[-1] + 1
+                    _076T_hidden_rows = np.append(_076T_hidden_rows, added_item)
+                else:
+                    _076T_hidden_rows = np.append(_076T_hidden_rows, np.array(idx) + 4)
+                    added_item = _076T_hidden_rows[-1] + 1
+                    _076T_hidden_rows = np.append(_076T_hidden_rows, added_item)
+            except:
+                pass
+
     # ADD TREATED COLUMN NAMES
     _076T.columns = columnsT
 
@@ -499,7 +589,7 @@ def create_s5_ordersheet(
     ]
     _076U["ORDER QTY M3"] = np.nan
     _076U["AMOUNT R"] = np.nan
-    _076U = _076U[_076U["M3 UNTREATED"] > 0]
+    _076U = _076U[_076U["M3 UNTREATED"] >= 0]
     _076U.sort_values(by=["DESC"], inplace=True, axis=0)
 
     _076U.sort_values(by=["DESC"], inplace=True, axis=0)
@@ -524,6 +614,24 @@ def create_s5_ordersheet(
             df2 = _076U.iloc[idx[-1] + 1 :, :].copy()
 
             _076U = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _076U_hidden_rows = []
+    for i in desc_076:
+        idx = list(_076U[_076U["DESC"].str.contains(i)].index)
+        if _076U.loc[idx, "M3 UNTREATED"].sum() == 0:
+            try:
+                if len(_076U_hidden_rows) == 0:
+                    _076U_hidden_rows = np.array(idx) + 4
+                    added_item = _076U_hidden_rows[-1] + 1
+                    _076U_hidden_rows = np.append(_076U_hidden_rows, added_item)
+                else:
+                    _076U_hidden_rows = np.append(_076U_hidden_rows, np.array(idx) + 4)
+                    added_item = _076U_hidden_rows[-1] + 1
+                    _076U_hidden_rows = np.append(_076U_hidden_rows, added_item)
+            except:
+                pass
+
     # ADD UNTREATED COLUMN NAMES
     _076U.columns = columnsU
 
@@ -594,6 +702,12 @@ def create_s5_ordersheet(
         column_format2.set_align("vcenter")
         column_format2.set_text_wrap()
         column_format2.set_num_format('_(###0.00_);_(\(###0.00\);_(" "??_);_(@_)')
+
+        column_format3 = workbook.add_format()
+        column_format3.set_align("center")
+        column_format3.set_align("vcenter")
+        column_format3.set_text_wrap()
+        column_format3.set_num_format("_(###0.00_);_(\(###0.00\)")
 
         # FORMULA FORMAT
         formula_format = workbook.add_format()
@@ -731,14 +845,14 @@ def create_s5_ordersheet(
 
         # WORKSHEET 2
         worksheet2.set_column(0, 2, 20, column_format1)
-        worksheet2.set_column(3, 7, 20, column_format2)
-        worksheet2.set_column(7, 8, 20, column_format2)
+        worksheet2.set_column(3, 5, 20, column_format3)
+        worksheet2.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _038T_rownum + 4)
         for i in r:
 
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet2.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
@@ -746,14 +860,14 @@ def create_s5_ordersheet(
 
         # WORKSHEET 3
         worksheet3.set_column(0, 2, 20, column_format1)
-        worksheet3.set_column(3, 7, 20, column_format2)
-        worksheet3.set_column(7, 8, 20, column_format2)
+        worksheet3.set_column(3, 5, 20, column_format3)
+        worksheet3.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _038U_rownum + 4)
         for i in r:
 
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet3.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
@@ -761,14 +875,14 @@ def create_s5_ordersheet(
 
         # WORKSHEET 4
         worksheet4.set_column(0, 2, 20, column_format1)
-        worksheet4.set_column(3, 7, 20, column_format2)
-        worksheet4.set_column(7, 8, 20, column_format2)
+        worksheet4.set_column(3, 5, 20, column_format3)
+        worksheet4.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _050T_rownum + 4)
         for i in r:
 
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet4.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
@@ -776,13 +890,13 @@ def create_s5_ordersheet(
 
         # WORKSHEET 5
         worksheet5.set_column(0, 2, 20, column_format1)
-        worksheet5.set_column(3, 7, 20, column_format2)
-        worksheet5.set_column(7, 8, 20, column_format2)
+        worksheet5.set_column(3, 5, 20, column_format3)
+        worksheet5.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _050U_rownum + 4)
         for i in r:
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet5.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
@@ -790,13 +904,13 @@ def create_s5_ordersheet(
 
         # WORKSHEET 6
         worksheet6.set_column(0, 2, 20, column_format1)
-        worksheet6.set_column(3, 7, 20, column_format2)
-        worksheet6.set_column(7, 8, 20, column_format2)
+        worksheet6.set_column(3, 5, 20, column_format3)
+        worksheet6.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _076T_rownum + 4)
         for i in r:
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet6.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
@@ -804,13 +918,13 @@ def create_s5_ordersheet(
 
         # WORKSHEET 7
         worksheet7.set_column(0, 2, 20, column_format1)
-        worksheet7.set_column(3, 7, 20, column_format2)
-        worksheet7.set_column(7, 8, 20, column_format2)
+        worksheet7.set_column(3, 5, 20, column_format3)
+        worksheet7.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _076U_rownum + 4)
         for i in r:
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet7.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
@@ -1056,6 +1170,31 @@ def create_s5_ordersheet(
             "x_scale": 2,
             "y_scale": 1.5,
         }
+
+        # HIDE ROWS THAT ARE ZERO
+        if len(_038T_hidden_rows) > 0:
+            for row_num in _038T_hidden_rows:
+                worksheet2.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_038U_hidden_rows) > 0:
+            for row_num in _038U_hidden_rows:
+                worksheet3.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_050T_hidden_rows) > 0:
+            for row_num in _050T_hidden_rows:
+                worksheet4.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_050U_hidden_rows) > 0:
+            for row_num in _050U_hidden_rows:
+                worksheet5.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_076T_hidden_rows) > 0:
+            for row_num in _076T_hidden_rows:
+                worksheet6.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_076U_hidden_rows) > 0:
+            for row_num in _076U_hidden_rows:
+                worksheet7.set_row(row_num, None, None, {"hidden": True})
 
         # ADD FORMULA FOR CUSTOMER NUMBER IN PRODUCT SHEETS
         if schedule_date == 0:

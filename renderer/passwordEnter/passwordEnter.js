@@ -68,16 +68,21 @@ function checkMuteFlag() {
     });
   }
 }
-if (!storage.muteflag) {
-  checkMuteFlag();
+
+try {
+  if (!storage.muteflag) {
+    checkMuteFlag();
+  }
+} catch (err) {
+  // DO NOTHING
 }
 
 function headerMessage(message, flag) {
   if (flag) {
-    header.style.backgroundColor = 'var(--sec-blue)';
-    header.innerText = message;
+    header.style.visibility = 'hidden';
+    header.innerText = '';
   } else {
-    header.style.backgroundColor = 'var(--button-red)';
+    header.style.visibility = 'visible';
     header.innerText = message;
   }
 }
@@ -110,7 +115,7 @@ function shortUsername() {
 }
 
 function resetLabels() {
-  headerMessage('Login', true);
+  headerMessage('', true);
   passwordLabel.style.color = '#000';
   passwordLabel.innerText = 'Password:';
   usernameLabel.style.color = '#000';

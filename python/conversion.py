@@ -354,6 +354,7 @@ else:
         multi_zip_path = f"{multi_zip_path}\\{strip_number}\\"
         os.makedirs(f"{multi_zip_path}\\", exist_ok=True)
 
+
 # print(mydocuments_folder)
 
 # PASS TO SHEET CREATOR CODE #

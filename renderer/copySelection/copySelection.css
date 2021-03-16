@@ -57,7 +57,7 @@ main {
   background-color: #fff;
   width: 94vw;
   height: 62vh;
-  border: 1px solid lightgray;
+  border: 1px solid #d1d1d1;
   margin-top: 2vh;
 }
 
@@ -233,7 +233,7 @@ footer {
 }
 #container-background::-webkit-scrollbar-thumb {
   height: 6vh;
-  background-color: lightgray;
+  background-color: #d1d1d1;
 }
 
 #container {
@@ -360,7 +360,7 @@ footer {
   justify-content: center;
   justify-items: center;
   width: 94vw;
-  border: 1px solid var(--button-disabled);
+  border: 1px solid #d1d1d1;
 }
 
 .btn {
@@ -597,18 +597,14 @@ footer {
   padding: 1vh 4vw;
   opacity: 0;
   top: 2vh;
-  background-color: var(--button-green);
+  color: var(--button-green);
+  font-weight: bold;
   display: flex;
   justify-content: center;
   align-items: center;
   align-content: center;
   border-radius: 3px;
   transition: opacity 0.3s ease-in;
-}
-#success-label::after {
-  content: attr(success);
-  position: relative;
-  color: #fff;
 }
 
 #excel {
@@ -653,17 +649,16 @@ footer {
   transform: scaleY(1);
   min-height: 10vh;
   align-content: center;
-  border: 1px solid lightgray;
-  color: lightgray;
+  border: 1px solid #d1d1d1;
+  color: #d1d1d1;
   width: 50vw;
   background-color: #fff;
   margin-bottom: 1vh;
-  transition: all 0.3s ease-out;
+  transition: all 0.5s ease-out;
 }
 
 .convert-item-hide {
   transform: scaleY(0);
-  opacity: 0;
 }
 
 .convert-item-busy {
@@ -702,9 +697,9 @@ footer {
 
 @keyframes spin {
   from {
-    transform: rotateY(0);
+    transform: rotate(0);
   }
   to {
-    transform: rotateY(360deg);
+    transform: rotate(360deg);
   }
 }

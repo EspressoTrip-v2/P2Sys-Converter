@@ -57,7 +57,7 @@ const {
   queryCustomerName,
   querySinglePriceListNumber,
   querySingleCustomerBackup,
-  queryAllScheduleDates, //TODO:  Finish schedule conversion
+  queryAllScheduleDates,
   querySingleSchedule,
   createScheduleItem,
   removeScheduleItems,
@@ -68,6 +68,9 @@ const {
   removePausedItem,
   removePausedItemSync,
   updatePriceListDataBase,
+  addCustomerNameAndNumbers,
+  queryAllPausedQuantity,
+  queryAllScheduleDatesQuantity,
 } = require(`${dir}/database/mongoDbConnect.js`);
 const { updater } = require(`${dir}/updater.js`);
 
@@ -79,7 +82,6 @@ let homeWindow,
   tray,
   childWindow,
   loadingWindow,
-  updateWindow,
   emailWindow,
   multiWindow,
   progressWindow,
@@ -97,12 +99,16 @@ let homeWindow,
   version,
   trayMenu,
   passwordGenerate,
-  passwordEnter;
+  passwordEnter,
+  checkScheduleDateFlag,
+  updateInfoWindow;
 
 /* GET THE YEAR */
-const yearNow = new Date().getFullYear();
+let date = new Date();
+const yearNow = date.getFullYear();
+const monthNow = date.getMonth() + 1;
+const dateString = `${monthNow}/${yearNow}`;
 /* GET TEMP FOLDER AND DESKTOP FOLDER */
-let desktopFolder = `${homedir}\\Desktop`;
 let tempPath = os.tmpdir();
 
 /* ICON FILE */
@@ -194,19 +200,29 @@ const db = mongoose.connection;
 db.once('connected', async () => {
   /* GET LATEST EXMILL PRICE */
   try {
-    let result = await queryExmillPrice();
+    let result = await queryExmillPrice(notifyMain);
     exmillPrice = result;
   } catch (err) {
     logFileFunc(err);
   }
 
+  /* NOTIFICATION FUNCTION */
+  function notifyMain(message) {
+    let notification = new Notification({
+      title: message.title,
+      body: message.body,
+      icon: `${dir}/renderer/icons/converter-logo.png`,
+    });
+    notification.show();
+  }
+
   /* CHECK BACKUPS CLEAN DATE */
   try {
-    let result = await queryBackUpDate();
+    let result = await queryBackUpDate(notifyMain);
     if (result) {
       let notification = new Notification({
         title: 'Cleaning Backup database',
-        body: 'Redundant entries are being removed from the Backup Database.',
+        body: 'Out of date entries are being removed from the Backup Database.',
         icon: `${dir}/renderer/icons/converter-logo.png`,
       });
       notification.show();
@@ -215,29 +231,31 @@ db.once('connected', async () => {
     logFileFunc(err);
   }
 
-  /* QUERY ALL NAMES */
+  /* GET ALL THE SCHEDULE DATES */
   try {
-    customerNumberNameResult = await queryCustomerName(null, true);
+    scheduleDates = await queryAllScheduleDates(notifyMain);
+    checkScheduleDateFlag = scheduleDates.includes(dateString) ? true : false;
+    if (checkScheduleDateFlag) {
+      let schedulePrices = await querySingleSchedule(dateString, notifyMain);
+      schedulePriceListsToConvert = {
+        schedulePrices,
+        dateString,
+      };
+    }
   } catch (err) {
     logFileFunc(err);
   }
 
-  /* FETCH PRICELIST INDEXES */
+  /* QUERY ALL NAMES */
   try {
-    customerPricesNumbersArr = await queryAllPriceListNumbers();
+    customerNumberNameResult = await queryCustomerName(null, true, notifyMain);
   } catch (err) {
     logFileFunc(err);
   }
 
   /* FETCH ALL CUSTOMER NAME INDEXES */
   try {
-    customerNumberAllKeys = await queryAllCustomerNumbers();
-  } catch (err) {
-    logFileFunc(err);
-  }
-
-  try {
-    scheduleDates = await queryAllScheduleDates();
+    customerNumberAllKeys = await queryAllCustomerNumbers(notifyMain);
   } catch (err) {
     logFileFunc(err);
   }
@@ -246,7 +264,6 @@ db.once('connected', async () => {
   trayMenu = Menu.buildFromTemplate([{ label: `Converter v${version}` }]);
   createWindow();
   convertNumberName();
-  deleteUnusedFiles();
 });
 
 db.on('disconnected', () => {
@@ -326,7 +343,7 @@ function createWindow() {
     alwaysOnTop: true,
     backgroundColor: '#00FFFFFF',
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -349,6 +366,10 @@ function createWindow() {
 
   // Only show on load completion
   homeWindow.webContents.on('did-finish-load', () => {
+    homeWindow.webContents.send('get-notifications-main-app', null);
+    if (checkScheduleDateFlag) {
+      homeWindow.webContents.send('convert-schedule', schedulePriceListsToConvert);
+    }
     if (loadingWindow) {
       loadingWindow.close();
     }
@@ -376,7 +397,7 @@ function createSecWindow(message) {
     backgroundColor: '#00FFFFFF',
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -393,7 +414,6 @@ function createSecWindow(message) {
     /* CREATE DATABASE OBJECT TO SEND TO WINDOW */
     let dbObj = {
       customerNumberAllKeys,
-      customerPricesNumbersArr,
       customerNameNumberJson,
       customerNumberNameJson,
       exmillPrice,
@@ -450,7 +470,7 @@ function createChildWindow(message) {
     spellCheck: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -505,7 +525,7 @@ function createLoadingWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -545,7 +565,7 @@ function createEmailWindow(message) {
     alwaysOnTop: true,
     maximizable: false,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -590,7 +610,7 @@ function createProgressWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -614,43 +634,6 @@ function createProgressWindow() {
   });
 }
 
-/* UPDATING WINDOW */
-function createUpdateWindow() {
-  xPos = screenWidth / 2 - 115;
-  updateWindow = new BrowserWindow({
-    height: 80,
-    width: 240,
-    x: xPos,
-    y: 0,
-    spellCheck: false,
-    resizable: false,
-    backgroundColor: '#00FFFFFF',
-    autoHideMenuBar: true,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    center: true,
-    frame: false,
-    transparent: true,
-    webPreferences: {
-      // devTools: false,
-      nodeIntegration: true,
-      enableRemoteModule: true,
-      contextIsolation: false,
-    },
-    icon: `${dir}/renderer/icons/updateTemplate.png`,
-  });
-  //   LOAD HTML PAGE
-  updateWindow.loadFile(`${dir}/renderer/update/update.html`);
-
-  //   LOAD DEV TOOLS
-  // updateWindow.webContents.openDevTools();
-
-  //   EVENT LISTENER FOR CLOSING
-  updateWindow.on('closed', () => {
-    updateWindow = null;
-  });
-}
-
 /* COPY SELECTION WINDOW */
 function createCopySelectionWindow(message) {
   copySelectionWindow = new BrowserWindow({
@@ -668,7 +651,7 @@ function createCopySelectionWindow(message) {
     frame: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -717,7 +700,7 @@ function createMultiWindow(message) {
     spellCheck: false,
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -741,6 +724,42 @@ function createMultiWindow(message) {
   });
 }
 
+/* UPDATE CORNER INFO */
+function createUpdateInfo() {
+  updateInfoWindow = new BrowserWindow({
+    width: Math.floor(screenWidth * 0.03),
+    height: Math.floor(screenWidth * 0.03),
+    x: screenWidth - 60,
+    y: screenHeight - 100,
+    autoHideMenuBar: true,
+    center: true,
+    frame: false,
+    alwaysOnTop: true,
+    spellCheck: false,
+    backgroundColor: '#00FFFFFF',
+    skipTaskbar: true,
+    resizable: false,
+    webPreferences: {
+      devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+      contextIsolation: false,
+    },
+    icon: iconImage,
+  });
+
+  //   Load html page
+  updateInfoWindow.loadFile(`${dir}/renderer/updateInfo/updateInfo.html`);
+
+  //   Load dev tools
+  // updateInfoWindow.webContents.openDevTools();
+
+  //   Event listener for closing
+  updateInfoWindow.on('closed', () => {
+    updateInfoWindow = null;
+  });
+}
+
 /* PASSWORD ASK WINDOW CREATION */
 function createPasswordGenerateWindow(message) {
   passwordGenerate = new BrowserWindow({
@@ -758,7 +777,7 @@ function createPasswordGenerateWindow(message) {
     backgroundColor: '#00FFFFFF',
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -802,7 +821,7 @@ function createPasswordEnterWindow(hash) {
     backgroundColor: '#00FFFFFF',
     transparent: true,
     webPreferences: {
-      // devTools: false,
+      devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -897,8 +916,8 @@ app.on('window-all-closed', () => {
 
 /* IPC FUNCTIONS */
 async function reloadData() {
-  customerNumberNameResult = await queryCustomerName(null, true);
-  customerNumberAllKeys = await queryAllCustomerNumbers();
+  customerNumberNameResult = await queryCustomerName(null, true, notifyMain);
+  customerNumberAllKeys = await queryAllCustomerNumbers(notifyMain);
   convertNumberName();
 }
 
@@ -958,7 +977,7 @@ async function databaseBackupControl(message) {
 
   /* REMOVE PAUSED ITEM FROM DB IF TRUE */
   if (pauseFlag) {
-    removePausedItem(customerNumber);
+    removePausedItem(customerNumber, notifyMain);
   }
 
   /* REMOVED OLD SCHEDULE AND CREATE A NEW ONE (EDIT) */
@@ -966,33 +985,42 @@ async function databaseBackupControl(message) {
     /* CHECK IF DATES ARE THE SAME */
     if (OldScheduleDate === newScheduleDate) {
       let obj = getNewScheduleItem(message);
-      createScheduleItem(obj, newScheduleDate);
+      createScheduleItem(obj, newScheduleDate, notifyMain);
       /* CHECK IF DATES ARE DIFFERENT */
     } else if (OldScheduleDate !== newScheduleDate) {
-      let result = await removeScheduleItems({ dateValue: OldScheduleDate, customerNumber });
+      let result = await removeScheduleItems(
+        { dateValue: OldScheduleDate, customerNumber },
+        notifyMain
+      );
       if (result) {
         let obj = getNewScheduleItem(message);
-        createScheduleItem(obj, newScheduleDate);
+        createScheduleItem(obj, newScheduleDate, notifyMain);
       }
     }
     /* CHECK IF REMOVE FLAG IS TRUE AND CREATE IS FALSE THEN JUST REMOVE */
   } else if (removeOldScheduleFlag && !createNewScheduleFlag) {
-    removeScheduleItems({ dateValue: OldScheduleDate, customerNumber });
+    removeScheduleItems({ dateValue: OldScheduleDate, customerNumber }, notifyMain);
   } else if (!removeOldScheduleFlag && createNewScheduleFlag) {
     let obj = getNewScheduleItem(message);
-    createScheduleItem(obj, newScheduleDate);
+    createScheduleItem(obj, newScheduleDate, notifyMain);
   }
 
   /* UPDATE PRICE-LIST AND BACKUP ALSO IF NEW CUSTOMER UPDATE THE NAMES */
   if (newFlag && updateDbFlag) {
-    await updatePriceListDataBase({ customerNumber, 'price-list': priceList, custDetail });
+    await updatePriceListDataBase(
+      { customerNumber, 'price-list': priceList, custDetail },
+      notifyMain
+    );
     reloadData();
   } else if (updateDbFlag) {
-    await updatePriceListDataBase({
-      customerNumber,
-      'price-list': priceList,
-      custDetail: null,
-    });
+    await updatePriceListDataBase(
+      {
+        customerNumber,
+        'price-list': priceList,
+        custDetail: null,
+      },
+      notifyMain
+    );
     reloadData();
   }
 }
@@ -1045,13 +1073,6 @@ ipcMain.on('loader-close', (e, message) => {
   }
 });
 
-/* CLOSE UPDATE WINDOW */
-ipcMain.on('close-updatewindow', (e, message) => {
-  if (updateWindow) {
-    updateWindow.close();
-  }
-});
-
 /* RESTART SEC WINDOW */
 ipcMain.on('restart-sec', async (e, message) => {
   createLoadingWindow();
@@ -1066,8 +1087,13 @@ ipcMain.on('restart-sec', async (e, message) => {
 
 /* SHOW HOME WINDOW */
 ipcMain.on('show-home', (e, message) => {
-  secWindow.close();
-  homeWindow.show();
+  if (secWindow) {
+    secWindow.close();
+  }
+  if (homeWindow) {
+    homeWindow.webContents.send('get-notifications-main-app', null);
+    homeWindow.show();
+  }
 });
 
 /* REMOVE FADE FROM SECWINDOW */
@@ -1077,105 +1103,76 @@ ipcMain.on('show-sec-window', (e, message) => {
   }
 });
 
-/* START UPDATE WINDOW */
-ipcMain.on('create-download-window', (e, message) => {
-  createUpdateWindow();
-});
-
-ipcMain.on('update-progress', (e, message) => {
-  if (updateWindow) {
-    updateWindow.webContents.send('download-percent', message);
-    if (message === 100) {
-      setTimeout(() => {
-        updateWindow.close();
-      }, 1000);
-    }
-  }
-});
-
 /* CLOSE MAIN WINDOW & CHECK TO SEE IF UPDATE IS DOWNLOADING */
 ipcMain.on('close-main', (e, message) => {
-  if (updateWindow) {
-    let answer = dialog.showMessageBoxSync(homeWindow, {
-      type: 'question',
-      title: 'DOWNLOAD IN PROGRESS',
-      icon: `${dir}/renderer/icons/updateTemplate.png`,
-      message: `A update is being downloaded, are you sure you want to exit?`,
-      detail:
-        'Exiting will cause the download to be cancelled. You will have to download the update when asked on the next restart',
-      buttons: ['EXIT', 'CANCEL'],
-    });
-    if (answer === 0) {
-      updateWindow.close();
-      setTimeout(() => {
-        homeWindow.close();
-      }, 50);
-    }
-  } else {
-    setTimeout(() => {
-      homeWindow.close();
-    }, 200);
+  if (homeWindow) {
+    homeWindow.close();
   }
-});
+}); // TODO: FINNISH CLOSE
 
 /* QUERIES FOR DATABASE */
 ipcMain.handle('get-price-list', async (e, message) => {
-  let result = await querySinglePriceList(message);
+  let result = await querySinglePriceList(message, notifyMain);
   return result;
 });
 
 /* GET THE PRICE-LIST NUMBER */
 ipcMain.handle('get-pricelist-number', async (e, message) => {
-  let result = await querySinglePriceListNumber(message);
+  let result = await querySinglePriceListNumber(message, notifyMain);
   return result;
 });
 
 /* GET THE CUSTOMER BACKUP DATA */
 ipcMain.handle('get-customer-backup', async (e, message) => {
-  let result = await querySingleCustomerBackup(message);
+  let result = await querySingleCustomerBackup(message, notifyMain);
   return result;
 });
 
+ipcMain.on('create-name-numbers', (e, message) => {
+  addCustomerNameAndNumbers(message, notifyMain);
+});
+
 /* SAVE PAUSED PRICE-LIST */
-ipcMain.on('save-paused-price-list', (e, message) => {
-  createPausedPriceList(message.pausedJson);
+ipcMain.on('save-paused-price-list', async (e, message) => {
+  await createPausedPriceList(message.pausedJson, notifyMain);
+  reloadData();
 });
 
 /* QUERY ALL PAUSED PRICE-LIST CUSTOMER NUMBERS */
 ipcMain.handle('get-all-paused', async (e, message) => {
-  let result = queryAllPaused();
+  let result = queryAllPaused(notifyMain);
   return result;
 });
 
 /* QUERY SINGLE PAUSED PRICE-LIST CUSTOMER NUMBERS */
 ipcMain.handle('get-single-paused', async (e, message) => {
-  let result = querySinglePaused(message);
+  let result = await querySinglePaused(message, notifyMain);
   return result;
 });
 
 /* REMOVE PAUSED ITEM */
 ipcMain.handle('remove-pause-item-sync', async (e, message) => {
-  return await removePausedItemSync(message);
+  return await removePausedItemSync(message, notifyMain);
 });
 
 /* QUERY ALL SCHEDULED PRICE-LISTS */
 ipcMain.handle('get-schedule-dates-update', async (e, message) => {
-  return await queryAllScheduleDates();
+  return await queryAllScheduleDates(notifyMain);
 });
 
 /* QUERY SINGLE SCHEDULED PRICE-LISTS */
 ipcMain.handle('show-single-customer-schedule', async (e, message) => {
-  return await querySingleSchedule(message);
+  return await querySingleSchedule(message, notifyMain);
 });
 
 ipcMain.handle('update-scheduled-items', async (e, message) => {
-  return await removeScheduleItems(message);
+  return await removeScheduleItems(message, notifyMain);
 });
 
 ipcMain.handle('edit-schedule-price-list', async (e, message) => {
-  let priceList = await editSingleScheduledPriceList(message);
-  let priceListNumber = await querySinglePriceListNumber(message.customerNumber);
-  let customerBackUpJson = await querySingleCustomerBackup(message.customerNumber);
+  let priceList = await editSingleScheduledPriceList(message, notifyMain);
+  let priceListNumber = await querySinglePriceListNumber(message.customerNumber, notifyMain);
+  let customerBackUpJson = await querySingleCustomerBackup(message.customerNumber, notifyMain);
   let customerNumber = message.customerNumber;
   let customerNameValue = customerNumberNameJson[message.customerNumber];
 
@@ -1191,10 +1188,25 @@ ipcMain.handle('edit-schedule-price-list', async (e, message) => {
   return schedulePriceListObj;
 });
 
+/* GET A SINGLE SCHEDULE PRICE-LIST FOR CONVERSION */
+ipcMain.handle('get-schedule-price-list', async (e, message) => {
+  let priceList = await editSingleScheduledPriceList(message, notifyMain);
+  let jsonFile = {
+    'price-list': priceList,
+    _id: message.customerNumber,
+  };
+
+  return jsonFile;
+});
+
 ipcMain.on('close-email-window', (e, message) => {
   if (emailWindow) {
     emailWindow.close();
   }
+  if (updateInfoWindow) {
+    updateInfoWindow.show();
+  }
+  deleteUnusedFiles();
 });
 
 ipcMain.on('ask-window-multi', (e, message) => {
@@ -1224,7 +1236,7 @@ ipcMain.on('unselect-item-copy-selection', (e, message) => {
 });
 
 ipcMain.handle('customer-prices-array', async (e, message) => {
-  customerPricesNumbersArr = await queryAllPriceListNumbers();
+  customerPricesNumbersArr = await queryAllPriceListNumbers(notifyMain);
   return customerPricesNumbersArr;
 });
 
@@ -1250,4 +1262,43 @@ ipcMain.on('get-customer-selection-arr', (e, message) => {
 
 ipcMain.on('return-customer-selection-arr', (e, message) => {
   copySelectionWindow.webContents.send('get-customer-selection-arr', message);
+});
+
+ipcMain.handle('get-paused-schedule-count', async (e, message) => {
+  let pCount = await queryAllPausedQuantity(notifyMain);
+  let sCount = await queryAllScheduleDatesQuantity(notifyMain);
+  return { pCount, sCount };
+});
+
+/* OPEN UPDATE WINDOW */
+ipcMain.on('open-update-window', (e, message) => {
+  createUpdateInfo();
+});
+
+/* UPDATE DOWNLOADED */
+ipcMain.on('close-update-window', (e, message) => {
+  if (updateInfoWindow) {
+    updateInfoWindow.close();
+  }
+});
+
+/* UPDATE DOWNLOADED */
+ipcMain.on('update-progress', (e, message) => {
+  if (updateInfoWindow) {
+    updateInfoWindow.webContents.send('update-percent', message);
+  }
+});
+
+/* HIDE UPDATER IF OPEN */
+ipcMain.on('hide-updater', (e, message) => {
+  if (updateInfoWindow) {
+    updateInfoWindow.hide();
+  }
+});
+
+/* SHOW UPDATER IF OPEN */
+ipcMain.on('show-updater', (e, message) => {
+  if (updateInfoWindow) {
+    updateInfoWindow.show();
+  }
 });

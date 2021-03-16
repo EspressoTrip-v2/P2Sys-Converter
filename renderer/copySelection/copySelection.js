@@ -141,18 +141,19 @@ function clearCustomerList() {
 
 function showListContainer() {
   askHeaderInnerText.innerText = 'Converting';
+  askHeaderInnerText.style.backgroundColor = 'var(--button-green)';
   convertContainer.style.visibility = 'visible';
 }
 
 function hideListContainer() {
   askHeaderInnerText.innerText = 'What do you want to copy?';
+  askHeaderInnerText.style.backgroundColor = 'var(--sec-blue)';
   convertContainer.style.visibility = 'hidden';
 }
 
 function showExcelAnimation() {
   excelContainer.style.top = '15vh';
   setTimeout(() => {
-    successLabel.setAttribute('success', 'Success');
     successLabel.style.opacity = '1';
   }, 500);
 }
@@ -160,16 +161,14 @@ function showExcelAnimation() {
 function removeProcessedElement(element) {
   element.style.transform = 'scaleY(0)';
   element.style.opacity = '0';
-  setTimeout(() => {
-    if (listElements.length >= 1) {
-      element.className = element.className + ' convert-item-busy-hide';
-      setTimeout(() => {
-        element.remove();
-        listElements.splice(0, 1);
-        setElementToProcessing(listElements[0], false);
-      });
-    }
-  }, 600);
+  if (listElements.length >= 1) {
+    element.className = element.className + ' convert-item-busy-hide';
+    setTimeout(() => {
+      element.remove();
+      listElements.splice(0, 1);
+      setElementToProcessing(listElements[0], false);
+    }, 600);
+  }
 }
 
 function buildMessage(element) {
@@ -196,7 +195,7 @@ function buildMessage(element) {
     updateDbFlag: true,
   };
 
-  convertPythonModule(message);
+  convertPythonFunction(message);
 }
 
 /* ZIP FUNCTION */
@@ -230,7 +229,9 @@ async function setElementToProcessing(element, startFlag) {
       setTimeout(() => {
         element.className = element.className + ' convert-item-hide';
         hideLoadingAsk();
-        element.setAttribute('class', 'convert-item-busy');
+        setTimeout(() => {
+          element.setAttribute('class', 'convert-item-busy');
+        }, 600);
       }, 500);
     } else {
       element.className = element.className + ' convert-item-hide';
@@ -242,7 +243,9 @@ async function setElementToProcessing(element, startFlag) {
     buildMessage(element);
   } else {
     showExcelAnimation();
-    zipFileContents(multiZipPath);
+    setTimeout(() => {
+      zipFileContents(multiZipPath);
+    }, 1500);
   }
 }
 
@@ -290,7 +293,6 @@ async function populatePriceListObject(priceListTemplate, detailsFlag) {
   if (detailsFlag) {
     priceListNumberValue = await ipcRenderer.invoke('get-pricelist-number', customerNumber);
     customerBackUpJson = await ipcRenderer.invoke('get-customer-backup', customerNumber);
-    console.log(customerBackUpJson);
     let priceListObj = { ...priceListTemplate };
     priceListObj.customerNameValue = customerName;
     priceListObj.customerBackUpJson = customerBackUpJson;
@@ -522,7 +524,7 @@ ipcRenderer.on('get-customer-selection-arr', (e, message) => {
 
 /* PYTHON CONVERSION MULTI */
 /////////////////////////////
-async function convertPythonModule(message) {
+async function convertPythonFunction(message) {
   /* SET VARIABLES */
   let pauseFlag = message.pauseFlag;
   let createNewScheduleFlag = message.createNewScheduleFlag;
@@ -605,6 +607,14 @@ async function convertPythonModule(message) {
   pyshell.end(function (err, code, signal) {
     if (err) {
       logFileFunc(err);
+      new Notification(`Failure to convert ${customerNumber}`, {
+        icon: `${dir}/renderer/icons/converter-logo.png`,
+        body: `Please double check all entries on the price list you are trying to convert.`,
+      });
+      fs.rmdir(`${multiZipPath}\\${customerNumber}`, (err) => {
+        logFileFunc(err);
+      });
+      removeProcessedElement(listElements[0]);
     }
   });
 }

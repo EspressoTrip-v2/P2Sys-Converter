@@ -26,6 +26,7 @@ if (!process.env.NODE_ENV) {
 /* LOCAL MODULES */
 const { dataObjects } = require(`${dir}/objects.js`);
 const { tablePopulate } = require(`${dir}/renderer/startPage/tablePopulate`);
+const { logFileFunc } = require(`${dir}/logFile.js`);
 
 /* CREATE DATE INSTANCE */
 let mainDate = new Date();
@@ -56,7 +57,7 @@ let searchValue,
   cusNum,
   bundleSizeColumn,
   bundleSizeHeading,
-  exmillPrice,
+  exmillPrice = null,
   exmillTransportCost,
   untreatedColumnClass,
   treatedColumnClass,
@@ -103,8 +104,6 @@ let backBtn = document.getElementById('back-to-main-btn'),
   exmillContainer = document.getElementById('exmill-transport-container'),
   exmillApplyBtn = document.getElementById('exmill-transport-apply'),
   exmillTransportValue = document.getElementById('exmill-transport-value'),
-  transportFooterContainer = document.getElementById('transport-value'),
-  transportFooterValue = document.getElementById('t-value'),
   audioTag = Array.from(document.getElementsByTagName('audio')),
   /* TABLE COMPONENT DOMS */
   /////////////////////////
@@ -479,7 +478,6 @@ function getBackupDateStrings(cumenu, ctmenu) {
         ctdatelist = '';
         priceListDates.forEach((el) => {
           let val = customerBackUpJson[el][i][4];
-          // console.log(val);
           ctdatelist += ` ${el}: ${val}`;
         });
         ctmenu[i].setAttribute('data-label', ctdatelist);
@@ -534,7 +532,7 @@ function htmlInnerFill(html, categoryModification) {
 /* ACTIVATE EXMILL BUTTON FUNCTION */
 function activateExmillBtn() {
   /* ACTIVATE THE EXMILL BUTTON */
-  if (customerPricesNumbersArr.includes('@EXMILL')) {
+  if (exmillPrice != null) {
     exmillBtn.style.display = 'block';
     exmillBtnDisabled.style.display = 'none';
   }
@@ -1043,6 +1041,33 @@ pauseBtn.addEventListener('click', () => {
   }, 300);
 });
 
+/* PAUSE NEW BUTTON TO SAVE TO DATABASE */
+pauseBtnNew.addEventListener('click', () => {
+  repopulateBundleSize();
+  soundClick.play();
+  setTimeout(() => {
+    if (
+      customerName.innerText.length !== 0 &&
+      customerName.innerText !== 'ENTER CUSTOMER NAME'
+    ) {
+      let pausedJson = createObjectFromHtml();
+      let custDetail = getCustomerDetail();
+      ipcRenderer.send('create-name-numbers', custDetail);
+      ipcRenderer.send('save-paused-price-list', { pausedJson });
+      resetForm();
+    } else {
+      remote.dialog.showMessageBoxSync(secWindow, {
+        type: 'error',
+        title: 'Customer name is required',
+        message: 'Please enter a customer name before pausing',
+        buttons: ['OK'],
+        icon: `${dir}/renderer/icons/converter-logo.png`,
+      });
+      customerName.focus();
+    }
+  }, 300);
+});
+
 /* LENGTH LOCK BUTTON */
 lengthLockBtn.addEventListener('click', (e) => {
   soundClick.play();
@@ -1172,7 +1197,6 @@ function CCAManualSwitch() {
 manCaaBtn.addEventListener('click', (e) => {
   CCAManualSwitch();
   repopulateBundleSize();
-  transportFooterContainer.close();
 });
 
 /* EXMILL FUNCTIONS AND BUTTON */
@@ -1283,19 +1307,6 @@ function compareExmill() {
 function exmillClick() {
   if (window.getComputedStyle(exmillContainer).transform === 'matrix(0, 0, 0, 1, 0, 0)') {
     /* RESET THE TRANSPORT VALUE IF VISIBLE */
-
-    if (
-      window.getComputedStyle(transportFooterContainer).transform ===
-      'matrix(1, 0, 0, 1, 0, 0)'
-    ) {
-      transportFooterContainer.close();
-      setTimeout(() => {
-        transportFooterValue.innerText = '';
-      }, 300);
-    } else {
-      transportFooterValue.innerText = '';
-    }
-
     /* SET CCA AUTO */
     CCAAutoSwitch();
     /* OPEN DOCK */
@@ -1347,7 +1358,6 @@ exmillTransportValue.addEventListener('keyup', (e) => {
 exmillApplyBtn.addEventListener('click', (e) => {
   soundClick.play();
   exmillTransportCost = exmillTransportValue.value;
-  transportFooterValue.innerText = exmillTransportCost;
   setTimeout(() => {
     compareExmill();
     setTimeout(() => {
@@ -1356,9 +1366,6 @@ exmillApplyBtn.addEventListener('click', (e) => {
       exmillApplyBtn.setAttribute('class', 'exmill-btn-disabled');
       exmillTransportValue.value = '';
       exmillApplyBtn.setAttribute('class', 'exmill-btn-disabled');
-      setTimeout(() => {
-        transportFooterContainer.show();
-      }, 500);
     }, 200);
   }, 200);
 });
@@ -1430,6 +1437,7 @@ function addListListeners() {
       showLoading(true);
       getPriceList(cusNum);
       customerSearch.dispatchEvent(new Event('keyup'));
+      customerSearch.dispatchEvent(new Event('keyup'));
     });
   });
 }
@@ -1468,7 +1476,7 @@ function resetListenersContext() {
     try {
       el.removeEventListener('click', pausedEvent);
     } catch (err) {
-      console.log(err);
+      logFileFunc(err);
     }
     el.addEventListener('click', pausedEvent);
 
@@ -2098,7 +2106,6 @@ applyCancelBtn.addEventListener('click', (e) => {
 
 /* RECEIVE THE DATABASE OBJECTS THAT WERE DOWNLOADED */
 ipcRenderer.once('database-object', (e, message) => {
-  customerPricesNumbersArr = message.customerPricesNumbersArr;
   customerNumberAllKeys = message.customerNumberAllKeys;
   customerNameNumberJson = message.customerNameNumberJson;
   customerNumberNameJson = message.customerNumberNameJson;

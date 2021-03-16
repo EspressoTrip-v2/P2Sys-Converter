@@ -923,7 +923,7 @@ tr {
   width: 25vw;
   max-width: 25vw;
   margin-left: 0.2vw;
-  border-left: 1px solid lightgray;
+  border-left: 1px solid #d1d1d1;
 }
 
 .customer-region-item-b form {
@@ -932,7 +932,7 @@ tr {
 
 .header-form {
   height: 100%;
-  border-left: 1px solid lightgray;
+  border-left: 1px solid #d1d1d1;
 }
 
 #label-customer-number,
@@ -975,7 +975,7 @@ tr {
   align-items: center;
   height: 100%;
   margin-left: 0.2vw;
-  border-left: 1px solid lightgray;
+  border-left: 1px solid #d1d1d1;
 }
 
 #pricelist {
@@ -1051,7 +1051,7 @@ tr {
 }
 #overflow::-webkit-scrollbar-thumb {
   height: 1vh;
-  background-color: lightgray;
+  background-color: #d1d1d1;
 }
 
 .customer-name-standard {
@@ -1078,7 +1078,7 @@ tr {
 
 .customer-name-standard[contenteditable]:empty::before {
   content: 'Enter the customer';
-  color: lightgray;
+  color: #d1d1d1;
   background-color: #fff;
   left: 0vw;
   top: 0;
@@ -1093,7 +1093,7 @@ tr {
 }
 .customer-name-placeholder {
   position: relative;
-  background-color: lightgray;
+  background-color: #d1d1d1;
   color: #fff;
   font-size: 0.8vw;
   text-align: center;
@@ -1208,23 +1208,6 @@ tr {
   background-color: var(--auto);
 }
 
-#transport-value {
-  position: absolute;
-  z-index: 3;
-  transform: scale(0);
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  align-content: center;
-  animation: none;
-  border: 1px solid #fff;
-  height: 100%;
-}
-#transport-value[open] {
-  animation: popup-notify 0.1s linear 1 forwards;
-}
-
 @keyframes shrink {
   0% {
     transform: scale(1);
@@ -1237,27 +1220,6 @@ tr {
   }
 }
 
-#t-value {
-  position: relative;
-  width: fit-content;
-  font-size: 0.8vw;
-  font-weight: bold;
-  margin-left: 10px;
-  background-color: #fff;
-  border: 1px solid;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  align-content: center;
-  height: 2vw;
-  padding: 0 1vw;
-}
-#transport-value-image {
-  position: relative;
-  top: 2px;
-  width: 2vw;
-}
 /* ///////////////// */
 /* PERCENTAGE ADJUST */
 /* ///////////////// */
@@ -1370,7 +1332,7 @@ tr {
 
 #date-select-text {
   position: absolute;
-  top: 0.1vh;
+  top: 0vh;
   text-align: center;
   padding: 0.5vh;
   width: 100%;
@@ -1524,7 +1486,7 @@ select {
 
 #schedule-button-new {
   position: absolute;
-  background-color: lightgray;
+  background-color: #d1d1d1;
   right: 13vw;
   color: #fff;
   width: 12vw;
@@ -2107,7 +2069,7 @@ select {
   top: 1.5vh;
   display: none;
   text-align: center;
-  background-color: lightgray;
+  background-color: #d1d1d1;
   font-size: 6vw;
   border: 1px solid #fff;
   color: #fff;
@@ -2194,7 +2156,7 @@ select {
 #customer-search {
   text-transform: uppercase;
   outline: none;
-  border: 1px solid var(--button-disabled);
+  border: 1px solid #d1d1d1;
   font-size: 6vw;
   width: 94vw;
   text-align: center;
@@ -2222,7 +2184,7 @@ select {
   position: relative;
   width: 94vw;
   background-color: #fff;
-  border: 1px solid var(--button-disabled);
+  border: 1px solid #d1d1d1;
 }
 
 #customer-list {

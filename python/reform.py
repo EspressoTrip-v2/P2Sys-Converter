@@ -5,6 +5,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
+from pandas.core.frame import DataFrame
 
 import s5_ordersheet
 
@@ -25,7 +26,6 @@ data = master_json["data"].values()
 
 # CREATE MASTER PRICELIST DF
 master_price = pd.DataFrame(data, columns=columns, index=index)
-
 
 # REFORMAT THE LAYMAN PRICELIST FUNCTION #
 ##########################################
@@ -49,7 +49,7 @@ def reformat_layman(pricelist_number, customer_number, df):
     customer_pricelist = master_price.copy()
     customer_pricelist["R/METER UNTREATED"] = 0
     customer_pricelist["R/METER TREATED"] = 0
-    customer_pricelist["BUNDLE SIZE"] = "NA"
+    customer_pricelist["BUNDLE SIZE"] = 0
     customer_pricelist["M3 TREATED"] = 0
     customer_pricelist["M3 UNTREATED"] = 0
     customer_pricelist["CURRENCY"] = "ZAR"
@@ -78,9 +78,15 @@ def reformat_layman(pricelist_number, customer_number, df):
             customer_pricelist.loc[v[0], ["M3 TREATED"]] = v[1]
             customer_pricelist.loc[v[0], ["BUNDLE SIZE"]] = v[3]
 
+    # CHANGE THE BUNDLE SIZE TO INT
+    customer_pricelist["BUNDLE SIZE"] = customer_pricelist["BUNDLE SIZE"].astype(int)
+
+    # REMOVE INVALID BUNDLE SIZE ENTRIES
+    customer_pricelist = customer_pricelist[customer_pricelist["BUNDLE SIZE"] > 0]
+
     # REPLACE ALL THE ZERO WITH NAN VALUES AND SORT THE DF UNITPRICE WITH VALUES
-    customer_pricelist.replace(0, np.nan, inplace=True)
-    customer_pricelist = customer_pricelist.dropna(axis=0, subset=["UNITPRICE"])
+    # customer_pricelist.replace(0, np.nan, inplace=True)
+    # customer_pricelist = customer_pricelist.dropna(axis=0, subset=["UNITPRICE"])
     # customer_pricelist = customer_pricelist.dropna(axis=0, subset=['DESC'])
 
     # RETURN ITEMS TO PROCESS S5 AND SYSTEM TEMPLATE

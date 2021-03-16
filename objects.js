@@ -1,25 +1,3 @@
-/* MODULES */
-const fs = require('fs');
-
-/* GET WORKING DIRECTORY */
-let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
-
-/* GET APPDATA DIR */
-let appData;
-if (process.platform === 'win32') {
-  appData = `${process.env.APPDATA}/P2Sys-Converter`;
-} else {
-  appData = process.cwd();
-}
-
 /* TEMPLATES FOR NEW CUSTOMER CREATION */
 exports.dataObjects = {
   'template-pricelist': {
@@ -70,39 +48,3 @@ exports.dataObjects = {
     standard: '(\\d.\\d)-(\\d.\\d)',
   },
 };
-
-/* CREATE DATA INSTANCE */
-let mainDate = new Date();
-let dateString = `${mainDate.getMonth() + 1}/${mainDate.getFullYear()}`;
-
-/* ////////// */
-/* FUNCTIONS */
-/* //////// */
-
-/* LOGFILE CREATION FUNCTION */
-function logFileFunc(error) {
-  const fileDir = `${appData}/error-log.txt`;
-  /* CHECK IF IT EXISTS */
-  if (fs.existsSync(fileDir)) {
-    fs.appendFileSync(fileDir, `${new Date()}: Object.js error -> ${error}\n`, (err) =>
-      console.log(err)
-    );
-  } else {
-    fs.writeFileSync(fileDir, `${new Date()}:  Object.js error -> ${error}\n`, (err) =>
-      console.log(err)
-    );
-  }
-}
-
-/* SORT DATES FUNCTION */
-/////////////////////////
-function sortDate(datesArr) {
-  /* SET THE DATES */
-  let arr = datesArr.map((el) => {
-    return `1/${el}`;
-  });
-  arr.sort((dateA, dateB) => new Date(dateA) - new Date(dateB));
-  return arr.map((el) => {
-    return el.toString().slice(2);
-  });
-}
