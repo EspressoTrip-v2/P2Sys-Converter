@@ -1,12 +1,6 @@
 const fs = require('fs');
 
-/* GET APPDATA DIR */
-let appData;
-if (process.platform === 'win32') {
-  appData = `${process.env.APPDATA}/P2Sys-Converter`;
-} else {
-  appData = process.cwd();
-}
+let appData = `${process.env.APPDATA}\\P2Sys-Manager`;
 
 /* LOGFILE CREATION FUNCTION */
 exports.logFileFunc = function (error) {

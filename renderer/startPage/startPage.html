@@ -175,6 +175,12 @@
             <span role="textbox" id="customer-name" class="customer-name-standard" spellcheck="false" contenteditable>
             </span>
           </div>
+          <div id="short-name-alert">MINIMUM 4 CHARACTERS</div>
+          <div id="existing-customer-numbers">
+            <div id="existing-list">
+
+            </div>
+          </div>
 
         </div>
         <div class="customer-region-item-b">
@@ -182,8 +188,9 @@
             <span>Customer<br />Number</span>
           </span>
           <form class='header-form' action="javascript:null">
-            <input type="text" id="customer-number" placeholder="CUSTOMER #" minlength="6" maxlength="7"
-              spellcheck="false" autofocus />
+            <div id="customer-number-disabled">FIRST ENTER CUSTOMER NAME</div>
+            <input type="text" id="customer-number" placeholder="--- Enter customer number ---" minlength="6"
+              maxlength="7" spellcheck="false" autofocus />
             <input type="submit" id='customer-number-submit' style="display: none;">
           </form>
         </div>
@@ -193,7 +200,17 @@
             <span>Pricelist<br />Number</span>
           </span>
           <form class='header-form' action="javascript:null">
-            <input type="text" spellcheck="false" placeholder="PRICELIST #" id="pricelist" />
+
+            <div id="price-list-number-loader" class="loading-container-pricelist">
+              <div class="spinner-pricelist">
+                <div class="spinner-sector spinner-color-a"></div>
+                <div class="spinner-sector spinner-color-b"></div>
+                <div class="spinner-sector spinner-color-c"></div>
+              </div>
+
+            </div>
+
+            <input type="text" spellcheck="false" placeholder="--- Auto generating ---" id="pricelist" />
           </form>
         </div>
 

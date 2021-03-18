@@ -58,10 +58,6 @@ function fillCustomerNameNumberJson() {
     });
   })();
 
-  function closeWindow() {
-    border.style.visibility = 'hidden';
-  }
-
   ////////////////////////////////////////
   /* DOM ELEMENTS AFTER GENERATED HTML */
   //////////////////////////////////////
@@ -113,5 +109,5 @@ ipcRenderer.on('name-search', (event, message) => {
 
 /* MESSAGE TO RETRACT WINDOW BEFORE CLOSE */
 ipcRenderer.on('close-window-dock', (e, message) => {
-  closeWindow();
+  border.style.visibility = 'hidden';
 });

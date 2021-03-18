@@ -99,6 +99,7 @@ input[type='text'][disabled] {
   background-color: #fff;
   color: var(--main);
   border: 1px solid lightgrey;
+  pointer-events: none;
 }
 input[type='text'] {
   background-color: #fff;
@@ -911,6 +912,32 @@ tr {
   justify-items: center;
   align-items: center;
 }
+
+#short-name-alert {
+  display: flex;
+  visibility: hidden;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  font-size: 0.8vw;
+  width: 100%;
+  height: 90%;
+  color: #fff;
+  border-radius: 3px;
+  animation: flashWarn 0.5s linear infinite alternate;
+}
+
+@keyframes flashWarn {
+  0% {
+    background-color: var(--button-gold);
+    color: #fff;
+  }
+  100% {
+    background-color: #fff;
+  }
+}
+
 .customer-region-item-b,
 .price-list-item-a {
   position: relative;
@@ -933,6 +960,7 @@ tr {
 .header-form {
   height: 100%;
   border-left: 1px solid #d1d1d1;
+  position: relative;
 }
 
 #label-customer-number,
@@ -990,6 +1018,33 @@ tr {
   max-width: 17vw;
 }
 
+.loading-container-pricelist {
+  display: flex;
+  z-index: 1;
+  flex-direction: column;
+  justify-content: center;
+  justify-items: center;
+  align-content: center;
+  align-items: center;
+  visibility: hidden;
+  position: absolute;
+  font-weight: bolder;
+  width: 100%;
+  background-color: #fff;
+  height: 4vh;
+}
+
+.spinner-pricelist {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 2vw;
+  height: 2vw;
+  border-radius: 50%;
+}
+
 #customer-number {
   font-size: 0.8vw;
   position: absolute;
@@ -1005,6 +1060,22 @@ tr {
 #customer-number:focus {
   outline: none;
   animation: flash 1s steps(2, end) infinite;
+}
+
+#customer-number-disabled {
+  display: flex;
+  position: absolute;
+  left: 0.1vw;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  visibility: hidden;
+  width: 100%;
+  font-size: 0.8vw;
+  height: 4.5vh;
+  color: #fff;
+  background-color: lightgrey;
+  z-index: 1;
 }
 
 #cca-price {
@@ -1069,6 +1140,7 @@ tr {
   justify-content: center;
   align-items: center;
   align-content: center;
+  overflow-wrap: anywhere;
 }
 
 .customer-name-standard:focus {
@@ -1077,8 +1149,8 @@ tr {
 }
 
 .customer-name-standard[contenteditable]:empty::before {
-  content: 'Enter the customer';
-  color: #d1d1d1;
+  content: '--- Enter customer name ---';
+  color: darkgray;
   background-color: #fff;
   left: 0vw;
   top: 0;
@@ -1086,32 +1158,6 @@ tr {
   width: 100%;
   font-size: 0.8vw;
   position: absolute;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  align-content: center;
-}
-.customer-name-placeholder {
-  position: relative;
-  background-color: #d1d1d1;
-  color: #fff;
-  font-size: 0.8vw;
-  text-align: center;
-  padding: 4px 0px;
-  text-transform: uppercase;
-  width: 26vw;
-  height: 98%;
-  max-width: 26vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  align-content: center;
-}
-
-.customer-name-placeholder::before {
-  content: 'Enter customer number first';
-  width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1708,6 +1754,7 @@ select {
   font-size: 0.8vw;
   right: 35vw;
   background-color: grey;
+  border: 1px solid #fff;
   color: #fff;
   width: 12vw;
   height: 100%;
@@ -2212,6 +2259,30 @@ select {
 /* /////////////////// */
 /* POPULATED HTML CSS */
 /* ///////////////// */
+.cusnum-existing {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  background-color: #fff;
+  text-align: center;
+  padding: 2vh 0.5vw;
+  height: 1vh;
+  font-size: 0.8vw;
+  margin: 0;
+  margin-top: 1vh;
+  width: 100%;
+}
+
+.cusnum-existing:hover {
+  color: #fff;
+  background-color: var(--hover-blue);
+}
+
+.cusnum-existing:active {
+  color: #fff;
+  background-color: var(--sec-blue);
+}
 
 .cusnum {
   display: flex;
@@ -2343,6 +2414,44 @@ select {
 
 .context-delete:active {
   transform: scale(0.95);
+}
+
+#existing-customer-numbers {
+  display: flex;
+  visibility: hidden;
+  z-index: 3;
+  top: 5vh;
+  position: absolute;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  align-content: center;
+  width: 92%;
+  max-height: 50vh;
+  overflow-y: auto;
+  box-shadow: 0px 5px 6px 0px rgba(50, 50, 50, 0.3);
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  background-color: #fff;
+  border-top: 1px solid #d1d1d1;
+}
+
+#existing-customer-numbers::-webkit-scrollbar {
+  width: 0.4vw;
+}
+#existing-customer-numbers::-webkit-scrollbar-thumb {
+  height: 1vh;
+  background-color: #d1d1d1;
+}
+
+#existing-list {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  align-content: center;
+  width: 100%;
 }
 
 #p2s-logo {
@@ -2502,13 +2611,6 @@ select {
   width: 15vw;
   height: 15vw;
   border-radius: 50%;
-}
-
-#logo {
-  position: relative;
-  top: 2px;
-  width: 35px;
-  height: auto;
 }
 
 .spinner-sector {

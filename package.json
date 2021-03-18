@@ -1,6 +1,6 @@
 {
-  "name": "P2Sys-Converter",
-  "version": "2.0.0",
+  "name": "P2Sys-Manager",
+  "version": "2.0.1",
   "description": "Price-List conversion program",
   "main": "main.js",
   "scripts": {
@@ -27,19 +27,19 @@
     "nodemailer": "^6.4.18",
     "python-shell": "^2.0.3"
   },
-  "homepage": "https://github.com/EspressoTrip-v2/P2Sys-Converter-Release",
+  "homepage": "https://github.com/EspressoTrip-v2/P2Sys-Manager-Release",
   "repository": {
     "type": "github",
-    "url": "https://github.com/EspressoTrip-v2/P2Sys-Converter-Release"
+    "url": "https://github.com/EspressoTrip-v2/P2Sys-Manager-Release"
   },
   "build": {
-    "appId": "com.JDevSoftware.P2Sys-Converter",
-    "productName": "P2Sys-Converter",
-    "copyright": "Copyright © 2021 P2Sys-Converter",
+    "appId": "com.JDevSoftware.P2Sys-Manager",
+    "productName": "P2Sys-Manager",
+    "copyright": "Copyright © 2021 P2Sys-Manager",
     "publish": {
       "provider": "github",
       "owner": "EspressoTrip-v2",
-      "package": "P2Sys-Converter-Release"
+      "package": "P2Sys-Manager-Release"
     },
     "electronUpdaterCompatibility": ">= 2.16",
     "files": [
@@ -73,7 +73,7 @@
       ]
     },
     "nsis": {
-      "shortcutName": "Converter",
+      "shortcutName": "Manager",
       "deleteAppDataOnUninstall": false,
       "perMachine": true,
       "oneClick": false,

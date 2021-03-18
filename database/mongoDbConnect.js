@@ -1,14 +1,5 @@
 /* MODULES */
 const mongoose = require('mongoose');
-const fs = require('fs');
-
-/* GET APPDATA DIR */
-let appData;
-if (process.platform === 'win32') {
-  appData = `${process.env.APPDATA}/P2Sys-Converter`;
-} else {
-  appData = process.cwd();
-}
 
 /* DATE VARIABLES */
 const currentYear = new Date().getFullYear();
@@ -16,23 +7,10 @@ const yearLimit = currentYear - 3;
 
 /* GET WORKING DIRECTORY */
 let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
 if (!process.env.NODE_ENV) {
-  envFileChange();
+  dir = `${process.cwd()}\\resources\\app.asar`;
 } else {
   dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
 }
 
 const { logFileFunc } = require(`${dir}/logFile.js`);
@@ -357,8 +335,8 @@ exports.queryExmillPrice = async function (notifyMain) {
   } catch (err) {
     logFileFunc(err);
     notifyMain({
-      title: 'Querying ex-mill price list failed',
-      body: `Problem querying ex-mill price list, please check the log file.`,
+      title: 'No Ex-Mill price list available',
+      body: `There is no Ex-Mill in the database, please create one for full functionality.`,
     });
   }
 };

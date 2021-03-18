@@ -11,23 +11,10 @@ const archiver = require('archiver');
 
 /* GET WORKING DIRECTORY */
 let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
 if (!process.env.NODE_ENV) {
-  envFileChange();
+  dir = `${process.cwd()}\\resources\\app.asar`;
 } else {
   dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
 }
 
 const { logFileFunc } = require(`${dir}/logFile.js`);
@@ -81,8 +68,7 @@ let startBtn = document.getElementById('start'),
   scheduleNotifyContainer = document.getElementById('schedule-notif'),
   pauseNotify = document.getElementById('pause-logo'),
   pauseNotifyContainer = document.getElementById('pause-notif'),
-  downloadContainer = document.getElementById('download-notif'),
-  downloadLogo = document.getElementById('download-logo');
+  downloadContainer = document.getElementById('download-notif');
 
 /* GLOBAL VARIABLES */
 let scheduleDatesArr,
@@ -621,7 +607,7 @@ function zipFileContents(directoryPath) {
   archive.on('end', () => {
     hideListContainer();
     systemSettingsMenu.style.visibility = 'hidden';
-    homeWindow.hide();
+    homeWindow.minimize();
     ipcRenderer.send('email-popup', { multiZipPath: desktopPath });
   });
 
@@ -763,7 +749,7 @@ async function convertPythonFunction(message) {
       logFileFunc(err);
       new Notification(`Failure to convert ${customerNumber}`, {
         icon: `${dir}/renderer/icons/converter-logo.png`,
-        body: `Customer ${customerNumber} will have an empty folder in the compressed file.\nPlease double check all entries on the price list you are trying to convert.`,
+        body: `Customer ${customerNumber} will not be converted as it is incomplete.`,
       });
       fs.rmdir(`${multiZipPath}\\${customerNumber}`, (err) => {
         logFileFunc(err);

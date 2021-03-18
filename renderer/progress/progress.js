@@ -4,31 +4,10 @@ const fs = require('fs');
 
 /* GET WORKING DIRECTORY */
 let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
 if (!process.env.NODE_ENV) {
-  envFileChange();
+  dir = `${process.cwd()}\\resources\\app.asar`;
 } else {
   dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
-}
-
-/* GET APPDATA DIR */
-let appData;
-if (process.platform === 'win32') {
-  appData = `${process.env.APPDATA}/P2Sys-Converter`;
-} else {
-  appData = process.cwd();
 }
 
 const { logFileFunc } = require(`${dir}/logFile.js`);
@@ -71,7 +50,7 @@ ipcRenderer.on('convert-python', (event, message) => {
   priceList = customerData['price-list'];
   updateDbFlag = message.updateDbFlag;
   multiZipPath = message.multiZipPath;
-  let createExcelSchedule = message.createExcelSchedule;
+  createExcelSchedule = message.createExcelSchedule;
 
   /* CREATE A PRICING OBJECT TO CONVERT IN PYTHON */
   let pythonPricingObj = {
@@ -111,6 +90,7 @@ ipcRenderer.on('convert-python', (event, message) => {
   let filePaths;
 
   pyshell.on('message', (message) => {
+    // console.log(message);
     /* SEPARATE THE PATHS INTO USABLE ARRAY */
     let value = parseInt(message);
     if (isNaN(value)) {

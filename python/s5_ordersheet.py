@@ -294,6 +294,7 @@ def create_s5_ordersheet(
 
     # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
     _038T_hidden_rows = []
+    _038T_hidden_rows_ind = []
     for i in desc_038:
         idx = list(_038T[_038T["DESC"].str.contains(i)].index)
         if _038T.loc[idx, "M3 TREATED"].sum() == 0:
@@ -308,6 +309,10 @@ def create_s5_ordersheet(
                     _038T_hidden_rows = np.append(_038T_hidden_rows, added_item)
             except:
                 pass
+        else:
+            for num in idx:
+                if _038T.loc[num, "M3 TREATED"] == 0:
+                    _038T_hidden_rows_ind.append(num + 4)
 
     # ADD THE TREATED COLUMN NAMES
     _038T.columns = columnsT
@@ -357,6 +362,7 @@ def create_s5_ordersheet(
 
     # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
     _038U_hidden_rows = []
+    _038U_hidden_rows_ind = []
     for i in desc_038:
         idx = list(_038U[_038U["DESC"].str.contains(i)].index)
         if _038U.loc[idx, "M3 UNTREATED"].sum() == 0:
@@ -371,6 +377,10 @@ def create_s5_ordersheet(
                     _038U_hidden_rows = np.append(_038U_hidden_rows, added_item)
             except:
                 pass
+        else:
+            for num in idx:
+                if _038U.loc[num, "M3 UNTREATED"] == 0:
+                    _038U_hidden_rows_ind.append((num + 4))
 
     # ADD UNTREATED COLUMN NAMES
     _038U.columns = columnsU
@@ -422,6 +432,7 @@ def create_s5_ordersheet(
 
     # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
     _050T_hidden_rows = []
+    _050T_hidden_rows_ind = []
     for i in desc_050:
         idx = list(_050T[_050T["DESC"].str.contains(i)].index)
         if _050T.loc[idx, "M3 TREATED"].sum() == 0:
@@ -436,6 +447,10 @@ def create_s5_ordersheet(
                     _050T_hidden_rows = np.append(_050T_hidden_rows, added_item)
             except:
                 pass
+        else:
+            for num in idx:
+                if _050T.loc[num, "M3 TREATED"] == 0:
+                    _050T_hidden_rows_ind.append(num + 4)
 
     # ADD TREATED COLUMN NAMES
     _050T.columns = columnsT
@@ -486,6 +501,7 @@ def create_s5_ordersheet(
 
     # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
     _050U_hidden_rows = []
+    _050U_hidden_rows_ind = []
     for i in desc_050:
         idx = list(_050U[_050U["DESC"].str.contains(i)].index)
         if _050U.loc[idx, "M3 UNTREATED"].sum() == 0:
@@ -500,6 +516,10 @@ def create_s5_ordersheet(
                     _050U_hidden_rows = np.append(_050U_hidden_rows, added_item)
             except:
                 pass
+        else:
+            for num in idx:
+                if _050U.loc[num, "M3 UNTREATED"] == 0:
+                    _050U_hidden_rows_ind.append(num + 4)
 
     # ADD UNTREATED COLUMN NAMES
     _050U.columns = columnsU
@@ -552,6 +572,7 @@ def create_s5_ordersheet(
 
     # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
     _076T_hidden_rows = []
+    _076T_hidden_rows_ind = []
     for i in desc_076:
         idx = list(_076T[_076T["DESC"].str.contains(i)].index)
         if _076T.loc[idx, "M3 TREATED"].sum() == 0:
@@ -566,6 +587,10 @@ def create_s5_ordersheet(
                     _076T_hidden_rows = np.append(_076T_hidden_rows, added_item)
             except:
                 pass
+        else:
+            for num in idx:
+                if _076T.loc[num, "M3 TREATED"] == 0:
+                    _076T_hidden_rows_ind.append(num + 4)
 
     # ADD TREATED COLUMN NAMES
     _076T.columns = columnsT
@@ -617,6 +642,7 @@ def create_s5_ordersheet(
 
     # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
     _076U_hidden_rows = []
+    _076U_hidden_rows_ind = []
     for i in desc_076:
         idx = list(_076U[_076U["DESC"].str.contains(i)].index)
         if _076U.loc[idx, "M3 UNTREATED"].sum() == 0:
@@ -631,6 +657,10 @@ def create_s5_ordersheet(
                     _076U_hidden_rows = np.append(_076U_hidden_rows, added_item)
             except:
                 pass
+        else:
+            for num in idx:
+                if _076U.loc[num, "M3 UNTREATED"] == 0:
+                    _076U_hidden_rows_ind.append(num + 4)
 
     # ADD UNTREATED COLUMN NAMES
     _076U.columns = columnsU
@@ -1171,31 +1201,6 @@ def create_s5_ordersheet(
             "y_scale": 1.5,
         }
 
-        # HIDE ROWS THAT ARE ZERO
-        if len(_038T_hidden_rows) > 0:
-            for row_num in _038T_hidden_rows:
-                worksheet2.set_row(row_num, None, None, {"hidden": True})
-
-        if len(_038U_hidden_rows) > 0:
-            for row_num in _038U_hidden_rows:
-                worksheet3.set_row(row_num, None, None, {"hidden": True})
-
-        if len(_050T_hidden_rows) > 0:
-            for row_num in _050T_hidden_rows:
-                worksheet4.set_row(row_num, None, None, {"hidden": True})
-
-        if len(_050U_hidden_rows) > 0:
-            for row_num in _050U_hidden_rows:
-                worksheet5.set_row(row_num, None, None, {"hidden": True})
-
-        if len(_076T_hidden_rows) > 0:
-            for row_num in _076T_hidden_rows:
-                worksheet6.set_row(row_num, None, None, {"hidden": True})
-
-        if len(_076U_hidden_rows) > 0:
-            for row_num in _076U_hidden_rows:
-                worksheet7.set_row(row_num, None, None, {"hidden": True})
-
         # ADD FORMULA FOR CUSTOMER NUMBER IN PRODUCT SHEETS
         if schedule_date == 0:
             order_number_formula = '=IF(summary!E3="-- Enter number here --", "- - - - - - - -", summary!E3)'
@@ -1247,6 +1252,63 @@ def create_s5_ordersheet(
         len_76U = np.arange(5, _076U_rownum + 5)
         for i in len_76U:
             worksheet7.write(f"G{i}", "", unlocked)
+
+        # HIDE ROWS THAT ARE ZERO
+        if len(_038T_hidden_rows) >= _038T_rownum:
+            worksheet3.set_first_sheet()
+            worksheet3.activate()
+            worksheet2.hide()
+        if len(_038T_hidden_rows) > 0:
+            for row_num in _038T_hidden_rows:
+                worksheet2.set_row(row_num, None, None, {"hidden": True})
+        if len(_038T_hidden_rows_ind) > 0:
+            for row_num in _038T_hidden_rows_ind:
+                worksheet2.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_038U_hidden_rows) >= _038U_rownum:
+            worksheet3.hide()
+        if len(_038U_hidden_rows) > 0:
+            for row_num in _038U_hidden_rows:
+                worksheet3.set_row(row_num, None, None, {"hidden": True})
+        if len(_038U_hidden_rows_ind) > 0:
+            for row_num in _038U_hidden_rows_ind:
+                worksheet3.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_050T_hidden_rows) >= _050T_rownum:
+            worksheet4.hide()
+        if len(_050T_hidden_rows) > 0:
+            for row_num in _050T_hidden_rows:
+                worksheet4.set_row(row_num, None, None, {"hidden": True})
+        if len(_050T_hidden_rows_ind) > 0:
+            for row_num in _050T_hidden_rows_ind:
+                worksheet4.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_050U_hidden_rows) >= _050U_rownum:
+            worksheet5.hide()
+        if len(_050U_hidden_rows) > 0:
+            for row_num in _050U_hidden_rows:
+                worksheet5.set_row(row_num, None, None, {"hidden": True})
+        if len(_050U_hidden_rows_ind) > 0:
+            for row_num in _050U_hidden_rows_ind:
+                worksheet5.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_076T_hidden_rows) >= _076T_rownum:
+            worksheet6.hide()
+        if len(_076T_hidden_rows) > 0:
+            for row_num in _076T_hidden_rows:
+                worksheet6.set_row(row_num, None, None, {"hidden": True})
+        if len(_076T_hidden_rows_ind) > 0:
+            for row_num in _076T_hidden_rows_ind:
+                worksheet6.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_076U_hidden_rows) >= _076U_rownum:
+            worksheet7.hide()
+        if len(_076U_hidden_rows) > 0:
+            for row_num in _076U_hidden_rows:
+                worksheet7.set_row(row_num, None, None, {"hidden": True})
+        if len(_076U_hidden_rows_ind) > 0:
+            for row_num in _076U_hidden_rows_ind:
+                worksheet7.set_row(row_num, None, None, {"hidden": True})
 
     writer.save()
     print(server_path)

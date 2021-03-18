@@ -3,36 +3,16 @@
 const { ipcRenderer } = require('electron');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
-const { windowsStore } = require('process');
 
 /* GET WORKING DIRECTORY */
 let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
 if (!process.env.NODE_ENV) {
-  envFileChange();
+  dir = `${process.cwd()}\\resources\\app.asar`;
 } else {
   dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
 }
 
-/* GET APPDATA DIR */
-let appData;
-if (process.platform === 'win32') {
-  appData = `${process.env.APPDATA}/P2Sys-Converter`;
-} else {
-  appData = process.cwd();
-}
+let appData = `${process.env.APPDATA}\\P2Sys-Manager`;
 
 /* DOM ELEMENTS */
 let userInput = document.getElementById('username'),
@@ -43,7 +23,6 @@ let userInput = document.getElementById('username'),
   generateBtnDisabled = document.getElementById('generate-btn-disabled'),
   generateBtn = document.getElementById('generate-btn'),
   soundClick = document.getElementById('click'),
-  audioTag = Array.from(document.getElementsByTagName('audio')),
   loadingContainer = document.getElementsByClassName('loading-container')[0],
   creationContainer = document.getElementById('creation-container'),
   creationCountDown = document.getElementById('restarting-info'),

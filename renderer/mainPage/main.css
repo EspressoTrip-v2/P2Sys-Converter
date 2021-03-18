@@ -136,7 +136,7 @@ button {
 }
 #psys-logo-container::after {
   position: absolute;
-  content: 'Converter';
+  content: 'Manager';
   font-family: Forelle;
   font-size: 20vw;
   top: -13vh;

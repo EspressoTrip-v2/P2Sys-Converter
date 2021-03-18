@@ -3,31 +3,17 @@ const { remote, ipcRenderer } = require('electron');
 
 /* GET WORKING DIRECTORY */
 let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
 if (!process.env.NODE_ENV) {
-  envFileChange();
+  dir = `${process.cwd()}\\resources\\app.asar`;
 } else {
   dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
 }
 
 /* GET WINDOW */
 let multiWindow = remote.getCurrentWindow();
 
 /* DOM ELEMENTS */
-let container = document.getElementById('container'),
-  clearAllBtn = document.getElementById('clear-list-btn'),
+let clearAllBtn = document.getElementById('clear-list-btn'),
   customerListContainer = document.getElementById('customer-list'),
   soundClick = document.getElementById('click'),
   audioTag = Array.from(document.getElementsByTagName('audio'));

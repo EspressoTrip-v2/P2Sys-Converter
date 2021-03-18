@@ -1,36 +1,17 @@
 /* MODULES */
 const nodemailer = require('nodemailer');
-const { screen, ipcRenderer, remote } = require('electron');
-const fs = require('fs');
+const { ipcRenderer, remote } = require('electron');
 
 /* GET WORKING DIRECTORY */
 let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
+
 if (!process.env.NODE_ENV) {
-  envFileChange();
+  dir = `${process.cwd()}\\resources\\app.asar`;
 } else {
   dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
 }
 
-/* GET APPDATA DIR */
-let appData;
-if (process.platform === 'win32') {
-  appData = `${process.env.APPDATA}/P2Sys-Converter`;
-} else {
-  appData = process.cwd();
-}
+let appData = `${process.env.APPDATA}\\P2Sys-Manager`;
 const { logFileFunc } = require(`${dir}/logFile.js`);
 
 /* GET WINDOW */

@@ -4,23 +4,11 @@ const { remote, ipcRenderer } = require('electron');
 
 /* GET WORKING DIRECTORY */
 let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
+
 if (!process.env.NODE_ENV) {
-  envFileChange();
+  dir = `${process.cwd()}\\resources\\app.asar`;
 } else {
   dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
 }
 
 /* LOCAL MODULES */
@@ -63,7 +51,8 @@ let searchValue,
   treatedColumnClass,
   customerNumbersSearchList,
   dateValue,
-  OldScheduleDate;
+  OldScheduleDate,
+  existingCustomerListArr;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -108,6 +97,12 @@ let backBtn = document.getElementById('back-to-main-btn'),
   /* TABLE COMPONENT DOMS */
   /////////////////////////
   table = document.getElementById('table'),
+  existingCustomerNameContainer = document.getElementById('existing-customer-numbers'),
+  existingCustomerList = document.getElementById('existing-list'),
+  priceListLoading = document.getElementById('price-list-number-loader'),
+  customerNumberDisabled = document.getElementById('customer-number-disabled'),
+  customerNumberSubmitForm = document.getElementById('customer-number-submit'),
+  customerNameMinimumAlert = document.getElementById('short-name-alert'),
   /* MAIN PAGE ELEMENTS */
   ///////////////////////
   html = document.getElementsByTagName('html')[0],
@@ -284,26 +279,6 @@ function resetForm() {
   ipcRenderer.send('restart-sec', null);
 }
 
-function showLoading(flag) {
-  if (flag) {
-    loadingContainer.style.visibility = 'visible';
-    viewPauseBtn.disabled = true;
-  } else {
-    loadingContainer.style.visibility = 'visible';
-    searchDisabledBox.style.visibility = 'visible';
-  }
-}
-
-function hideLoading(flag) {
-  if (flag) {
-    loadingContainer.style.visibility = 'hidden';
-    viewPauseBtn.disabled = false;
-  } else {
-    loadingContainer.style.visibility = 'hidden';
-    searchDisabledBox.style.visibility = 'visible';
-  }
-}
-
 /* GET PRICE-LIST FROM DATABASE */
 async function getPriceList(customerNumber) {
   // Get the price list number
@@ -357,6 +332,36 @@ function blurTable() {
 function unBlurTable() {
   progressFade.style.visibility = 'hidden';
   progressFade.style.backdropFilter = 'none';
+}
+
+/* LOADING CONTAINER CONTROLS */
+function showLoading(flag) {
+  if (flag) {
+    loadingContainer.style.visibility = 'visible';
+    viewPauseBtn.disabled = true;
+  } else {
+    loadingContainer.style.visibility = 'visible';
+    searchDisabledBox.style.visibility = 'visible';
+  }
+}
+
+function hideLoading(flag) {
+  if (flag) {
+    loadingContainer.style.visibility = 'hidden';
+    viewPauseBtn.disabled = false;
+  } else {
+    loadingContainer.style.visibility = 'hidden';
+    searchDisabledBox.style.visibility = 'visible';
+  }
+}
+
+/* CUSTOMER NUMBER DISABLED CONTAINER CONTROL */
+function showCustomerNumberDisabled() {
+  customerNumberDisabled.style.visibility = 'visible';
+}
+
+function hideCustomerNumberDisabled() {
+  customerNumberDisabled.style.visibility = 'hidden';
 }
 
 /* SELECTOR SHOW PAUSED VERSION */
@@ -486,15 +491,33 @@ function getBackupDateStrings(cumenu, ctmenu) {
     }
   } else {
     for (i = 0; i < cumenu.length; i++) {
-      cudateList = 'NO BACKUPS';
+      cudateList = 'No History';
       cumenu[i].setAttribute('data-label', cudateList);
       cumenu[i].style.setProperty('--vis', 'visible');
     }
     /* TREATED COLUMNS POPUP */
     for (i = 0; i < ctmenu.length; i++) {
-      ctdatelist = 'NO BACKUPS';
+      ctdatelist = 'No History';
       ctmenu[i].setAttribute('data-label', ctdatelist);
     }
+  }
+}
+
+/* CUSTOMER NAME EXISTING FILTERING */
+function filterNames(e) {
+  if (customerName.innerText.length > 0) {
+    existingCustomerListArr.forEach((el) => {
+      let elMatch = el.innerText.includes(customerName.innerText);
+      if (elMatch) {
+        el.style.display = 'flex';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+
+    existingCustomerNameContainer.style.visibility = 'visible';
+  } else {
+    existingCustomerNameContainer.style.visibility = 'hidden';
   }
 }
 
@@ -524,8 +547,11 @@ function htmlInnerFill(html, categoryModification) {
   // POPUP MENUS FOR THE BACKUP PRICES
   getBackupDateStrings(cuMenu, ctMenu);
   if (categoryModification === 'new') {
-    customerNumberValue.addEventListener('keyup', generatePriceListNumber);
-    customerName.setAttribute('class', 'customer-name-placeholder');
+    showCustomerNumberDisabled();
+    customerNumberValue.disabled = true;
+    customerName.addEventListener('keyup', filterNames);
+    customerName.addEventListener('keyup', enterEvent);
+    customerNumberValue.addEventListener('keyup', paddingAddPriceListNum);
   }
 }
 
@@ -535,52 +561,6 @@ function activateExmillBtn() {
   if (exmillPrice != null) {
     exmillBtn.style.display = 'block';
     exmillBtnDisabled.style.display = 'none';
-  }
-}
-
-/* ADD PADDING TO SHORT CUSTOMER */
-function paddingAddPricelistNum(value) {
-  let newValue;
-  if (value.length < 6) {
-    newValue = value.padEnd(6, ' ');
-    return newValue;
-  } else if (value.length === 7) {
-    newValue = value.slice(0, 6);
-    return newValue;
-  } else {
-    return value;
-  }
-}
-
-function generatePriceListNumber(e) {
-  let pattern = /\w+|\s+/g;
-  if (customerNumberValue.value.length > 0) {
-    let match = customerNumberValue.value.match(pattern).join('');
-    pricelistNumber = match.toUpperCase().replace(' ', '');
-
-    /* REGEX TO FIX SYNTAX OF CUSTOMER NUMBER TO PRICELISTNUMBER */
-    pricelistNumber = paddingAddPricelistNum(pricelistNumber);
-
-    /* ENTER THE PRICELIST NUMBER THAT HAS BEEN GENERATED */
-    customerPriceList.value = pricelistNumber.toUpperCase();
-
-    /* CHECK LENGTH MAKE CUSTOMER NAME EDITABLE */
-    if (customerNumberAllKeys.indexOf(customerNumberValue.value.toUpperCase()) != -1) {
-      customerName.innerText = customerNumberNameJson[customerNumberValue.value.toUpperCase()];
-      customerName.setAttribute('class', 'customer-name-standard');
-    } else if (
-      customerNumberAllKeys.indexOf(customerNumberValue.value.toUpperCase()) === -1 &&
-      customerNumberValue.value.length >= 6 &&
-      customerNumberValue.value.length <= 7
-    ) {
-      customerName.contentEditable = true;
-      customerName.setAttribute('class', 'customer-name-standard');
-    } else {
-      customerName.contentEditable = false;
-      customerName.setAttribute('class', 'customer-name-placeholder');
-    }
-  } else {
-    customerPriceList.value = null;
   }
 }
 
@@ -654,7 +634,10 @@ function tablePageCreate(existingOrCopy, categoryModification) {
     customerNumberValue.value = null;
     customerNumberValue.disabled = false;
     customerName.innerText = null;
-    customerName.contentEditable = false;
+    customerName.contentEditable = true;
+    setTimeout(() => {
+      customerName.focus();
+    }, 500);
   }
 
   ccaPrice.value = jsonFile['CCA'];
@@ -1223,7 +1206,7 @@ function repopulateBundleSize() {
 
 /* FUNCTION TO CREATE THE PERCENTAGE STRING FOR EXMILL */
 function createExmillPercent(pricelistvalue, exmillvalue) {
-  let string, newInt;
+  let newInt;
   let value = (pricelistvalue / exmillvalue - 1) * 100;
   if (value > 1) {
     newInt = value.toFixed(2);
@@ -1562,9 +1545,96 @@ async function populateList() {
   hideLoading();
 }
 
+/* CUSTOMER NAME ENTER EVENT */
+function enterEvent(e) {
+  if (e.key === 'Enter') {
+    customerName.innerText = customerName.innerText.trimEnd();
+    if (customerName.innerText.length < 4) {
+      customerName.innerText = null;
+      customerNameMinimumAlert.style.visibility = 'visible';
+      setTimeout(() => {
+        customerNameMinimumAlert.style.visibility = 'hidden';
+      }, 1000);
+    } else {
+      hideCustomerNumberDisabled();
+      customerNumberValue.disabled = false;
+      customerNumberValue.focus();
+    }
+  }
+}
+
+async function existingEvent(e) {
+  soundClick.play();
+  priceListLoading.style.visibility = 'visible';
+  createBtnNew.disabled = true;
+  pauseBtnNew.disabled = true;
+  hideCustomerNumberDisabled();
+  customerName.innerText = e.target.innerText;
+  customerName.contentEditable = false;
+  customerNumberValue.value = e.target.id;
+  customerNumberValue.disabled = true;
+  existingCustomerNameContainer.style.visibility = 'hidden';
+  customerPriceList.value = await ipcRenderer.invoke('get-pricelist-number', e.target.id);
+  priceListLoading.style.visibility = 'hidden';
+
+  createBtnNew.disabled = false;
+  pauseBtnNew.disabled = false;
+
+  /* REMOVE EVENT LISTENERS FROM CUSTOMER NUMBER AND NAME */
+  customerName.removeEventListener('keyup', filterNames);
+  customerName.removeEventListener('keyup', enterEvent);
+
+  customerNumberValue.removeEventListener('keyup', paddingAddPriceListNum);
+}
+
+/* ADD EXISTING LISTENERS TO PAUSED LIST ITEMS */
+function addExistingListListeners() {
+  /* CLICK EVENTS ON CUSTOMER NUMBER SEARCH BOX */
+  existingCustomerListArr = Array.from(existingCustomerList.children);
+  // CLICK EVENT ON CUSTOMER LIST ITEM
+  existingCustomerListArr.forEach((el) => {
+    el.addEventListener('click', existingEvent);
+  });
+}
+
+/* POPULATE EXISTING NAME LIST */
+function populateExistingList() {
+  let customerNames = Object.keys(customerNameNumberJson);
+  existingCustomerList.innerHTML = '';
+  customerNames.forEach((el) => {
+    let html = `
+      <div class="cusnum-existing" id="${customerNameNumberJson[el]}">${el}</div>
+      `;
+    existingCustomerList.insertAdjacentHTML('beforeend', html);
+  });
+  addExistingListListeners();
+}
+
 /* CLOSE CUSTOMER DOCK */
 function closeCustomerDock() {
   ipcRenderer.send('close-window-dock', null);
+}
+
+/* ADD PADDING TO SHORT CUSTOMER */
+function paddingAddPriceListNum(e) {
+  if (e.target.value.length > 0) {
+    let pattern = /\w+|\s+/g;
+    let match = e.target.value.match(pattern).join('');
+    let value = match.toUpperCase().replace(' ', '');
+
+    let newValue;
+    // let value = e.target.value;
+    if (value.length < 6) {
+      customerNumberSubmitForm.click();
+      newValue = value.padEnd(6, ' ');
+      customerPriceList.value = newValue;
+    } else if (value.length === 7) {
+      newValue = value.slice(0, 6);
+      customerPriceList.value = newValue;
+    } else {
+      customerPriceList.value = value;
+    }
+  }
 }
 
 /* REMOVE ITEMS IN THE LIST THAT DOES NOT MATCH SEARCH */
@@ -2162,7 +2232,6 @@ ipcRenderer.on('reset-form', (e, message) => {
 ipcRenderer.on('edit-schedule-price-list', (e, message) => {
   jsonFile = message.priceList;
 
-  /* GET THE PRICE LIST NUMEBR & CUSTOMER NUMBER THEN REMOVE IT FROM PRICE-LIST */
   priceListNumber = message.priceListNumber;
   searchValue = message.customerNumber;
   delete jsonFile['priceListNumber'];
@@ -2177,7 +2246,6 @@ ipcRenderer.on('edit-schedule-price-list', (e, message) => {
 ipcRenderer.on('copy-price-list', (e, message) => {
   jsonFile = message.jsonFile;
 
-  /* GET THE PRICE LIST NUMEBR & CUSTOMER NUMBER THEN REMOVE IT FROM PRICE-LIST */
   priceListNumber = message.priceListNumber;
   searchValue = message.customerNumber;
 
@@ -2188,9 +2256,9 @@ ipcRenderer.on('copy-price-list', (e, message) => {
 });
 
 ipcRenderer.on('new-price-list', (e, message) => {
+  populateExistingList();
   jsonFile = message.jsonFile;
 
-  /* GET THE PRICE LIST NUMBER & CUSTOMER NUMBER THEN REMOVE IT FROM PRICE-LIST */
   priceListNumber = message.priceListNumber;
   searchValue = message.customerNumber;
 
@@ -2202,7 +2270,7 @@ ipcRenderer.on('new-price-list', (e, message) => {
 
 /* CONNECTION MONITORING */
 function showOnlineWarning() {
-  if (window.getComputedStyle(checkCustomer).opacity === '1') {
+  if (window.getComputedStyle(checkCustomer).visibility === 'visible') {
     progressFade.style.visibility = 'visible';
     progressFade.style.backdropFilter = 'blur(2px)';
     onlineWarningCustomer.style.visibility = 'visible';

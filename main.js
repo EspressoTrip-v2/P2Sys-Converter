@@ -11,7 +11,6 @@ const {
 } = require('electron');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const homedir = require('os').homedir();
 const os = require('os');
 require('dotenv').config();
 
@@ -20,32 +19,13 @@ app.disableHardwareAcceleration();
 
 /* GET WORKING DIRECTORY */
 let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
 if (!process.env.NODE_ENV) {
-  envFileChange();
+  dir = `${process.cwd()}\\resources\\app.asar`;
 } else {
   dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
 }
 
-/* GET APPDATA DIR */
-let appData;
-if (process.platform === 'win32') {
-  appData = `${process.env.APPDATA}/P2Sys-Converter`;
-} else {
-  appData = process.cwd();
-}
+let appData = `${process.env.APPDATA}\\P2Sys-Manager`;
 
 /* LOCAL MODULES */
 const {
@@ -166,7 +146,7 @@ function mongooseConnect(message) {
           title: 'P2SYS ERROR',
           icon: `${dir}/renderer/icons/converter-logo.png`,
           message:
-            'P2Sys Converter was unable to connect to the database. Please try again when a connection is available',
+            'P2Sys Manager was unable to connect to the database. Please try again when a connection is available',
           buttons: ['EXIT'],
         })
         .then(() => {
@@ -204,16 +184,6 @@ db.once('connected', async () => {
     exmillPrice = result;
   } catch (err) {
     logFileFunc(err);
-  }
-
-  /* NOTIFICATION FUNCTION */
-  function notifyMain(message) {
-    let notification = new Notification({
-      title: message.title,
-      body: message.body,
-      icon: `${dir}/renderer/icons/converter-logo.png`,
-    });
-    notification.show();
   }
 
   /* CHECK BACKUPS CLEAN DATE */
@@ -261,7 +231,7 @@ db.once('connected', async () => {
   }
 
   /* TRAY MENU LAYOUT TEMPLATE */
-  trayMenu = Menu.buildFromTemplate([{ label: `Converter v${version}` }]);
+  trayMenu = Menu.buildFromTemplate([{ label: `Manager v${version}` }]);
   createWindow();
   convertNumberName();
 });
@@ -323,6 +293,17 @@ db.on('reconnected', () => {
 ////////////////////////////////
 /* WINDOW CREATION FUNCTIONS */
 //////////////////////////////
+
+/* NOTIFICATION FUNCTION */
+function notifyMain(message) {
+  let notification = new Notification({
+    title: message.title,
+    body: message.body,
+    icon: `${dir}/renderer/icons/converter-logo.png`,
+  });
+  notification.show();
+}
+
 /* MAIN WINDOW CREATION */
 function createWindow() {
   createTray();
@@ -341,7 +322,6 @@ function createWindow() {
     center: true,
     maximizable: false,
     alwaysOnTop: true,
-    backgroundColor: '#00FFFFFF',
     webPreferences: {
       devTools: false,
       nodeIntegration: true,
@@ -387,6 +367,7 @@ function createWindow() {
 /* SECWINDOW CREATION */
 function createSecWindow(message) {
   secWindow = new BrowserWindow({
+    parent: homeWindow,
     width: Math.floor(screenWidth * 0.13),
     height: Math.floor(screenWidth * 0.18),
     autoHideMenuBar: true,
@@ -394,7 +375,6 @@ function createSecWindow(message) {
     frame: false,
     alwaysOnTop: true,
     spellCheck: false,
-    backgroundColor: '#00FFFFFF',
     transparent: true,
     webPreferences: {
       devTools: false,
@@ -464,7 +444,6 @@ function createChildWindow(message) {
     x: message.dimensions[0] - message.size[0],
     y: message.dimensions[1],
     autoHideMenuBar: true,
-    backgroundColor: '#00FFFFFF',
     skipTaskbar: true,
     frame: false,
     spellCheck: false,
@@ -516,7 +495,6 @@ function createLoadingWindow() {
     width: Math.floor(screenWidth * 0.052),
     height: Math.floor(screenWidth * 0.052),
     autoHideMenuBar: true,
-    backgroundColor: '#00FFFFFF',
     center: true,
     frame: false,
     skipTaskbar: true,
@@ -558,12 +536,12 @@ function createEmailWindow(message) {
     maxHeight: Math.floor(screenWidth * 0.45),
     autoHideMenuBar: true,
     center: true,
-    backgroundColor: '#00FFFFFF',
     frame: false,
     spellCheck: false,
     transparent: true,
     alwaysOnTop: true,
     maximizable: false,
+    skipTaskbar: true,
     webPreferences: {
       devTools: false,
       nodeIntegration: true,
@@ -601,7 +579,6 @@ function createProgressWindow() {
     height: Math.floor(screenWidth * 0.052),
     spellCheck: false,
     resizable: false,
-    backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
     center: true,
     skipTaskbar: true,
@@ -637,6 +614,7 @@ function createProgressWindow() {
 /* COPY SELECTION WINDOW */
 function createCopySelectionWindow(message) {
   copySelectionWindow = new BrowserWindow({
+    parent: homeWindow,
     width: Math.floor(screenWidth * 0.13),
     height: Math.floor(screenWidth * 0.18),
     maxWidth: Math.floor(screenWidth * 0.16),
@@ -644,7 +622,6 @@ function createCopySelectionWindow(message) {
     minHeight: Math.floor(screenWidth * 0.18),
     minWidth: Math.floor(screenWidth * 0.13),
     spellCheck: false,
-    backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
     alwaysOnTop: true,
     center: true,
@@ -694,7 +671,6 @@ function createMultiWindow(message) {
     y: message.dimensions[1],
     resizable: false,
     autoHideMenuBar: true,
-    backgroundColor: '#00FFFFFF',
     skipTaskbar: true,
     frame: false,
     spellCheck: false,
@@ -735,8 +711,8 @@ function createUpdateInfo() {
     center: true,
     frame: false,
     alwaysOnTop: true,
+    transparent: true,
     spellCheck: false,
-    backgroundColor: '#00FFFFFF',
     skipTaskbar: true,
     resizable: false,
     webPreferences: {
@@ -761,7 +737,7 @@ function createUpdateInfo() {
 }
 
 /* PASSWORD ASK WINDOW CREATION */
-function createPasswordGenerateWindow(message) {
+function createPasswordGenerateWindow() {
   passwordGenerate = new BrowserWindow({
     width: Math.floor(screenWidth * 0.13),
     height: Math.floor(screenWidth * 0.19),
@@ -774,7 +750,6 @@ function createPasswordGenerateWindow(message) {
     frame: false,
     alwaysOnTop: true,
     spellCheck: false,
-    backgroundColor: '#00FFFFFF',
     transparent: true,
     webPreferences: {
       devTools: false,
@@ -818,7 +793,6 @@ function createPasswordEnterWindow(hash) {
     frame: false,
     alwaysOnTop: true,
     spellCheck: false,
-    backgroundColor: '#00FFFFFF',
     transparent: true,
     webPreferences: {
       devTools: false,
@@ -884,13 +858,13 @@ app.on('ready', () => {
     dialog.showMessageBoxSync({
       type: 'error',
       title: 'APP ALREADY RUNNING',
-      message: 'Converter is already running, please check the taskbar.',
+      message: 'Manager is already running, please check the taskbar.',
       buttons: ['OK'],
     });
     app.quit();
   } else {
     /* SET APP NAME FOR WINDOWS NOTIFICATIONS*/
-    app.setAppUserModelId('P2Sys-Converter');
+    app.setAppUserModelId('P2Sys-Manager');
     /* SET VERSION VARIABLE */
     version = app.getVersion();
 
@@ -935,7 +909,7 @@ ipcMain.on('dock-sec', (e, message) => {
 /* MESSAGE FROM START BUTTON */
 /* Create new customer number search window */
 ipcMain.on('start', (e, message) => {
-  homeWindow.hide();
+  homeWindow.minimize();
   createLoadingWindow();
   createSecWindow(message);
 });
@@ -1055,6 +1029,7 @@ ipcMain.on('email-close', (e, message) => {
 
 /* SEND MESSAGE TO CLOSE TABLE WINDOW ON ERROR */
 ipcMain.on('reset-form', (e, message) => {
+  reloadData();
   secWindow.webContents.send('reset-form', null);
 });
 
@@ -1092,7 +1067,8 @@ ipcMain.on('show-home', (e, message) => {
   }
   if (homeWindow) {
     homeWindow.webContents.send('get-notifications-main-app', null);
-    homeWindow.show();
+    homeWindow.restore();
+    homeWindow.focus();
   }
 });
 
