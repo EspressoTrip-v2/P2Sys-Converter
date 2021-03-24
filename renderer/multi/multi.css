@@ -29,6 +29,7 @@
 * {
   box-sizing: border-box;
   -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 /* Fonts */
 @font-face {

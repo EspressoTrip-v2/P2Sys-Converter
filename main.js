@@ -126,10 +126,10 @@ let connectionString;
 ////////////////////////
 function mongooseConnect(message) {
   /* TEST DATABASE */
-  connectionString = `mongodb+srv://${message.username}:${message.password}@cluster0.z0sd1.mongodb.net/acwhitcher?retryWrites=true&w=majority`;
+  // connectionString = `mongodb+srv://${message.username}:${message.password}@cluster0.z0sd1.mongodb.net/acwhitcher?retryWrites=true&w=majority`;
 
   /* AC WHITCHER DATABASE */
-  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+  connectionString = `mongodb+srv://${message.username}:${message.password}@cluster0.e7vid.mongodb.net/acwhitcher?retryWrites=true&w=majority`;
 
   mongoose
     .connect(connectionString, {
@@ -139,35 +139,25 @@ function mongooseConnect(message) {
       useUnifiedTopology: true,
     })
     .catch((err) => {
+      logFileFunc(err.stack);
       /* INITIAL ERROR CONNECTION */
       dialog
         .showMessageBox(loadingWindow, {
           type: 'error',
-          title: 'P2SYS ERROR',
+          title: 'P2Sys Error',
           icon: `${dir}/renderer/icons/converter-logo.png`,
           message:
             'P2Sys Manager was unable to connect to the database. Please try again when a connection is available',
           buttons: ['EXIT'],
         })
         .then(() => {
-          loadingWindow.close();
+          setTimeout(() => {
+            if (loadingWindow) {
+              loadingWindow.close();
+            }
+            app.quit();
+          }, 20);
         });
-
-      let fileDir = `${appData}/error-log.txt`;
-      /* CHECK IF IT EXISTS */
-      fs.existsSync(fileDir)
-        ? fs.appendFileSync(
-            fileDir,
-            `${new Date()} -> Connection failure: ${err}\n`,
-            'utf8',
-            () => console.log('Logfile write error')
-          )
-        : fs.writeFileSync(
-            fileDir,
-            `${new Date()} -> Connection failure: ${err}\n`,
-            'utf8',
-            () => console.log('Logfile write error')
-          );
     });
 }
 
@@ -183,7 +173,7 @@ db.once('connected', async () => {
     let result = await queryExmillPrice(notifyMain);
     exmillPrice = result;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   }
 
   /* CHECK BACKUPS CLEAN DATE */
@@ -198,7 +188,7 @@ db.once('connected', async () => {
       notification.show();
     }
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   }
 
   /* GET ALL THE SCHEDULE DATES */
@@ -213,21 +203,21 @@ db.once('connected', async () => {
       };
     }
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   }
 
   /* QUERY ALL NAMES */
   try {
     customerNumberNameResult = await queryCustomerName(null, true, notifyMain);
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   }
 
   /* FETCH ALL CUSTOMER NAME INDEXES */
   try {
     customerNumberAllKeys = await queryAllCustomerNumbers(notifyMain);
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   }
 
   /* TRAY MENU LAYOUT TEMPLATE */
@@ -244,7 +234,7 @@ db.on('disconnected', () => {
   } else if (emailWindow && emailWindow.isVisible()) {
     dialog.showMessageBoxSync(emailWindow, {
       type: 'info',
-      title: 'P2SYS DATABASE CONNECTION LOST',
+      title: 'P2Sys Database Connection Lost',
       message: 'The connection to the database has been lost',
       detail: 'The email will fail on send, you will have to resend it manually.',
       icon: `${dir}/renderer/icons/converter-logo.png`,
@@ -263,7 +253,7 @@ db.on('error', () => {
   } else if (emailWindow && emailWindow.isVisible()) {
     dialog.showMessageBoxSync(emailWindow, {
       type: 'info',
-      title: 'P2SYS DATABASE CONNECTION LOST',
+      title: 'P2Sys Database Connection Lost',
       message: 'The connection to the database has been lost',
       detail: 'The email will fail on send, you will have to resend it manually.',
       icon: `${dir}/renderer/icons/converter-logo.png`,
@@ -358,7 +348,7 @@ function createWindow() {
   //   Event listener for closing
   homeWindow.on('closed', () => {
     homeWindow = null;
-    if (!emailWindow) {
+    if (!emailWindow || !updateInfoWindow) {
       app.quit();
     }
   });
@@ -824,10 +814,10 @@ function createPasswordEnterWindow(hash) {
 }
 
 function checkPassword() {
-  if (!fs.existsSync(`${appData}/ps_bin.dat`)) {
+  if (!fs.existsSync(`${appData}/ps_bin`)) {
     createPasswordGenerateWindow();
-  } else if (fs.existsSync(`${appData}/ps_bin.dat`)) {
-    fs.readFile(`${appData}/ps_bin.dat`, 'utf8', (err, data) => {
+  } else if (fs.existsSync(`${appData}/ps_bin`)) {
+    fs.readFile(`${appData}/ps_bin`, 'utf8', (err, data) => {
       createPasswordEnterWindow(JSON.parse(data).hash);
     });
   }
@@ -844,7 +834,7 @@ function deleteUnusedFiles() {
     filesToDelete.forEach((el) => {
       fs.rmdir(`${tempPath}\\${el}`, { recursive: true }, (err) => {
         if (err) {
-          logFileFunc(err);
+          logFileFunc(err.stack);
         }
       });
     });
@@ -936,8 +926,8 @@ function getNewScheduleItem(message) {
   return scheduleData;
 }
 
-/* DATABASE BACKUP */
-async function databaseBackupControl(message) {
+/* DATABASE UPDATE */
+async function databaseUpdateControl(message) {
   let customerNumber = message.customerNumber;
   let pauseFlag = message.pauseFlag;
   let newScheduleDate = message.newScheduleDate;
@@ -1003,12 +993,12 @@ async function databaseBackupControl(message) {
 ipcMain.on('progress-end', (e, message) => {
   /* SEND MESSAGE TO CLOSE THE PROGRESS BAR */
   secWindow.webContents.send('progress-end', message);
-  databaseBackupControl(message);
+  databaseUpdateControl(message);
 });
 
 /* MESSAGE FROM MULTI CONVERT PROGRESS */
 ipcMain.on('progress-end-multi', async (e, message) => {
-  databaseBackupControl(message);
+  databaseUpdateControl(message);
 });
 
 /* MESSAGE TO CREATE EMAIL POPUP CHILD WINDOW */
@@ -1050,9 +1040,9 @@ ipcMain.on('loader-close', (e, message) => {
 
 /* RESTART SEC WINDOW */
 ipcMain.on('restart-sec', async (e, message) => {
-  createLoadingWindow();
+  homeWindow.minimize();
   if (secWindow) {
-    secWindow.hide();
+    createLoadingWindow();
     secWindow.close();
     setTimeout(() => {
       createSecWindow(null);
@@ -1277,4 +1267,10 @@ ipcMain.on('show-updater', (e, message) => {
   if (updateInfoWindow) {
     updateInfoWindow.show();
   }
+});
+
+/* MINIMIZE SEC */
+ipcMain.on('minimize', (e, message) => {
+  homeWindow.minimize();
+  secWindow.minimize();
 });

@@ -108,7 +108,7 @@
       </svg>
     </a>
     <div id="check-background">
-      <div class="loading-container">
+      <div id="loading-container-search" class="loading-container">
         <div class="spinner">
           <div class="spinner-sector spinner-color-a"></div>
           <div class="spinner-sector spinner-color-b"></div>
@@ -188,6 +188,7 @@
             <span>Customer<br />Number</span>
           </span>
           <form class='header-form' action="javascript:null">
+            <dialog id="existing-warning" number></dialog>
             <div id="customer-number-disabled">FIRST ENTER CUSTOMER NAME</div>
             <input type="text" id="customer-number" placeholder="--- Enter customer number ---" minlength="6"
               maxlength="7" spellcheck="false" autofocus />
@@ -202,7 +203,7 @@
           <form class='header-form' action="javascript:null">
 
             <div id="price-list-number-loader" class="loading-container-pricelist">
-              <div class="spinner-pricelist">
+              <div class=" spinner-pricelist">
                 <div class="spinner-sector spinner-color-a"></div>
                 <div class="spinner-sector spinner-color-b"></div>
                 <div class="spinner-sector spinner-color-c"></div>
@@ -212,6 +213,9 @@
 
             <input type="text" spellcheck="false" placeholder="--- Auto generating ---" id="pricelist" />
           </form>
+          </dialog>
+
+
         </div>
 
         <div class="cca-box-item-a">

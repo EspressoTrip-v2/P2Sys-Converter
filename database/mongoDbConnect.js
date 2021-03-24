@@ -94,7 +94,7 @@ exports.createPausedPriceList = async function (priceList, notifyMain) {
       await pausedPricesModel.create(priceList);
     }
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Create paused failed',
       body: `Failed to create ${priceList._id} paused price list, please check the log file.`,
@@ -108,7 +108,7 @@ exports.queryAllPaused = async function (notifyMain) {
     let result = await pausedPricesModel.find().distinct('_id').lean().exec();
     return result;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Query all paused failed',
       body: 'Problem querying paused items, please check the log file.',
@@ -122,7 +122,7 @@ exports.queryAllPausedQuantity = async function (notifyMain) {
     let result = await pausedPricesModel.find().distinct('_id').lean().exec();
     return result.length;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Query paused quantity failed',
       body: 'Problem querying paused quantities, please check the log file.',
@@ -136,7 +136,7 @@ exports.querySinglePaused = async function (customerNumber, notifyMain) {
     let result = await pausedPricesModel.findById(customerNumber).lean().exec();
     return result;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Query single paused item failed',
       body: `Problem querying ${customerNumber} paused item, please check the log file.`,
@@ -148,7 +148,7 @@ exports.removePausedItem = async function (customerNumber, notifyMain) {
   try {
     pausedPricesModel.findByIdAndDelete(customerNumber).exec();
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Removal of single paused item failed',
       body: `Problem removing ${customerNumber} paused item, please check the log file.`,
@@ -163,7 +163,7 @@ exports.removePausedItemSync = async function (customerNumber, notifyMain) {
       return true;
     }
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Removal of single paused item failed',
       body: `Problem removing ${customerNumber} paused item, please check the log file.`,
@@ -177,7 +177,7 @@ exports.queryAllPriceListNumbers = async function (notifyMain) {
     let result = await customerPricesModel.find().distinct('_id').exec();
     return result;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Query all price list numbers failed',
       body: 'Problem querying all price list numbers, please check the log file.',
@@ -191,7 +191,7 @@ exports.querySinglePriceList = async function (customerNumber, notifyMain) {
     let priceList = await customerPricesModel.findById(customerNumber).lean().exec();
     return priceList;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Query single price failed',
       body: `Problem querying ${customerNumber} price list, please check the log file.`,
@@ -205,7 +205,7 @@ async function queryCustomerExists(customerNumber) {
     let result = await customerPricesModel.exists({ _id: customerNumber });
     return result;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   }
 }
 
@@ -220,7 +220,7 @@ async function addPriceListNumber(customerNumber, priceListNumber, notifyMain) {
       });
     }
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Adding price list number failed',
       body: `Problem adding ${priceListNumber} for ${customerNumber}, please check the log file.`,
@@ -235,7 +235,7 @@ async function addCustomerName(customerName, customerNumber, notifyMain) {
       await customerNumberNameModel.create({ _id: customerNumber, name: customerName });
     }
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Adding customer name failed',
       body: `Problem adding a name to ${customerNumber}, please check the log file.`,
@@ -301,7 +301,7 @@ exports.updatePriceListDataBase = async function (customerData, notifyMain) {
     }
     return true;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Updating price lists failed',
       body: `Problem updating price list for ${customerNumber}, please check the log file.`,
@@ -319,7 +319,7 @@ exports.querySinglePriceListNumber = async function (customerNumber, notifyMain)
       return null;
     }
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Querying price list number failed',
       body: `Problem querying ${customerNumber} price list, please check the log file.`,
@@ -333,7 +333,7 @@ exports.queryExmillPrice = async function (notifyMain) {
     let result = await customerPricesModel.findById('@EXMILL').lean().exec();
     return result['price-list'];
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'No Ex-Mill price list available',
       body: `There is no Ex-Mill in the database, please create one for full functionality.`,
@@ -346,7 +346,7 @@ exports.queryAllScheduleDates = async function (notifyMain) {
     let result = await schedulePricesModel.find().distinct('_id').lean().exec();
     return result;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Querying all schedules failed',
       body: `Problem querying all scheduled items, please check the log file.`,
@@ -359,7 +359,7 @@ exports.queryAllScheduleDatesQuantity = async function (notifyMain) {
     let result = await schedulePricesModel.find().distinct('_id').lean().exec();
     return result.length;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Querying all schedules dates failed',
       body: `Problem querying all scheduled dates, please check the log file.`,
@@ -375,7 +375,7 @@ exports.querySingleSchedule = async function (date, notifyMain) {
     arr.splice(idx, 1);
     return arr;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Querying single schedule date failed',
       body: `Problem querying schedule date: ${date}, please check the log file.`,
@@ -400,7 +400,7 @@ exports.createScheduleItem = async function (message, date, notifyMain) {
       }
     }
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Creating schedule date failed',
       body: `Problem creating schedule date: ${date}, please check the log file.`,
@@ -430,7 +430,7 @@ exports.removeScheduleItems = async function (message, notifyMain) {
       }
     }
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Removing schedule date failed',
       body: `Problem removing schedule date: ${date}, please check the log file.`,
@@ -447,7 +447,7 @@ exports.editSingleScheduledPriceList = async function (dateNumberObj, notifyMain
     let priceList = scheduleObj[dateNumberObj.customerNumber];
     return priceList;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Editing schedule date failed',
       body: `Problem editing schedule date: ${date}, please check the log file.`,
@@ -461,7 +461,7 @@ exports.queryAllCustomerNumbers = async function (notifyMain) {
     let result = await customerNumberNameModel.find().distinct('_id').lean().exec();
     return result;
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Querying all customer numbers failed',
       body: `Problem querying all customer numbers, please check the log file.`,
@@ -477,7 +477,7 @@ exports.queryCustomerName = async function (customerNumber, allNames, notifyMain
       result = await customerNumberNameModel.find().lean().exec();
       return result;
     } catch (err) {
-      logFileFunc(err);
+      logFileFunc(err.stack);
       notifyMain({
         title: 'Querying all customer names failed',
         body: `Problem querying all customer names, please check the log file.`,
@@ -488,7 +488,7 @@ exports.queryCustomerName = async function (customerNumber, allNames, notifyMain
       result = await customerNumberNameModel.findById(customerNumber).lean().exec();
       return result;
     } catch (err) {
-      logFileFunc(err);
+      logFileFunc(err.stack);
       notifyMain({
         title: 'Querying a customer name failed',
         body: `Problem querying name for ${customerNumber}, please check the log file.`,
@@ -508,7 +508,7 @@ exports.querySingleCustomerBackup = async function (customerNumber, notifyMain) 
       return result;
     }
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Querying a single backup failed',
       body: `Problem querying backup for ${customerNumber}, please check the log file.`,
@@ -528,7 +528,7 @@ exports.queryBackUpDate = async function (notifyMain) {
       return false;
     }
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
     notifyMain({
       title: 'Querying all backup dates failed',
       body: `Problem querying all backup dates, please check the log file.`,
@@ -542,7 +542,7 @@ async function updateBackups() {
     let backUpCustomerNumbers = await customerBackUpModel.find().distinct('_id').lean().exec();
     removeBackups(backUpCustomerNumbers);
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   }
 }
 
@@ -599,7 +599,7 @@ async function removePriceLists(query) {
   try {
     customerBackUpModel.findOneAndReplace({ _id: id }, newObj).exec();
   } catch (err) {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   }
 }
 
@@ -610,7 +610,7 @@ async function removeBackups(customerNumbers) {
       let backup = await customerBackUpModel.findById(number).exec();
       removePriceLists(backup);
     } catch (err) {
-      logFileFunc(err);
+      logFileFunc(err.stack);
     }
 
     try {
@@ -625,7 +625,7 @@ async function removeBackups(customerNumbers) {
         )
         .exec();
     } catch (err) {
-      logFileFunc(err);
+      logFileFunc(err.stack);
     }
   });
 }

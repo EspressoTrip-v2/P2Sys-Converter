@@ -11,7 +11,6 @@ if (!process.env.NODE_ENV) {
   dir = process.cwd();
 }
 
-let appData = `${process.env.APPDATA}\\P2Sys-Manager`;
 const { logFileFunc } = require(`${dir}/logFile.js`);
 
 /* GET WINDOW */
@@ -29,6 +28,7 @@ screenHeight = res.height;
 let newEmailInput = document.getElementById('email-entry'),
   emailMessageArea = document.getElementById('email-message'),
   sendBtn = document.getElementById('send'),
+  cancelBtn = document.getElementById('close'),
   borderBox = document.getElementById('border'),
   sentNotification = document.getElementById('sent-audio'),
   errorNotification = document.getElementById('error-audio'),
@@ -233,7 +233,7 @@ function verifyConnect(message) {
   mailTransport.verify((err, success) => {
     if (err) {
       /* LOG THE ERROR */
-      logFileFunc(err);
+      logFileFunc(err.stack);
       new Notification('P2Sys mail server error', {
         icon: `${dir}/renderer/icons/converter-logo.png`,
         body: 'There was a mail server error.\nPlease contact your administrator.',
@@ -317,7 +317,7 @@ function populateEmail(message) {
             sendingMail.style.display = 'none';
 
             /* LOG ERROR */
-            logFileFunc(err);
+            logFileFunc(err.stack);
 
             /* CREATE NOTIFICATION */
             new Notification('P2Sys mail send error', {
@@ -354,6 +354,14 @@ function populateEmail(message) {
   borderBox.style.opacity = '1';
 }
 
+/* CANCEL MAIL SEND */
+cancelBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  setTimeout(() => {
+    ipcRenderer.send('email-close', null);
+    ipcRenderer.send('close-email-window', null);
+  }, 300);
+});
 /* ///////////// */
 /* IPC LISTENERS */
 /* ///////////// */

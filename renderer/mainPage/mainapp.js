@@ -2,7 +2,6 @@
 ////////////
 
 const { remote, ipcRenderer } = require('electron');
-const mongoose = require('mongoose');
 const os = require('os');
 const fs = require('fs');
 const { PythonShell } = require('python-shell');
@@ -103,7 +102,6 @@ function checkMuteFlag() {
       el.muted = true;
     });
     muteLogo.style.fill = 'var(--main)';
-    muteBtn.title = 'Sound Off';
   } else {
     /* SET THE FLAG TO TRUE AND TURN OFF ALL SOUND */
     storage.muteflag = true;
@@ -113,7 +111,6 @@ function checkMuteFlag() {
     });
     soundClick.play();
     muteLogo.style.fill = '#d1d1d1';
-    muteBtn.title = 'Sound On';
   }
 }
 
@@ -124,6 +121,8 @@ if (!storage.muteflag) {
 /* NOTIFICATIONS CONTROL */
 async function checkNotifications() {
   let countObj = await ipcRenderer.invoke('get-paused-schedule-count', null);
+  pauseNotifyContainer.setAttribute('count', countObj.pCount > 0 ? countObj.pCount : '');
+  scheduleNotifyContainer.setAttribute('count', countObj.sCount > 0 ? countObj.sCount : '');
   if (countObj.pCount > 0) {
     showPausedNotify(countObj.pCount);
   } else {
@@ -139,22 +138,18 @@ async function checkNotifications() {
 
 function showPausedNotify(count) {
   pauseNotify.style.fill = '#000';
-  pauseNotifyContainer.title = `Pause count ${count}`;
 }
 
 function hidePausedNotify() {
   pauseNotify.style.fill = '#d1d1d1 ';
-  pauseNotifyContainer.title = `Pause count 0`;
 }
 
 function showScheduleNotify(count) {
   scheduleNotify.style.fill = '#000';
-  scheduleNotifyContainer.title = `Schedule count ${count}`;
 }
 
 function hideScheduleNotify() {
   scheduleNotify.style.fill = '#d1d1d1 ';
-  scheduleNotifyContainer.title = `Schedule count 0`;
 }
 
 function showUpdateNotify() {
@@ -263,11 +258,11 @@ async function editEvent(e) {
     customerNumber: parent.id,
   };
 
-  showLoader();
+  showLoaderSchedule();
   let schedulePriceList = await ipcRenderer.invoke('edit-schedule-price-list', scheduleObj);
   ipcRenderer.send('start', { schedulePriceList, flag: 'edit' });
   setTimeout(() => {
-    hideLoader();
+    hideLoaderSchedule();
     scheduleContainer.style.visibility = 'hidden';
     systemSettingsMenu.style.visibility = 'hidden';
   }, 500);
@@ -296,7 +291,7 @@ function resetListenersContext() {
     try {
       el.removeEventListener('click', scheduleEvent);
     } catch (err) {
-      logFileFunc(err);
+      logFileFunc(err.stack);
     }
     el.addEventListener('click', scheduleEvent);
 
@@ -602,7 +597,7 @@ function zipFileContents(directoryPath) {
   let archive = archiver('zip', { zlib: { level: 9 } });
 
   archive.on('error', (err) => {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   });
   archive.on('end', () => {
     hideListContainer();
@@ -746,13 +741,13 @@ async function convertPythonFunction(message) {
 
   pyshell.end(function (err, code, signal) {
     if (err) {
-      logFileFunc(err);
+      logFileFunc(err.stack);
       new Notification(`Failure to convert ${customerNumber}`, {
         icon: `${dir}/renderer/icons/converter-logo.png`,
         body: `Customer ${customerNumber} will not be converted as it is incomplete.`,
       });
       fs.rmdir(`${multiZipPath}\\${customerNumber}`, (err) => {
-        logFileFunc(err);
+        logFileFunc(err.stack);
       });
       removeProcessedElement(listElements[0]);
     }

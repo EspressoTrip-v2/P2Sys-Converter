@@ -73,6 +73,7 @@ main {
   padding: 0;
   font-family: sans-serif;
   -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 #logo-background {
   display: flex;
@@ -351,19 +352,41 @@ body {
 #send {
   position: absolute;
   bottom: 1vh;
-  background-color: var(--sec-blue);
+  right: 12vw;
+  background-color: var(--button-green);
   border: 1px solid #fff;
   font-size: 2.6vw;
-  width: 20vw;
+  width: 30vw;
   height: 4.5vh;
   outline: none;
   color: #fff;
 }
 #send:hover {
-  background-color: var(--sec-blue-hover);
+  background-color: var(--button-green-hover);
 }
 
 #send:active {
+  transform: scale(0.95);
+}
+
+#close {
+  position: absolute;
+  bottom: 1vh;
+  left: 12vw;
+  background-color: var(--button-red);
+  border: 1px solid #fff;
+  font-size: 2.6vw;
+  width: 30vw;
+  height: 4.5vh;
+  outline: none;
+  color: #fff;
+}
+
+#close:hover {
+  background-color: var(--button-red-hover);
+}
+
+#close:active {
   transform: scale(0.95);
 }
 

@@ -118,7 +118,7 @@ ipcRenderer.on('convert-python', (event, message) => {
 
   pyshell.end(function (err, code, signal) {
     if (err) {
-      logFileFunc(err);
+      logFileFunc(err.stack);
       progressWindow.hide();
       remote.dialog.showMessageBoxSync(secWindow, {
         type: 'warning',

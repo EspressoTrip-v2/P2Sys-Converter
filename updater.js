@@ -22,7 +22,7 @@ exports.updater = (window) => {
   autoUpdater.autoInstallOnAppQuit = true;
 
   autoUpdater.checkForUpdates().catch((err) => {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   });
 
   autoUpdater.on('update-available', (info) => {
@@ -41,6 +41,6 @@ exports.updater = (window) => {
   });
 
   autoUpdater.on('error', (err) => {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   });
 };

@@ -73,7 +73,8 @@ button {
 
 #grab {
   position: absolute;
-  width: 96vw;
+  left: 0;
+  width: 84vw;
   height: 7vh;
   top: 2vh;
   -webkit-app-region: drag;
@@ -111,7 +112,7 @@ button {
   display: flex;
   top: 0;
   left: 0;
-  height: 7vh;
+  height: 0;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -132,7 +133,6 @@ button {
   left: 2vw;
   top: -15vh;
   height: 20vh;
-  -webkit-user-drag: none;
 }
 #psys-logo-container::after {
   position: absolute;
@@ -181,7 +181,7 @@ button {
   animation: pulse 0.3s linear forwards;
 }
 
-#notifications{
+#notifications {
   display: flex;
   position: absolute;
   bottom: -12vh;
@@ -202,8 +202,6 @@ button {
   position: relative;
 }
 
-
-
 #pause-notif {
   position: absolute;
   width: 10vw;
@@ -215,9 +213,20 @@ button {
   align-content: center;
   transition: left 1s ease-in;
 }
+
+#pause-notif::after {
+  content: attr(count);
+  position: absolute;
+  width: auto;
+  font-size: 4vw;
+  font-weight: bold;
+  color: #000;
+  bottom: 7vh;
+}
+
 #pause-logo {
   position: relative;
-  height: 10vw;
+  height: 9vw;
 }
 
 #download-notif {
@@ -236,8 +245,6 @@ button {
   height: 11vw;
 }
 
-
-
 #schedule-notif {
   position: absolute;
   right: 4vw;
@@ -247,6 +254,16 @@ button {
   justify-content: space-evenly;
   align-items: center;
   align-content: center;
+}
+
+#schedule-notif::after {
+  content: attr(count);
+  position: absolute;
+  width: auto;
+  font-size: 4vw;
+  font-weight: bold;
+  color: #000;
+  bottom: 7vh;
 }
 #schedule-logo {
   position: relative;

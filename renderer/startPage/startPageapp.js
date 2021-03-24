@@ -1,6 +1,7 @@
 /* MODULES */
 ////////////
 const { remote, ipcRenderer } = require('electron');
+const { set } = require('mongoose');
 
 /* GET WORKING DIRECTORY */
 let dir;
@@ -84,10 +85,8 @@ let backBtn = document.getElementById('back-to-main-btn'),
   unlockSvg = document.getElementById('unlock-svg'),
   lengthColumn = document.getElementById('len'),
   soundClick = document.getElementById('click'),
-  soundPop = document.getElementById('pop'),
   minimizeTableBtn = document.getElementById('minimize-table'),
   calculateBtn = document.getElementById('calculate'),
-  neverShowAgainBtn = Array.from(document.getElementsByClassName('never-show')),
   exmillBtn = document.getElementById('exmill'),
   exmillBtnDisabled = document.getElementById('exmill-disabled'),
   exmillContainer = document.getElementById('exmill-transport-container'),
@@ -103,6 +102,7 @@ let backBtn = document.getElementById('back-to-main-btn'),
   customerNumberDisabled = document.getElementById('customer-number-disabled'),
   customerNumberSubmitForm = document.getElementById('customer-number-submit'),
   customerNameMinimumAlert = document.getElementById('short-name-alert'),
+  existingWarningMessage = document.getElementById('existing-warning'),
   /* MAIN PAGE ELEMENTS */
   ///////////////////////
   html = document.getElementsByTagName('html')[0],
@@ -128,7 +128,7 @@ let backBtn = document.getElementById('back-to-main-btn'),
   checkCancelBtn = document.getElementById('check-cancel-btn'),
   checkResetBtn = document.getElementById('view-reset'),
   disabledBtn = document.getElementById('disabled'),
-  loadingContainer = document.getElementsByClassName('loading-container')[0],
+  loadingContainer = document.getElementById('loading-container-search'),
   searchDisabledBox = document.getElementById('search-disabled'),
   maxWindow = document.getElementsByClassName('max'),
   customerFindBtn = document.getElementById('assist-btn'),
@@ -337,21 +337,21 @@ function unBlurTable() {
 /* LOADING CONTAINER CONTROLS */
 function showLoading(flag) {
   if (flag) {
-    loadingContainer.style.visibility = 'visible';
+    loadingContainer.style.display = 'flex';
     viewPauseBtn.disabled = true;
   } else {
-    loadingContainer.style.visibility = 'visible';
-    searchDisabledBox.style.visibility = 'visible';
+    loadingContainer.style.display = 'flex';
+    searchDisabledBox.style.display = 'flex';
   }
 }
 
 function hideLoading(flag) {
   if (flag) {
-    loadingContainer.style.visibility = 'hidden';
+    loadingContainer.style.display = 'none';
     viewPauseBtn.disabled = false;
   } else {
-    loadingContainer.style.visibility = 'hidden';
-    searchDisabledBox.style.visibility = 'visible';
+    loadingContainer.style.display = 'none';
+    searchDisabledBox.style.display = 'flex';
   }
 }
 
@@ -544,12 +544,31 @@ function htmlInnerFill(html, categoryModification) {
     });
   });
 
+  function showExistingWarning() {
+    let number = `Customer number ${customerNumberValue.value.toUpperCase()} already exists.`;
+    existingWarningMessage.setAttribute('number', number);
+    existingWarningMessage.show();
+    customerNumberValue.value = null;
+    customerPriceList.value = null;
+    setTimeout(() => {
+      existingWarningMessage.close();
+      customerNumberValue.focus();
+    }, 1500);
+  }
+
+  function checkCustomerNumber() {
+    if (customerNumberNameJson[customerNumberValue.value.toUpperCase()]) {
+      showExistingWarning();
+    }
+  }
+
   // POPUP MENUS FOR THE BACKUP PRICES
   getBackupDateStrings(cuMenu, ctMenu);
   if (categoryModification === 'new') {
     showCustomerNumberDisabled();
     customerNumberValue.disabled = true;
     customerName.addEventListener('keyup', filterNames);
+    customerNumberValue.addEventListener('keyup', checkCustomerNumber);
     customerName.addEventListener('keyup', enterEvent);
     customerNumberValue.addEventListener('keyup', paddingAddPriceListNum);
   }
@@ -1459,7 +1478,7 @@ function resetListenersContext() {
     try {
       el.removeEventListener('click', pausedEvent);
     } catch (err) {
-      logFileFunc(err);
+      logFileFunc(err.stack);
     }
     el.addEventListener('click', pausedEvent);
 
@@ -1529,7 +1548,7 @@ function addPausedListListeners() {
 
 /* POPULATE THE CUSTOMER-LIST AND ADD CORRECT CLASSES */
 async function populateList() {
-  showLoading();
+  showLoading(true);
   customerPricesNumbersArr = await ipcRenderer.invoke('customer-prices-array', null);
   customerNumberList.innerHTML = '';
   customerPricesNumbersArr.forEach((el) => {
@@ -1542,7 +1561,7 @@ async function populateList() {
   /* RESET THE BUTTONS */
   resetButtonsStart();
   addListListeners();
-  hideLoading();
+  hideLoading(true);
 }
 
 /* CUSTOMER NAME ENTER EVENT */
@@ -1565,7 +1584,7 @@ function enterEvent(e) {
 
 async function existingEvent(e) {
   soundClick.play();
-  priceListLoading.style.visibility = 'visible';
+  priceListLoading.style.display = 'flex';
   createBtnNew.disabled = true;
   pauseBtnNew.disabled = true;
   hideCustomerNumberDisabled();
@@ -1575,7 +1594,7 @@ async function existingEvent(e) {
   customerNumberValue.disabled = true;
   existingCustomerNameContainer.style.visibility = 'hidden';
   customerPriceList.value = await ipcRenderer.invoke('get-pricelist-number', e.target.id);
-  priceListLoading.style.visibility = 'hidden';
+  priceListLoading.style.display = 'none';
 
   createBtnNew.disabled = false;
   pauseBtnNew.disabled = false;
@@ -1707,7 +1726,7 @@ viewPauseBtn.addEventListener('click', (e) => {
 /* CUSTOMER FIND DOCK BUTTON */
 customerFindBtn.addEventListener('click', (e) => {
   soundClick.play();
-  // Get window posiiton to send to main process
+  // Get window position to send to main process
   let dimensions = secWindow.getPosition(),
     size = secWindow.getSize(),
     message = {
@@ -1738,44 +1757,6 @@ closeAppBtnTable.addEventListener('click', (e) => {
   setTimeout(() => {
     ipcRenderer.send('close-app', null);
   }, 300);
-});
-
-/* NEVER SHOW AGAIN BUTTON */
-neverShowAgainBtn.forEach((el) => {
-  el.addEventListener('click', (e) => {
-    soundPop.play();
-    let pnode = e.target.parentNode.id;
-    if (pnode === 'copy-popup') {
-      let storage = JSON.parse(localStorage.getItem('notifications'));
-      storage.copy = false;
-      localStorage.setItem('notifications', JSON.stringify(storage));
-      copyPop.close();
-    }
-    if (pnode === 'lockbutton-popup') {
-      let storage = JSON.parse(localStorage.getItem('notifications'));
-      storage.lockbutton = false;
-      localStorage.setItem('notifications', JSON.stringify(storage));
-      lockbuttonPop.close();
-    }
-    if (pnode === 'CCA-popup') {
-      let storage = JSON.parse(localStorage.getItem('notifications'));
-      storage.autocca = false;
-      localStorage.setItem('notifications', JSON.stringify(storage));
-      CCAPop.close();
-    }
-    if (pnode === 'calculatebutton-popup') {
-      let storage = JSON.parse(localStorage.getItem('notifications'));
-      storage.calculate = false;
-      localStorage.setItem('notifications', JSON.stringify(storage));
-      calculateButtonPop.close();
-    }
-    if (pnode === 'roundall-popup') {
-      let storage = JSON.parse(localStorage.getItem('notifications'));
-      storage.roundall = false;
-      localStorage.setItem('notifications', JSON.stringify(storage));
-      roundAllPop.close();
-    }
-  });
 });
 
 /* COPY BUTTON EVENTS */
@@ -1821,14 +1802,14 @@ maxWindow[0].addEventListener('click', (e) => {
 minimizeCheckBtn.addEventListener('click', () => {
   soundClick.play();
   setTimeout(() => {
-    secWindow.minimize();
+    ipcRenderer.send('minimize', null);
   }, 300);
 });
 
 minimizeTableBtn.addEventListener('click', () => {
   soundClick.play();
   setTimeout(() => {
-    secWindow.minimize();
+    ipcRenderer.send('minimize', null);
   }, 500);
 });
 

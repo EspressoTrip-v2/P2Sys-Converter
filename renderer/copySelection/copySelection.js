@@ -194,7 +194,7 @@ function zipFileContents(directoryPath) {
   let archive = archiver('zip', { zlib: { level: 9 } });
 
   archive.on('error', (err) => {
-    logFileFunc(err);
+    logFileFunc(err.stack);
   });
   archive.on('end', () => {
     hideListContainer();
@@ -593,13 +593,13 @@ async function convertPythonFunction(message) {
 
   pyshell.end(function (err, code, signal) {
     if (err) {
-      logFileFunc(err);
+      logFileFunc(err.stack);
       new Notification(`Failure to convert ${customerNumber}`, {
         icon: `${dir}/renderer/icons/converter-logo.png`,
         body: `Please double check all entries on the price list you are trying to convert.`,
       });
       fs.rmdir(`${multiZipPath}\\${customerNumber}`, (err) => {
-        logFileFunc(err);
+        logFileFunc(err.stack);
       });
       removeProcessedElement(listElements[0]);
     }

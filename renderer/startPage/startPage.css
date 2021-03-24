@@ -45,6 +45,7 @@ button:focus {
   box-sizing: border-box;
   user-select: none;
   -webkit-user-drag: none;
+  -webkit-user-drag: none;
 }
 
 /* MAIN TAG SECTION WITH CHILDREN*/
@@ -1019,14 +1020,13 @@ tr {
 }
 
 .loading-container-pricelist {
-  display: flex;
+  display: none;
   z-index: 1;
   flex-direction: column;
   justify-content: center;
   justify-items: center;
   align-content: center;
   align-items: center;
-  visibility: hidden;
   position: absolute;
   font-weight: bolder;
   width: 100%;
@@ -2249,11 +2249,10 @@ select {
 }
 #customer-list::-webkit-scrollbar {
   width: 2.5vw;
-  background-color: lightgrey;
 }
 #customer-list::-webkit-scrollbar-thumb {
   height: 4vh;
-  background-color: grey;
+  background-color: #d1d1d1;
 }
 
 /* /////////////////// */
@@ -2325,7 +2324,7 @@ select {
   color: #fff;
   border: 1px solid var(--sec-blue);
   text-align: center;
-  padding: 1vh 0;
+  padding: 2vh 0;
   height: 10vh;
   font-size: 6vw;
   /* font-weight: bold; */
@@ -2585,14 +2584,13 @@ select {
 }
 
 .loading-container {
-  display: flex;
+  display: none;
   top: 0.4vh;
   flex-direction: column;
   justify-content: center;
   justify-items: center;
   align-content: center;
   align-items: center;
-  visibility: hidden;
   position: absolute;
   z-index: 2;
   font-size: 6vw;
@@ -2793,8 +2791,8 @@ select {
   position: absolute;
   transform: scale(1);
   top: 1vw;
-  right: 3vw;
-  width: 5vw;
+  right: 5vw;
+  width: 6vw;
   height: auto;
   outline: none;
   fill: var(--main);
@@ -2834,126 +2832,33 @@ select {
   transition: backdrop-filter 0.1s linear;
 }
 
-/* NOTIFICATION POPUPS */
-/* LOCK BUTTON POPUP */
-#lockbutton-popup {
+/* EXISTING WARNING */
+#existing-warning {
   position: absolute;
-  top: 4vh;
-  right: 24vw;
-  transform: scale(0);
+  display: none;
   z-index: 3;
-  width: 300px;
-  height: 240px;
-  text-align: justify;
-  font-size: 14px;
-  border-radius: 10px;
-  border: 2px solid var(--main);
-  filter: drop-shadow(2px 4px 6px black);
-}
-#lockbutton-popup[open] {
-  animation: popup-notify 0.1s linear 1 forwards;
-}
-#lockbutton-popup p {
-  position: relative;
-  bottom: 25px;
-}
-#lockbutton-popup h3 {
-  position: relative;
-  top: -20px;
-}
-#lockbutton-yes {
-  position: absolute;
-  top: 5px;
-  right: 40px;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background-color: #fff;
-  transition: box-shadow 0.3s;
-}
-#lockbutton-yes svg {
+  left: 0.05vw;
   width: 100%;
-  height: 100%;
-  background-color: #fff;
-  border-radius: 50%;
-}
-
-#lockbutton-yes:active {
-  transform: scale(0.9);
-}
-#lockbutton-yes:hover {
-  box-shadow: 3px 3px 7px 0px rgba(50, 50, 50, 0.8);
-}
-
-#lockbutton-no {
-  position: absolute;
-  top: 5px;
-  width: 25px;
-  height: 25px;
-  right: 10px;
-  border-radius: 50%;
-  background-color: #fff;
-  transition: box-shadow 0.3s;
-}
-#lockbutton-no svg {
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-  border-radius: 50%;
-}
-#lockbutton-no:active {
-  transform: scale(0.9);
-  box-shadow: 2px 2px 3px 0px rgba(50, 50, 50, 0.8);
-}
-#lockbutton-no:hover {
-  box-shadow: 3px 3px 7px 0px rgba(50, 50, 50, 0.8);
-}
-
-/* EXMILL POPUP */
-#exmill-popup {
-  position: absolute;
-  transform: scale(0);
-  bottom: 6vh;
-  left: -28vw;
-  z-index: 3;
-  width: 16vw;
-  height: 21vh;
-  text-align: justify;
+  height: 4.5vh;
   font-size: 0.8vw;
+  background-color: #fff;
+  color: var(--button-gold);
   border-radius: 3px;
-  border: 1px solid #fff;
-  box-shadow: 1px 1px 10px 3px rgba(50, 50, 50, 0.5);
-}
-#exmill-popup[open] {
-  animation: popup-notify-small 0.1s linear 1 forwards;
-}
-#exmill-popup p {
-  position: relative;
-  bottom: 3vh;
-}
-#exmill-popup h3 {
-  position: relative;
-  top: -2vh;
-  font-size: 0.95vw;
-}
-#exmill-yes {
-  position: absolute;
-  top: 1vh;
-  right: 0.8vw;
-  width: 1.5vw;
-  height: 1.5vw;
-  border-radius: 50%;
-  background-color: #fff;
-}
-#exmill-yes svg {
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-  border-radius: 50%;
+  border: 3px solid var(--button-gold);
+  text-align: center;
+  font-weight: bold;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
 }
 
-#exmill-yes:active {
-  transform: scale(0.9);
+#existing-warning[open] {
+  display: flex;
+}
+
+#existing-warning::after {
+  content: attr(number);
+  font-size: 0.8vw;
 }
 
 #connection-logo {
@@ -2961,6 +2866,7 @@ select {
   position: absolute;
   top: 1vh;
 }
+
 #connection-internal {
   position: absolute;
   display: flex;

@@ -1,4 +1,4 @@
-P2SYS-CONVERTER VERSION 2.0.1
+P2Sys Manager version 2.0.1
 
 changelog:
 
