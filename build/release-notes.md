@@ -1,8 +1,7 @@
-P2Sys Manager version 2.0.1
+P2Sys Manager version 2.0.4
 
 changelog:
 
-- Entire revamp of application and also changes in database structure.
-- Password control.
-- Scheduled price-list creation.
-- All paused conversion.
+- Loading window fix
+- desktop location for zip changed to documents
+- fixed email display

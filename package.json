@@ -1,6 +1,6 @@
 {
   "name": "P2Sys-Manager",
-  "version": "2.0.1",
+  "version": "2.0.4",
   "description": "Price-List conversion program",
   "main": "main.js",
   "scripts": {

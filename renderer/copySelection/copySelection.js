@@ -189,7 +189,7 @@ function buildMessage(element) {
 function zipFileContents(directoryPath) {
   let date = new Date();
   let zipDateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-  let desktopPath = `${homedir}\\Desktop\\P2Sys_conversion_${zipDateString}.zip`;
+  let desktopPath = `${homedir}\\Documents\\P2Sys_conversion_${zipDateString}.zip`;
   let output = fs.createWriteStream(desktopPath);
   let archive = archiver('zip', { zlib: { level: 9 } });
 

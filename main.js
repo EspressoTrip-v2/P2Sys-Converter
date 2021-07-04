@@ -313,7 +313,7 @@ function createWindow() {
     maximizable: false,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -348,9 +348,6 @@ function createWindow() {
   //   Event listener for closing
   homeWindow.on('closed', () => {
     homeWindow = null;
-    if (!emailWindow || !updateInfoWindow) {
-      app.quit();
-    }
   });
 }
 
@@ -367,7 +364,7 @@ function createSecWindow(message) {
     spellCheck: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -439,7 +436,7 @@ function createChildWindow(message) {
     spellCheck: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -473,15 +470,7 @@ function createChildWindow(message) {
 
 /* LOADING WINDOW */
 function createLoadingWindow() {
-  let parentWin;
-  if (secWindow) {
-    parentWin = secWindow;
-  } else {
-    parentWin = null;
-  }
-
   loadingWindow = new BrowserWindow({
-    parent: parentWin,
     width: Math.floor(screenWidth * 0.052),
     height: Math.floor(screenWidth * 0.052),
     autoHideMenuBar: true,
@@ -493,7 +482,7 @@ function createLoadingWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -533,7 +522,7 @@ function createEmailWindow(message) {
     maximizable: false,
     skipTaskbar: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -545,11 +534,11 @@ function createEmailWindow(message) {
   emailWindow.loadFile(`${dir}/renderer/email/email.html`);
 
   emailWindow.webContents.once('did-finish-load', (e) => {
+    emailWindow.webContents.send('email-popup', message);
+    emailWindow.moveTop();
     if (loadingWindow) {
       loadingWindow.close();
     }
-    emailWindow.webContents.send('email-popup', message);
-    emailWindow.moveTop();
   });
 
   //   Load dev tools
@@ -577,7 +566,7 @@ function createProgressWindow() {
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -618,7 +607,7 @@ function createCopySelectionWindow(message) {
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -666,7 +655,7 @@ function createMultiWindow(message) {
     spellCheck: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -706,7 +695,7 @@ function createUpdateInfo() {
     skipTaskbar: true,
     resizable: false,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -742,7 +731,7 @@ function createPasswordGenerateWindow() {
     spellCheck: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -785,7 +774,7 @@ function createPasswordEnterWindow(hash) {
     spellCheck: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
@@ -871,7 +860,7 @@ app.on('ready', () => {
 
 /* QUIT APP WHEN ALL WINDOWS ARE CLOSED */
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  app.quit();
 });
 
 ////////////////////
@@ -991,6 +980,7 @@ async function databaseUpdateControl(message) {
 
 /* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
 ipcMain.on('progress-end', (e, message) => {
+  // createLoadingWindow();
   /* SEND MESSAGE TO CLOSE THE PROGRESS BAR */
   secWindow.webContents.send('progress-end', message);
   databaseUpdateControl(message);
@@ -1068,13 +1058,6 @@ ipcMain.on('show-sec-window', (e, message) => {
     secWindow.setFullScreen(true);
   }
 });
-
-/* CLOSE MAIN WINDOW & CHECK TO SEE IF UPDATE IS DOWNLOADING */
-ipcMain.on('close-main', (e, message) => {
-  if (homeWindow) {
-    homeWindow.close();
-  }
-}); // TODO: FINNISH CLOSE
 
 /* QUERIES FOR DATABASE */
 ipcMain.handle('get-price-list', async (e, message) => {
@@ -1207,7 +1190,11 @@ ipcMain.handle('customer-prices-array', async (e, message) => {
 });
 
 ipcMain.on('close-app', (e, message) => {
-  app.exit();
+  if (updateInfoWindow) {
+    homeWindow.hide();
+  } else {
+    app.quit();
+  }
 });
 
 ipcMain.on('restart-app', (e, message) => {
@@ -1243,8 +1230,16 @@ ipcMain.on('open-update-window', (e, message) => {
 
 /* UPDATE DOWNLOADED */
 ipcMain.on('close-update-window', (e, message) => {
-  if (updateInfoWindow) {
-    updateInfoWindow.close();
+  if (!homeWindow.isVisible()) {
+    if (updateInfoWindow) {
+      updateInfoWindow.close();
+    }
+
+    homeWindow.close();
+  } else {
+    if (updateInfoWindow) {
+      updateInfoWindow.close();
+    }
   }
 });
 

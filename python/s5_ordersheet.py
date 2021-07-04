@@ -653,9 +653,11 @@ def create_s5_ordersheet(
     # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
     _076U_hidden_rows = []
     _076U_hidden_rows_ind = []
+    _076U_empty_flag = False
     for i in desc_076:
         idx = list(_076U[_076U["DESC"].str.contains(i)].index)
         if _076U.loc[idx, "M3 UNTREATED"].sum() == 0:
+            _076U_empty_flag = True
             try:
                 if len(_076U_hidden_rows) == 0:
                     _076U_hidden_rows = np.array(idx) + 4
@@ -1264,11 +1266,12 @@ def create_s5_ordersheet(
             worksheet7.write(f"G{i}", "", unlocked)
 
         # HIDE ROWS THAT ARE ZERO
+        worksheet1.set_first_sheet()
+        worksheet1.activate()
         if len(_038T_hidden_rows) >= _038T_rownum:
             if _038T_empty_flag:
-                worksheet3.set_first_sheet()
-                worksheet3.activate()
                 worksheet2.hide()
+
         if len(_038T_hidden_rows) > 0:
             for row_num in _038T_hidden_rows:
                 worksheet2.set_row(row_num, None, None, {"hidden": True})
@@ -1277,12 +1280,9 @@ def create_s5_ordersheet(
                 worksheet2.set_row(row_num, None, None, {"hidden": True})
 
         if len(_038U_hidden_rows) >= _038U_rownum:
-            if _038T_empty_flag and _038U_empty_flag:
-                worksheet4.set_first_sheet()
-                worksheet4.activate()
+            if _038U_empty_flag:
                 worksheet3.hide()
-            else:
-                worksheet3.hide()
+
         if len(_038U_hidden_rows) > 0:
             for row_num in _038U_hidden_rows:
                 worksheet3.set_row(row_num, None, None, {"hidden": True})
@@ -1291,12 +1291,9 @@ def create_s5_ordersheet(
                 worksheet3.set_row(row_num, None, None, {"hidden": True})
 
         if len(_050T_hidden_rows) >= _050T_rownum:
-            if _038T_empty_flag and _038U_empty_flag and _050T_empty_flag:
-                worksheet5.set_first_sheet()
-                worksheet5.activate()
+            if _050T_empty_flag:
                 worksheet4.hide()
-            else:
-                worksheet4.hide()
+
         if len(_050T_hidden_rows) > 0:
             for row_num in _050T_hidden_rows:
                 worksheet4.set_row(row_num, None, None, {"hidden": True})
@@ -1305,17 +1302,9 @@ def create_s5_ordersheet(
                 worksheet4.set_row(row_num, None, None, {"hidden": True})
 
         if len(_050U_hidden_rows) >= _050U_rownum:
-            if (
-                _038T_empty_flag
-                and _038U_empty_flag
-                and _050T_empty_flag
-                and _050U_empty_flag
-            ):
-                worksheet6.set_first_sheet()
-                worksheet6.activate()
+            if _050U_empty_flag:
                 worksheet5.hide()
-            else:
-                worksheet5.hide()
+
         if len(_050U_hidden_rows) > 0:
             for row_num in _050U_hidden_rows:
                 worksheet5.set_row(row_num, None, None, {"hidden": True})
@@ -1324,18 +1313,9 @@ def create_s5_ordersheet(
                 worksheet5.set_row(row_num, None, None, {"hidden": True})
 
         if len(_076T_hidden_rows) >= _076T_rownum:
-            if (
-                _038T_empty_flag
-                and _038U_empty_flag
-                and _050T_empty_flag
-                and _050U_empty_flag
-                and _076T_empty_flag
-            ):
-                worksheet7.set_first_sheet()
-                worksheet7.activate()
+            if _076T_empty_flag:
                 worksheet6.hide()
-            else:
-                worksheet6.hide()
+
         if len(_076T_hidden_rows) > 0:
             for row_num in _076T_hidden_rows:
                 worksheet6.set_row(row_num, None, None, {"hidden": True})
@@ -1344,7 +1324,9 @@ def create_s5_ordersheet(
                 worksheet6.set_row(row_num, None, None, {"hidden": True})
 
         if len(_076U_hidden_rows) >= _076U_rownum:
-            worksheet7.hide()
+            if _076U_empty_flag:
+                worksheet7.hide()
+
         if len(_076U_hidden_rows) > 0:
             for row_num in _076U_hidden_rows:
                 worksheet7.set_row(row_num, None, None, {"hidden": True})

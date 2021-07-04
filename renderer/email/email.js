@@ -247,7 +247,7 @@ function verifyConnect(message) {
 /* EMAIL SENT FUNCTION */
 function sendEmail() {
   ipcRenderer.send('hide-updater', null);
-  borderBox.style.opacity = '0';
+  borderBox.style.visibility = 'hidden';
   /* SHOW HOMEWINDOW IF CONVERTING SCHEDULE ITEMS */
   if (unHideHomeWindowFlag != null) {
     ipcRenderer.send('show-home', null);
@@ -301,6 +301,8 @@ function populateEmail(message) {
     }
   });
 
+  borderBox.style.visibility = 'visible';
+
   /* SEND BUTTON */
   sendBtn.addEventListener('click', (e) => {
     let message = getMessage();
@@ -350,8 +352,6 @@ function populateEmail(message) {
       }, 300);
     }
   });
-
-  borderBox.style.opacity = '1';
 }
 
 /* CANCEL MAIL SEND */

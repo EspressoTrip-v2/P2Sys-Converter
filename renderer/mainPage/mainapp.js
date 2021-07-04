@@ -50,7 +50,6 @@ let startBtn = document.getElementById('start'),
   scheduleDatesBackBtn = document.getElementById('schedule-exit-btn'),
   scheduleContainer = document.getElementById('schedule-container'),
   scheduleDates = document.getElementById('schedule-dates'),
-  loadingContainer = document.getElementsByClassName('loading-container')[0],
   loadingDateBox = document.getElementById('loading-dates'),
   systemSettingsMenu = document.getElementsByClassName('system-settings')[0],
   onlineWarning = document.getElementById('connection-container'),
@@ -164,16 +163,6 @@ function hideUpdateNotify() {
   setTimeout(() => {
     pauseNotifyContainer.style.left = '43vw';
   }, 500);
-}
-
-/* HIDE LOADER */
-function hideLoader() {
-  loadingContainer.style.visibility = 'hidden';
-}
-
-/* SHOW LOADER */
-function showLoader() {
-  loadingContainer.style.visibility = 'visible';
 }
 
 /* SHOW LOADER */
@@ -415,7 +404,7 @@ startBtn.addEventListener('click', (e) => {
 exitbtn.addEventListener('click', (e) => {
   soundClick.play();
   setTimeout(() => {
-    ipcRenderer.send('close-main', null);
+    ipcRenderer.send('close-app', null);
   }, 300);
 });
 
@@ -471,7 +460,7 @@ scheduleDatesBackBtn.addEventListener('click', (e) => {
 /* SCHEDULE SELECTOR EVENT LISTENER */
 scheduleDatesSelector.addEventListener('change', (e) => {
   dateValue = scheduleDates.value;
-  showLoader();
+  showLoaderSchedule();
   getScheduledCustomers(dateValue);
 });
 
@@ -592,7 +581,7 @@ async function buildMessage(element, typeOfCovert) {
 function zipFileContents(directoryPath) {
   let date = new Date();
   let zipDateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-  let desktopPath = `${homedir}\\Desktop\\P2Sys_conversion_${zipDateString}.zip`;
+  let desktopPath = `${homedir}\\Documents\\P2Sys_conversion_${zipDateString}.zip`;
   let output = fs.createWriteStream(desktopPath);
   let archive = archiver('zip', { zlib: { level: 9 } });
 
