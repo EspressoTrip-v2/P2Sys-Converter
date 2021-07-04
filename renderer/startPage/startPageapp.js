@@ -5,28 +5,17 @@ const { set } = require('mongoose');
 
 /* GET WORKING DIRECTORY */
 let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
+
 if (!process.env.NODE_ENV) {
-  envFileChange();
+  dir = `${process.cwd()}\\resources\\app.asar`;
 } else {
   dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
 }
 
 /* LOCAL MODULES */
 const { dataObjects } = require(`${dir}/objects.js`);
 const { tablePopulate } = require(`${dir}/renderer/startPage/tablePopulate`);
+const { logFileFunc } = require(`${dir}/logFile.js`);
 
 /* CREATE DATE INSTANCE */
 let mainDate = new Date();
@@ -42,35 +31,29 @@ screenWidth = res.width;
 ///////////////////
 let secWindow = remote.getCurrentWindow();
 
-/* ///////////////////////////////// VARIABLE LEGEND ////////////////////////////// */
-/* searchValue: Value entered into the search box (customer number)                 */
-/* target: clicked object in the customer list in search box                        */
-/* jsonFile: Locally stored layman pricelist                                        */
-/* htmlContent: Html that gets generated in the table form from the jsonFile        */
-/* 
-/* //////////////////////////////////////////////////////////////////////////////// */
-
 // GLOBAL VARIABLES FOR USAGE ON NECESSARY CODE
 let searchValue,
-  target,
   jsonFile,
   htmlContent,
-  customerNumber,
   customerData,
-  pricelistNumber,
-  customerPrices,
-  customerPricelistNumber,
-  customerNumberName,
-  customerNameNumber,
-  customerBackUp,
+  priceListNumber,
+  customerPricesNumbersArr,
+  customerNameValue,
+  customerNumberAllKeys,
+  customerNameNumberJson,
+  customerNumberNameJson,
+  customerBackUpJson,
   cusNum,
-  notObject,
   bundleSizeColumn,
   bundleSizeHeading,
-  exmillPrice,
+  exmillPrice = null,
   exmillTransportCost,
   untreatedColumnClass,
-  treatedColumnClass;
+  treatedColumnClass,
+  customerNumbersSearchList,
+  dateValue,
+  OldScheduleDate,
+  existingCustomerListArr;
 
 ///////////////////
 /* DOM ELEMENTS */
@@ -80,12 +63,19 @@ let searchValue,
 //////////////////
 let backBtn = document.getElementById('back-to-main-btn'),
   createBtn = document.getElementById('create-btn'),
+  createBtnPause = document.getElementById('create-btn-pause'),
+  createBtnNew = document.getElementById('create-btn-new'),
+  createBtnEdit = document.getElementById('create-btn-edit'),
   pauseBtn = document.getElementById('pause-btn'),
+  pauseBtnNew = document.getElementById('pause-btn-new'),
+  scheduleBtn = document.getElementById('schedule-button'),
+  scheduleBtnPause = document.getElementById('schedule-button-pause'),
+  scheduleBtnEdit = document.getElementById('schedule-button-edit'),
+  scheduleBtnNew = document.getElementById('schedule-button-new'),
   customerName = document.getElementById('customer-name'),
   overflow = document.getElementById('overflow'),
   customerPriceList = document.getElementById('pricelist'),
   customerNumberValue = document.getElementById('customer-number'),
-  customerNumberSubmit = document.getElementById('customer-number-submit'),
   ccaPrice = document.getElementById('cca-price'),
   manCaaBtn = document.getElementById('cca-man'),
   autoCaaBtn = document.getElementById('cca-auto'),
@@ -95,24 +85,24 @@ let backBtn = document.getElementById('back-to-main-btn'),
   unlockSvg = document.getElementById('unlock-svg'),
   lengthColumn = document.getElementById('len'),
   soundClick = document.getElementById('click'),
-  soundPop = document.getElementById('pop'),
   minimizeTableBtn = document.getElementById('minimize-table'),
   calculateBtn = document.getElementById('calculate'),
-  neverShowAgainBtn = Array.from(document.getElementsByClassName('never-show')),
   exmillBtn = document.getElementById('exmill'),
   exmillBtnDisabled = document.getElementById('exmill-disabled'),
   exmillContainer = document.getElementById('exmill-transport-container'),
   exmillApplyBtn = document.getElementById('exmill-transport-apply'),
   exmillTransportValue = document.getElementById('exmill-transport-value'),
-  exmillPop = document.getElementById('exmill-popup'),
-  exmillYes = document.getElementById('exmill-yes'),
-  exmillInfoPop = document.getElementById('exmill-info-popup'),
-  exmillInfoYes = document.getElementById('exmill-info-yes'),
-  transportFooterContainer = document.getElementById('transport-value'),
-  transportFooterValue = document.getElementById('t-value'),
+  audioTag = Array.from(document.getElementsByTagName('audio')),
   /* TABLE COMPONENT DOMS */
   /////////////////////////
   table = document.getElementById('table'),
+  existingCustomerNameContainer = document.getElementById('existing-customer-numbers'),
+  existingCustomerList = document.getElementById('existing-list'),
+  priceListLoading = document.getElementById('price-list-number-loader'),
+  customerNumberDisabled = document.getElementById('customer-number-disabled'),
+  customerNumberSubmitForm = document.getElementById('customer-number-submit'),
+  customerNameMinimumAlert = document.getElementById('short-name-alert'),
+  existingWarningMessage = document.getElementById('existing-warning'),
   /* MAIN PAGE ELEMENTS */
   ///////////////////////
   html = document.getElementsByTagName('html')[0],
@@ -121,158 +111,121 @@ let backBtn = document.getElementById('back-to-main-btn'),
   treatedColumns = document.getElementById('treated'),
   /* PROGRESS FADE DOM */
   //////////////////////
-  progressFade = document.getElementById('progress-fade');
-
-/* CUSTOMER SEARCH DOM */
-/////////////////////////
-let checkCustomer = document.getElementById('check-customer'),
+  progressFade = document.getElementById('progress-fade'),
+  dateSelectionBox = document.getElementById('date-select'),
+  dateSelectionMonth = document.getElementById('month'),
+  dateSelectionYear = document.getElementById('year'),
+  dateCancelStandardBtn = document.getElementById('date-cancel-standard-btn'),
+  dateSelectStandardBtn = document.getElementById('date-select-standard-btn'),
+  dateSelectPausedBtn = document.getElementById('date-select-paused-btn'),
+  dateSelectEditBtn = document.getElementById('date-select-edit-btn'),
+  /* CUSTOMER SEARCH DOM */
+  /////////////////////////
+  checkCustomer = document.getElementById('check-customer'),
   customerSearch = document.getElementById('customer-search'),
   customerNumberList = document.getElementById('customer-list'),
   checkUpdateBtn = document.getElementById('check-update-btn'),
-  checkCancelbtn = document.getElementById('check-cancel-btn'),
+  checkCancelBtn = document.getElementById('check-cancel-btn'),
+  checkResetBtn = document.getElementById('view-reset'),
   disabledBtn = document.getElementById('disabled'),
+  loadingContainer = document.getElementById('loading-container-search'),
+  searchDisabledBox = document.getElementById('search-disabled'),
   maxWindow = document.getElementsByClassName('max'),
-  checkContinueBtn = document.getElementById('check-continue-btn'),
   customerFindBtn = document.getElementById('assist-btn'),
-  hider = document.getElementById('hider'),
   checkResumeEditingBtn = document.getElementById('resume-editing-btn'),
   checkCopyBtn = document.getElementById('copy-btn'),
-  copyCheckbox = document.getElementById('copy-select'),
-  copyContainer = document.getElementById('copy-container'),
-  tickBox = document.getElementById('tick'),
-  tickCheckMark = document.getElementById('tick-img'),
   minimizeCheckBtn = document.getElementById('minimize-search'),
   /* CUSTOMER DISPLAY BOX IN TABLE */
-  customerDisplayBoxContainer = document.getElementById('customer-displaybox-container'),
-  customerDisplayBox = document.getElementById('customer-displaybox'),
-  viewPauseBtn = document.getElementById('view-pause');
+  viewPauseBtn = document.getElementById('view-pause'),
+  onlineWarningCustomer = document.getElementById('connection-internal-customer'),
+  onlineWarningTable = document.getElementById('connection-internal'),
+  closeAppBtnCustomer = document.getElementById('connection-close-customer'),
+  closeAppBtnTable = document.getElementById('connection-close');
 
 //////////////
 /*FUNCTIONS*/
 ////////////
 
-/* ADD PADDING TO SHORT CUSTOMER NUMBERS */
-function paddingAddPricelistNum(value) {
-  let newValue;
-  if (value.length < 6) {
-    newValue = value.padEnd(6, ' ');
-    return newValue;
-  } else if (value.length === 7) {
-    newValue = value.slice(0, 6);
-    return newValue;
+/* POPULATE YEAR SELECTION */
+function addYears() {
+  let date = new Date();
+  let year = date.getFullYear();
+  let html = `
+  <option value="${year}">${year}</option>
+  <option value="${year + 1}">${year + 1}</option>
+  <option value="${year + 2}">${year + 2}</option>
+  `;
+  dateSelectionYear.insertAdjacentHTML('beforeend', html);
+}
+
+/* RESET BUTTON FUNCTIONS */
+function resetButtonsStart() {
+  searchDisabledBox.style.display = 'none';
+  disabledBtn.style.display = 'flex';
+  viewPauseBtn.style.display = 'flex';
+  checkResumeEditingBtn.style.display = 'none';
+  customerFindBtn.style.display = 'flex';
+  checkResetBtn.style.display = 'none';
+  checkUpdateBtn.style.display = 'none';
+  checkCopyBtn.style.display = 'none';
+}
+
+function resetButtonsClicked() {
+  searchDisabledBox.style.display = 'none';
+  disabledBtn.style.display = 'none';
+  viewPauseBtn.style.display = 'none';
+  checkResumeEditingBtn.style.display = 'none';
+  customerFindBtn.style.display = 'none';
+  checkResetBtn.style.display = 'flex';
+  checkUpdateBtn.style.display = 'flex';
+  checkCopyBtn.style.display = 'flex';
+}
+
+function resetButtonsPaused() {
+  customerSearch.value = '';
+  searchDisabledBox.style.display = 'flex';
+  disabledBtn.style.display = 'flex';
+  checkResumeEditingBtn.style.display = 'none';
+  viewPauseBtn.style.display = 'flex';
+  customerFindBtn.style.display = 'none';
+  checkResetBtn.style.display = 'flex';
+  checkUpdateBtn.style.display = 'none';
+  checkCopyBtn.style.display = 'none';
+}
+
+function resetButtonsPausedClicked() {
+  searchDisabledBox.style.display = 'flex';
+  disabledBtn.style.display = 'none';
+  checkResumeEditingBtn.style.display = 'flex';
+  viewPauseBtn.style.display = 'flex';
+  customerFindBtn.style.display = 'none';
+  checkResetBtn.style.display = 'flex';
+  checkUpdateBtn.style.display = 'none';
+  checkCopyBtn.style.display = 'none';
+}
+
+/* FUNCTION CHECK THE MUTE FLAG */
+let storage = JSON.parse(localStorage.getItem('notifications'));
+function checkMuteFlag() {
+  if (!storage.muteflag) {
+    /* SET FLAG TO FALSE AND TURN OFF ALL SOUND */
+    storage.muteflag = false;
+    localStorage.setItem('notifications', JSON.stringify(storage));
+    audioTag.forEach((el) => {
+      el.muted = true;
+    });
   } else {
-    return value;
+    /* SET THE FLAG TO TRUE AND TURN OFF ALL SOUND */
+    storage.muteflag = true;
+    localStorage.setItem('notifications', JSON.stringify(storage));
+    audioTag.forEach((el) => {
+      el.muted = false;
+    });
   }
 }
 
-/* CHECK IF CUSTOMER EXISTS */
-function checkExistingCustomer() {
-  /* CUSTOMER NUMBER KEYUP EVENTS FOR COPIED PRICELIST */
-  customerNumberValue.addEventListener('keyup', (e) => {
-    if (customerNumberValue.value.length < 6) {
-      customerNumberSubmit.click();
-    }
-    // USE REGEX TO REMOVE ANY UNWANTED CHAR
-    let pattern = /\w+|\s+/g;
-    if (customerNumberValue.value.length > 0) {
-      let match = customerNumberValue.value.match(pattern).join('');
-      pricelistNumber = match.toUpperCase().replace(' ', '');
-
-      /* REGEX TO FIX SYNTAX OF CUSTOMER NUMBER TO PRICELISTNUMBER */
-      pricelistNumber = paddingAddPricelistNum(pricelistNumber);
-
-      /* ENTER THE PRICELIST NUMBER THAT HAS BEEN GENERATED */
-      customerPriceList.value = pricelistNumber.toUpperCase();
-
-      /* CHECK TO SEE IF CUSTOMER NUMBER ALREADY IN USE */
-      if (Object.keys(customerPrices).includes(customerNumberValue.value.toUpperCase())) {
-        let answer = remote.dialog.showMessageBoxSync(secWindow, {
-          type: 'question',
-          icon: `${dir}/renderer/icons/error.png`,
-          buttons: ['TRY AGAIN', 'RETURN'],
-          message: 'CUSTOMER NUMBER NOT AVAILABLE:',
-          detail: `\nThis CUSTOMER NUMBER belongs to ${
-            customerNumberName[customerNumberValue.value.toUpperCase()]
-          }.\n\nWould you like to try a different CUSTOMER NUMBER or return to select the customer from the search window?`,
-        });
-        if (answer === 0) {
-          customerNumberValue.value = null;
-        } else {
-          resetForm();
-        }
-      }
-    }
-    if (customerNumberValue.value.length === 0) {
-      customerPriceList.value = null;
-    }
-  });
-
-  /* DISPLAY BOX FOR CUSTOMER SEARCH */
-  let customers = Object.keys(customerNameNumber),
-    customerPricesKeys = Object.keys(customerPrices);
-
-  /* GENERATE THE INTERNAL HTML */
-  (() => {
-    customers.forEach((el) => {
-      let html = `<div title="${
-        customerNameNumber[el.toLocaleUpperCase()]
-      }" class="customer-name-list">${el.toUpperCase()}</div>`;
-      customerDisplayBox.insertAdjacentHTML('beforeend', html);
-    });
-  })();
-
-  let customerNameLists = Array.from(document.getElementsByClassName('customer-name-list'));
-
-  /* EVENT LISTENER FOR CLICK */
-  customerNameLists.forEach((el) => {
-    el.addEventListener('click', (e) => {
-      let number = customerNameNumber[e.target.innerText],
-        name = e.target.innerText;
-      soundClick.play();
-      setTimeout(() => {
-        customerName.innerText = name;
-        customerName.contentEditable = false;
-        customerDisplayBoxContainer.style.visibility = 'hidden';
-        customerNumberValue.value = number;
-        customerNumberValue.disabled = true;
-        customerNumberValue.dispatchEvent(new Event('keyup'));
-      }, 300);
-    });
-  });
-
-  /* EVENTLISTENER FOR SUGGESTIONS */
-  customerName.addEventListener('keyup', (e) => {
-    let pattern = /[\s\W]+/g;
-    let temp, text;
-    let countA = 0;
-    temp = customerName.innerText.replace(pattern, '');
-    /* CHECK IF THE LENGTH OF ENTRY IS 3 OR GREATER TO SHOW BOX */
-    if (temp.length >= 3 && temp.length <= 8) {
-      customerDisplayBoxContainer.style.visibility = 'visible';
-    } else {
-      customerDisplayBoxContainer.style.visibility = 'hidden';
-    }
-    /* ASSIGN DISPLAY NONE OR BLOCK FOR ELEMENTS IF MATCHED */
-    customerNameLists.forEach((el) => {
-      if (customerPricesKeys.includes(el.title)) {
-        el.style.display = 'none';
-      } else {
-        text = el.innerText.replace(pattern, '');
-        /* REMOVE ELEMENTS THAT HAVE PRICELISTS */
-        let elMatch = text.includes(temp);
-        if (elMatch) {
-          el.style.display = 'block';
-          countA++;
-        } else {
-          el.style.display = 'none';
-        }
-      }
-    });
-    if (countA === 0) {
-      /* IF ALL ELEMENTS ARE HIDDEN HIDE BOX */
-      customerDisplayBoxContainer.style.visibility = 'hidden';
-    }
-  });
+if (!storage.muteflag) {
+  checkMuteFlag();
 }
 
 /* CCA AUTO/MAN FUNCTION CONTROL FOR KEYUP IN CELLS */
@@ -287,10 +240,11 @@ function ccaAutoMan() {
 }
 
 /* CREATE THE JSON OBJECT FROM HTML TABLE DATA */
-const createObjectFromHtml = () => {
+function createObjectFromHtml() {
   /* SET VARIABLES */
-  let tableRows, columns, tableData, jsonObject, customerNum;
+  let tableRows, columns, tableData, jsonObject, customerNum, cutomerPriceListNum;
   customerNum = customerNumberValue.value.toUpperCase();
+  cutomerPriceListNum = customerPriceList.value;
   /* RETRIEVE ALL INFO AND CREATE JSON OBJECT FROM TABLE */
   jsonObject = {};
   jsonObjectData = {};
@@ -311,29 +265,168 @@ const createObjectFromHtml = () => {
       parseInt(document.getElementById(`TSER${i}`).value),
     ];
   }
-
-  jsonObject[customerNum] = jsonObjectData;
-  jsonObject[customerNum]['COLUMNS'] = columns.map((el) => el.innerText);
-  jsonObject[customerNum]['CCA'] = parseInt(ccaPrice.value);
-  jsonObject[customerNum]['EMAIL'] = '';
-  jsonObject[customerNum]['TEL'] = '';
-  jsonObject['PRICELIST'] = customerPriceList.value;
-  jsonObject['HEADER'] = {
-    customerName: customerName.innerText,
-  };
+  jsonObject['_id'] = customerNum;
+  jsonObject['price-list'] = jsonObjectData;
+  jsonObject['price-list']['COLUMNS'] = columns.map((el) => el.innerText);
+  jsonObject['price-list']['CCA'] = parseInt(ccaPrice.value);
+  jsonObject['price-list']['EMAIL'] = '';
+  jsonObject['price-list']['TEL'] = '';
 
   return jsonObject;
-};
+}
 
-const resetForm = () => {
-  /* RESTART SECWINDOW */
-  ipcRenderer.send('restart-sec', 'startPage');
-  secWindow.close();
-};
+function resetForm() {
+  ipcRenderer.send('restart-sec', null);
+}
 
-////////////////////////////////////
-/* HTML TABLE FORM PAGE FUNCTION */
-//////////////////////////////////
+/* GET PRICE-LIST FROM DATABASE */
+async function getPriceList(customerNumber) {
+  // Get the price list number
+  let pricelistNumberResult = await ipcRenderer.invoke('get-pricelist-number', customerNumber);
+  priceListNumber = pricelistNumberResult;
+
+  // Get the price list from the db
+  let priceListResult = await ipcRenderer.invoke('get-price-list', customerNumber);
+  jsonFile = priceListResult['price-list'];
+  searchValue = priceListResult._id;
+
+  // Get the backup db for the customer
+  customerBackUpJson = await ipcRenderer.invoke('get-customer-backup', customerNumber);
+
+  // Get the name from db
+  customerNameValue = customerNumberNameJson[customerNumber];
+
+  // ONLY SHOW UPDATE BUTTON ONCE ALL DATA IS AVAILABLE
+  hideLoading(true);
+  resetButtonsClicked();
+}
+
+/* GET PAUSED PRICE-LIST FROM DATABASE */
+async function getPausedPriceList(customerNumber) {
+  // Get the price list number
+  let pricelistNumberResult = await ipcRenderer.invoke('get-pricelist-number', customerNumber);
+  priceListNumber = pricelistNumberResult;
+
+  // Get the price list from the db
+  let priceListResult = await ipcRenderer.invoke('get-single-paused', customerNumber);
+  jsonFile = priceListResult['price-list'];
+  searchValue = priceListResult._id;
+
+  // Get the backup db for the customer
+  customerBackUpJson = await ipcRenderer.invoke('get-customer-backup', customerNumber);
+
+  // Get the name from db
+  customerNameValue = customerNumberNameJson[customerNumber];
+
+  // ONLY SHOW UPDATE BUTTON ONCE ALL DATA IS AVAILABLE
+  hideLoading();
+  resetButtonsPausedClicked();
+}
+
+/* BLUR TABLE */
+function blurTable() {
+  progressFade.style.visibility = 'visible';
+  progressFade.style.backdropFilter = 'blur(2px)';
+}
+/* UNBLUR TABLE */
+function unBlurTable() {
+  progressFade.style.visibility = 'hidden';
+  progressFade.style.backdropFilter = 'none';
+}
+
+/* LOADING CONTAINER CONTROLS */
+function showLoading(flag) {
+  if (flag) {
+    loadingContainer.style.display = 'flex';
+    viewPauseBtn.disabled = true;
+  } else {
+    loadingContainer.style.display = 'flex';
+    searchDisabledBox.style.display = 'flex';
+  }
+}
+
+function hideLoading(flag) {
+  if (flag) {
+    loadingContainer.style.display = 'none';
+    viewPauseBtn.disabled = false;
+  } else {
+    loadingContainer.style.display = 'none';
+    searchDisabledBox.style.display = 'flex';
+  }
+}
+
+/* CUSTOMER NUMBER DISABLED CONTAINER CONTROL */
+function showCustomerNumberDisabled() {
+  customerNumberDisabled.style.visibility = 'visible';
+}
+
+function hideCustomerNumberDisabled() {
+  customerNumberDisabled.style.visibility = 'hidden';
+}
+
+/* SELECTOR SHOW PAUSED VERSION */
+function showPauseSelector() {
+  /* SHOW CORRECT BUTTONS */
+  dateSelectStandardBtn.style.display = 'none';
+  dateSelectEditBtn.style.display = 'none';
+  dateCancelStandardBtn.style.display = 'flex';
+  dateSelectPausedBtn.style.display = 'flex';
+  /* BLUR BACKGROUND */
+  blurTable();
+  addYears();
+  dateSelectionBox.style.visibility = 'visible';
+  dateSelectionBox.style.opacity = 1;
+}
+
+/* SELECTOR SHOW EDIT VERSION */
+function showEditSelector() {
+  /* SHOW CORRECT BUTTONS */
+  dateSelectStandardBtn.style.display = 'none';
+  dateSelectEditBtn.style.display = 'flex';
+  dateCancelStandardBtn.style.display = 'flex';
+  dateSelectPausedBtn.style.display = 'none';
+  /* BLUR BACKGROUND */
+  blurTable();
+  addYears();
+  dateSelectionBox.style.visibility = 'visible';
+  dateSelectionBox.style.opacity = 1;
+}
+
+/* SELECTOR SHOW STANDARD VERSION */
+function showStandardSelector() {
+  /* SHOW CORRECT BUTTONS */
+  dateSelectStandardBtn.style.display = 'flex';
+  dateCancelStandardBtn.style.display = 'flex';
+  dateSelectPausedBtn.style.display = 'none';
+  dateSelectEditBtn.style.display = 'none';
+
+  /* BLUR BACKGROUND */
+  blurTable();
+  addYears();
+  dateSelectionBox.style.visibility = 'visible';
+  dateSelectionBox.style.opacity = 1;
+}
+
+/* DATE SECLECTOR FUNCTION FOR SCHEDULES */
+function showDateSelector(flag) {
+  switch (flag) {
+    case 'standard':
+      showStandardSelector();
+      break;
+    case 'pause':
+      showPauseSelector();
+      break;
+    case 'edit':
+      showEditSelector();
+      break;
+  }
+}
+
+/* DATE SECLECTOR FUNCTION FOR SCHEDULES */
+function hideDateSelector() {
+  /* BLUR BACKGROUND */
+  dateSelectionBox.style.opacity = 0;
+}
 
 /* SORT DATES FUNCTION */
 function sortDate(datesArr) {
@@ -348,10 +441,20 @@ function sortDate(datesArr) {
 }
 
 /* CREATE THE POPUP DATA FOR PREVIOUS PRICELISTS */
-function getBackupDateStrings(customernumber, cumenu, ctmenu) {
-  if (customerBackUp[customernumber]) {
+function getBackupDateStrings(cumenu, ctmenu) {
+  let dateFlag = true;
+
+  /* MAKE SURE BACKUP IS NOT NULL */
+  if (customerBackUpJson !== null) {
+    let keys = Object.keys(customerBackUpJson);
+    if (keys.length === 1) {
+      dateFlag = keys[0] === dateString ? false : true;
+    }
+  }
+
+  if (customerBackUpJson !== null && dateFlag) {
     /* GET THE PRICELIST DATES FROM DATAFRAME */
-    let datesArray = Array.from(Object.keys(customerBackUp[customernumber])),
+    let datesArray = Array.from(Object.keys(customerBackUpJson)),
       cudateList,
       priceListDates,
       ctdatelist;
@@ -369,8 +472,7 @@ function getBackupDateStrings(customernumber, cumenu, ctmenu) {
       for (i = 0; i < cumenu.length; i++) {
         cudateList = '';
         priceListDates.forEach((el) => {
-          let val = customerBackUp[customernumber][el][i][3];
-          // console.log(val);
+          let val = customerBackUpJson[el][i][3];
           cudateList += ` ${el}: ${val}`;
         });
         cumenu[i].setAttribute('data-label', cudateList);
@@ -380,22 +482,49 @@ function getBackupDateStrings(customernumber, cumenu, ctmenu) {
       for (i = 0; i < ctmenu.length; i++) {
         ctdatelist = '';
         priceListDates.forEach((el) => {
-          let val = customerBackUp[customernumber][el][i][4];
-          // console.log(val);
+          let val = customerBackUpJson[el][i][4];
           ctdatelist += ` ${el}: ${val}`;
         });
         ctmenu[i].setAttribute('data-label', ctdatelist);
         ctmenu[i].style.setProperty('--vis', 'visible');
       }
     }
+  } else {
+    for (i = 0; i < cumenu.length; i++) {
+      cudateList = 'No History';
+      cumenu[i].setAttribute('data-label', cudateList);
+      cumenu[i].style.setProperty('--vis', 'visible');
+    }
+    /* TREATED COLUMNS POPUP */
+    for (i = 0; i < ctmenu.length; i++) {
+      ctdatelist = 'No History';
+      ctmenu[i].setAttribute('data-label', ctdatelist);
+    }
+  }
+}
+
+/* CUSTOMER NAME EXISTING FILTERING */
+function filterNames(e) {
+  if (customerName.innerText.length > 0) {
+    existingCustomerListArr.forEach((el) => {
+      let elMatch = el.innerText.includes(customerName.innerText);
+      if (elMatch) {
+        el.style.display = 'flex';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+
+    existingCustomerNameContainer.style.visibility = 'visible';
+  } else {
+    existingCustomerNameContainer.style.visibility = 'hidden';
   }
 }
 
 /* INNER TABLE HTM FUNCTION */
-const htmlInnerFill = (customernumber, html) => {
+function htmlInnerFill(html, categoryModification) {
   let innerTableColumns = html.htmlColumns,
     innerTable = html.htmlInner;
-
   table.insertAdjacentHTML(
     'beforeend',
     `<tbody id="table-body" ><tr id="row-columns">${innerTableColumns}</tr>${innerTable}</tbody>`
@@ -415,76 +544,144 @@ const htmlInnerFill = (customernumber, html) => {
     });
   });
 
+  function showExistingWarning() {
+    let number = `Customer number ${customerNumberValue.value.toUpperCase()} already exists.`;
+    existingWarningMessage.setAttribute('number', number);
+    existingWarningMessage.show();
+    customerNumberValue.value = null;
+    customerPriceList.value = null;
+    setTimeout(() => {
+      existingWarningMessage.close();
+      customerNumberValue.focus();
+    }, 1500);
+  }
+
+  function checkCustomerNumber() {
+    if (customerNumberNameJson[customerNumberValue.value.toUpperCase()]) {
+      showExistingWarning();
+    }
+  }
+
   // POPUP MENUS FOR THE BACKUP PRICES
-  getBackupDateStrings(customernumber, cuMenu, ctMenu);
-};
+  getBackupDateStrings(cuMenu, ctMenu);
+  if (categoryModification === 'new') {
+    showCustomerNumberDisabled();
+    customerNumberValue.disabled = true;
+    customerName.addEventListener('keyup', filterNames);
+    customerNumberValue.addEventListener('keyup', checkCustomerNumber);
+    customerName.addEventListener('keyup', enterEvent);
+    customerNumberValue.addEventListener('keyup', paddingAddPriceListNum);
+  }
+}
 
 /* ACTIVATE EXMILL BUTTON FUNCTION */
 function activateExmillBtn() {
-  if (ccaPrice.value.length > 0) {
-    /* ACTIVATE THE EXMILL BUTTON */
-    if (Object.keys(customerPrices).includes('@EXMILL')) {
-      exmillBtn.style.display = 'block';
-      exmillBtnDisabled.style.display = 'none';
-    } else {
-      setTimeout(() => {
-        soundPop.play();
-        exmillPop.show();
-      }, 2000);
-    }
+  /* ACTIVATE THE EXMILL BUTTON */
+  if (exmillPrice != null) {
+    exmillBtn.style.display = 'block';
+    exmillBtnDisabled.style.display = 'none';
   }
 }
 
 /* FUNCTION TO FILL THE TABLE PAGE IF UPDATE OR COPY IS SELECTED */
-function tablePageCreate(type) {
-  /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
-  if (type) {
-    searchValue = customerSearch.value.toUpperCase();
-    if (customerPricelistNumber[searchValue]) {
-      customerPriceList.value = customerPricelistNumber[searchValue];
-      customerPriceList.disabled = true;
-    } else {
-      customerPriceList.value = pricelistNumber;
-    }
+function tablePageCreate(existingOrCopy, categoryModification) {
+  /* SHOW THE CORRECT CREAT BUTTON FOR PAUSE OR UPDATE */
+  if (categoryModification === 'pause') {
+    /* RESUME VERSION */
+    createBtn.style.display = 'none';
+    createBtnEdit.style.display = 'none';
+    scheduleBtnEdit.style.display = 'none';
+    scheduleBtn.style.display = 'none';
+    createBtnPause.style.display = 'flex';
+    scheduleBtnPause.style.display = 'flex';
+    createBtnNew.style.display = 'none';
+    scheduleBtnNew.style.display = 'none';
+    createBtnNew.style.display = 'none';
+    pauseBtn.style.display = 'flex';
+    pauseBtnNew.style.display = 'none';
+  } else if (categoryModification === 'update') {
+    /* UPDATE VERSION */
+    createBtn.style.display = 'flex';
+    createBtnPause.style.display = 'none';
+    scheduleBtn.style.display = 'flex';
+    scheduleBtnPause.style.display = 'none';
+    createBtnEdit.style.display = 'none';
+    scheduleBtnEdit.style.display = 'none';
+    createBtnNew.style.display = 'none';
+    scheduleBtnNew.style.display = 'none';
+    createBtnNew.style.display = 'none';
+    pauseBtn.style.display = 'flex';
+    pauseBtnNew.style.display = 'none';
+  } else if (categoryModification === 'edit') {
+    /* UPDATE VERSION */
+    createBtn.style.display = 'none';
+    createBtnPause.style.display = 'none';
+    scheduleBtn.style.display = 'none';
+    scheduleBtnPause.style.display = 'none';
+    createBtnEdit.style.display = 'flex';
+    scheduleBtnEdit.style.display = 'flex';
+    createBtnNew.style.display = 'none';
+    scheduleBtnNew.style.display = 'none';
+    createBtnNew.style.display = 'none';
+    pauseBtn.style.display = 'flex';
+    pauseBtnNew.style.display = 'none';
+  } else if (categoryModification === 'new') {
+    /* UPDATE VERSION */
+    createBtnNew.style.display = 'flex';
+    scheduleBtnNew.style.display = 'flex';
+    createBtnNew.style.display = 'flex';
+    createBtn.style.display = 'none';
+    createBtnPause.style.display = 'none';
+    scheduleBtn.style.display = 'none';
+    scheduleBtnPause.style.display = 'none';
+    createBtnEdit.style.display = 'none';
+    scheduleBtnEdit.style.display = 'none';
+    pauseBtn.style.display = 'none';
+    pauseBtnNew.style.display = 'flex';
+  }
+  if (existingOrCopy) {
+    customerPriceList.value = priceListNumber;
+    customerPriceList.disabled = true;
+
     // FILL TABLE INFO
     customerNumberValue.value = searchValue;
-    customerName.innerText = customerNumberName[searchValue];
+    customerNumberValue.disabled = true;
+
+    customerName.innerText = customerNameValue;
     customerName.contentEditable = false;
   } else {
+    customerNumberValue.value = null;
     customerNumberValue.disabled = false;
     customerName.innerText = null;
+    customerName.contentEditable = true;
+    setTimeout(() => {
+      customerName.focus();
+    }, 500);
   }
 
-  ccaPrice.value = customerPrices[searchValue]['CCA'];
+  ccaPrice.value = jsonFile['CCA'];
   customerPriceList.disabled = true;
 
   // POPULATE HTML TABLE
   htmlContent = tablePopulate(jsonFile);
-  htmlInnerFill(searchValue, htmlContent);
+  htmlInnerFill(htmlContent, categoryModification);
 
   // HIDE SEARCH BOX
   checkCustomer.style.visibility = 'hidden';
   checkCustomer.style.opacity = '0';
 
-  /* SET CUSTOMER NUMBER TO GLOBAL VARIABLE */
-  cusNum = customerNumberValue.value.toUpperCase();
-
   // ADD BACKGROUND TO HTML ELEMENT
   setTimeout(() => {
-    html.style.backgroundColor = '#f1f1f1';
+    html.style.backgroundColor = '#fff';
   }, 300);
-  if (secWindow.getChildWindows().length > 0) {
-    secWindow.getChildWindows()[0].close();
-    setTimeout(() => {
-      hider.style.display = 'flex';
-      secWindow.maximize();
-      secWindow.setMinimumSize(950, 700);
-    }, 300);
-  }
+
   setTimeout(() => {
     hider.style.display = 'flex';
     secWindow.maximize();
     secWindow.setMinimumSize(950, 700);
+    setTimeout(() => {
+      customerNumberValue.focus();
+    }, 300);
   }, 300);
 
   /* CHECK TO ACTIVATE EXMILL BTN */
@@ -494,46 +691,19 @@ function tablePageCreate(type) {
 ///////////////////////////////////
 /* HEADER BUTTON RESET FUNCTION */
 /////////////////////////////////
-const btnReset = () => {
-  if (autoCaaBtn.classList.value === 'cca-auto-in') {
-    autoCaaBtn.setAttribute('class', 'cca-auto-out');
-    manCaaBtn.setAttribute('class', 'cca-man-in');
-    autoCaaBtn.disabled = false;
-    treatedColumns.style.backgroundColor = 'var(--opaque-man)';
-  }
-  if (lengthLockBtn.classList.value === 'lock-out') {
-    lengthLockBtn.setAttribute('class', 'lock-in');
-    lockSvg.style.fill = '#fff';
-    lengthColumn.style.backgroundColor = 'var(--opaque-auto)';
+/* GET CUSTOMER DETAIL */
+function getCustomerDetail() {
+  return {
+    customerName: customerName.innerText,
+    customerNumber: customerNumberValue.value.toUpperCase(),
+    priceListNumber: customerPriceList.value.toUpperCase(),
+  };
+}
 
-    lengthUnlockBtn.setAttribute('class', 'unlock-out');
-    unlockSvg.style.fill = 'var(--button-green)';
-  }
-};
-
-//////////////////////
-/* EVENT LISTENERS */
-////////////////////
-
-/* HTML TABLE EVENTS */
-//////////////////////
-
-/* TO MAIN BUTTON */
-backBtn.addEventListener('click', () => {
-  soundClick.play();
-  /* RESET THE TABLE FORM TO ZERO DATA */
-  setTimeout(() => {
-    resetForm();
-  }, 200);
-});
-
-/* CREATE BUTTON */
-createBtn.addEventListener('click', (e) => {
+/* CREATE PRICELIST OBJECT FROM HTML */
+function createPriceListFromHtml(flag) {
   /* MAKE SURE BUNDLE SIZES ARE NOT SHOWING EXMILL */
   repopulateBundleSize();
-
-  soundClick.play();
-
   /* CHECK ALL VALUE ENTRIES AND WARN IF MISSING */
   let treatedMissingBool = [],
     untreatedMissingBool = [];
@@ -554,8 +724,12 @@ createBtn.addEventListener('click', (e) => {
     }
   });
 
-  /* CHECK THE LENGTHS OF THOSE ARRAY AND HIGHLIGHT THE MISSING INPUTS */
+  /* SET CCA PRICE TO ZERO IF NO ENTRY */
+  if (ccaPrice.value.length < 1) {
+    ccaPrice.VALUE = 0;
+  }
   if (treatedMissingBool.length > 0 || untreatedMissingBool.length > 0) {
+    /* CHECK THE LENGTHS OF THOSE ARRAY AND HIGHLIGHT THE MISSING INPUTS */
     treatedMissingBool.forEach((el) => {
       el.style.backgroundColor = '#ffa60079';
       el.style.border = '1px solid #ffa500';
@@ -572,21 +746,16 @@ createBtn.addEventListener('click', (e) => {
     /* CREATE MESSAGE POPUP */
     remote.dialog.showMessageBoxSync(secWindow, {
       type: 'warning',
-      icon: `${dir}/renderer/icons/error.png`,
+      icon: `${dir}/renderer/icons/converter-logo.png`,
       buttons: ['OK'],
-      message: 'MISSING VALUES:',
+      message: 'Missing Values:',
       detail: 'Please complete the highlighted fields.',
     });
-    /* CHECK IF ALL TOP REQUIRED FIELDS HAVE BEEN ENTERED */
     return;
   }
-  if (
-    customerName.innerText.length === 0 ||
-    customerNumberValue.value.length < 6 ||
-    ccaPrice.value.length === 0
-  ) {
+  if (customerName.innerText.length === 0 || customerNumberValue.value.length < 6) {
     /* HIGHLIGHT THE FIELDS THAT ARE MISSING */
-    if (customerName.innerText.length === 0) {
+    if (customerName.innerText.length === 0 || customerName === 'Enter customer number') {
       customerName.style.fontWeight = 'bolder';
       customerName.style.animation = 'cca-flash .5s linear 4';
       overflow.style.animation = 'cca-flash .5s linear 4';
@@ -602,18 +771,6 @@ createBtn.addEventListener('click', (e) => {
       overflow.style.backgroundColor = '#fff';
       overflow.style.border = '1px solid #fff';
     }
-    if (ccaPrice.value.trim().length == 0) {
-      ccaPrice.style.fontWeight = 'bolder';
-      ccaPrice.style.animation = 'cca-flash .5s linear 4';
-      setTimeout(() => {
-        ccaPrice.style.fontWeight = 'normal';
-        ccaPrice.style.animation = 'none';
-      }, 2050);
-      return;
-    } else {
-      ccaPrice.style.backgroundColor = '#fff';
-      ccaPrice.style.border = '1px solid #fff';
-    }
     if (customerNumberValue.value.length < 6) {
       customerNumberValue.style.fontWeight = 'bolder';
       customerNumberValue.style.animation = 'cca-flash .5s linear 4';
@@ -627,48 +784,290 @@ createBtn.addEventListener('click', (e) => {
       customerNumberValue.style.border = '1px solid #fff';
     }
   } else {
-    /* CREATE THE CUSTOMER PRICELIST OBJECT TO SEND TO PYTHON */
-    customerData = createObjectFromHtml();
+    /* CHECK FLAG */
+    switch (flag) {
+      /* PAUSED SCHEDULE BUTTON - SCHEDULES A PAUSED PRICE-LIST AND REMOVES THE PAUSED ITEM */
+      case 'schedule-pause':
+        customerData = createObjectFromHtml();
+        showDateSelector('pause');
+        break;
+      /* STANDARD SCHEDULE BUTTON - SCHEDULES A PRICE-LIST */
+      case 'schedule':
+        customerData = createObjectFromHtml();
+        showDateSelector('standard');
+        break;
 
-    if (!jsonFile) {
-      jsonFile = customerData[Object.keys(customerData)[0]];
+      /* SCHEDULE EDIT SCHEDULE BUTTON - RESCHEDULES A SCHEDULED PRICE-LIST AND REMOVES THE OLD SCHEDULE */
+      case 'schedule-edit':
+        customerData = createObjectFromHtml();
+        showDateSelector('edit');
+        break;
+
+      /* PAUSE CREATE BUTTON - MAKES SYSTEM AND ORDER SHEET ALSO REMOVES PAUSED ITEM  */
+      case 'create-pause':
+        customerData = createObjectFromHtml();
+        ipcRenderer.send('progress-create', {
+          customerData,
+          pauseFlag: true,
+          removeOldScheduleFlag: false,
+          createNewScheduleFlag: false,
+          createExcelSchedule: false,
+          newScheduleDate: null,
+          OldScheduleDate: null,
+          newFlag: false,
+          updateDbFlag: true,
+          custDetail: getCustomerDetail(),
+          multiZipPath: null,
+        });
+        secWindow.hide();
+        break;
+
+      /* SCHEDULE EDIT CREATE BUTTON - MAKES SYSTEM AND ORDER SHEET ALSO REMOVES SCHEDULE */
+      case 'create-schedule-edit':
+        customerData = createObjectFromHtml();
+        ipcRenderer.send('progress-create', {
+          customerData,
+          pauseFlag: false,
+          removeOldScheduleFlag: true,
+          createNewScheduleFlag: false,
+          createExcelSchedule: false,
+          newScheduleDate: null,
+          OldScheduleDate,
+          newFlag: false,
+          updateDbFlag: true,
+          custDetail: getCustomerDetail(),
+          multiZipPath: null,
+        });
+        secWindow.hide();
+        break;
+
+      /* STANDARD CREATE BUTTON - MAKES SYSTEM AND ORDER SHEET */
+      case 'create-standard':
+        customerData = createObjectFromHtml();
+        ipcRenderer.send('progress-create', {
+          customerData,
+          pauseFlag: false,
+          removeOldScheduleFlag: false,
+          createNewScheduleFlag: false,
+          createExcelSchedule: false,
+          newScheduleDate: null,
+          OldScheduleDate: null,
+          newFlag: false,
+          updateDbFlag: true,
+          custDetail: getCustomerDetail(),
+          multiZipPath: null,
+        });
+        secWindow.hide();
+        break;
+
+      case 'create-new':
+        customerData = createObjectFromHtml();
+        ipcRenderer.send('progress-create', {
+          customerData,
+          pauseFlag: false,
+          removeOldScheduleFlag: false,
+          createNewScheduleFlag: false,
+          createExcelSchedule: false,
+          newScheduleDate: null,
+          OldScheduleDate: null,
+          updateDbFlag: true,
+          newFlag: true,
+          custDetail: getCustomerDetail(),
+          multiZipPath: null,
+        });
+        secWindow.hide();
+        break;
     }
-
-    /* FADE THE BACKGROUND AND MESSAGE FOR PROGRESS BAR */
-    progressFade.style.visibility = 'visible';
-    progressFade.style.backdropFilter = 'blur(4px) grayscale(1)';
-    ipcRenderer.send('progress', customerData);
   }
+}
 
+//////////////////////
+/* EVENT LISTENERS */
+////////////////////
+
+/* HTML TABLE EVENTS */
+//////////////////////
+
+/* DATE SELECTOR STANDARD CANCEL BUTTON */
+dateCancelStandardBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  hideDateSelector();
+  unBlurTable();
+});
+
+/* DATE SELECTOR PAUSED SELECT BUTTON */
+dateSelectPausedBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  let month = dateSelectionMonth.value;
+  let year = dateSelectionYear.value;
+  dateValue = `${month}/${year}`;
+  hideDateSelector();
+  customerData = createObjectFromHtml('python');
+  ipcRenderer.send('progress-create', {
+    customerData,
+    pauseFlag: true,
+    removeOldScheduleFlag: false,
+    createNewScheduleFlag: true,
+    newScheduleDate: dateValue,
+    OldScheduleDate: null,
+    newFlag: false,
+    updateDbFlag: false,
+    custDetail: getCustomerDetail(),
+    multiZipPath: null,
+  });
   secWindow.hide();
 });
 
-/* PAUSE BUTTON TO SAVE TO LOCAL STORAGE */
+/* DATE SELECTOR EDIT SELECT BUTTON */
+dateSelectEditBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  let month = dateSelectionMonth.value;
+  let year = dateSelectionYear.value;
+  dateValue = `${month}/${year}`;
+  hideDateSelector();
+  customerData = createObjectFromHtml('python');
+  ipcRenderer.send('progress-create', {
+    customerData,
+    pauseFlag: false,
+    removeOldScheduleFlag: true,
+    createNewScheduleFlag: true,
+    createExcelSchedule: true,
+    newScheduleDate: dateValue,
+    OldScheduleDate,
+    newFlag: false,
+    updateDbFlag: false,
+    custDetail: getCustomerDetail(),
+    multiZipPath: null,
+  });
+  secWindow.hide();
+});
+
+/* DATE SELECTOR STANDARD SELECT BUTTON */
+dateSelectStandardBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  let month = dateSelectionMonth.value;
+  let year = dateSelectionYear.value;
+  dateValue = `${month}/${year}`;
+  hideDateSelector();
+
+  customerData = createObjectFromHtml('python');
+  ipcRenderer.send('progress-create', {
+    customerData,
+    pauseFlag: false,
+    removeOldScheduleFlag: false,
+    createNewScheduleFlag: true,
+    newScheduleDate: dateValue,
+    createExcelSchedule: true,
+    OldScheduleDate: null,
+    newFlag: false,
+    updateDbFlag: false,
+    custDetail: getCustomerDetail(),
+    multiZipPath: null,
+  });
+  secWindow.hide();
+});
+
+/* TO MAIN BUTTON */
+backBtn.addEventListener('click', () => {
+  soundClick.play();
+  /* RESET THE TABLE FORM TO ZERO DATA */
+  setTimeout(() => {
+    resetForm();
+  }, 200);
+});
+
+/* SCHEDULE BUTTON */
+scheduleBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  createPriceListFromHtml('schedule');
+});
+
+/* SCHEDULE PAUSE BUTTON */
+scheduleBtnPause.addEventListener('click', (e) => {
+  soundClick.play();
+  createPriceListFromHtml('schedule-pause');
+});
+
+/* SCHEDULE EDIT BUTTON */
+scheduleBtnEdit.addEventListener('click', (e) => {
+  soundClick.play();
+  createPriceListFromHtml('schedule-edit');
+});
+
+/* CREATE BUTTON */
+createBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  createPriceListFromHtml('create-standard');
+});
+
+/* CREATE NEW BUTTON */
+createBtnNew.addEventListener('click', (e) => {
+  soundClick.play();
+  createPriceListFromHtml('create-new');
+});
+
+/* CREATE PAUSE BUTTON */
+createBtnPause.addEventListener('click', (e) => {
+  soundClick.play();
+  createPriceListFromHtml('create-pause');
+});
+
+/* CREATE EDIT BUTTON */
+createBtnEdit.addEventListener('click', (e) => {
+  soundClick.play();
+  createPriceListFromHtml('create-schedule-edit');
+});
+
+/* PAUSE BUTTON TO SAVE TO DATABASE */
 pauseBtn.addEventListener('click', () => {
   repopulateBundleSize();
   soundClick.play();
-  if (customerName.innerText.length !== 0) {
-    /* CREATE THE STORAGE OBJECT */
-    let localStorageJson = createObjectFromHtml(),
-      number = customerNumberValue.value.toUpperCase();
-
-    /* STRINGIFY FOR LOCALSTORAGE */
-    localStorageJson = JSON.stringify(localStorageJson);
-    /* SET ITEM */
-    localStorage.setItem(number, localStorageJson);
-    setTimeout(() => {
+  setTimeout(() => {
+    if (
+      customerName.innerText.length !== 0 &&
+      customerName.innerText !== 'ENTER CUSTOMER NAME'
+    ) {
+      let pausedJson = createObjectFromHtml();
+      ipcRenderer.send('save-paused-price-list', { pausedJson });
       resetForm();
-    }, 200);
-  } else {
-    remote.dialog.showMessageBoxSync(secWindow, {
-      type: 'error',
-      title: 'CUSTOMER NAME IS REQUIRED',
-      message: 'Please enter a customer name before pausing',
-      buttons: ['OK'],
-      icon: `${dir}/renderer/icons/error.png`,
-    });
-    customerName.focus();
-  }
+    } else {
+      remote.dialog.showMessageBoxSync(secWindow, {
+        type: 'error',
+        title: 'Customer name is required',
+        message: 'Please enter a customer name before pausing',
+        buttons: ['OK'],
+        icon: `${dir}/renderer/icons/converter-logo.png`,
+      });
+      customerName.focus();
+    }
+  }, 300);
+});
+
+/* PAUSE NEW BUTTON TO SAVE TO DATABASE */
+pauseBtnNew.addEventListener('click', () => {
+  repopulateBundleSize();
+  soundClick.play();
+  setTimeout(() => {
+    if (
+      customerName.innerText.length !== 0 &&
+      customerName.innerText !== 'ENTER CUSTOMER NAME'
+    ) {
+      let pausedJson = createObjectFromHtml();
+      let custDetail = getCustomerDetail();
+      ipcRenderer.send('create-name-numbers', custDetail);
+      ipcRenderer.send('save-paused-price-list', { pausedJson });
+      resetForm();
+    } else {
+      remote.dialog.showMessageBoxSync(secWindow, {
+        type: 'error',
+        title: 'Customer name is required',
+        message: 'Please enter a customer name before pausing',
+        buttons: ['OK'],
+        icon: `${dir}/renderer/icons/converter-logo.png`,
+      });
+      customerName.focus();
+    }
+  }, 300);
 });
 
 /* LENGTH LOCK BUTTON */
@@ -678,7 +1077,7 @@ lengthLockBtn.addEventListener('click', (e) => {
   if (lengthLockBtn.classList.value === 'lock-out') {
     lengthLockBtn.setAttribute('class', 'lock-in');
     lockSvg.style.fill = '#fff';
-    lengthColumn.style.backgroundColor = 'var(--opaque-auto)';
+    lengthColumn.style.backgroundColor = 'var(--auto)';
 
     lengthUnlockBtn.setAttribute('class', 'unlock-out');
     unlockSvg.style.fill = 'var(--button-green)';
@@ -690,35 +1089,12 @@ lengthLockBtn.addEventListener('click', (e) => {
   }
 });
 
-let lockbuttonPop = document.getElementById('lockbutton-popup'),
-  lockbuttonPopYes = document.getElementById('lockbutton-yes'),
-  lockbuttonPopNo = document.getElementById('lockbutton-no');
-/* LOCKBUTTON NOTIFICATION FUNCTION */
-function notificationBubbleLockbutton() {
-  notObject = JSON.parse(localStorage.getItem('notifications'));
-  if (notObject.lockbutton) {
-    soundPop.play();
-    lockbuttonPop.show();
-    lockbuttonPopYes.addEventListener('click', (e) => {
-      soundPop.play();
-      lockbuttonPop.close();
-      unlockLength();
-    });
-    lockbuttonPopNo.addEventListener('click', (e) => {
-      soundPop.play();
-      lockbuttonPop.close();
-    });
-  } else if (!notObject.lockbutton) {
-    unlockLength();
-  }
-}
-
 function unlockLength() {
   soundClick.play();
   if (lengthUnlockBtn.classList.value === 'unlock-out') {
     lengthUnlockBtn.setAttribute('class', 'unlock-in');
     unlockSvg.style.fill = '#fff';
-    lengthColumn.style.backgroundColor = 'var(--opaque-man)';
+    lengthColumn.style.backgroundColor = 'var(--man)';
 
     lengthLockBtn.setAttribute('class', 'lock-out');
     lockSvg.style.fill = 'var(--button-gold)';
@@ -733,41 +1109,19 @@ function unlockLength() {
 /* LENGTH UNLOCK BUTTON */
 
 lengthUnlockBtn.addEventListener('click', (e) => {
-  notificationBubbleLockbutton();
+  soundClick.play();
+  unlockLength();
 });
-
-let CCAPop = document.getElementById('CCA-popup'),
-  CCAPopYes = document.getElementById('CCA-yes'),
-  CCAPopNo = document.getElementById('CCA-no');
-/* CCA NOTIFICATION */
-function notificationBubbleAutocca() {
-  notObject = JSON.parse(localStorage.getItem('notifications'));
-  if (notObject.autocca) {
-    soundPop.play();
-    CCAPop.show();
-    CCAPopYes.addEventListener('click', (e) => {
-      soundPop.play();
-      CCAPop.close();
-      CCAAutoSwitch();
-    });
-    CCAPopNo.addEventListener('click', (e) => {
-      soundPop.play();
-      CCAPop.close();
-    });
-  } else if (!notObject.autocca) {
-    CCAAutoSwitch();
-  }
-}
 
 /* FUNCTION TO SWITCH CCA */
 function CCAAutoSwitch() {
-  soundClick.play();
+  // soundClick.play();
   // Check to see if there is an entry in the cca price and the button is out
   if (autoCaaBtn.classList.value === 'cca-auto-out' && ccaPrice.value) {
     autoCaaBtn.setAttribute('class', 'cca-auto-in');
     autoCaaBtn.disabled = true;
     ccaPrice.disabled = true;
-    treatedColumns.style.backgroundColor = 'var(--opaque-auto)';
+    treatedColumns.style.backgroundColor = 'var(--auto)';
 
     // Disable all treated cells
     for (let i = 0; i < 30; i++) {
@@ -809,7 +1163,8 @@ function CCAAutoSwitch() {
 /* AUTO CCA BUTTON */
 
 autoCaaBtn.addEventListener('click', (e) => {
-  notificationBubbleAutocca();
+  soundClick.play();
+  CCAAutoSwitch();
 });
 
 function CCAManualSwitch() {
@@ -820,7 +1175,7 @@ function CCAManualSwitch() {
     manCaaBtn.setAttribute('class', 'cca-man-in');
     manCaaBtn.disabled = true;
     ccaPrice.disabled = false;
-    treatedColumns.style.backgroundColor = 'var(--opaque-man)';
+    treatedColumns.style.backgroundColor = 'var(--man)';
 
     // Make treated cell active
     for (let i = 0; i < 30; i++) {
@@ -844,7 +1199,6 @@ function CCAManualSwitch() {
 manCaaBtn.addEventListener('click', (e) => {
   CCAManualSwitch();
   repopulateBundleSize();
-  transportFooterContainer.close();
 });
 
 /* EXMILL FUNCTIONS AND BUTTON */
@@ -863,6 +1217,7 @@ function repopulateBundleSize() {
     br = `BR${i}`;
     element = document.getElementById(br);
     element.style.color = '#000';
+    element.style.fontWeight = 'normal';
     /* GET THE BUNDLE SIZES FROM THE OBJECT TEMPLATE */
     element.value = dataObjects['template-pricelist'][i][0];
   }
@@ -870,7 +1225,7 @@ function repopulateBundleSize() {
 
 /* FUNCTION TO CREATE THE PERCENTAGE STRING FOR EXMILL */
 function createExmillPercent(pricelistvalue, exmillvalue) {
-  let string, newInt;
+  let newInt;
   let value = (pricelistvalue / exmillvalue - 1) * 100;
   if (value > 1) {
     newInt = value.toFixed(2);
@@ -915,7 +1270,7 @@ function exmillKeyUp() {
 function compareExmill() {
   /* SET THE COLOR AND HEADING */
   bundleSizeHeading.innerText = 'EX-MILL %';
-  bundleSizeHeading.style.backgroundColor = 'dodgerblue';
+  bundleSizeHeading.style.backgroundColor = 'var(--main)';
   bundleSizeColumn.setAttribute('class', 'exm');
 
   let brInput, ctInputValue, element, exmillValue;
@@ -954,19 +1309,6 @@ function compareExmill() {
 function exmillClick() {
   if (window.getComputedStyle(exmillContainer).transform === 'matrix(0, 0, 0, 1, 0, 0)') {
     /* RESET THE TRANSPORT VALUE IF VISIBLE */
-
-    if (
-      window.getComputedStyle(transportFooterContainer).transform ===
-      'matrix(1, 0, 0, 1, 0, 0)'
-    ) {
-      transportFooterContainer.close();
-      setTimeout(() => {
-        transportFooterValue.innerText = '';
-      }, 300);
-    } else {
-      transportFooterValue.innerText = '';
-    }
-
     /* SET CCA AUTO */
     CCAAutoSwitch();
     /* OPEN DOCK */
@@ -995,12 +1337,6 @@ function exmillClick() {
   }
 }
 
-/* YES BUTTON FOR EXMILL POPUP */
-exmillYes.addEventListener('click', (e) => {
-  soundPop.play();
-  exmillPop.close();
-});
-
 /* EXMILL BUTTON  */
 exmillBtn.addEventListener('click', (e) => {
   soundClick.play();
@@ -1024,7 +1360,6 @@ exmillTransportValue.addEventListener('keyup', (e) => {
 exmillApplyBtn.addEventListener('click', (e) => {
   soundClick.play();
   exmillTransportCost = exmillTransportValue.value;
-  transportFooterValue.innerText = exmillTransportCost;
   setTimeout(() => {
     compareExmill();
     setTimeout(() => {
@@ -1033,18 +1368,9 @@ exmillApplyBtn.addEventListener('click', (e) => {
       exmillApplyBtn.setAttribute('class', 'exmill-btn-disabled');
       exmillTransportValue.value = '';
       exmillApplyBtn.setAttribute('class', 'exmill-btn-disabled');
-      setTimeout(() => {
-        transportFooterContainer.show();
-      }, 500);
     }, 200);
   }, 200);
 });
-
-/* exmillApplyBtn
-exmillTransportValue */
-/////////////////////////////////
-/* CUSTOMER NUMBER SEARCH BOX */
-///////////////////////////////
 
 /* CUSTOMER NUMBER SEARCH BOX EVENTS */
 //////////////////////////////////////
@@ -1055,332 +1381,326 @@ exmillTransportValue */
 /* CLEAR CURRENT LIST OF CLICKS FUNCTION */
 /* SET A FLAG FOR THE PUSE VIEW BUTTON */
 
-function clearList() {
-  numbers.forEach((el) => {
-    if (localStorage.getItem(el.innerText)) {
-      el.setAttribute('class', 'cusnum-resume');
-    } else {
+function clearList(flag) {
+  if (flag) {
+    customerNumbersSearchList.forEach((el) => {
       el.setAttribute('class', 'cusnum');
-    }
-  });
+      resetButtonsStart();
+    });
+  } else {
+    customerNumbersSearchList.forEach((el) => {
+      el.setAttribute('class', 'context-container');
+      resetButtonsPaused();
+    });
+  }
 }
 
 /* SHOW ONLY PAUSED ITEMS FUNCTION */
-function showPausedItems() {
-  let listedItems = Array.from(customerNumberList.children);
-  listedItems.forEach((el) => {
-    if (el.classList.value === 'cusnum-resume') {
-      el.style.display = 'block';
-    } else {
-      el.style.display = 'none';
-    }
-  });
+async function showPausedItems() {
+  let pausedList = await ipcRenderer.invoke('get-all-paused', null);
+  if (pausedList.length > 0) {
+    customerNumberList.innerHTML = '';
+    pausedList.forEach((el) => {
+      let html = `
+      <div id="${el}" class="context-container"><button id="${el}-delete" class="context-delete">Delete</button>${el}<button id="${el}-cancel" class="context-cancel" >Cancel</button></div>
+        `;
+      customerNumberList.insertAdjacentHTML('beforeend', html);
+    });
+    resetButtonsPaused();
+    addPausedListListeners();
+    hideLoading();
+  } else {
+    customerNumberList.innerHTML = '';
+    let html = `
+    <div class="no-paused">No paused items</div>
+    `;
+    customerNumberList.insertAdjacentHTML('beforeend', html);
+    resetButtonsPaused();
+    hideLoading();
+  }
 }
-// failedEmail
 
 /* ADD EVENT LISTENERS TO LIST FUNCTION */
-
-let numbers;
 function addListListeners() {
   /* CLICK EVENTS ON CUSTOMER NUMBER SEARCH BOX */
-  numbers = Array.from(customerNumberList.children);
+  customerNumbersSearchList = Array.from(customerNumberList.children);
   // CLICK EVENT ON CUSTOMER LIST ITEM
-  numbers.forEach((el) => {
+  customerNumbersSearchList.forEach((el) => {
     el.addEventListener('click', (e) => {
       soundClick.play();
-      // RESET ALL THE BUTTONS TO DEFAULT
-      checkUpdateBtn.style.display = 'none';
-      checkContinueBtn.style.display = 'none';
-      checkResumeEditingBtn.style.display = 'none';
-      disabledBtn.style.display = 'flex';
-
-      // SET THE ELEMENT CLICKED TO A GLOBAL VARIABLE
-      target = e.target;
-      searchValue = target.id;
       // CLEAR ANY EXISTING CLICKED ELEMENTS THAT WERE PREVIOUSLY CLICKED
-      clearList();
+      clearList(true);
       // SET THE CLICKED CLASS ON THE SELECTED ELEMENT
       el.setAttribute('class', 'cusnum-clicked');
       customerSearch.value = el.textContent;
+      cusNum = customerSearch.value;
 
-      // FIRST CHECK TO SEE IF THERE IS A LOCALLY STORED VERSION
-      // PRICELIST OF THE SELECTED CUSTOMER AND SHOW THE RESUME BUTTON
-      if (localStorage.getItem(searchValue)) {
-        jsonFile = customerPrices[customerSearch.value];
-        checkUpdateBtn.style.display = 'none';
-        checkContinueBtn.style.display = 'none';
-        checkResumeEditingBtn.style.display = 'flex';
-        disabledBtn.style.display = 'none';
-      } else {
-        // IF NO LOCAL STORED VERSION SHOW THE UPDATE BUTTON
-        jsonFile = customerPrices[customerSearch.value];
-        checkUpdateBtn.style.display = 'flex';
-        checkContinueBtn.style.display = 'none';
-        checkResumeEditingBtn.style.display = 'none';
-        disabledBtn.style.display = 'none';
-        copyContainer.style.opacity = '1';
-      }
+      /* POPULATE VARIABLES RELATING TO THE PRICELIST */
+      showLoading(true);
+      getPriceList(cusNum);
+      customerSearch.dispatchEvent(new Event('keyup'));
       customerSearch.dispatchEvent(new Event('keyup'));
     });
   });
 }
 
-/* POPLATE THE CUSTOMERLIST AND ADD CORRECT CLASSES */
-function populateList() {
+/* CONTEXT DELETE EVENT */
+async function deleteEvent(e) {
+  let customerNumber = e.target.parentNode.id;
+  showLoading();
+  let result = await ipcRenderer.invoke('remove-pause-item-sync', customerNumber);
+  if (result) {
+    showPausedItems();
+  }
+}
+
+/* CONTEXT CANCEL EVENT */
+function cancelEvent(e) {
+  let parent = e.target.parentNode;
+  let buttons = parent.children;
+  /* HIDE ALL THE BUTTONS */
+  buttons[0].style.visibility = 'hidden';
+  buttons[1].style.visibility = 'hidden';
+
+  buttons[0].removeEventListener('click', deleteEvent);
+  buttons[1].removeEventListener('click', cancelEvent);
+  clearList(false);
+  setTimeout(() => {
+    parent.addEventListener('click', pausedEvent);
+  }, 300);
+}
+
+/* RESET LISTENERS ON CONTEXT MENU */
+function resetListenersContext() {
+  let allContextContainers = Array.from(document.getElementsByClassName('context-container'));
+  allContextContainers.forEach((el) => {
+    /* RESET ALL CONTEXT */
+    try {
+      el.removeEventListener('click', pausedEvent);
+    } catch (err) {
+      logFileFunc(err.stack);
+    }
+    el.addEventListener('click', pausedEvent);
+
+    let buttons = el.children;
+    buttons[0].style.visibility = 'hidden';
+    buttons[0].removeEventListener('click', deleteEvent);
+    buttons[1].style.visibility = 'hidden';
+    buttons[1].removeEventListener('click', cancelEvent);
+  });
+}
+
+/* PAUSED CONTEXT MENU FUNCTION */
+function showPausedContextMenu(e) {
+  clearList(false);
+  resetListenersContext();
+
+  let el = e.target;
+  /* REMOVE THE EVENT LISTENER */
+  el.removeEventListener('click', pausedEvent);
+  let customerNumber = el.innerText;
+  let cancelBtnId = `${customerNumber}-cancel`;
+  let deleteBtnId = `${customerNumber}-delete`;
+
+  let tempBtnCancel = document.getElementById(cancelBtnId);
+  let tempBtnDelete = document.getElementById(deleteBtnId);
+
+  /* SHOW THE BUTTONS */
+  tempBtnCancel.style.visibility = 'visible';
+  tempBtnDelete.style.visibility = 'visible';
+
+  /* ADD EVENT LISTENERS */
+  tempBtnDelete.addEventListener('click', deleteEvent);
+  tempBtnCancel.addEventListener('click', cancelEvent);
+
+  /* SET CLICKED */
+  el.setAttribute('class', 'context-container-clicked');
+}
+
+/* EVENT LISTENER FOR PAUSED LIST */
+function pausedEvent(e) {
+  let el = e.target;
+  soundClick.play();
+  clearList(false);
+  // SET THE CLICKED CLASS ON THE SELECTED ELEMENT
+  el.setAttribute('class', 'context-container-clicked');
+  customerSearch.value = el.innerText;
+  cusNum = customerSearch.value;
+  /* POPULATE VARIABLES RELATING TO THE PRICELIST */
+  showLoading();
+  getPausedPriceList(cusNum);
+  customerSearch.dispatchEvent(new Event('keyup'));
+}
+
+/* ADD EVENT LISTENERS TO PAUSED LIST ITEMS */
+function addPausedListListeners() {
+  /* CLICK EVENTS ON CUSTOMER NUMBER SEARCH BOX */
+  customerNumbersSearchList = Array.from(customerNumberList.children);
+  // CLICK EVENT ON CUSTOMER LIST ITEM
+  customerNumbersSearchList.forEach((el) => {
+    el.addEventListener('click', pausedEvent);
+
+    el.addEventListener('contextmenu', (e) => {
+      showPausedContextMenu(e);
+    });
+  });
+}
+
+/* POPULATE THE CUSTOMER-LIST AND ADD CORRECT CLASSES */
+async function populateList() {
+  showLoading(true);
+  customerPricesNumbersArr = await ipcRenderer.invoke('customer-prices-array', null);
   customerNumberList.innerHTML = '';
-  customerNumber = Object.keys(customerPrices);
-
-  let localStorageKeys = Object.keys(localStorage);
-
-  customerNumber.forEach((el) => {
-    if (localStorage.getItem(el)) {
-      localStorageKeys.splice(localStorageKeys.indexOf(el), 1);
-
-      let html = `
-      <dl class="cusnum-resume" id="${el}">${el}</dl>
-      `;
-      customerNumberList.insertAdjacentHTML('beforeend', html);
-    } else {
-      let html = `
+  customerPricesNumbersArr.forEach((el) => {
+    let html = `
       <dl class="cusnum" id="${el}">${el}</dl>
       `;
-      customerNumberList.insertAdjacentHTML('beforeend', html);
-    }
+    customerNumberList.insertAdjacentHTML('beforeend', html);
   });
-  if (localStorageKeys.length > 0) {
-    localStorageKeys.forEach((el) => {
-      if (el !== 'notifications' && el !== 'failedEmail') {
-        let html = `
-        <dl class="cusnum-resume" id="${el}">${el}</dl>
-        `;
-        customerNumberList.insertAdjacentHTML('beforeend', html);
-      }
-    });
-  }
+
+  /* RESET THE BUTTONS */
+  resetButtonsStart();
   addListListeners();
+  hideLoading(true);
+}
+
+/* CUSTOMER NAME ENTER EVENT */
+function enterEvent(e) {
+  if (e.key === 'Enter') {
+    customerName.innerText = customerName.innerText.trimEnd();
+    if (customerName.innerText.length < 4) {
+      customerName.innerText = null;
+      customerNameMinimumAlert.style.visibility = 'visible';
+      setTimeout(() => {
+        customerNameMinimumAlert.style.visibility = 'hidden';
+      }, 1000);
+    } else {
+      hideCustomerNumberDisabled();
+      customerNumberValue.disabled = false;
+      customerNumberValue.focus();
+    }
+  }
+}
+
+async function existingEvent(e) {
+  soundClick.play();
+  priceListLoading.style.display = 'flex';
+  createBtnNew.disabled = true;
+  pauseBtnNew.disabled = true;
+  hideCustomerNumberDisabled();
+  customerName.innerText = e.target.innerText;
+  customerName.contentEditable = false;
+  customerNumberValue.value = e.target.id;
+  customerNumberValue.disabled = true;
+  existingCustomerNameContainer.style.visibility = 'hidden';
+  customerPriceList.value = await ipcRenderer.invoke('get-pricelist-number', e.target.id);
+  priceListLoading.style.display = 'none';
+
+  createBtnNew.disabled = false;
+  pauseBtnNew.disabled = false;
+
+  /* REMOVE EVENT LISTENERS FROM CUSTOMER NUMBER AND NAME */
+  customerName.removeEventListener('keyup', filterNames);
+  customerName.removeEventListener('keyup', enterEvent);
+
+  customerNumberValue.removeEventListener('keyup', paddingAddPriceListNum);
+}
+
+/* ADD EXISTING LISTENERS TO PAUSED LIST ITEMS */
+function addExistingListListeners() {
+  /* CLICK EVENTS ON CUSTOMER NUMBER SEARCH BOX */
+  existingCustomerListArr = Array.from(existingCustomerList.children);
+  // CLICK EVENT ON CUSTOMER LIST ITEM
+  existingCustomerListArr.forEach((el) => {
+    el.addEventListener('click', existingEvent);
+  });
+}
+
+/* POPULATE EXISTING NAME LIST */
+function populateExistingList() {
+  let customerNames = Object.keys(customerNameNumberJson);
+  existingCustomerList.innerHTML = '';
+  customerNames.forEach((el) => {
+    let html = `
+      <div class="cusnum-existing" id="${customerNameNumberJson[el]}">${el}</div>
+      `;
+    existingCustomerList.insertAdjacentHTML('beforeend', html);
+  });
+  addExistingListListeners();
+}
+
+/* CLOSE CUSTOMER DOCK */
+function closeCustomerDock() {
+  ipcRenderer.send('close-window-dock', null);
+}
+
+/* ADD PADDING TO SHORT CUSTOMER */
+function paddingAddPriceListNum(e) {
+  if (e.target.value.length > 0) {
+    let pattern = /\w+|\s+/g;
+    let match = e.target.value.match(pattern).join('');
+    let value = match.toUpperCase().replace(' ', '');
+
+    let newValue;
+    // let value = e.target.value;
+    if (value.length < 6) {
+      customerNumberSubmitForm.click();
+      newValue = value.padEnd(6, ' ');
+      customerPriceList.value = newValue;
+    } else if (value.length === 7) {
+      newValue = value.slice(0, 6);
+      customerPriceList.value = newValue;
+    } else {
+      customerPriceList.value = value;
+    }
+  }
 }
 
 /* REMOVE ITEMS IN THE LIST THAT DOES NOT MATCH SEARCH */
 customerSearch.addEventListener('keyup', (e) => {
   // USE REGEX TO REMOVE ANY UNWANTED CHAR
-  let pattern = /\w+|\s+/g,
-    matchStop = /[.]/g;
+  let matchStop = /[.]/g;
   customerSearch.value = customerSearch.value.replace(matchStop, '');
 
-  if (customerSearch.value) {
-    let match = customerSearch.value.match(pattern).join('');
-    pricelistNumber = match.toUpperCase().replace(' ', '');
-
-    /* REGEX TO FIX SYNTAX OF CUSTOMER NUMBER TO PRICELISTNUMBER */
-    pricelistNumber = paddingAddPricelistNum(pricelistNumber);
-  }
-
   // REHIDE THE UPDATE BUTTON AND RESUME IF SEARCH CHANGES
-  if (target && customerSearch.value.length < 6) {
+  if (customerSearch.value.length < 6) {
     // REMOVE ANY MOUSE CLICKED ITEMS
-    clearList();
-    // SHOW THE DISABLED BUTTON AND HIDE OTHERS
-    checkUpdateBtn.style.display = 'none';
-    checkCopyBtn.style.display = 'none';
-    checkResumeEditingBtn.style.display = 'none';
-    disabledBtn.style.display = 'flex';
+    clearList(true);
+    resetButtonsStart();
     target = null;
-
-    /* UNCHECK COPY */
-    copyCheckbox.checked = false;
-    tickBox.style.border = '2px solid var(--sec-blue)';
-    tickCheckMark.style.animation = 'none';
-    copyContainer.style.opacity = '0';
-  } else if (
-    customerSearch.value.length < 6 &&
-    !Object.keys(localStorage).includes(customerSearch.value)
-  ) {
-    checkContinueBtn.style.display = 'none';
-    checkUpdateBtn.style.display = 'none';
-    checkResumeEditingBtn.style.display = 'none';
-    disabledBtn.style.display = 'flex';
   }
+
   // SORTING CODE
-  numbers.forEach((el) => {
+  customerNumbersSearchList.forEach((el) => {
     // CHECK TO SEE IF THE ELEMENT CONTAINS THE SEARCH VALUE
     let hasMatch = el.innerText.includes(customerSearch.value.toUpperCase());
-    el.style.display = hasMatch ? 'block' : 'none';
-    // COUNT THE DISPLAY NONE ATTRIBUTES AND DISPLAY THE APPROPRIATE BUTTON
-    let count = 0;
-
-    numbers.forEach((el) => {
-      if (window.getComputedStyle(el).display === 'none') {
-        count += 1;
-      }
-      if (count === numbers.length) {
-        if (
-          // MAKE SURE CONTINUE BUTT0N IS INACTIVE / SEARCH VALUE LENGTH IS 6
-          // AND THE SEARCH VALUE ISNT IN THE CURRENT CUSTOMER PRICELISTS
-          window.getComputedStyle(checkContinueBtn).display === 'none' &&
-          customerSearch.value.length >= 6 &&
-          !customerNumber.includes(customerSearch.value.toUpperCase())
-        ) {
-          // DISPLAY CONTINUE BUTTON
-          jsonFile = dataObjects['template-pricelist'];
-          checkContinueBtn.style.display = 'flex';
-          disabledBtn.style.display = 'none';
-          checkUpdateBtn.style.display = 'none';
-          checkResumeEditingBtn.style.display = 'none';
-          copyContainer.style.opacity = '0';
-          checkCopyBtn.style.display = 'none';
-        } else if (
-          // DISABLE THE CONTINUE BUTTON IF THE SEARCH VALUE IS LESS 6
-          window.getComputedStyle(checkContinueBtn).display === 'flex' &&
-          customerSearch.value.length < 6
-        ) {
-          // SHOW DISABLED BUTTON
-          checkContinueBtn.style.display = 'none';
-          disabledBtn.style.display = 'flex';
-          checkUpdateBtn.style.display = 'none';
-          checkResumeEditingBtn.style.display = 'none';
-          copyContainer.style.opacity = '0';
-          checkCopyBtn.style.display = 'none';
-        } else if (
-          !localStorage.getItem(customerSearch.value.toUpperCase()) &&
-          !customerNumber.includes(customerSearch.value.toUpperCase())
-        ) {
-          // DISPLAY TICK IF THE SEARCH  VALUE IS CORRECT PATTERN AND LENGTH 6
-          customerNumberList.style.backgroundImage = `url('${dir}/renderer/icons/tick.png')`;
-          searchValue = customerSearch.value.toUpperCase();
-        }
-      } else {
-        // REMOVE IMAGE IF UNACCEPTABLE
-        customerNumberList.style.backgroundImage = 'none';
-      }
-    });
+    el.style.display = hasMatch ? 'flex' : 'none';
   });
 });
 
-/* SEARCH BOX BUTTON EVENTS */
-/////////////////////////////
-
-/* CONTINUE BUTTON */
-checkContinueBtn.addEventListener('click', (e) => {
+/* RESET BUTTON */
+checkResetBtn.addEventListener('click', (e) => {
   soundClick.play();
-
-  /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
-  searchValue = customerSearch.value.toUpperCase();
-
-  // POPULATE HTML TABLE
-  htmlContent = tablePopulate(jsonFile);
-  htmlInnerFill(searchValue, htmlContent);
-  // HIDE SEARCH BOX
-  checkCustomer.style.visibility = 'hidden';
-  checkCustomer.style.opacity = '0';
-  customerNumberValue.value = searchValue;
-  customerPriceList.value = pricelistNumber;
-  customerPriceList.disabled = true;
-
-  if (customerNumberName[searchValue]) {
-    customerName.innerText = customerNumberName[searchValue];
-    customerName.contentEditable = false;
-  } else {
-    customerName.innerText = null;
-  }
-  // ADD BACKGROUND TO HTML ELEMENT
-  setTimeout(() => {
-    html.style.backgroundColor = '#fff';
-  }, 300);
-
-  if (secWindow.getChildWindows().length > 0) {
-    secWindow.getChildWindows()[0].close();
-    setTimeout(() => {
-      hider.style.display = 'flex';
-      secWindow.maximize();
-      secWindow.setMinimumSize(950, 700);
-    }, 300);
-    searchValue;
-  }
-  setTimeout(() => {
-    hider.style.display = 'flex';
-    secWindow.maximize();
-    secWindow.setMinimumSize(950, 700);
-  }, 300);
-
-  /* ACTIVATE EXMILL BUTTON */
-  activateExmillBtn();
-
-  /* SHOW INFO POPUP FOR EXMILL */
-  setTimeout(() => {
-    soundPop.play();
-    exmillInfoPop.show();
-    exmillInfoYes.addEventListener('click', (e) => {
-      soundPop.play();
-      exmillInfoPop.close();
-    });
-  }, 2000);
+  customerSearch.value = '';
+  populateList();
 });
 
 /* UPDATE BUTTON */
 checkUpdateBtn.addEventListener('click', (e) => {
   soundClick.play();
-  tablePageCreate(true);
+  closeCustomerDock();
+  tablePageCreate(true, 'update');
 });
 
 /* RESUME BUTTON */
 checkResumeEditingBtn.addEventListener('click', (e) => {
   soundClick.play();
-
-  /* SET THE SEARCH VALUE TO CUSTOMER SEARCH VALUE UPPERCASE*/
-  searchValue = customerSearch.value.toUpperCase();
-
-  // let localStorageObject = JSON.parse(localStorage.getItem(searchValue));
-  /* GET OBJECT FROM LOCAL STORAGE */
-  let localStorageObject = JSON.parse(localStorage.getItem(searchValue));
-  /* SET JSONfILE */
-  jsonFile = localStorageObject[searchValue];
-  console.log(jsonFile);
-  // POPULATE HTML TABLE
-  htmlContent = tablePopulate(localStorageObject[searchValue]);
-  htmlInnerFill(searchValue, htmlContent);
-
-  // HIDE SEARCH BOX
-  checkCustomer.style.visibility = 'hidden';
-  checkCustomer.style.opacity = '0';
-  // FILL TABLE INFO
-  customerNumberValue.value = searchValue;
-  customerNumberValue.disabled = true;
-  customerName.innerText = customerNumberName[searchValue]
-    ? customerNumberName[searchValue]
-    : localStorageObject['HEADER']['customerName'];
-  customerName.contentEditable = false;
-  /* LOOK TO SEE IF PRICELIST ONFILE */
-  customerPriceList.value = customerPricelistNumber[searchValue]
-    ? customerPricelistNumber[searchValue]
-    : searchValue;
-  customerPriceList.disabled = true;
-  ccaPrice.value = localStorageObject[searchValue]['CCA'];
-
-  // ADD BACKGROUND TO HTML ELEMENT
-  setTimeout(() => {
-    html.style.backgroundColor = '#fff';
-  }, 300);
-
-  if (secWindow.getChildWindows().length > 0) {
-    secWindow.getChildWindows()[0].close();
-    setTimeout(() => {
-      hider.style.display = 'flex';
-      secWindow.maximize();
-      secWindow.setMinimumSize(950, 700);
-    }, 300);
-  }
-  setTimeout(() => {
-    hider.style.display = 'flex';
-    secWindow.maximize();
-    secWindow.setMinimumSize(950, 700);
-  }, 300);
-
-  /* ACTIVATE EXMILL BUTTON */
-  activateExmillBtn();
+  closeCustomerDock();
+  tablePageCreate(true, 'pause');
 });
 
 /* CANCEL BUTTON */
-checkCancelbtn.addEventListener('click', () => {
+checkCancelBtn.addEventListener('click', () => {
   soundClick.play();
 
   /* CLOSE DOCK IF OPEN */
@@ -1389,122 +1709,74 @@ checkCancelbtn.addEventListener('click', () => {
   }
   /* FADE OUT WINDOW */
   checkCustomer.style.opacity = '0';
-
   /* SHOW MAIN WINDOW */
   setTimeout(() => {
     ipcRenderer.send('show-home', null);
   }, 650);
 });
 
-/* CUSTOMER FIND DOCK BUTTON */
+/* VIEW PAUSED BUTTON */
+viewPauseBtn.addEventListener('click', (e) => {
+  soundClick.play();
+  closeCustomerDock();
+  showLoading();
+  showPausedItems();
+});
 
+/* CUSTOMER FIND DOCK BUTTON */
 customerFindBtn.addEventListener('click', (e) => {
   soundClick.play();
-
-  // Get window posiiton to send to main process
+  // Get window position to send to main process
   let dimensions = secWindow.getPosition(),
+    size = secWindow.getSize(),
     message = {
-      emit: 'startPage',
       dimensions,
-      type: 'toolbar',
+      size,
     };
 
   if (secWindow.getChildWindows().length > 0) {
-    ipcRenderer.send('close-window-dock', null);
-    setTimeout(() => {
-      secWindow.getChildWindows()[0].close();
-      customerSearch.focus();
-    }, 500);
+    closeCustomerDock();
+    customerSearch.focus();
   } else {
     ipcRenderer.send('position', message);
   }
 });
-
-/* NEVER SHOW AGAIN BUTTON */
-neverShowAgainBtn.forEach((el) => {
-  el.addEventListener('click', (e) => {
-    soundPop.play();
-    let pnode = e.target.parentNode.id;
-    if (pnode === 'copy-popup') {
-      let storage = JSON.parse(localStorage.getItem('notifications'));
-      storage.copy = false;
-      localStorage.setItem('notifications', JSON.stringify(storage));
-      copyPop.close();
-    }
-    if (pnode === 'lockbutton-popup') {
-      let storage = JSON.parse(localStorage.getItem('notifications'));
-      storage.lockbutton = false;
-      localStorage.setItem('notifications', JSON.stringify(storage));
-      lockbuttonPop.close();
-    }
-    if (pnode === 'CCA-popup') {
-      let storage = JSON.parse(localStorage.getItem('notifications'));
-      storage.autocca = false;
-      localStorage.setItem('notifications', JSON.stringify(storage));
-      CCAPop.close();
-    }
-    if (pnode === 'calculatebutton-popup') {
-      let storage = JSON.parse(localStorage.getItem('notifications'));
-      storage.calculate = false;
-      localStorage.setItem('notifications', JSON.stringify(storage));
-      calculateButtonPop.close();
-    }
-    if (pnode === 'roundall-popup') {
-      let storage = JSON.parse(localStorage.getItem('notifications'));
-      storage.roundall = false;
-      localStorage.setItem('notifications', JSON.stringify(storage));
-      roundAllPop.close();
-    }
-  });
+/* MAIN PAGE EVENTS */
+/////////////////////
+closeAppBtnCustomer.addEventListener('click', (e) => {
+  soundClick.play();
+  setTimeout(() => {
+    ipcRenderer.send('close-app', null);
+  }, 300);
 });
 
-/* COPY NOTIFICATION */
-let copyPop = document.getElementById('copy-popup'),
-  copyPopYes = document.getElementById('copy-yes');
-function notificationBubbleCopy() {
-  /* READ IN THE LOCAL STORAGE OBJECT AND CHECK FLAG */
-  let notObject = JSON.parse(localStorage.getItem('notifications'));
-  if (notObject.copy) {
-    soundPop.play();
-    copyPop.show();
-    copyPopYes.addEventListener('click', (e) => {
-      soundPop.play();
-      copyPop.close();
-    });
-  }
-}
-
-/* COPY CHECKBOX EVENTS */
-copyCheckbox.addEventListener('change', (e) => {
-  if (checkUpdateBtn.style.display === 'flex') {
-    soundClick.play();
-    if (e.target.checked) {
-      notificationBubbleCopy();
-      tickBox.style.border = '2px solid var(--main)';
-      tickCheckMark.style.animation = 'check 0.2s linear forwards';
-      setTimeout(() => {
-        checkUpdateBtn.style.display = 'none';
-        checkCopyBtn.style.display = 'flex';
-      }, 200);
-    }
-  } else if (checkCopyBtn.style.display === 'flex') {
-    soundClick.play();
-    tickBox.style.border = '2px solid var(--sec-blue)';
-    tickCheckMark.style.animation = 'none';
-    setTimeout(() => {
-      checkUpdateBtn.style.display = 'flex';
-      checkCopyBtn.style.display = 'none';
-    }, 200);
-  }
+/* MAIN PAGE EVENTS */
+/////////////////////
+closeAppBtnTable.addEventListener('click', (e) => {
+  soundClick.play();
+  setTimeout(() => {
+    ipcRenderer.send('close-app', null);
+  }, 300);
 });
 
 /* COPY BUTTON EVENTS */
 checkCopyBtn.addEventListener('click', (e) => {
   soundClick.play();
-  tablePageCreate(false);
-  progressFade.style.visibility = 'visible';
-  progressFade.style.backdropFilter = 'blur(3px)';
-  ipcRenderer.send('open-copySelection', 'open');
+  setTimeout(() => {
+    /* GET THE CUSTOMER PRICE LIST WITHOUT THE NAME/ CUSTOMER NUMBER & PRICE LIST NUMBER */
+    let customerObj = {
+      jsonFile,
+      customerNumber: null,
+      customerBackUpJson: null,
+      customerNameValue: null,
+      priceListNumber: null,
+    };
+
+    closeCustomerDock();
+    // secWindow.minimize();
+    ipcRenderer.send('open-copy-selection', customerObj);
+    secWindow.close();
+  }, 300);
 });
 
 /////////////////////////////
@@ -1530,52 +1802,21 @@ maxWindow[0].addEventListener('click', (e) => {
 minimizeCheckBtn.addEventListener('click', () => {
   soundClick.play();
   setTimeout(() => {
-    secWindow.minimize();
+    ipcRenderer.send('minimize', null);
   }, 300);
 });
 
 minimizeTableBtn.addEventListener('click', () => {
   soundClick.play();
   setTimeout(() => {
-    secWindow.minimize();
+    ipcRenderer.send('minimize', null);
   }, 500);
 });
 
-/* PAUSE BUTTON FLAG FUNCTION */
-function checkLocalStorage() {
-  let localStorageKeys = Object.keys(localStorage),
-    storageArr = [];
-  localStorageKeys.forEach((el) => {
-    if (el !== 'notifications' && el !== 'failedEmail') {
-      storageArr.push(el);
-    }
-  });
-
-  if (storageArr.length > 0) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
 /* CHANGE OPACITY AFTER LOAD */
 secWindow.webContents.on('did-finish-load', () => {
-  setTimeout(() => {
-    checkCustomer.style.opacity = '1';
-    if (checkLocalStorage()) {
-      setTimeout(() => {
-        viewPauseBtn.style.animation = 'pop 0.3s linear forwards 1';
-        soundPop.play();
-        viewPauseBtn.addEventListener('click', (e) => {
-          clearList();
-          soundClick.play();
-          setTimeout(() => {
-            showPausedItems();
-          }, 300);
-        });
-      }, 1000);
-    }
-  }, 300);
+  // clearList(true);
+  checkCustomer.style.opacity = '1';
 });
 
 //////////////////////////////////
@@ -1731,77 +1972,33 @@ sliderAll.addEventListener('input', (e) => {
   slider76228.value = e.target.value;
 });
 
-let roundAllPop = document.getElementById('roundall-popup'),
-  roundAllPopYes = document.getElementById('roundall-yes');
-
-/* CALCULATE NOTIFICATION */
-function notificationBubbleRoundall() {
-  notObject = JSON.parse(localStorage.getItem('notifications'));
-  if (notObject.roundall) {
-    soundPop.play();
-    roundAllPop.show();
-    roundAllPopYes.addEventListener('click', (e) => {
-      soundPop.play();
-      roundAllPop.close();
-    });
-  }
-}
-
 /* ROUNDALL CHECKBOX EVENTS */
 roundAllCheckbox.addEventListener('change', (e) => {
   soundClick.play();
   if (e.target.checked) {
-    notificationBubbleRoundall();
     roundAllBox.style.border = '2px solid var(--main)';
     roundAllCheckMark.style.animation = 'check 0.2s linear forwards';
   } else {
     soundClick.play();
-    roundAllBox.style.border = '2px solid var(--sec-blue)';
+    roundAllBox.style.border = '2px solid var(--main)';
     roundAllCheckMark.style.animation = 'none';
   }
 });
-
-/* CALCULATE NOTIFICATION */
-let calculateButtonPop = document.getElementById('calculatebutton-popup'),
-  calculateButtonPopYes = document.getElementById('calculatebutton-yes'),
-  calculateButtonPopNo = document.getElementById('calculatebutton-no');
-function notificationBubbleCalculate() {
-  notObject = JSON.parse(localStorage.getItem('notifications'));
-  if (notObject.calculate) {
-    soundPop.play();
-    calculateButtonPop.show();
-    calculateButtonPopYes.addEventListener('click', (e) => {
-      soundPop.play();
-      calculateButtonPop.close();
-      calculateButtonPress();
-    });
-    calculateButtonPopNo.addEventListener('click', (e) => {
-      soundPop.play();
-      calculateButtonPop.close();
-    });
-  } else if (!notObject.calculate) {
-    calculateButtonPress();
-  }
-}
 
 function calculateButtonPress() {
   /* PRESS CCA BUTTON FUNCTION */
   CCAAutoSwitch();
   /* SHOW PERCENTAGE CALCULATOR*/
-  setTimeout(() => {
-    progressFade.style.visibility = 'visible';
-    progressFade.style.backdropFilter = 'blur(3px)';
-    if (secWindow.getSize()[0] >= 1280) {
-      percentageContainer.style.transform = 'scale(1)';
-    } else {
-      percentageContainer.style.transform = 'scale(0.8)';
-    }
-  }, 300);
+  blurTable();
+  percentageContainer.style.transform = 'scale(1)';
 }
 
 /* CALCULATE BUTTON */
 calculateBtn.addEventListener('click', (e) => {
-  notificationBubbleCalculate();
+  soundClick.play();
+  setTimeout(() => {
+    calculateButtonPress();
+  }, 300);
 });
 
 /* FUNCTION FOR PERCENTAGE CALC */
@@ -1919,7 +2116,7 @@ function resetSlider() {
 
 /* RESET ROUNDALL CHECKBOX */
 function resetRoundAllCheckbox() {
-  roundAllBox.style.border = '2px solid var(--sec-blue)';
+  roundAllBox.style.border = '2px solid var(--main)';
   roundAllCheckMark.style.animation = 'none';
   roundAllCheckbox.checked = false;
 }
@@ -1958,130 +2155,46 @@ applyCancelBtn.addEventListener('click', (e) => {
 /*IPC LISTENERS*/
 ////////////////
 
-/* REMOVE FADE */
-ipcRenderer.on('remove-fade', (e, message) => {
-  if (message) {
-    progressFade.style.visibility = 'hidden';
-    progressFade.style.backdropFilter = 'none';
-    /* ACTIVATE EVENTLISTENER FOR CUSTOMER NUMBER ENTRY */
-    checkExistingCustomer();
-    customerName.focus();
-  } else {
-    progressFade.style.visibility = 'hidden';
-    progressFade.style.backdropFilter = 'none';
-  }
-});
-
 /* RECEIVE THE DATABASE OBJECTS THAT WERE DOWNLOADED */
 ipcRenderer.once('database-object', (e, message) => {
-  customerPrices = message.customerPrices;
-  customerPricelistNumber = message.customerPricelistNumber;
-  customerNumberName = message.customerNumberName;
-  customerNameNumber = message.customerNameNumber;
-  customerBackUp = message.customerBackUp;
-  exmillPrice = customerPrices['@EXMILL'];
+  customerNumberAllKeys = message.customerNumberAllKeys;
+  customerNameNumberJson = message.customerNameNumberJson;
+  customerNumberNameJson = message.customerNumberNameJson;
+
+  exmillPrice = message.exmillPrice;
   populateList();
 });
 
 /* COMMUNICATION FOR CUSTOMER DOCK */
 ipcRenderer.on('dock-sec', (event, message) => {
-  let child = secWindow.getChildWindows()[0];
-
-  /* RESET CHECKBOX */
-  copyCheckbox.checked = false;
-  tickBox.style.border = '2px solid var(--sec-blue)';
-  tickCheckMark.style.animation = 'none';
+  showLoading(true);
 
   /* FILL SEARCH BOX WITH CUSTOMER NUMBER */
   customerSearch.value = message;
-  /* SET CUSTOMER NUMBER GLOBAL VARIABLE */
-  searchValue = message;
+  customerSearch.dispatchEvent(new Event('keyup'));
 
-  /* GET THE PRICELIST FROM HE DATABASE */
-  jsonFile = customerPrices[message];
+  /* GET THE PRICELIST FROM THE DATABASE */
+  getPriceList(message);
 
-  child.blur();
   secWindow.focus();
   customerSearch.focus();
-  if (Object.keys(customerPrices).includes(message)) {
-    /* SEND THE NUMBER TO THE CUSTOMER SEARCH MAKE THE ITEM CLICKED AND SHOW UPDATE BUTTON */
-    let item = document.getElementById(message);
-    item.setAttribute('class', 'cusnum-clicked');
-    checkUpdateBtn.style.display = 'flex';
-    disabledBtn.style.display = 'none';
-    checkContinueBtn.style.display = 'none';
-    copyContainer.style.opacity = '1';
-    /* KEYUP EVENT TO FORCE SORT ALGORITHM  */
-    customerSearch.dispatchEvent(new Event('keyup'));
-    /* DISPLAY THE ITEM AS CLICKED */
-    item.style.display = 'block';
-  } else {
-    customerSearch.dispatchEvent(new Event('keyup'));
-    customerSearch.dispatchEvent(new Event('keyup'));
-  }
-});
 
-/* //// LOCAL oBJECTS //// */
-/* customerPrices:         */
-/* customerPricelistNumber */
-/* customerNumberName      */
-/* customerBackUp          */
-/* /////////////////////// */
+  /* SEND THE NUMBER TO THE CUSTOMER SEARCH MAKE THE ITEM CLICKED AND SHOW UPDATE BUTTON */
+  let item = document.getElementById(message);
+  item.setAttribute('class', 'cusnum-clicked');
+
+  /* KEYUP EVENT TO FORCE SORT ALGORITHM  */
+  customerSearch.dispatchEvent(new Event('keyup'));
+  /* DISPLAY THE ITEM AS CLICKED */
+  item.style.display = 'flex';
+});
 
 /* COMMUNICATION FOR PROGRESS WINDOW END */
 ipcRenderer.on('progress-end', (event, message) => {
-  /* SET SEARCH VALUE TO SEARCH CUSTOMER UPPERCASE */
-  searchValue = customerSearch.value.toUpperCase();
-  cusNum = customerNumberValue.value.toUpperCase();
-
-  /* CREATE THE DATE OBJECT TO INSERT IN CUSTOMER BACKUPS */
-  let dateJsonFile = {};
-  if (jsonFile[0].length > 3) {
-    if (customerBackUp[cusNum]) {
-      dateJsonFile = jsonFile;
-      customerBackUp[cusNum][dateString] = dateJsonFile;
-    } else {
-      dateJsonFile[dateString] = jsonFile;
-      customerBackUp[cusNum] = dateJsonFile;
-    }
-  } else {
-    dateJsonFile[dateString] = customerData[cusNum];
-    customerBackUp[cusNum] = dateJsonFile;
-  }
-
-  /* UPDATE ALL THE DATA OBJECTS AND SEND TO GET WRITTEN LOCALLY  */
-  customerPricelistNumber[cusNum] = customerPriceList.value;
-  customerNumberName[cusNum] = customerName.innerText;
-  customerPrices[cusNum] = customerData[cusNum];
-
-  /* ADD BACK THE _id FOR ONLINE UPDATE */
-  customerBackUp['_id'] = 'customerBackUp';
-  customerPricelistNumber['_id'] = 'customerPricelistNumber';
-  customerNumberName['_id'] = 'customerNumberName';
-  customerPrices['_id'] = 'customerPrices';
-
-  /* CREATE THE WRITE FILE OBJECT */
-  let databaseObj = {
-    customerBackUp,
-    customerPrices,
-    customerNumberName,
-    customerPricelistNumber,
-  };
-
-  /* UPDATE DB */
-  ipcRenderer.send('update-database', databaseObj);
-
-  /* REMOVE ITEM FROM LOCALSTORAGE */
-  localStorage.removeItem(cusNum);
-
   /* SEND MESSAGE WITH FILE PATHS TO MAIN TO OPEN EMAIL CHILDWINDOW */
-  /* ADD CUSTOMER NUMBER FOE EASIER FILENAME DESCRIPTION */
   let newMessage = {
-    name: customerName.innerText,
-    number: cusNum,
-    filePaths: message,
+    ...message,
   };
-
   /* CALL EMAIL POPUP */
   ipcRenderer.send('email-popup', newMessage);
 
@@ -2097,50 +2210,70 @@ ipcRenderer.on('reset-form', (e, message) => {
   resetForm();
 });
 
+ipcRenderer.on('edit-schedule-price-list', (e, message) => {
+  jsonFile = message.priceList;
+
+  priceListNumber = message.priceListNumber;
+  searchValue = message.customerNumber;
+  delete jsonFile['priceListNumber'];
+  delete jsonFile['customerNumber'];
+
+  customerNameValue = message.customerNameValue;
+  customerBackUpJson = message.customerBackUpJson;
+  OldScheduleDate = message.OldScheduleDate;
+  tablePageCreate(true, 'edit');
+});
+
+ipcRenderer.on('copy-price-list', (e, message) => {
+  jsonFile = message.jsonFile;
+
+  priceListNumber = message.priceListNumber;
+  searchValue = message.customerNumber;
+
+  customerNameValue = message.customerNameValue;
+  customerBackUpJson = message.customerBackUpJson;
+  OldScheduleDate = message.OldScheduleDate;
+  tablePageCreate(true, 'update');
+});
+
+ipcRenderer.on('new-price-list', (e, message) => {
+  populateExistingList();
+  jsonFile = message.jsonFile;
+
+  priceListNumber = message.priceListNumber;
+  searchValue = message.customerNumber;
+
+  customerNameValue = message.customerNameValue;
+  customerBackUpJson = message.customerBackUpJson;
+  OldScheduleDate = message.OldScheduleDate;
+  tablePageCreate(false, 'new');
+});
+
 /* CONNECTION MONITORING */
-window.addEventListener('offline', (e) => {
-  new Notification('P2SYS OFFLINE', {
-    icon: `${dir}/renderer/icons/error.png`,
-    body: 'There is no available internet connection.',
-    requireInteraction: true,
-  });
-  createBtn.setAttribute('class', 'create-btn-disabled');
-  createBtn.disabled = true;
-});
-
-/* CHECK IF THERE IS AN INTERNET CONNECTION  */
-setTimeout(() => {
-  if (!window.navigator.onLine) {
-    createBtn.setAttribute('class', 'create-btn-disabled');
-    createBtn.disabled = true;
-  }
-}, 2000);
-
-/* MESSAGE FROM DB ON LOSS OF CONNECTION */
-ipcRenderer.on('reconnected', (e, message) => {
-  createBtn.setAttribute('class', 'create-btn');
-  createBtn.disabled = false;
-});
-
-/* ENTER NAME AND NUMBER FROM CUSTOMER DATABASE DURING COPY  */
-ipcRenderer.on('form-contents', (e, message) => {
-  cusNum;
-  customerName.innerText = message.customerName;
-  customerName.contentEditable = false;
-  /* SAFETY TO MAKE SURE THERE ARE NO VALUES LESS THAN 6 DUE TO DATABASE ISSUES */
-  if (message.customerNumber.length < 6) {
-    cusNum = message.customerNumber.padEnd(6, ' ');
-    customerNumberValue.value = cusNum;
-    customerNumberValue.disabled = true;
-    customerNumberName[customerName] = cusNum;
-    customerPriceList.value = customerPricelistNumber[message.customerNumber];
-    pricelistNumber = cusNum;
+function showOnlineWarning() {
+  if (window.getComputedStyle(checkCustomer).visibility === 'visible') {
+    progressFade.style.visibility = 'visible';
+    progressFade.style.backdropFilter = 'blur(2px)';
+    onlineWarningCustomer.style.visibility = 'visible';
+    closeCustomerDock();
   } else {
-    /* STANDARD ROUTE TO FILL ENTRIES */
-    customerNumberValue.value = message.customerNumber;
-    customerNumberValue.dispatchEvent(new Event('keyup'));
-    customerNumberValue.disabled = true;
-    customerPriceList.value = customerPricelistNumber[message.customerNumber];
-    pricelistNumber = customerPricelistNumber[message.customerNumber];
+    percentageContainer.style.transform = 'scale(0)';
+    progressFade.style.visibility = 'visible';
+    progressFade.style.backdropFilter = 'blur(2px)';
+    onlineWarningTable.style.visibility = 'visible';
   }
+}
+
+function hideOnlineWarning() {
+  progressFade.style.visibility = 'hidden';
+  progressFade.style.backdropFilter = 'none';
+  onlineWarningCustomer.style.visibility = 'hidden';
+  onlineWarningTable.style.visibility = 'hidden';
+}
+
+ipcRenderer.on('connection-lost', (e) => {
+  showOnlineWarning();
+});
+ipcRenderer.on('connection-found', (e) => {
+  hideOnlineWarning();
 });

@@ -1,6 +1,6 @@
 {
-  "name": "P2Sys-Converter",
-  "version": "1.1.1",
+  "name": "P2Sys-Manager",
+  "version": "2.0.4",
   "description": "Price-List conversion program",
   "main": "main.js",
   "scripts": {
@@ -13,33 +13,33 @@
   "author": "JDevSoftware",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^9.1.0",
-    "nodemon": "^2.0.4"
+    "electron": "^11.2.3",
+    "nodemon": "^2.0.7"
   },
   "dependencies": {
+    "archiver": "^5.3.0",
+    "bcrypt": "^5.0.1",
     "dotenv": "^8.2.0",
-    "electron-log": "^4.2.4",
-    "electron-updater": "^4.3.4",
-    "mongoose": "^5.9.27",
-    "nodemailer": "^6.4.11",
-    "python-shell": "^2.0.1"
+    "electron-log": "^4.3.1",
+    "electron-updater": "^4.3.8",
+    "mongoose": "^5.11.16",
+    "nodemailer": "^6.4.18",
+    "python-shell": "^2.0.3"
   },
+  "homepage": "https://github.com/EspressoTrip-v2/P2Sys-Manager-Release",
   "repository": {
-    "type": "bintray",
-    "url": "https://bintray.com/espressotrip-v2/JDevSoftware/"
+    "type": "github",
+    "url": "https://github.com/EspressoTrip-v2/P2Sys-Manager-Release"
   },
   "build": {
-    "appId": "com.JDevSoftware.P2Sys-Converter",
-    "productName": "P2Sys-Converter",
-    "copyright": "Copyright © 2020 P2Sys-Converter",
+    "appId": "com.JDevSoftware.P2Sys-Manager",
+    "productName": "P2Sys-Manager",
+    "copyright": "Copyright © 2021 P2Sys-Manager",
     "publish": {
-      "provider": "bintray",
-      "package": "P2Sys-Converter",
-      "owner": "espressotrip-v2",
-      "repo": "JDevSoftware",
-      "url": "https://bintray.com/espressotrip-v2/JDevSoftware/"
+      "provider": "github",
+      "owner": "EspressoTrip-v2",
+      "package": "P2Sys-Manager-Release"
     },
-    "electronUpdaterCompatibility": ">= 2.16",
     "files": [
       "!python**/*",
       "!private**/*",
@@ -53,6 +53,9 @@
       "build/release-notes.md"
     ],
     "win": {
+      "publish": [
+        "github"
+      ],
       "publisherName": "JDevSoftware",
       "verifyUpdateCodeSignature": false,
       "certificateFile": "private/JDevSoftware.pfx",
@@ -68,8 +71,8 @@
       ]
     },
     "nsis": {
-      "shortcutName": "Converter",
-      "deleteAppDataOnUninstall": true,
+      "shortcutName": "Manager",
+      "deleteAppDataOnUninstall": false,
       "perMachine": true,
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,

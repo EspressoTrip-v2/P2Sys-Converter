@@ -1,22 +1,9 @@
 /* GET WORKING DIRECTORY */
 let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
 if (!process.env.NODE_ENV) {
-  envFileChange();
+  dir = `${process.cwd()}\\resources\\app.asar`;
 } else {
   dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
 }
 
 /* MODULES */
@@ -64,34 +51,25 @@ exports.tablePopulate = (jsonfile) => {
       </td>
       
       <td>
-      <input type="text" id="DR${el}" class="DR" value="${
-      row[1]
-    }" style="border: none;" disabled/>
+      <input type="text" id="DR${el}" class="DR" value="${row[1]}" style="border: none;" disabled/>
       </td>
       
      
       
       <td>
-      <form action="javascript:null;"><input pattern=${pattern} id="ER${el}"  title="${title}" class="table-entries" type="text" value="${
-      row[2]
-    }" disabled/>
+      <form action="javascript:null;"><input pattern=${pattern} id="ER${el}"  title="${title}" class="table-entries" type="text" value="${row[2]}" disabled/>
       <input type="submit" id="SER${el}" style="display:none;" />
       </form>
       </td>
       
           
-      <td><div id="CU${el}" class="CU" data-label=""><input id="USER${el}" class="price-entries-untreated" type="number" value="${
-      row[3] ? row[3] : ''
-    }" placeholder="- - - - - - - - -"/></div></td>
+      <td><div id="CU${el}" class="CU" data-label=""><input id="USER${el}" class="price-entries-untreated" type="number" value="${row[3]}" placeholder="- - - - - - - - -"/></div></td>
     
     
-      <td><div id="CT${el}" class="CT" data-label=""><input id="TSER${el}" class="price-entries-treated" type="number" value="${
-      row[4] ? row[4] : ''
-    }" placeholder="- - - - - - - - -"/></div></td>
+      <td><div id="CT${el}" class="CT" data-label=""><input id="TSER${el}" class="price-entries-treated" type="number" value="${row[4]}" placeholder="- - - - - - - - -"/></div></td>
     
     </tr>  
     `;
   });
-
   return { htmlColumns, htmlInner };
 };

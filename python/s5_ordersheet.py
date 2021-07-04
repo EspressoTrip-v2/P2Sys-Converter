@@ -1,4 +1,5 @@
 import collections as c
+import os
 import shutil
 import warnings
 from datetime import datetime
@@ -7,14 +8,27 @@ import numpy as np
 import pandas as pd
 import xlsxwriter
 
-time = str(datetime.now())[:10]
+time = datetime.now().strftime("%d-%m-%Y")
 
-warnings.filterwarnings("ignore", "This pattern has match grouserver_filepathps")
+workdir = os.getcwd()
+order_sheet_notice_image = f"{workdir}/python/templates/notice.png"
+order_sheet_official_image = f"{workdir}/python/templates/official.png"
+order_sheet_notice_summary_image = f"{workdir}/python/templates/notice_summary.png"
+order_sheet_official_summary_image = f"{workdir}/python/templates/official_summary.png"
+
+warnings.filterwarnings("ignore", "This pattern has match server_filepaths")
 warnings.filterwarnings("ignore", "divide by zero encountered in true_divide")
 warnings.filterwarnings("ignore", "invalid value encountered in multiply")
 
 
-def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_path):
+def create_s5_ordersheet(
+    directory,
+    customer_number,
+    customer_pricelist,
+    server_path,
+    schedule_date,
+    multi_zip_path,
+):
 
     # CREATE THE COLUMNS TO BE USED IN THE ORDERSHEET #
     ###################################################
@@ -212,6 +226,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
     desc_050 = ["(050 x 076)", "(050 x 114)", "(050 x 152)", "(050 x 228)"]
     desc_076 = ["(076 x 114)", "(076 x 152)", "(076 x 228)"]
     nan_row = ["", "", "", "", np.nan, np.nan, np.nan, np.nan]
+    # filter_row = ["", "", "", 0, np.nan, np.nan, np.nan, np.nan]
 
     # RESET THE INDEX
     customer_pricelist.reset_index(inplace=True)
@@ -254,7 +269,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
     ]
     _038T["ORDER QTY M3"] = np.nan
     _038T["AMOUNT R"] = np.nan
-    _038T = _038T[_038T["M3 TREATED"] > 0]
+    _038T = _038T[_038T["M3 TREATED"] >= 0]
 
     _038T.sort_values(by=["DESC"], inplace=True, axis=0)
     _038T["DESC"] = (
@@ -276,6 +291,30 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
             df2 = _038T.iloc[idx[-1] + 1 :, :].copy()
             _038T = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _038T_hidden_rows = []
+    _038T_hidden_rows_ind = []
+    _038T_empty_flag = False
+    for i in desc_038:
+        idx = list(_038T[_038T["DESC"].str.contains(i)].index)
+        if _038T.loc[idx, "M3 TREATED"].sum() == 0:
+            _038T_empty_flag = True
+            try:
+                if len(_038T_hidden_rows) == 0:
+                    _038T_hidden_rows = np.array(idx) + 4
+                    added_item = _038T_hidden_rows[-1] + 1
+                    _038T_hidden_rows = np.append(_038T_hidden_rows, added_item)
+                else:
+                    _038T_hidden_rows = np.append(_038T_hidden_rows, np.array(idx) + 4)
+                    added_item = _038T_hidden_rows[-1] + 1
+                    _038T_hidden_rows = np.append(_038T_hidden_rows, added_item)
+            except:
+                pass
+        else:
+            for num in idx:
+                if _038T.loc[num, "M3 TREATED"] == 0:
+                    _038T_hidden_rows_ind.append(num + 4)
 
     # ADD THE TREATED COLUMN NAMES
     _038T.columns = columnsT
@@ -299,7 +338,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
     ]
     _038U["ORDER QTY M3"] = np.nan
     _038U["AMOUNT R"] = np.nan
-    _038U = _038U[_038U["M3 UNTREATED"] > 0]
+    _038U = _038U[_038U["M3 UNTREATED"] >= 0]
     _038U.sort_values(by=["DESC"], inplace=True, axis=0)
 
     _038U.sort_values(by=["DESC"], inplace=True, axis=0)
@@ -322,6 +361,31 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
             df2 = _038U.iloc[idx[-1] + 1 :, :].copy()
             _038U = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _038U_hidden_rows = []
+    _038U_hidden_rows_ind = []
+    _038U_empty_flag = False
+    for i in desc_038:
+        idx = list(_038U[_038U["DESC"].str.contains(i)].index)
+        if _038U.loc[idx, "M3 UNTREATED"].sum() == 0:
+            _038U_empty_flag = True
+            try:
+                if len(_038U_hidden_rows) == 0:
+                    _038U_hidden_rows = np.array(idx) + 4
+                    added_item = _038U_hidden_rows[-1] + 1
+                    _038U_hidden_rows = np.append(_038U_hidden_rows, added_item)
+                else:
+                    _038U_hidden_rows = np.append(_038U_hidden_rows, np.array(idx) + 4)
+                    added_item = _038U_hidden_rows[-1] + 1
+                    _038U_hidden_rows = np.append(_038U_hidden_rows, added_item)
+            except:
+                pass
+        else:
+            for num in idx:
+                if _038U.loc[num, "M3 UNTREATED"] == 0:
+                    _038U_hidden_rows_ind.append((num + 4))
+
     # ADD UNTREATED COLUMN NAMES
     _038U.columns = columnsU
 
@@ -345,7 +409,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
     ]
     _050T["ORDER QTY M3"] = np.nan
     _050T["AMOUNT R"] = np.nan
-    _050T = _050T[_050T["M3 TREATED"] > 0]
+    _050T = _050T[_050T["M3 TREATED"] >= 0]
     _050T.sort_values(by=["DESC"], inplace=True, axis=0)
 
     _050T.sort_values(by=["DESC"], inplace=True, axis=0)
@@ -369,6 +433,31 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
             df2 = _050T.iloc[idx[-1] + 1 :, :].copy()
 
             _050T = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _050T_hidden_rows = []
+    _050T_hidden_rows_ind = []
+    _050T_empty_flag = False
+    for i in desc_050:
+        idx = list(_050T[_050T["DESC"].str.contains(i)].index)
+        if _050T.loc[idx, "M3 TREATED"].sum() == 0:
+            _050T_empty_flag = True
+            try:
+                if len(_050T_hidden_rows) == 0:
+                    _050T_hidden_rows = np.array(idx) + 4
+                    added_item = _050T_hidden_rows[-1] + 1
+                    _050T_hidden_rows = np.append(_050T_hidden_rows, added_item)
+                else:
+                    _050T_hidden_rows = np.append(_050T_hidden_rows, np.array(idx) + 4)
+                    added_item = _050T_hidden_rows[-1] + 1
+                    _050T_hidden_rows = np.append(_050T_hidden_rows, added_item)
+            except:
+                pass
+        else:
+            for num in idx:
+                if _050T.loc[num, "M3 TREATED"] == 0:
+                    _050T_hidden_rows_ind.append(num + 4)
+
     # ADD TREATED COLUMN NAMES
     _050T.columns = columnsT
 
@@ -391,7 +480,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
     ]
     _050U["ORDER QTY M3"] = np.nan
     _050U["AMOUNT R"] = np.nan
-    _050U = _050U[_050U["M3 UNTREATED"] > 0]
+    _050U = _050U[_050U["M3 UNTREATED"] >= 0]
     _050U.sort_values(by=["DESC"], inplace=True, axis=0)
 
     _050U.sort_values(by=["DESC"], inplace=True, axis=0)
@@ -415,6 +504,31 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
             df2 = _050U.iloc[idx[-1] + 1 :, :].copy()
             _050U = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _050U_hidden_rows = []
+    _050U_hidden_rows_ind = []
+    _050U_empty_flag = False
+    for i in desc_050:
+        idx = list(_050U[_050U["DESC"].str.contains(i)].index)
+        if _050U.loc[idx, "M3 UNTREATED"].sum() == 0:
+            _050U_empty_flag = True
+            try:
+                if len(_050U_hidden_rows) == 0:
+                    _050U_hidden_rows = np.array(idx) + 4
+                    added_item = _050U_hidden_rows[-1] + 1
+                    _050U_hidden_rows = np.append(_050U_hidden_rows, added_item)
+                else:
+                    _050U_hidden_rows = np.append(_050U_hidden_rows, np.array(idx) + 4)
+                    added_item = _050U_hidden_rows[-1] + 1
+                    _050U_hidden_rows = np.append(_050U_hidden_rows, added_item)
+            except:
+                pass
+        else:
+            for num in idx:
+                if _050U.loc[num, "M3 UNTREATED"] == 0:
+                    _050U_hidden_rows_ind.append(num + 4)
+
     # ADD UNTREATED COLUMN NAMES
     _050U.columns = columnsU
 
@@ -438,7 +552,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
     ]
     _076T["ORDER QTY M3"] = np.nan
     _076T["AMOUNT R"] = np.nan
-    _076T = _076T[_076T["M3 TREATED"] > 0]
+    _076T = _076T[_076T["M3 TREATED"] >= 0]
     _076T.sort_values(by=["DESC"], inplace=True, axis=0)
 
     _076T.sort_values(by=["DESC"], inplace=True, axis=0)
@@ -463,6 +577,31 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
             df2 = _076T.iloc[idx[-1] + 1 :, :].copy()
 
             _076T = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _076T_hidden_rows = []
+    _076T_hidden_rows_ind = []
+    _076T_empty_flag = False
+    for i in desc_076:
+        idx = list(_076T[_076T["DESC"].str.contains(i)].index)
+        if _076T.loc[idx, "M3 TREATED"].sum() == 0:
+            _076T_empty_flag = True
+            try:
+                if len(_076T_hidden_rows) == 0:
+                    _076T_hidden_rows = np.array(idx) + 4
+                    added_item = _076T_hidden_rows[-1] + 1
+                    _076T_hidden_rows = np.append(_076T_hidden_rows, added_item)
+                else:
+                    _076T_hidden_rows = np.append(_076T_hidden_rows, np.array(idx) + 4)
+                    added_item = _076T_hidden_rows[-1] + 1
+                    _076T_hidden_rows = np.append(_076T_hidden_rows, added_item)
+            except:
+                pass
+        else:
+            for num in idx:
+                if _076T.loc[num, "M3 TREATED"] == 0:
+                    _076T_hidden_rows_ind.append(num + 4)
+
     # ADD TREATED COLUMN NAMES
     _076T.columns = columnsT
 
@@ -485,7 +624,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
     ]
     _076U["ORDER QTY M3"] = np.nan
     _076U["AMOUNT R"] = np.nan
-    _076U = _076U[_076U["M3 UNTREATED"] > 0]
+    _076U = _076U[_076U["M3 UNTREATED"] >= 0]
     _076U.sort_values(by=["DESC"], inplace=True, axis=0)
 
     _076U.sort_values(by=["DESC"], inplace=True, axis=0)
@@ -510,16 +649,45 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
             df2 = _076U.iloc[idx[-1] + 1 :, :].copy()
 
             _076U = pd.concat([df1, df2])
+
+    # INSERT THE FILTER ROW IF ALL VALUES ARE ZERO
+    _076U_hidden_rows = []
+    _076U_hidden_rows_ind = []
+    _076U_empty_flag = False
+    for i in desc_076:
+        idx = list(_076U[_076U["DESC"].str.contains(i)].index)
+        if _076U.loc[idx, "M3 UNTREATED"].sum() == 0:
+            _076U_empty_flag = True
+            try:
+                if len(_076U_hidden_rows) == 0:
+                    _076U_hidden_rows = np.array(idx) + 4
+                    added_item = _076U_hidden_rows[-1] + 1
+                    _076U_hidden_rows = np.append(_076U_hidden_rows, added_item)
+                else:
+                    _076U_hidden_rows = np.append(_076U_hidden_rows, np.array(idx) + 4)
+                    added_item = _076U_hidden_rows[-1] + 1
+                    _076U_hidden_rows = np.append(_076U_hidden_rows, added_item)
+            except:
+                pass
+        else:
+            for num in idx:
+                if _076U.loc[num, "M3 UNTREATED"] == 0:
+                    _076U_hidden_rows_ind.append(num + 4)
+
     # ADD UNTREATED COLUMN NAMES
     _076U.columns = columnsU
 
     # ROW LENGTH
     _076U_rownum = _076U.shape[0]
 
+    file_path_string = ""
+    if schedule_date == 0:
+        file_path_string = f"{directory}/S5_{customer_number.strip()}.xlsx"
+    else:
+        file_path_string = f"{directory}/S5_sample_{customer_number.strip()}.xlsx"
+
     # CREATE XLSX WRITER
-    with pd.ExcelWriter(
-        f"{directory}/S5_{customer_number.strip()}.xlsx", engine="xlsxwriter"
-    ) as writer:
+    with pd.ExcelWriter(file_path_string, engine="xlsxwriter") as writer:
 
         # GET THE WRITER WORKBOOK
         workbook = writer.book
@@ -577,6 +745,12 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
         column_format2.set_text_wrap()
         column_format2.set_num_format('_(###0.00_);_(\(###0.00\);_(" "??_);_(@_)')
 
+        column_format3 = workbook.add_format()
+        column_format3.set_align("center")
+        column_format3.set_align("vcenter")
+        column_format3.set_text_wrap()
+        column_format3.set_num_format("_(###0.00_);_(\(###0.00\)")
+
         # FORMULA FORMAT
         formula_format = workbook.add_format()
         # formula_format.set_hidden()
@@ -598,10 +772,10 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
         # COLOR FORMAT UNLOCKED
         color_format_unlocked = workbook.add_format()
-        color_format_unlocked.set_bg_color("black")
+        color_format_unlocked.set_bg_color("#0f61b0")
         color_format_unlocked.set_font_color("white")
         color_format_unlocked.set_bold()
-        color_format_unlocked.set_border()
+        # color_format_unlocked.set_border()
         color_format_unlocked.set_locked(False)
         color_format_unlocked.set_align("center")
         color_format_unlocked.set_align("vcenter")
@@ -609,32 +783,31 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
         # COLOR FORMAT LOCKED
         color_format_locked = workbook.add_format()
-        color_format_locked.set_bg_color("black")
+        color_format_locked.set_bg_color("#0f61b0")
         color_format_locked.set_font_color("white")
         color_format_locked.set_hidden()
         color_format_locked.set_bold()
-        color_format_locked.set_border()
+        # color_format_locked.set_border()
         color_format_locked.set_align("center")
         color_format_locked.set_align("vcenter")
 
         # ORDER NUMBER FORMAT AND ALIGN
         order_format = workbook.add_format()
-        order_format.set_bg_color("black")
+        order_format.set_bg_color("#0f61b0")
         order_format.set_font_color("white")
         order_format.set_bold()
-        order_format.set_border()
-        order_format.set_locked(False)
+        # order_format.set_border()
+        order_format.set_locked(True)
         order_format.set_align("right")
         order_format.set_align("vcenter")
 
         # SET FORMATTING FOR THE MERGED CELLS AC WHITCHER
         merge_formatA = workbook.add_format(
             {
-                "bold": 0.5,
                 "font_name": "Monotype Corsiva",
                 "align": "center",
                 "valign": "vcenter",
-                "font_size": 15,
+                "bg_color": "white",
             }
         )
         # SET FORMATTING FOR THE MERGED CELLS ESTABLISHED 1902
@@ -644,7 +817,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
                 "font_name": "Times New Roman",
                 "align": "center",
                 "valign": "vcenter",
-                "font_size": 10,
+                "bg_color": "white",
             }
         )
 
@@ -656,7 +829,7 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
                 "align": "center",
                 "valign": "vcenter",
                 "font_size": 11,
-                "bg_color": "black",
+                "bg_color": "#0f61b0",
                 "color": "white",
             }
         )
@@ -714,14 +887,14 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
         # WORKSHEET 2
         worksheet2.set_column(0, 2, 20, column_format1)
-        worksheet2.set_column(3, 7, 20, column_format2)
-        worksheet2.set_column(7, 8, 20, column_format2)
+        worksheet2.set_column(3, 5, 20, column_format3)
+        worksheet2.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _038T_rownum + 4)
         for i in r:
 
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet2.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
@@ -729,14 +902,14 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
         # WORKSHEET 3
         worksheet3.set_column(0, 2, 20, column_format1)
-        worksheet3.set_column(3, 7, 20, column_format2)
-        worksheet3.set_column(7, 8, 20, column_format2)
+        worksheet3.set_column(3, 5, 20, column_format3)
+        worksheet3.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _038U_rownum + 4)
         for i in r:
 
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet3.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
@@ -744,14 +917,14 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
         # WORKSHEET 4
         worksheet4.set_column(0, 2, 20, column_format1)
-        worksheet4.set_column(3, 7, 20, column_format2)
-        worksheet4.set_column(7, 8, 20, column_format2)
+        worksheet4.set_column(3, 5, 20, column_format3)
+        worksheet4.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _050T_rownum + 4)
         for i in r:
 
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet4.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
@@ -759,13 +932,13 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
         # WORKSHEET 5
         worksheet5.set_column(0, 2, 20, column_format1)
-        worksheet5.set_column(3, 7, 20, column_format2)
-        worksheet5.set_column(7, 8, 20, column_format2)
+        worksheet5.set_column(3, 5, 20, column_format3)
+        worksheet5.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _050U_rownum + 4)
         for i in r:
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet5.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
@@ -773,13 +946,13 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
         # WORKSHEET 6
         worksheet6.set_column(0, 2, 20, column_format1)
-        worksheet6.set_column(3, 7, 20, column_format2)
-        worksheet6.set_column(7, 8, 20, column_format2)
+        worksheet6.set_column(3, 5, 20, column_format3)
+        worksheet6.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _076T_rownum + 4)
         for i in r:
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet6.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
@@ -787,26 +960,75 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
 
         # WORKSHEET 7
         worksheet7.set_column(0, 2, 20, column_format1)
-        worksheet7.set_column(3, 7, 20, column_format2)
-        worksheet7.set_column(7, 8, 20, column_format2)
+        worksheet7.set_column(3, 5, 20, column_format3)
+        worksheet7.set_column(6, 7, 20, column_format2)
 
         # ADD FORMULA TO ROWS
         r = np.arange(5, _076U_rownum + 4)
         for i in r:
-            m3_formula = f"=H{i}/D{i}"
+            m3_formula = f"=IFERROR(H{i}/D{i}, 0)"
             worksheet7.write_formula(f"I{i}:I{i}", m3_formula, formula_format)
 
             formula = f"=SUM(E{i}:E{i}*G{i}:G{i})"
             worksheet7.write_formula(f"H{i}:H{i}", formula, formula_format)
 
         # MERGE CELLS AND ENTER WRITING
-        worksheet1.merge_range("A1:E1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet2.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet3.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet4.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet5.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet6.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
-        worksheet7.merge_range("C1:F1", "A.C. Whitcher (PTY) Ltd", merge_formatA)
+        worksheet1.merge_range("A1:E2", "", merge_formatA)
+        worksheet2.merge_range("C1:H2", "", merge_formatA)
+        worksheet3.merge_range("C1:H2", "", merge_formatA)
+        worksheet4.merge_range("C1:H2", "", merge_formatA)
+        worksheet5.merge_range("C1:H2", "", merge_formatA)
+        worksheet6.merge_range("C1:H2", "", merge_formatA)
+        worksheet7.merge_range("C1:H2", "", merge_formatA)
+
+        if schedule_date == 0:
+            worksheet1.insert_image(
+                "A1",
+                order_sheet_official_summary_image,
+                {"object_position": 3},
+            )
+            worksheet2.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+            worksheet3.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+            worksheet4.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+            worksheet5.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+            worksheet6.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+            worksheet7.insert_image(
+                "C1", order_sheet_official_image, {"object_position": 3}
+            )
+        else:
+            worksheet1.insert_image(
+                "A1",
+                order_sheet_notice_summary_image,
+                {"object_position": 3},
+            )
+            worksheet2.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
+            worksheet3.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
+            worksheet4.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
+            worksheet5.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
+            worksheet6.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
+            worksheet7.insert_image(
+                "C1", order_sheet_notice_image, {"object_position": 3}
+            )
 
         worksheet2.merge_range("A1:B1", " ", merge_formatA)
         worksheet3.merge_range("A1:B1", " ", merge_formatA)
@@ -815,70 +1037,55 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
         worksheet6.merge_range("A1:B1", " ", merge_formatA)
         worksheet7.merge_range("A1:B1", " ", merge_formatA)
 
-        worksheet2.merge_range("G1:H1", " ", merge_formatA)
-        worksheet3.merge_range("G1:H1", " ", merge_formatA)
-        worksheet4.merge_range("G1:H1", " ", merge_formatA)
-        worksheet5.merge_range("G1:H1", " ", merge_formatA)
-        worksheet6.merge_range("G1:H1", " ", merge_formatA)
-        worksheet7.merge_range("G1:H1", " ", merge_formatA)
+        worksheet2.merge_range("C3:F3", "", color_format_locked)
+        worksheet3.merge_range("C3:F3", "", color_format_locked)
+        worksheet4.merge_range("C3:F3", "", color_format_locked)
+        worksheet5.merge_range("C3:F3", "", color_format_locked)
+        worksheet6.merge_range("C3:F3", "", color_format_locked)
+        worksheet7.merge_range("C3:F3", "", color_format_locked)
 
-        worksheet2.merge_range("C3:F3", "", color_format_unlocked)
-        worksheet3.merge_range("C3:F3", "", color_format_unlocked)
-        worksheet4.merge_range("C3:F3", "", color_format_unlocked)
-        worksheet5.merge_range("C3:F3", "", color_format_unlocked)
-        worksheet6.merge_range("C3:F3", "", color_format_unlocked)
-        worksheet7.merge_range("C3:F3", "", color_format_unlocked)
+        if schedule_date == 0:
+            worksheet2.write_string(2, 6, "ORDER NO:", order_format)
+            worksheet3.write_string(2, 6, "ORDER NO:", order_format)
+            worksheet4.write_string(2, 6, "ORDER NO:", order_format)
+            worksheet5.write_string(2, 6, "ORDER NO:", order_format)
+            worksheet6.write_string(2, 6, "ORDER NO:", order_format)
+            worksheet7.write_string(2, 6, "ORDER NO:", order_format)
+        else:
+            worksheet2.write_string(2, 6, "PRICES VALID FROM:", order_format)
+            worksheet3.write_string(2, 6, "PRICES VALID FROM:", order_format)
+            worksheet4.write_string(2, 6, "PRICES VALID FROM:", order_format)
+            worksheet5.write_string(2, 6, "PRICES VALID FROM:", order_format)
+            worksheet6.write_string(2, 6, "PRICES VALID FROM:", order_format)
+            worksheet7.write_string(2, 6, "PRICES VALID FROM:", order_format)
 
-        worksheet2.write_string(2, 6, "ORDER NO:", order_format)
-        worksheet3.write_string(2, 6, "ORDER NO:", order_format)
-        worksheet4.write_string(2, 6, "ORDER NO:", order_format)
-        worksheet5.write_string(2, 6, "ORDER NO:", order_format)
-        worksheet6.write_string(2, 6, "ORDER NO:", order_format)
-        worksheet7.write_string(2, 6, "ORDER NO:", order_format)
+        worksheet2.write_string(2, 0, "CUSTOMER:", color_format_locked)
+        worksheet3.write_string(2, 0, "CUSTOMER:", color_format_locked)
+        worksheet4.write_string(2, 0, "CUSTOMER:", color_format_locked)
+        worksheet5.write_string(2, 0, "CUSTOMER:", color_format_locked)
+        worksheet6.write_string(2, 0, "CUSTOMER:", color_format_locked)
+        worksheet7.write_string(2, 0, "CUSTOMER:", color_format_locked)
 
-        worksheet2.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-        worksheet3.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-        worksheet4.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-        worksheet5.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-        worksheet6.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-        worksheet7.write_string(2, 0, "CUSTOMER:", color_format_unlocked)
-
-        worksheet2.write_string(2, 1, customer_number, color_format_unlocked)
-        worksheet3.write_string(2, 1, customer_number, color_format_unlocked)
-        worksheet4.write_string(2, 1, customer_number, color_format_unlocked)
-        worksheet5.write_string(2, 1, customer_number, color_format_unlocked)
-        worksheet6.write_string(2, 1, customer_number, color_format_unlocked)
-        worksheet7.write_string(2, 1, customer_number, color_format_unlocked)
-
-        worksheet1.merge_range("B2:D2", "ESTABLISHED 1902", merge_formatB)
-        worksheet2.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
-        worksheet3.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
-        worksheet4.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
-        worksheet5.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
-        worksheet6.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
-        worksheet7.merge_range("C2:F2", "ESTABLISHED 1902", merge_formatB)
+        worksheet2.write_string(2, 1, customer_number, color_format_locked)
+        worksheet3.write_string(2, 1, customer_number, color_format_locked)
+        worksheet4.write_string(2, 1, customer_number, color_format_locked)
+        worksheet5.write_string(2, 1, customer_number, color_format_locked)
+        worksheet6.write_string(2, 1, customer_number, color_format_locked)
+        worksheet7.write_string(2, 1, customer_number, color_format_locked)
 
         # ADD GENEARTED DATE
         # DATE FORMAT
         date_format = workbook.add_format()
         date_format.set_align("left")
         date_format.set_align("vcenter")
+        date_format.set_bg_color("white")
 
-        worksheet1.write_string("A2", f"Date created:  {time}", date_format)
         worksheet2.merge_range("A2:B2", f"Date created:  {time}", date_format)
         worksheet3.merge_range("A2:B2", f"Date created:  {time}", date_format)
         worksheet4.merge_range("A2:B2", f"Date created:  {time}", date_format)
         worksheet5.merge_range("A2:B2", f"Date created:  {time}", date_format)
         worksheet6.merge_range("A2:B2", f"Date created:  {time}", date_format)
         worksheet7.merge_range("A2:B2", f"Date created:  {time}", date_format)
-
-        worksheet1.merge_range("G2:H2", " ", merge_formatB)
-        worksheet2.merge_range("G2:H2", " ", merge_formatB)
-        worksheet3.merge_range("G2:H2", " ", merge_formatB)
-        worksheet4.merge_range("G2:H2", " ", merge_formatB)
-        worksheet5.merge_range("G2:H2", " ", merge_formatB)
-        worksheet6.merge_range("G2:H2", " ", merge_formatB)
-        worksheet7.merge_range("G2:H2", " ", merge_formatB)
 
         # USE ROW NUM TO ADD 7 11% TEXT
         t38_row = _038T_rownum + 5
@@ -980,6 +1187,10 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
         for i in range(len(columns_summary)):
             worksheet1.write_string(3, i, columns_summary[i], header_format)
 
+        # HIDE SUMMARY SHEET IF SCHEDULED PRICE LIST
+        if schedule_date != 0:
+            worksheet1.hide()
+
         # WORKSHEET PROTECTION
         worksheet1.protect("acwhitcher1234")
         worksheet2.protect("acwhitcher1234")
@@ -1003,26 +1214,32 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
         }
 
         # ADD FORMULA FOR CUSTOMER NUMBER IN PRODUCT SHEETS
-        order_number_formula = (
-            '=IF(summary!E3="-- Enter number here --", "- - - - - - - -", summary!E3)'
-        )
-        worksheet2.write(2, 7, order_number_formula, color_format_locked)
-        worksheet2.write_comment("H3", message, message_options)
+        if schedule_date == 0:
+            order_number_formula = '=IF(summary!E3="-- Enter number here --", "- - - - - - - -", summary!E3)'
+            worksheet2.write(2, 7, order_number_formula, color_format_locked)
+            worksheet2.write_comment("H3", message, message_options)
 
-        worksheet3.write(2, 7, order_number_formula, color_format_locked)
-        worksheet3.write_comment("H3", message, message_options)
+            worksheet3.write(2, 7, order_number_formula, color_format_locked)
+            worksheet3.write_comment("H3", message, message_options)
 
-        worksheet4.write(2, 7, order_number_formula, color_format_locked)
-        worksheet4.write_comment("H3", message, message_options)
+            worksheet4.write(2, 7, order_number_formula, color_format_locked)
+            worksheet4.write_comment("H3", message, message_options)
 
-        worksheet5.write(2, 7, order_number_formula, color_format_locked)
-        worksheet5.write_comment("H3", message, message_options)
+            worksheet5.write(2, 7, order_number_formula, color_format_locked)
+            worksheet5.write_comment("H3", message, message_options)
 
-        worksheet6.write(2, 7, order_number_formula, color_format_locked)
-        worksheet6.write_comment("H3", message, message_options)
+            worksheet6.write(2, 7, order_number_formula, color_format_locked)
+            worksheet6.write_comment("H3", message, message_options)
 
-        worksheet7.write(2, 7, order_number_formula, color_format_locked)
-        worksheet7.write_comment("H3", message, message_options)
+            worksheet7.write(2, 7, order_number_formula, color_format_locked)
+            worksheet7.write_comment("H3", message, message_options)
+        else:
+            worksheet2.write_string("H3", f"{schedule_date}", color_format_locked)
+            worksheet3.write_string("H3", f"{schedule_date}", color_format_locked)
+            worksheet4.write_string("H3", f"{schedule_date}", color_format_locked)
+            worksheet5.write_string("H3", f"{schedule_date}", color_format_locked)
+            worksheet6.write_string("H3", f"{schedule_date}", color_format_locked)
+            worksheet7.write_string("H3", f"{schedule_date}", color_format_locked)
 
         len_38T = np.arange(5, _038T_rownum + 5)
         for i in len_38T:
@@ -1048,15 +1265,89 @@ def create_s5_ordersheet(directory, customer_number, customer_pricelist, server_
         for i in len_76U:
             worksheet7.write(f"G{i}", "", unlocked)
 
-    writer.save()
+        # HIDE ROWS THAT ARE ZERO
+        worksheet1.set_first_sheet()
+        worksheet1.activate()
+        if len(_038T_hidden_rows) >= _038T_rownum:
+            if _038T_empty_flag:
+                worksheet2.hide()
 
+        if len(_038T_hidden_rows) > 0:
+            for row_num in _038T_hidden_rows:
+                worksheet2.set_row(row_num, None, None, {"hidden": True})
+        if len(_038T_hidden_rows_ind) > 0:
+            for row_num in _038T_hidden_rows_ind:
+                worksheet2.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_038U_hidden_rows) >= _038U_rownum:
+            if _038U_empty_flag:
+                worksheet3.hide()
+
+        if len(_038U_hidden_rows) > 0:
+            for row_num in _038U_hidden_rows:
+                worksheet3.set_row(row_num, None, None, {"hidden": True})
+        if len(_038U_hidden_rows_ind) > 0:
+            for row_num in _038U_hidden_rows_ind:
+                worksheet3.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_050T_hidden_rows) >= _050T_rownum:
+            if _050T_empty_flag:
+                worksheet4.hide()
+
+        if len(_050T_hidden_rows) > 0:
+            for row_num in _050T_hidden_rows:
+                worksheet4.set_row(row_num, None, None, {"hidden": True})
+        if len(_050T_hidden_rows_ind) > 0:
+            for row_num in _050T_hidden_rows_ind:
+                worksheet4.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_050U_hidden_rows) >= _050U_rownum:
+            if _050U_empty_flag:
+                worksheet5.hide()
+
+        if len(_050U_hidden_rows) > 0:
+            for row_num in _050U_hidden_rows:
+                worksheet5.set_row(row_num, None, None, {"hidden": True})
+        if len(_050U_hidden_rows_ind) > 0:
+            for row_num in _050U_hidden_rows_ind:
+                worksheet5.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_076T_hidden_rows) >= _076T_rownum:
+            if _076T_empty_flag:
+                worksheet6.hide()
+
+        if len(_076T_hidden_rows) > 0:
+            for row_num in _076T_hidden_rows:
+                worksheet6.set_row(row_num, None, None, {"hidden": True})
+        if len(_076T_hidden_rows_ind) > 0:
+            for row_num in _076T_hidden_rows_ind:
+                worksheet6.set_row(row_num, None, None, {"hidden": True})
+
+        if len(_076U_hidden_rows) >= _076U_rownum:
+            if _076U_empty_flag:
+                worksheet7.hide()
+
+        if len(_076U_hidden_rows) > 0:
+            for row_num in _076U_hidden_rows:
+                worksheet7.set_row(row_num, None, None, {"hidden": True})
+        if len(_076U_hidden_rows_ind) > 0:
+            for row_num in _076U_hidden_rows_ind:
+                worksheet7.set_row(row_num, None, None, {"hidden": True})
+
+    writer.save()
+    print(server_path)
     if server_path == "none":
         pass
     else:
         try:
             shutil.copyfile(
-                f"{directory}/S5_{customer_number.strip()}.xlsx",
-                f"{server_path}/S5_{customer_number.strip()}.xlsx",
+                f"{directory}\\S5_{customer_number.strip()}.xlsx",
+                f"{server_path}\\S5_{customer_number.strip()}.xlsx",
             )
         except:
             pass
+    if multi_zip_path != "null":
+        shutil.copyfile(
+            f"{directory}\\S5_{customer_number.strip()}.xlsx",
+            f"{multi_zip_path}\\S5_{customer_number.strip()}.xlsx",
+        )

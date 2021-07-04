@@ -1,80 +1,81 @@
 // Import modules
-const { remote, ipcRenderer } = require('electron');
-
-/* GET WORKING DIRECTORY */
-let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
-if (!process.env.NODE_ENV) {
-  envFileChange();
-} else {
-  dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
-}
+const { ipcRenderer } = require('electron');
 
 /* GLOBAL VARIABLES */
-/////////////////////
-let customerNameNumber;
+//////////////////////
+let customerNameNumberJson, customerPricesNumbersArr;
 
 ///////////////////
 /* DOM ELEMENTS */
 /////////////////
 
 let customerListContainer = document.getElementById('customer-list-container'),
+  searchDock = document.getElementById('customer-search'),
   soundClick = document.getElementById('click'),
+  audioTag = Array.from(document.getElementsByTagName('audio')),
   border = document.getElementById('border');
 
-/* POPULATE LIST OF CUSTOMERS */
-///////////////////////////////
+///////////////
+/* FUNCTIONS */
+///////////////
+/* FUNCTION CHECK THE MUTE FLAG */
+let storage = JSON.parse(localStorage.getItem('notifications'));
+function checkMuteFlag() {
+  if (!storage.muteflag) {
+    /* SET FLAG TO FALSE AND TURN OFF ALL SOUND */
+    storage.muteflag = false;
+    localStorage.setItem('notifications', JSON.stringify(storage));
+    audioTag.forEach((el) => {
+      el.muted = true;
+    });
+  } else {
+    /* SET THE FLAG TO TRUE AND TURN OFF ALL SOUND */
+    storage.muteflag = true;
+    localStorage.setItem('notifications', JSON.stringify(storage));
+    audioTag.forEach((el) => {
+      el.muted = false;
+    });
+  }
+}
 
-function populateCustomerNames() {
-  let customers = Object.keys(customerNameNumber);
+if (!storage.muteflag) {
+  checkMuteFlag();
+}
 
+function fillCustomerNameNumberJson() {
+  /* POPULATE LIST OF CUSTOMERS */
+  ///////////////////////////////
+
+  let customerNames = Object.keys(customerNameNumberJson);
   (() => {
-    customers.forEach((el) => {
-      let html = `<div title="${
-        customerNameNumber[el.toLocaleUpperCase()]
-      }" class="customer-name">${el.toUpperCase()}</div>`;
-      customerListContainer.insertAdjacentHTML('beforeend', html);
+    customerNames.forEach((el) => {
+      if (customerPricesNumbersArr.includes(customerNameNumberJson[el.toUpperCase()])) {
+        let html = `<div title="${
+          customerNameNumberJson[el.toLocaleUpperCase()]
+        }" class="customer-name">${el.toUpperCase()}</div>`;
+        customerListContainer.insertAdjacentHTML('beforeend', html);
+      }
     });
   })();
 
   ////////////////////////////////////////
   /* DOM ELEMENTS AFTER GENERATED HTML */
   //////////////////////////////////////
-
-  let customerNameLists = Array.from(document.getElementsByClassName('customer-name')),
-    searchDock = document.getElementById('customer-search');
+  let customerNameLists = Array.from(document.getElementsByClassName('customer-name'));
 
   //////////////////////
   /* EVENT LISTENERS */
   ////////////////////
-
   /* SEND CUSTOMER NUMBER TO SECWINDOW */
   customerNameLists.forEach((el) => {
     el.addEventListener('click', (e) => {
       soundClick.play();
-      let number = customerNameNumber[e.target.innerText];
-      // send ipc
-      ipcRenderer.send('dock-sec', number);
-
-      // Clear any existing highlighted number in case of reclick
-      customerNameLists.forEach((el) => {
-        el.setAttribute('class', 'customer-name');
-      });
-
-      // set the highlight on current clicked item
-      el.setAttribute('class', 'customer-name-clicked');
+      setTimeout(() => {
+        let number = customerNameNumberJson[e.target.innerText];
+        // send ipc
+        ipcRenderer.send('dock-sec', number);
+        ipcRenderer.send('close-window-dock', null);
+      }, 300);
     });
   });
 
@@ -83,34 +84,30 @@ function populateCustomerNames() {
   ////////////////
 
   searchDock.addEventListener('keyup', (e) => {
-    let pattern = /[\s\W]+/g,
-      temp,
-      text;
     searchDock.value = searchDock.value.toUpperCase();
-    temp = searchDock.value.replace(pattern, '');
     customerNameLists.forEach((el) => {
-      text = el.innerText.replace(pattern, '');
-      console.log(temp, text);
-      let elMatch = text.includes(temp);
+      let elMatch = el.innerText.includes(searchDock.value);
       el.style.display = elMatch ? 'block' : 'none';
     });
   });
-
-  /* SHOW WINDOW ON LOAD */
-  border.style.opacity = '1';
+  border.style.visibility = 'visible';
 }
 
 ////////////////////////
 /* MESSAGE LISTENERS */
 //////////////////////
 
-/* MESSAGE TO RETRACT WINDOW BEFORE CLOSE */
-ipcRenderer.on('close-window-dock', (e, message) => {
-  border.style.opacity = '0';
+/* POPULATE THE LIST OF NAMES IN WINDOW */
+ipcRenderer.on('name-search', (event, message) => {
+  customerNameNumberJson = message.customerNameNumberJson;
+  customerPricesNumbersArr = message.customerPricesNumbersArr;
+  fillCustomerNameNumberJson();
+  setTimeout(() => {
+    searchDock.focus();
+  }, 300);
 });
 
-/* GET CUSTOMER OBJECT */
-ipcRenderer.on('customer-name-number', (e, message) => {
-  customerNameNumber = message;
-  populateCustomerNames();
+/* MESSAGE TO RETRACT WINDOW BEFORE CLOSE */
+ipcRenderer.on('close-window-dock', (e, message) => {
+  border.style.visibility = 'hidden';
 });

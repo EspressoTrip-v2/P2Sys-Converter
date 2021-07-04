@@ -11,46 +11,50 @@ const {
 } = require('electron');
 const mongoose = require('mongoose');
 const fs = require('fs');
+const os = require('os');
 require('dotenv').config();
+
+/* DISABLE GPU RENDERING FOR APP */
+app.disableHardwareAcceleration();
 
 /* GET WORKING DIRECTORY */
 let dir;
-function envFileChange() {
-  let fileName = `${process.cwd()}/resources/app.asar`;
-  /* LOCAL MODULES */
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = fileName.replace(pattern, '/');
-  } else dir = fileName;
-}
 if (!process.env.NODE_ENV) {
-  envFileChange();
+  dir = `${process.cwd()}\\resources\\app.asar`;
 } else {
   dir = process.cwd();
-
-  if (process.platform === 'win32') {
-    let pattern = /[\\]+/g;
-    dir = dir.replace(pattern, '/');
-  }
 }
 
-/* GET APPDATA DIR */
-let appData;
-if (process.platform === 'win32') {
-  appData = `${process.env.APPDATA}/P2Sys-Converter`;
-} else {
-  appData = process.cwd();
-}
+let appData = `${process.env.APPDATA}\\P2Sys-Manager`;
 
 /* LOCAL MODULES */
 const {
-  customerPricesModel,
-  customerPricelistNumberModel,
-  customerNumberNameModel,
-  customerBackUpModel,
+  queryBackUpDate,
+  queryExmillPrice,
+  queryAllPriceListNumbers,
+  queryAllCustomerNumbers,
+  querySinglePriceList,
+  queryCustomerName,
+  querySinglePriceListNumber,
+  querySingleCustomerBackup,
+  queryAllScheduleDates,
+  querySingleSchedule,
+  createScheduleItem,
+  removeScheduleItems,
+  editSingleScheduledPriceList,
+  createPausedPriceList,
+  queryAllPaused,
+  querySinglePaused,
+  removePausedItem,
+  removePausedItemSync,
+  updatePriceListDataBase,
+  addCustomerNameAndNumbers,
+  queryAllPausedQuantity,
+  queryAllScheduleDatesQuantity,
 } = require(`${dir}/database/mongoDbConnect.js`);
-const { writeLocalDatabase } = require(`${dir}/objects.js`);
 const { updater } = require(`${dir}/updater.js`);
+
+const { logFileFunc } = require(`${dir}/logFile.js`);
 
 /* GLOBAL VARIABLES */
 let homeWindow,
@@ -58,41 +62,41 @@ let homeWindow,
   tray,
   childWindow,
   loadingWindow,
-  updateWindow,
   emailWindow,
+  multiWindow,
   progressWindow,
-  dbLoaderWindow,
   copySelectionWindow,
-  customerBackUp,
-  customerNumberName,
-  customerNameNumber,
-  customerPricelistNumber,
-  customerPrices,
+  customerNumberAllKeys,
+  customerNumberNameResult,
+  customerNumberNameJson,
+  customerNameNumberJson,
+  exmillPrice,
+  scheduleDates,
+  customerPricesNumbersArr,
   screenHeight,
   screenWidth,
-  iconImage;
+  backUpYear,
+  version,
+  trayMenu,
+  passwordGenerate,
+  passwordEnter,
+  checkScheduleDateFlag,
+  updateInfoWindow;
+
+/* GET THE YEAR */
+let date = new Date();
+const yearNow = date.getFullYear();
+const monthNow = date.getMonth() + 1;
+const dateString = `${monthNow}/${yearNow}`;
+/* GET TEMP FOLDER AND DESKTOP FOLDER */
+let tempPath = os.tmpdir();
 
 /* ICON FILE */
-if (process.platform === 'win32') {
-  iconImage = `${dir}/renderer/icons/icon.ico`;
-} else {
-  iconImage = `${dir}/renderer/icons/trayTemplate.png`;
-}
+let iconImage = `${dir}/renderer/icons/icon.ico`;
 
 ////////////////
 /* FUNCTIONS */
 ////////////////
-
-/* FUNCTION TO CREATE REVERSE OBJECT FOR DOCK */
-function customerNameNumberFunc(data) {
-  newArr = {};
-  Object.entries(data).forEach((el) => {
-    newArr[el[1]] = el[0];
-  });
-  delete newArr['_id'];
-
-  return newArr;
-}
 
 /* FUNCTION TO CREATE TRAY MENU */
 function createTray() {
@@ -100,37 +104,32 @@ function createTray() {
   tray.setContextMenu(trayMenu);
 }
 
-/* LOGFILE CREATION FUNCTION */
-//////////////////////////////
-function logfileFunc(message) {
-  let fileDir = `${appData}/error-log.txt`;
-  /* CHECK IF EXISTS */
-  if (fs.existsSync(fileDir)) {
-    fs.appendFileSync(fileDir, `${new Date()}: Database ${message}\n`, (err) =>
-      console.log(err)
-    );
-  } else {
-    fs.writeFileSync(fileDir, `${new Date()}: Database ${message}\n`, (err) =>
-      console.log(err)
-    );
-  }
+/* CREATE NAME NUMBER JSON FOR SEARCH WINDOW */
+function convertNumberName() {
+  let newObjA = {};
+  let newObjB = {};
+  customerNumberNameResult.forEach((obj) => {
+    newObjA[obj.name] = obj._id;
+    newObjB[obj._id] = obj.name;
+  });
+  customerNameNumberJson = newObjA;
+  customerNumberNameJson = newObjB;
 }
+
 //////////////////////
 /* GLOBAL VARIABLES */
 //////////////////////
-let connectionString, connectionName;
+let connectionString;
 
 //////////////////////////
 /* CONNECTION ERROR */
 ////////////////////////
-function mongooseConnect() {
+function mongooseConnect(message) {
   /* TEST DATABASE */
-  // connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.z0sd1.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  // connectionName = 'Test Database';
+  // connectionString = `mongodb+srv://${message.username}:${message.password}@cluster0.z0sd1.mongodb.net/acwhitcher?retryWrites=true&w=majority`;
 
   /* AC WHITCHER DATABASE */
-  connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.61lij.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-  connectionName = 'A.C Whitcher Database';
+  connectionString = `mongodb+srv://${message.username}:${message.password}@cluster0.e7vid.mongodb.net/acwhitcher?retryWrites=true&w=majority`;
 
   mongoose
     .connect(connectionString, {
@@ -140,35 +139,25 @@ function mongooseConnect() {
       useUnifiedTopology: true,
     })
     .catch((err) => {
+      logFileFunc(err.stack);
       /* INITIAL ERROR CONNECTION */
       dialog
-        .showMessageBox(dbLoaderWindow, {
+        .showMessageBox(loadingWindow, {
           type: 'error',
-          title: 'P2SYS ERROR',
-          icon: `${dir}/renderer/icons/error.png`,
+          title: 'P2Sys Error',
+          icon: `${dir}/renderer/icons/converter-logo.png`,
           message:
-            'P2Sys Converter was unable to connect to the database. Please try again when a connection is available',
+            'P2Sys Manager was unable to connect to the database. Please try again when a connection is available',
           buttons: ['EXIT'],
         })
         .then(() => {
-          dbLoaderWindow.close();
+          setTimeout(() => {
+            if (loadingWindow) {
+              loadingWindow.close();
+            }
+            app.quit();
+          }, 20);
         });
-
-      let fileDir = `${appData}/error-log.txt`;
-      /* CHECK IF IT EXISTS */
-      fs.existsSync(fileDir)
-        ? fs.appendFileSync(
-            fileDir,
-            `${new Date()} -> Connection failure: ${err}\n`,
-            'utf8',
-            () => console.log('Logfile write error')
-          )
-        : fs.writeFileSync(
-            fileDir,
-            `${new Date()} -> Connection failure: ${err}\n`,
-            'utf8',
-            () => console.log('Logfile write error')
-          );
     });
 }
 
@@ -179,131 +168,115 @@ const db = mongoose.connection;
 
 /* DOWNLOAD DB ONCE CONNECTED */
 db.once('connected', async () => {
+  /* GET LATEST EXMILL PRICE */
   try {
-    dbLoaderWindow.webContents.send('db-download', {
-      database: 'Downloading CB-Db',
-      percentage: 10,
-    });
-
-    customerBackUpObj = await customerBackUpModel.findById('customerBackUp').exec();
-    customerBackUp = customerBackUpObj._doc;
-    delete customerBackUp['_id'];
+    let result = await queryExmillPrice(notifyMain);
+    exmillPrice = result;
   } catch (err) {
-    logfileFunc(err);
+    logFileFunc(err.stack);
   }
 
+  /* CHECK BACKUPS CLEAN DATE */
   try {
-    dbLoaderWindow.webContents.send('db-download', {
-      database: 'Downloading CNN-Db',
-      percentage: 35,
-    });
-    customerNumberNameObj = await customerNumberNameModel
-      .findById('customerNumberName')
-      .exec();
-    customerNumberName = customerNumberNameObj._doc;
-    delete customerNumberName['_id'];
-
-    customerNameNumber = customerNameNumberFunc(customerNumberName);
+    let result = await queryBackUpDate(notifyMain);
+    if (result) {
+      let notification = new Notification({
+        title: 'Cleaning Backup database',
+        body: 'Out of date entries are being removed from the Backup Database.',
+        icon: `${dir}/renderer/icons/converter-logo.png`,
+      });
+      notification.show();
+    }
   } catch (err) {
-    logfileFunc(err);
+    logFileFunc(err.stack);
   }
+
+  /* GET ALL THE SCHEDULE DATES */
   try {
-    dbLoaderWindow.webContents.send('db-download', {
-      database: 'Downloading CPN-Db',
-      percentage: 65,
-    });
-
-    let customerPricelistNumberObj = await customerPricelistNumberModel
-      .findById('customerPricelistNumber')
-      .exec();
-    customerPricelistNumber = customerPricelistNumberObj._doc;
-    delete customerPricelistNumber['_id'];
+    scheduleDates = await queryAllScheduleDates(notifyMain);
+    checkScheduleDateFlag = scheduleDates.includes(dateString) ? true : false;
+    if (checkScheduleDateFlag) {
+      let schedulePrices = await querySingleSchedule(dateString, notifyMain);
+      schedulePriceListsToConvert = {
+        schedulePrices,
+        dateString,
+      };
+    }
   } catch (err) {
-    logfileFunc(err);
+    logFileFunc(err.stack);
   }
+
+  /* QUERY ALL NAMES */
   try {
-    dbLoaderWindow.webContents.send('db-download', {
-      database: 'Downloading CP-Db',
-      percentage: 90,
-    });
-
-    let customerPricesObj = await customerPricesModel.findById('customerPrices').exec();
-    customerPrices = customerPricesObj._doc;
-    delete customerPrices['_id'];
-    dbLoaderWindow.webContents.send('db-download', {
-      database: 'Success',
-      percentage: 100,
-    });
+    customerNumberNameResult = await queryCustomerName(null, true, notifyMain);
   } catch (err) {
-    logfileFunc(err);
+    logFileFunc(err.stack);
   }
+
+  /* FETCH ALL CUSTOMER NAME INDEXES */
+  try {
+    customerNumberAllKeys = await queryAllCustomerNumbers(notifyMain);
+  } catch (err) {
+    logFileFunc(err.stack);
+  }
+
+  /* TRAY MENU LAYOUT TEMPLATE */
+  trayMenu = Menu.buildFromTemplate([{ label: `Manager v${version}` }]);
   createWindow();
-
-  /* CREATE THE WRITE FILE OBJECT */
-  let databaseObj = {
-    customerBackUp,
-    customerPrices,
-    customerNumberName,
-    customerPricelistNumber,
-  };
-  writeLocalDatabase(app.getPath('appData'), databaseObj);
+  convertNumberName();
 });
 
 db.on('disconnected', () => {
   if (secWindow && secWindow.isVisible()) {
-    dialog.showMessageBoxSync(secWindow, {
-      type: 'info',
-      title: 'P2SYS DATABASE CONNECTION LOST',
-      message: 'The connection to the database has been lost',
-      detail:
-        'If reconnecting fails please PAUSE your work and update when a connection is available.',
-      icon: `${dir}/renderer/icons/info.png`,
-      buttons: ['OK'],
-    });
+    secWindow.webContents.send('connection-lost', null);
   } else if (homeWindow && homeWindow.isVisible()) {
-    dialog.showMessageBoxSync(homeWindow, {
-      type: 'info',
-      title: 'P2SYS DATABASE CONNECTION LOST',
-      message: 'The connection to the database has been lost',
-      detail:
-        'If reconnecting fails please PAUSE your work and update when a connection is available.',
-      icon: `${dir}/renderer/icons/info.png`,
-      buttons: ['OK'],
-    });
+    homeWindow.webContents.send('connection-lost', null);
   } else if (emailWindow && emailWindow.isVisible()) {
     dialog.showMessageBoxSync(emailWindow, {
       type: 'info',
-      title: 'P2SYS DATABASE CONNECTION LOST',
+      title: 'P2Sys Database Connection Lost',
       message: 'The connection to the database has been lost',
-      detail: 'The email will fail on send, however it will be sent on the next restart',
-      icon: `${dir}/renderer/icons/info.png`,
+      detail: 'The email will fail on send, you will have to resend it manually.',
+      icon: `${dir}/renderer/icons/converter-logo.png`,
       buttons: ['OK'],
     });
-  } else {
-    /* CHECK TO SEE IF THERE IS AN AVAILABLE WINDOW */
-    if (homeWindow | secWindow) {
-      let notification = new Notification({
-        title: 'P2SYS CONNECTION LOST',
-        body: 'The connection to the database has been lost',
-        icon: `${dir}/renderer/icons/info.png`,
-      });
-      notification.show();
-    }
+  } else if (copySelectionWindow && copySelectionWindow.isVisible()) {
+    copySelectionWindow.webContents.send('connection-lost', null);
+  }
+});
+
+db.on('error', () => {
+  if (secWindow && secWindow.isVisible()) {
+    secWindow.webContents.send('connection-lost', null);
+  } else if (homeWindow && homeWindow.isVisible()) {
+    homeWindow.webContents.send('connection-lost', null);
+  } else if (emailWindow && emailWindow.isVisible()) {
+    dialog.showMessageBoxSync(emailWindow, {
+      type: 'info',
+      title: 'P2Sys Database Connection Lost',
+      message: 'The connection to the database has been lost',
+      detail: 'The email will fail on send, you will have to resend it manually.',
+      icon: `${dir}/renderer/icons/converter-logo.png`,
+      buttons: ['OK'],
+    });
+  } else if (copySelectionWindow && copySelectionWindow.isVisible()) {
+    copySelectionWindow.webContents.send('connection-lost', null);
   }
 });
 
 db.on('reconnected', () => {
   let notification = new Notification({
-    title: 'P2SYS DB CONNECTED',
+    title: 'P2Sys database info',
     body: 'Reconnected to the database',
-    icon: `${dir}/renderer/icons/info.png`,
+    icon: `${dir}/renderer/icons/converter-logo.png`,
   });
   notification.show();
-  if (secWindow) {
-    secWindow.webContents.send('reconnected', null);
-  }
-  if (homeWindow) {
-    homeWindow.webContents.send('db', connectionName);
+  if (secWindow && secWindow.isVisible()) {
+    secWindow.webContents.send('connection-found', null);
+  } else if (homeWindow && homeWindow.isVisible()) {
+    homeWindow.webContents.send('connection-found', null);
+  } else if (copySelectionWindow && copySelectionWindow.isVisible()) {
+    copySelectionWindow.webContents.send('connection-found', null);
   }
 });
 
@@ -311,40 +284,39 @@ db.on('reconnected', () => {
 /* WINDOW CREATION FUNCTIONS */
 //////////////////////////////
 
-/* GET VERSION CHANGELOG */
-const version = fs.readFileSync(`${process.cwd()}/build/release-notes.md`, 'utf8');
-
-/* TRAY MENU LAYOUT TEMPLATE */
-let trayMenu = Menu.buildFromTemplate([
-  {
-    label: 'About',
-    click: () => {
-      let parent = secWindow ? secWindow : homeWindow;
-      dialog.showMessageBoxSync(parent, {
-        type: 'info',
-        detail: version,
-        buttons: ['OK'],
-        icon: `${dir}/renderer/icons/converter-logo.png`,
-      });
-    },
-  },
-]);
+/* NOTIFICATION FUNCTION */
+function notifyMain(message) {
+  let notification = new Notification({
+    title: message.title,
+    body: message.body,
+    icon: `${dir}/renderer/icons/converter-logo.png`,
+  });
+  notification.show();
+}
 
 /* MAIN WINDOW CREATION */
 function createWindow() {
   createTray();
+  /* SORT THE BACKUPS IF LAST CHECKED YEAR BEHIND CURRENT */
+  if (backUpYear < yearNow) {
+    removeBackups(customerBackUp);
+  }
   homeWindow = new BrowserWindow({
-    width: 300,
-    height: 420,
-    resizable: false,
+    width: Math.floor(screenWidth * 0.13),
+    height: Math.floor(screenWidth * 0.18),
+    maxWidth: Math.floor(screenWidth * 0.16),
+    maxHeight: Math.floor(screenWidth * 0.22),
+    minHeight: Math.floor(screenWidth * 0.18),
+    minWidth: Math.floor(screenWidth * 0.13),
     spellCheck: false,
     center: true,
+    maximizable: false,
     alwaysOnTop: true,
-    backgroundColor: '#00FFFFFF',
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     autoHideMenuBar: true,
     frame: false,
@@ -364,36 +336,38 @@ function createWindow() {
 
   // Only show on load completion
   homeWindow.webContents.on('did-finish-load', () => {
-    dbLoaderWindow.close();
-    homeWindow.webContents.send('show', null);
-    homeWindow.webContents.send('db', connectionName);
+    homeWindow.webContents.send('get-notifications-main-app', null);
+    if (checkScheduleDateFlag) {
+      homeWindow.webContents.send('convert-schedule', schedulePriceListsToConvert);
+    }
+    if (loadingWindow) {
+      loadingWindow.close();
+    }
   });
 
   //   Event listener for closing
   homeWindow.on('closed', () => {
     homeWindow = null;
-    if (!emailWindow) {
-      app.quit();
-    }
   });
 }
 
 /* SECWINDOW CREATION */
 function createSecWindow(message) {
   secWindow = new BrowserWindow({
-    height: 500,
-    width: 295,
+    parent: homeWindow,
+    width: Math.floor(screenWidth * 0.13),
+    height: Math.floor(screenWidth * 0.18),
     autoHideMenuBar: true,
     center: true,
     frame: false,
+    alwaysOnTop: true,
     spellCheck: false,
-    backgroundColor: '#00FFFFFF',
-    // alwaysOnTop: true,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: iconImage,
   });
@@ -403,20 +377,39 @@ function createSecWindow(message) {
 
   // Only show on load completion
   secWindow.webContents.once('did-finish-load', () => {
+    secWindow.moveTop();
     /* CREATE DATABASE OBJECT TO SEND TO WINDOW */
     let dbObj = {
-      customerPrices,
-      customerPricelistNumber,
-      customerNumberName,
-      customerBackUp,
-      customerNameNumber,
+      customerNumberAllKeys,
+      customerNameNumberJson,
+      customerNumberNameJson,
+      exmillPrice,
     };
     secWindow.webContents.send('database-object', dbObj);
+    if (message === null) {
+      if (loadingWindow) {
+        loadingWindow.close();
+      }
+    } else if (message.flag === 'edit') {
+      /* SEND ITEMS FROM SCHEDULED PRICE LIST TO UPDATE */
+      secWindow.webContents.send('edit-schedule-price-list', message.schedulePriceList);
 
-    if (loadingWindow) {
-      loadingWindow.close();
+      if (loadingWindow) {
+        loadingWindow.close();
+      }
+    } else if (message.flag === 'copy') {
+      /* SEND ITEMS FROM COPY PRICE LIST TO UPDATE */
+      secWindow.webContents.send('copy-price-list', message.copyPriceList);
+      if (loadingWindow) {
+        loadingWindow.close();
+      }
+    } else if (message.flag === 'new') {
+      /* SEND ITEMS FROM COPY PRICE LIST TO UPDATE */
+      secWindow.webContents.send('new-price-list', message.copyPriceList);
+      if (loadingWindow) {
+        loadingWindow.close();
+      }
     }
-    secWindow.focus();
   });
 
   //   Load dev tools
@@ -430,31 +423,26 @@ function createSecWindow(message) {
 
 /* CHILD WINDOW CREATION */
 function createChildWindow(message) {
-  // Window State windowStateKeeper
-  if (message.emit === 'startPage') {
-    childWindow = new BrowserWindow({
-      parent: secWindow,
-      height: 500,
-      width: 300,
-      resizable: false,
-      x: message.dimensions[0] - 300,
-      y: message.dimensions[1],
-      autoHideMenuBar: true,
-      backgroundColor: '#00FFFFFF',
-      center: true,
-      skipTaskbar: true,
-      frame: false,
-      spellCheck: false,
-      transparent: true,
-      alwaysOnTop: true,
-      webPreferences: {
-        devTools: false,
-        nodeIntegration: true,
-        enableRemoteModule: true,
-      },
-      icon: iconImage,
-    });
-  }
+  childWindow = new BrowserWindow({
+    parent: secWindow,
+    height: message.size[1],
+    width: message.size[0],
+    resizable: false,
+    x: message.dimensions[0] - message.size[0],
+    y: message.dimensions[1],
+    autoHideMenuBar: true,
+    skipTaskbar: true,
+    frame: false,
+    spellCheck: false,
+    transparent: true,
+    webPreferences: {
+      // devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+      contextIsolation: false,
+    },
+    icon: iconImage,
+  });
 
   //   Load html page
   childWindow.loadFile(`${dir}/renderer/cusNameSearch/customerName.html`);
@@ -464,7 +452,11 @@ function createChildWindow(message) {
 
   // Only show on load completion
   childWindow.webContents.once('did-finish-load', () => {
-    childWindow.webContents.send('customer-name-number', customerNameNumber);
+    /* SEND NAME-NUMBER JSON AND PRICE-LIST NAMES */
+    childWindow.webContents.send('name-search', {
+      customerNameNumberJson,
+      customerPricesNumbersArr,
+    });
     if (loadingWindow) {
       loadingWindow.close();
     }
@@ -478,29 +470,22 @@ function createChildWindow(message) {
 
 /* LOADING WINDOW */
 function createLoadingWindow() {
-  let parentWin;
-  if (secWindow) {
-    parentWin = secWindow;
-  } else {
-    parentWin = null;
-  }
-
   loadingWindow = new BrowserWindow({
-    parent: parentWin,
-    height: 280,
-    width: 280,
+    width: Math.floor(screenWidth * 0.052),
+    height: Math.floor(screenWidth * 0.052),
     autoHideMenuBar: true,
-    backgroundColor: '#00FFFFFF',
     center: true,
     frame: false,
     skipTaskbar: true,
+    resizable: false,
     spellCheck: false,
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: iconImage,
   });
@@ -524,20 +509,23 @@ function createLoadingWindow() {
 /* EMAIL POPUP WINDOW */
 function createEmailWindow(message) {
   emailWindow = new BrowserWindow({
-    height: 355,
-    width: 285,
+    width: Math.floor(screenWidth * 0.29),
+    height: Math.floor(screenWidth * 0.36),
+    maxWidth: Math.floor(screenWidth * 0.39),
+    maxHeight: Math.floor(screenWidth * 0.45),
     autoHideMenuBar: true,
     center: true,
-    backgroundColor: '#00FFFFFF',
     frame: false,
     spellCheck: false,
     transparent: true,
     alwaysOnTop: true,
     maximizable: false,
+    skipTaskbar: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: `${dir}/renderer/icons/mailTemplate.png`,
   });
@@ -548,6 +536,9 @@ function createEmailWindow(message) {
   emailWindow.webContents.once('did-finish-load', (e) => {
     emailWindow.webContents.send('email-popup', message);
     emailWindow.moveTop();
+    if (loadingWindow) {
+      loadingWindow.close();
+    }
   });
 
   //   Load dev tools
@@ -563,21 +554,22 @@ function createEmailWindow(message) {
 function createProgressWindow() {
   progressWindow = new BrowserWindow({
     parent: secWindow,
-    height: 250,
-    width: 250,
+    width: Math.floor(screenWidth * 0.052),
+    height: Math.floor(screenWidth * 0.052),
     spellCheck: false,
     resizable: false,
-    backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
     center: true,
     skipTaskbar: true,
+    resizable: false,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: iconImage,
   });
@@ -598,99 +590,27 @@ function createProgressWindow() {
   });
 }
 
-/* DBLOADER WINDOW */
-function createDbLoaderWindow() {
-  dbLoaderWindow = new BrowserWindow({
-    height: 250,
-    width: 250,
-    spellCheck: false,
-    resizable: false,
-    backgroundColor: '#00FFFFFF',
-    autoHideMenuBar: true,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    center: true,
-    frame: false,
-    transparent: true,
-    webPreferences: {
-      devTools: false,
-      nodeIntegration: true,
-      enableRemoteModule: true,
-    },
-    icon: iconImage,
-  });
-
-  //   LOAD HTML PAGE
-  dbLoaderWindow.loadFile(`${dir}/renderer/dbloader/dbloader.html`);
-
-  dbLoaderWindow.webContents.on('did-finish-load', () => {
-    dbLoaderWindow.moveTop();
-  });
-
-  //   LOAD DEV TOOLS
-  // dbLoaderWindow.webContents.openDevTools();
-
-  //   EVENT LISTENER FOR CLOSING
-  dbLoaderWindow.on('closed', () => {
-    dbLoaderWindow = null;
-  });
-}
-
-/* UPDATING WINDOW */
-function createUpdateWindow() {
-  xPos = screenWidth / 2 - 115;
-  updateWindow = new BrowserWindow({
-    height: 80,
-    width: 240,
-    x: xPos,
-    y: 0,
-    spellCheck: false,
-    resizable: false,
-    backgroundColor: '#00FFFFFF',
-    autoHideMenuBar: true,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    center: true,
-    frame: false,
-    transparent: true,
-    webPreferences: {
-      devTools: false,
-      nodeIntegration: true,
-      enableRemoteModule: true,
-    },
-    icon: `${dir}/renderer/icons/updateTemplate.png`,
-  });
-  //   LOAD HTML PAGE
-  updateWindow.loadFile(`${dir}/renderer/update/update.html`);
-
-  //   LOAD DEV TOOLS
-  // updateWindow.webContents.openDevTools();
-
-  //   EVENT LISTENER FOR CLOSING
-  updateWindow.on('closed', () => {
-    updateWindow = null;
-  });
-}
-
 /* COPY SELECTION WINDOW */
-function createCopySelectionWindow() {
+function createCopySelectionWindow(message) {
   copySelectionWindow = new BrowserWindow({
-    parent: secWindow,
-    height: 480,
-    width: 300,
+    parent: homeWindow,
+    width: Math.floor(screenWidth * 0.13),
+    height: Math.floor(screenWidth * 0.18),
+    maxWidth: Math.floor(screenWidth * 0.16),
+    maxHeight: Math.floor(screenWidth * 0.24),
+    minHeight: Math.floor(screenWidth * 0.18),
+    minWidth: Math.floor(screenWidth * 0.13),
     spellCheck: false,
-    resizable: false,
-    backgroundColor: '#00FFFFFF',
     autoHideMenuBar: true,
-    skipTaskbar: true,
     alwaysOnTop: true,
     center: true,
     frame: false,
     transparent: true,
     webPreferences: {
-      devTools: false,
+      // devTools: false,
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
     icon: iconImage,
   });
@@ -699,9 +619,14 @@ function createCopySelectionWindow() {
 
   // Only show on load completion
   copySelectionWindow.webContents.once('did-finish-load', () => {
+    if (loadingWindow) {
+      loadingWindow.close();
+    }
     copySelectionWindow.webContents.send('copy-selection', {
-      customerPrices,
-      customerNameNumber,
+      customerPricesNumbersArr,
+      customerNameNumberJson,
+      template: message,
+      customerNumberNameJson,
     });
   });
 
@@ -714,35 +639,245 @@ function createCopySelectionWindow() {
   });
 }
 
+/* CREATE MULTI WINDOW */
+function createMultiWindow(message) {
+  multiWindow = new BrowserWindow({
+    parent: copySelectionWindow,
+    height: message.size[1],
+    width: Math.floor(message.size[0] * 0.8),
+    resizable: false,
+    x: message.dimensions[0] - Math.floor(message.size[0] * 0.8),
+    y: message.dimensions[1],
+    resizable: false,
+    autoHideMenuBar: true,
+    skipTaskbar: true,
+    frame: false,
+    spellCheck: false,
+    transparent: true,
+    webPreferences: {
+      // devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+      contextIsolation: false,
+    },
+    icon: iconImage,
+  });
+  //   LOAD HTML PAGE
+  multiWindow.loadFile(`${dir}/renderer/multi/multi.html`);
+
+  // Only show on load completion
+  multiWindow.webContents.once('did-finish-load', () => {
+    multiWindow.webContents.send('add-customer-number', message.customerNumber);
+  });
+
+  //   LOAD DEV TOOLS
+  // copySelectionWindow.webContents.openDevTools();
+
+  //   EVENT LISTENER FOR CLOSING
+  multiWindow.on('closed', () => {
+    multiWindow = null;
+  });
+}
+
+/* UPDATE CORNER INFO */
+function createUpdateInfo() {
+  updateInfoWindow = new BrowserWindow({
+    width: Math.floor(screenWidth * 0.03),
+    height: Math.floor(screenWidth * 0.03),
+    x: screenWidth - 60,
+    y: screenHeight - 100,
+    autoHideMenuBar: true,
+    center: true,
+    frame: false,
+    alwaysOnTop: true,
+    transparent: true,
+    spellCheck: false,
+    skipTaskbar: true,
+    resizable: false,
+    webPreferences: {
+      // devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+      contextIsolation: false,
+    },
+    icon: iconImage,
+  });
+
+  //   Load html page
+  updateInfoWindow.loadFile(`${dir}/renderer/updateInfo/updateInfo.html`);
+
+  //   Load dev tools
+  // updateInfoWindow.webContents.openDevTools();
+
+  //   Event listener for closing
+  updateInfoWindow.on('closed', () => {
+    updateInfoWindow = null;
+  });
+}
+
+/* PASSWORD ASK WINDOW CREATION */
+function createPasswordGenerateWindow() {
+  passwordGenerate = new BrowserWindow({
+    width: Math.floor(screenWidth * 0.13),
+    height: Math.floor(screenWidth * 0.19),
+    maxWidth: Math.floor(screenWidth * 0.16),
+    maxHeight: Math.floor(screenWidth * 0.24),
+    minHeight: Math.floor(screenWidth * 0.15),
+    minWidth: Math.floor(screenWidth * 0.1),
+    autoHideMenuBar: true,
+    center: true,
+    frame: false,
+    alwaysOnTop: true,
+    spellCheck: false,
+    transparent: true,
+    webPreferences: {
+      // devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+      contextIsolation: false,
+    },
+    icon: iconImage,
+  });
+
+  //   Load html page
+  passwordGenerate.loadFile(`${dir}/renderer/passwordGenerate/passwordGenerate.html`);
+
+  // Only show on load completion
+  passwordGenerate.webContents.once('did-finish-load', () => {
+    if (loadingWindow) {
+      loadingWindow.close();
+    }
+  });
+
+  //   Load dev tools
+  // passwordGenerate.webContents.openDevTools();
+
+  //   Event listener for closing
+  passwordGenerate.on('closed', () => {
+    passwordGenerate = null;
+  });
+}
+
+/* PASSWORD ASK WINDOW CREATION */
+function createPasswordEnterWindow(hash) {
+  passwordEnter = new BrowserWindow({
+    width: Math.floor(screenWidth * 0.13),
+    height: Math.floor(screenWidth * 0.16),
+    maxWidth: Math.floor(screenWidth * 0.18),
+    maxHeight: Math.floor(screenWidth * 0.22),
+    minHeight: Math.floor(screenWidth * 0.125),
+    minWidth: Math.floor(screenWidth * 0.1),
+    autoHideMenuBar: true,
+    center: true,
+    frame: false,
+    alwaysOnTop: true,
+    spellCheck: false,
+    transparent: true,
+    webPreferences: {
+      // devTools: false,
+      nodeIntegration: true,
+      enableRemoteModule: true,
+      contextIsolation: false,
+    },
+    icon: iconImage,
+  });
+
+  //   Load html page
+  passwordEnter.loadFile(`${dir}/renderer/passwordEnter/passwordEnter.html`);
+
+  // Only show on load completion
+  passwordEnter.webContents.once('did-finish-load', () => {
+    if (loadingWindow) {
+      loadingWindow.close();
+    }
+    passwordEnter.webContents.send('hash', hash);
+  });
+
+  //   Load dev tools
+  // passwordEnter.webContents.openDevTools();
+
+  //   Event listener for closing
+  passwordEnter.on('closed', () => {
+    passwordEnter = null;
+  });
+}
+
+function checkPassword() {
+  if (!fs.existsSync(`${appData}/ps_bin`)) {
+    createPasswordGenerateWindow();
+  } else if (fs.existsSync(`${appData}/ps_bin`)) {
+    fs.readFile(`${appData}/ps_bin`, 'utf8', (err, data) => {
+      createPasswordEnterWindow(JSON.parse(data).hash);
+    });
+  }
+}
+
+function deleteUnusedFiles() {
+  let filesToDelete = [];
+  fs.readdir(tempPath, (err, files) => {
+    let psysFiles = files.forEach((el) => {
+      if (el.includes('P2Sys_conversion')) {
+        filesToDelete.push(el);
+      }
+    });
+    filesToDelete.forEach((el) => {
+      fs.rmdir(`${tempPath}\\${el}`, { recursive: true }, (err) => {
+        if (err) {
+          logFileFunc(err.stack);
+        }
+      });
+    });
+  });
+}
+
 /* APP READY --> CREATE MAIN WINDOW */
 app.on('ready', () => {
-  /* SET APP NAME FOR WINDOWS NOTIFICATIONS*/
-  app.setAppUserModelId('P2Sys-Converter');
+  /* CHECK TO SEE IF APP ALREADY RUNNING */
+  if (!app.requestSingleInstanceLock()) {
+    dialog.showMessageBoxSync({
+      type: 'error',
+      title: 'APP ALREADY RUNNING',
+      message: 'Manager is already running, please check the taskbar.',
+      buttons: ['OK'],
+    });
+    app.quit();
+  } else {
+    /* SET APP NAME FOR WINDOWS NOTIFICATIONS*/
+    app.setAppUserModelId('P2Sys-Manager');
+    /* SET VERSION VARIABLE */
+    version = app.getVersion();
 
-  /* GET SCREEN SIZE */
-  let res = screen.getPrimaryDisplay().size;
-  screenHeight = res.height;
-  screenWidth = res.width;
-  setTimeout(() => {
-    /* CREATE CONNECTION */
-    mongooseConnect();
-    /* START LOADER */
-    createDbLoaderWindow();
-  }, 300);
+    /* GET SCREEN SIZE */
+    let res = screen.getPrimaryDisplay().size;
+    screenHeight = res.height;
+    screenWidth = res.width;
+    setTimeout(() => {
+      createLoadingWindow();
+      checkPassword();
+    }, 300);
+  }
 });
 
 /* QUIT APP WHEN ALL WINDOWS ARE CLOSED */
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  app.quit();
 });
 
 ////////////////////
 /* IPC LISTENERS */
 //////////////////
 
+/* IPC FUNCTIONS */
+async function reloadData() {
+  customerNumberNameResult = await queryCustomerName(null, true, notifyMain);
+  customerNumberAllKeys = await queryAllCustomerNumbers(notifyMain);
+  convertNumberName();
+}
+
 /* OPEN COPY SELECTION WINDOW */
-ipcMain.on('open-copySelection', (e, message) => {
-  createCopySelectionWindow();
+ipcMain.on('open-copy-selection', (e, message) => {
+  createLoadingWindow();
+  createCopySelectionWindow(message);
 });
 
 /* MESSENGER SERVICE BETWEEN RENDERERS */
@@ -753,7 +888,7 @@ ipcMain.on('dock-sec', (e, message) => {
 /* MESSAGE FROM START BUTTON */
 /* Create new customer number search window */
 ipcMain.on('start', (e, message) => {
-  homeWindow.hide();
+  homeWindow.minimize();
   createLoadingWindow();
   createSecWindow(message);
 });
@@ -763,8 +898,8 @@ ipcMain.on('position', (e, message) => {
   createChildWindow(message);
 });
 
-/* MESSAGE FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
-ipcMain.on('progress', (e, message) => {
+/* MESSAGES FROM SAVE BUTTON TO CREATE PROGRESS WINDOW */
+ipcMain.on('progress-create', (e, message) => {
   /* CREATE THE PROGRESS WINDOW */
   createProgressWindow();
   /* SEND THE FILE TO PYTHON SHELL TO GET CONVERTED */
@@ -773,46 +908,116 @@ ipcMain.on('progress', (e, message) => {
   });
 });
 
+function getNewScheduleItem(message) {
+  let scheduleData = {
+    [message.customerNumber]: message.customerData['price-list'],
+  };
+  return scheduleData;
+}
+
+/* DATABASE UPDATE */
+async function databaseUpdateControl(message) {
+  let customerNumber = message.customerNumber;
+  let pauseFlag = message.pauseFlag;
+  let newScheduleDate = message.newScheduleDate;
+  let OldScheduleDate = message.OldScheduleDate;
+  let priceList = message.customerData['price-list'];
+  let newFlag = message.newFlag;
+  let custDetail = message.custDetail;
+  let removeOldScheduleFlag = message.removeOldScheduleFlag;
+  let createNewScheduleFlag = message.createNewScheduleFlag;
+  let updateDbFlag = message.updateDbFlag;
+
+  /* REMOVE PAUSED ITEM FROM DB IF TRUE */
+  if (pauseFlag) {
+    removePausedItem(customerNumber, notifyMain);
+  }
+
+  /* REMOVED OLD SCHEDULE AND CREATE A NEW ONE (EDIT) */
+  if (removeOldScheduleFlag && createNewScheduleFlag) {
+    /* CHECK IF DATES ARE THE SAME */
+    if (OldScheduleDate === newScheduleDate) {
+      let obj = getNewScheduleItem(message);
+      createScheduleItem(obj, newScheduleDate, notifyMain);
+      /* CHECK IF DATES ARE DIFFERENT */
+    } else if (OldScheduleDate !== newScheduleDate) {
+      let result = await removeScheduleItems(
+        { dateValue: OldScheduleDate, customerNumber },
+        notifyMain
+      );
+      if (result) {
+        let obj = getNewScheduleItem(message);
+        createScheduleItem(obj, newScheduleDate, notifyMain);
+      }
+    }
+    /* CHECK IF REMOVE FLAG IS TRUE AND CREATE IS FALSE THEN JUST REMOVE */
+  } else if (removeOldScheduleFlag && !createNewScheduleFlag) {
+    removeScheduleItems({ dateValue: OldScheduleDate, customerNumber }, notifyMain);
+  } else if (!removeOldScheduleFlag && createNewScheduleFlag) {
+    let obj = getNewScheduleItem(message);
+    createScheduleItem(obj, newScheduleDate, notifyMain);
+  }
+
+  /* UPDATE PRICE-LIST AND BACKUP ALSO IF NEW CUSTOMER UPDATE THE NAMES */
+  if (newFlag && updateDbFlag) {
+    await updatePriceListDataBase(
+      { customerNumber, 'price-list': priceList, custDetail },
+      notifyMain
+    );
+    reloadData();
+  } else if (updateDbFlag) {
+    await updatePriceListDataBase(
+      {
+        customerNumber,
+        'price-list': priceList,
+        custDetail: null,
+      },
+      notifyMain
+    );
+    reloadData();
+  }
+}
+
 /* MESSAGE FROM PROGRESS WINDOW ON COMPLETION AND CLOSE */
 ipcMain.on('progress-end', (e, message) => {
+  // createLoadingWindow();
   /* SEND MESSAGE TO CLOSE THE PROGRESS BAR */
-  createLoadingWindow();
-  secWindow.webContents.send('progress-end', message.filePaths);
+  secWindow.webContents.send('progress-end', message);
+  databaseUpdateControl(message);
 });
 
-/* SEND DB STATUS TO UPDATE OTHER DATABASE INDICATORS */
-ipcMain.on('db-status', (event, message) => {
-  if (secWindow) {
-    secWindow.webContents.send('db-status', message);
-  }
+/* MESSAGE FROM MULTI CONVERT PROGRESS */
+ipcMain.on('progress-end-multi', async (e, message) => {
+  databaseUpdateControl(message);
 });
 
 /* MESSAGE TO CREATE EMAIL POPUP CHILD WINDOW */
 ipcMain.on('email-popup', (e, message) => {
+  createLoadingWindow();
   createEmailWindow(message);
 });
 
 /* SEND MESSAGE SEND AND FORM CAN BE RESET MESSAGE FROM EMAIL POPUP */
 ipcMain.on('email-close', (e, message) => {
-  secWindow.webContents.send('email-close', null);
+  if (secWindow) {
+    secWindow.webContents.send('email-close', null);
+  } else {
+    createLoadingWindow();
+    createSecWindow(null);
+  }
 });
 
 /* SEND MESSAGE TO CLOSE TABLE WINDOW ON ERROR */
 ipcMain.on('reset-form', (e, message) => {
+  reloadData();
   secWindow.webContents.send('reset-form', null);
-});
-
-/* LOADER CLOSE MESSAGE */
-ipcMain.on('close-loader', (e, message) => {
-  if (loadingWindow) {
-    loadingWindow.close();
-  }
 });
 
 /* CLOSE DOCK WINDOW */
 ipcMain.on('close-window-dock', (e, message) => {
-  if (secWindow) {
+  if (childWindow) {
     childWindow.webContents.send('close-window-dock', null);
+    childWindow.close();
   }
 });
 
@@ -823,157 +1028,244 @@ ipcMain.on('loader-close', (e, message) => {
   }
 });
 
-/* CLOSE UPDATE WINDOW */
-ipcMain.on('close-updatewindow', (e, message) => {
-  if (updateWindow) {
-    updateWindow.close();
-  }
-});
-
 /* RESTART SEC WINDOW */
-ipcMain.on('restart-sec', (e, message) => {
-  setTimeout(() => {
+ipcMain.on('restart-sec', async (e, message) => {
+  homeWindow.minimize();
+  if (secWindow) {
     createLoadingWindow();
-    createSecWindow(message);
-  }, 300);
+    secWindow.close();
+    setTimeout(() => {
+      createSecWindow(null);
+    }, 500);
+  }
 });
 
 /* SHOW HOME WINDOW */
 ipcMain.on('show-home', (e, message) => {
-  secWindow.close();
-  homeWindow.show();
-});
-
-/* SEND CUSTOMER NAME AND NUMBER TO TABLE */
-ipcMain.on('form-contents', (e, message) => {
   if (secWindow) {
-    secWindow.webContents.send('form-contents', message);
+    secWindow.close();
+  }
+  if (homeWindow) {
+    homeWindow.webContents.send('get-notifications-main-app', null);
+    homeWindow.restore();
+    homeWindow.focus();
   }
 });
 
 /* REMOVE FADE FROM SECWINDOW */
-ipcMain.on('remove-fade', (e, message) => {
+ipcMain.on('show-sec-window', (e, message) => {
   if (secWindow) {
-    secWindow.webContents.send('remove-fade', message);
+    secWindow.setFullScreen(true);
   }
 });
 
-/* UPDATE THE DATABASE */
-ipcMain.on('update-database', async (e, message) => {
-  /* CREATE OBJECTS WITH _id FOR THE ONLINE DB */
-  let dbcustomerPrices = { ...message.customerPrices };
-
-  /* UPDATE THE LOCAL VARIABLE DATABASES */
-  customerPrices = message.customerPrices;
-  delete customerPrices['_id'];
-  customerPricelistNumber = message.customerPricelistNumber;
-  customerNumberName = message.customerNumberName;
-  customerBackUp = message.customerBackUp;
-  customerNameNumber = customerNameNumberFunc(message.customerNumberName);
-
-  await customerPricesModel.replaceOne(
-    { _id: 'customerPrices' },
-    dbcustomerPrices,
-    (err, res) => {
-      if (err) {
-        let notification = new Notification({
-          title: 'P2SYS CP-Db UPDATE ERROR',
-          body:
-            'There was an error in updating the database. Please check the logfile for details',
-          icon: `${dir}/renderer/icons/error.png`,
-        });
-        notification.show();
-        logfileFunc(err);
-      }
-    }
-  );
-  await customerPricelistNumberModel.replaceOne(
-    { _id: 'customerPricelistNumber' },
-    customerPricelistNumber,
-    (err, res) => {
-      if (err) {
-        let notification = new Notification({
-          title: 'P2SYS CPN-Db UPDATE ERROR',
-          body:
-            'There was an error in updating the database. Please check the logfile for details',
-          icon: `${dir}/renderer/icons/error.png`,
-        });
-        notification.show();
-        logfileFunc(err);
-      }
-    }
-  );
-  await customerNumberNameModel.replaceOne(
-    { _id: 'customerNumberName' },
-    customerNumberName,
-    (err, res) => {
-      if (err) {
-        let notification = new Notification({
-          title: 'P2SYS CNN-Db UPDATE ERROR',
-          body:
-            'There was an error in updating the database. Please check the logfile for details',
-          icon: `${dir}/renderer/icons/error.png`,
-        });
-        notification.show();
-        logfileFunc(err);
-      }
-    }
-  );
-  await customerBackUpModel.replaceOne(
-    { _id: 'customerBackUp' },
-    customerBackUp,
-    (err, res) => {
-      if (err) {
-        let notification = new Notification({
-          title: 'P2SYS CB-Db UPDATE ERROR',
-          body:
-            'There was an error in updating the database. Please check the logfile for details',
-          icon: `${dir}/renderer/icons/error.png`,
-        });
-        notification.show();
-        logfileFunc(err);
-      }
-    }
-  );
+/* QUERIES FOR DATABASE */
+ipcMain.handle('get-price-list', async (e, message) => {
+  let result = await querySinglePriceList(message, notifyMain);
+  return result;
 });
 
-/* START UPDATE WINDOW */
-ipcMain.on('create-download-window', (e, message) => {
-  createUpdateWindow();
+/* GET THE PRICE-LIST NUMBER */
+ipcMain.handle('get-pricelist-number', async (e, message) => {
+  let result = await querySinglePriceListNumber(message, notifyMain);
+  return result;
 });
 
-ipcMain.on('update-progress', (e, message) => {
-  if (updateWindow) {
-    updateWindow.webContents.send('download-percent', message);
-    if (message === 100) {
-      setTimeout(() => {
-        updateWindow.close();
-      }, 1000);
-    }
+/* GET THE CUSTOMER BACKUP DATA */
+ipcMain.handle('get-customer-backup', async (e, message) => {
+  let result = await querySingleCustomerBackup(message, notifyMain);
+  return result;
+});
+
+ipcMain.on('create-name-numbers', (e, message) => {
+  addCustomerNameAndNumbers(message, notifyMain);
+});
+
+/* SAVE PAUSED PRICE-LIST */
+ipcMain.on('save-paused-price-list', async (e, message) => {
+  await createPausedPriceList(message.pausedJson, notifyMain);
+  reloadData();
+});
+
+/* QUERY ALL PAUSED PRICE-LIST CUSTOMER NUMBERS */
+ipcMain.handle('get-all-paused', async (e, message) => {
+  let result = queryAllPaused(notifyMain);
+  return result;
+});
+
+/* QUERY SINGLE PAUSED PRICE-LIST CUSTOMER NUMBERS */
+ipcMain.handle('get-single-paused', async (e, message) => {
+  let result = await querySinglePaused(message, notifyMain);
+  return result;
+});
+
+/* REMOVE PAUSED ITEM */
+ipcMain.handle('remove-pause-item-sync', async (e, message) => {
+  return await removePausedItemSync(message, notifyMain);
+});
+
+/* QUERY ALL SCHEDULED PRICE-LISTS */
+ipcMain.handle('get-schedule-dates-update', async (e, message) => {
+  return await queryAllScheduleDates(notifyMain);
+});
+
+/* QUERY SINGLE SCHEDULED PRICE-LISTS */
+ipcMain.handle('show-single-customer-schedule', async (e, message) => {
+  return await querySingleSchedule(message, notifyMain);
+});
+
+ipcMain.handle('update-scheduled-items', async (e, message) => {
+  return await removeScheduleItems(message, notifyMain);
+});
+
+ipcMain.handle('edit-schedule-price-list', async (e, message) => {
+  let priceList = await editSingleScheduledPriceList(message, notifyMain);
+  let priceListNumber = await querySinglePriceListNumber(message.customerNumber, notifyMain);
+  let customerBackUpJson = await querySingleCustomerBackup(message.customerNumber, notifyMain);
+  let customerNumber = message.customerNumber;
+  let customerNameValue = customerNumberNameJson[message.customerNumber];
+
+  let schedulePriceListObj = {
+    OldScheduleDate: message.dateValue,
+    priceList,
+    priceListNumber,
+    customerNumber,
+    customerNameValue,
+    customerBackUpJson,
+  };
+
+  return schedulePriceListObj;
+});
+
+/* GET A SINGLE SCHEDULE PRICE-LIST FOR CONVERSION */
+ipcMain.handle('get-schedule-price-list', async (e, message) => {
+  let priceList = await editSingleScheduledPriceList(message, notifyMain);
+  let jsonFile = {
+    'price-list': priceList,
+    _id: message.customerNumber,
+  };
+
+  return jsonFile;
+});
+
+ipcMain.on('close-email-window', (e, message) => {
+  if (emailWindow) {
+    emailWindow.close();
   }
+  if (updateInfoWindow) {
+    updateInfoWindow.show();
+  }
+  deleteUnusedFiles();
 });
 
-/* CLOSE MAIN WINDOW & CHECK TO SEE IF UPDATE IS DOWNLOADING */
-ipcMain.on('close-main', (e, message) => {
-  if (updateWindow) {
-    let answer = dialog.showMessageBoxSync(homeWindow, {
-      type: 'question',
-      title: 'DOWNLOAD IN PROGRESS',
-      icon: `${dir}/renderer/icons/updateTemplate.png`,
-      message: `A update is being downloaded, are you sure you want to exit?`,
-      detail:
-        'Exiting will cause the download to be cancelled. You will have to download the update when asked on the next restart',
-      buttons: ['EXIT', 'CANCEL'],
-    });
-    if (answer === 0) {
-      updateWindow.close();
-      setTimeout(() => {
-        homeWindow.close();
-      }, 50);
-    }
+ipcMain.on('ask-window-multi', (e, message) => {
+  if (multiWindow) {
+    multiWindow.webContents.send('add-customer-number', message.customerNumber);
   } else {
-    setTimeout(() => {
-      homeWindow.close();
-    }, 200);
+    createMultiWindow(message);
   }
+});
+
+ipcMain.on('close-multi-window', (e, message) => {
+  if (multiWindow) {
+    multiWindow.close();
+  }
+});
+
+ipcMain.on('clear-copy-selection-click', (e, message) => {
+  if (copySelectionWindow) {
+    copySelectionWindow.webContents.send('clear-copy-selection-click', null);
+  }
+});
+
+ipcMain.on('unselect-item-copy-selection', (e, message) => {
+  if (copySelectionWindow) {
+    copySelectionWindow.webContents.send('unselect-item-copy-selection', message);
+  }
+});
+
+ipcMain.handle('customer-prices-array', async (e, message) => {
+  customerPricesNumbersArr = await queryAllPriceListNumbers(notifyMain);
+  return customerPricesNumbersArr;
+});
+
+ipcMain.on('close-app', (e, message) => {
+  if (updateInfoWindow) {
+    homeWindow.hide();
+  } else {
+    app.quit();
+  }
+});
+
+ipcMain.on('restart-app', (e, message) => {
+  app.relaunch();
+  app.exit();
+});
+
+ipcMain.on('connect-to-database', (e, message) => {
+  createLoadingWindow();
+  mongooseConnect(message);
+});
+
+ipcMain.on('get-customer-selection-arr', (e, message) => {
+  if (multiWindow) {
+    multiWindow.webContents.send('get-customer-selection-arr', null);
+  }
+});
+
+ipcMain.on('return-customer-selection-arr', (e, message) => {
+  copySelectionWindow.webContents.send('get-customer-selection-arr', message);
+});
+
+ipcMain.handle('get-paused-schedule-count', async (e, message) => {
+  let pCount = await queryAllPausedQuantity(notifyMain);
+  let sCount = await queryAllScheduleDatesQuantity(notifyMain);
+  return { pCount, sCount };
+});
+
+/* OPEN UPDATE WINDOW */
+ipcMain.on('open-update-window', (e, message) => {
+  createUpdateInfo();
+});
+
+/* UPDATE DOWNLOADED */
+ipcMain.on('close-update-window', (e, message) => {
+  if (!homeWindow.isVisible()) {
+    if (updateInfoWindow) {
+      updateInfoWindow.close();
+    }
+
+    homeWindow.close();
+  } else {
+    if (updateInfoWindow) {
+      updateInfoWindow.close();
+    }
+  }
+});
+
+/* UPDATE DOWNLOADED */
+ipcMain.on('update-progress', (e, message) => {
+  if (updateInfoWindow) {
+    updateInfoWindow.webContents.send('update-percent', message);
+  }
+});
+
+/* HIDE UPDATER IF OPEN */
+ipcMain.on('hide-updater', (e, message) => {
+  if (updateInfoWindow) {
+    updateInfoWindow.hide();
+  }
+});
+
+/* SHOW UPDATER IF OPEN */
+ipcMain.on('show-updater', (e, message) => {
+  if (updateInfoWindow) {
+    updateInfoWindow.show();
+  }
+});
+
+/* MINIMIZE SEC */
+ipcMain.on('minimize', (e, message) => {
+  homeWindow.minimize();
+  secWindow.minimize();
 });
